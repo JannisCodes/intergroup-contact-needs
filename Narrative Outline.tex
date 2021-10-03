@@ -1,0 +1,319 @@
+\documentclass[nobib]{tufte-handout}
+%\geometry{showframe} % for debugging purposes -- displays the margins
+\usepackage{amsmath}
+\usepackage{ntheorem}
+\usepackage{soul}
+\usepackage{xcolor}
+
+% Set up the images/graphics package
+\usepackage{graphicx}
+\setkeys{Gin}{width=\linewidth,totalheight=\textheight,keepaspectratio}
+\graphicspath{{graphics/}}
+
+\title[Needs in Intergroup Contact - Narrative]{Needs in Intergroup Contact: \\
+Narrative Structure with Notes}
+\author[Kreienkamp et al.]{}
+\date{}  % if the \date{} command is left out, the current date will be used
+
+% The following package makes prettier tables.  We're all about the bling!
+\usepackage{booktabs}
+
+% The units package provides nice, non-stacked fractions and better spacing for units.
+\usepackage{units}
+
+% The fancyvrb package lets us customize the formatting of verbatim environments.  We use a slightly smaller font.
+\usepackage{fancyvrb}
+\fvset{fontsize=\normalsize}
+
+% Small sections of multiple columns
+\usepackage{multicol}
+
+% Provides paragraphs of dummy text
+\usepackage{lipsum}
+
+% strike out text
+\usepackage[normalem]{ulem}
+
+% APA citations
+\bibliographystyle{plain}
+\usepackage[style=apa, sortcites=true, sorting=nyt, backend=biber, natbib=true, uniquename=false, uniquelist=false, useprefix=true]{biblatex}
+% add reference library file
+\addbibresource{references.bib}
+
+% These commands are used to pretty-print LaTeX commands
+\newcommand{\doccmd}[1]{\texttt{\textbackslash#1}}% command name -- adds backslash automatically
+\newcommand{\docopt}[1]{\ensuremath{\langle}\textrm{\textit{#1}}\ensuremath{\rangle}}% optional command argument
+\newcommand{\docarg}[1]{\textrm{\textit{#1}}}% (required) command argument
+\newenvironment{docspec}{\begin{quote}\noindent}{\end{quote}}% command specification environment
+\newcommand{\docenv}[1]{\textsf{#1}}% environment name
+\newcommand{\docpkg}[1]{\texttt{#1}}% package name
+\newcommand{\doccls}[1]{\texttt{#1}}% document class name
+\newcommand{\docclsopt}[1]{\texttt{#1}}% document class option name
+
+% make warning with red triangle
+\newcommand\Warning[1][2ex]{%
+  \renewcommand\stacktype{L}%
+  \scaleto{\stackon[1.3pt]{\color{red}$\triangle$}{\tiny\bfseries !}}{#1}}%
+
+% make question with red triangle
+\newcommand\Question[1][2ex]{%
+  \renewcommand\stacktype{L}%
+  \scaleto{\stackon[1.3pt]{\color{red}$\triangle$}{\tiny\bfseries ?}}{#1}}%
+  
+% add definition sections
+\theoremstyle{break}
+\newtheorem{definition}{Definition}
+
+% add hypothesis sections
+\theoremstyle{plain}
+\theoremseparator{:}
+\newtheorem{hyp}{Hypothesis}
+
+\newtheorem{subhyp}{Hypothesis}
+   \renewcommand\thesubhyp{\thehyp\alph{subhyp}}
+
+% add quote section
+\usepackage{csquotes}
+
+% framed box section
+\usepackage{framed}
+\emergencystretch=1em
+
+\begin{document}
+
+\maketitle % this prints the handout title, author, and date
+
+\begin{abstract}
+\noindent\marginnote{Abstract: 3 words} To be written.
+\end{abstract}
+
+%\printclassoptions
+
+\section{Introduction}
+\newthought{Relevance}\marginnote{Paragraph on the societal and academic relevance of intergroup contact.} Conflict between social groups and their individual members remains a prevalent feature of the modern human condition. Prejudices, discrimination, and animosities continue to plague societies around the world. One of the main ameliorations proposed by social psychologists has been positive intergroup contact. Based on Allport's \citeyear{Allport1954b} contact hypothesis, a plethora of studies and interventions have worked on bringing different social groups together\footnote{Cite interventions of British ministries.}. 
+% Yet, despite ...
+
+\newthought{Problem}
+\marginnote{Paragraph illustrating the theoretical and practical issue. Structure:
+\begin{enumerate}
+    \item Contact Hypothesis
+    \item Interaction Quality
+    \item Allport's Optimal Contact Conditions
+    \item Meta-Analyses
+\end{enumerate}} 
+In its most essential interpretation, the intergroup contact hypothesis postulates that frequent and positive contact with an out-group reduces prejudice and increases favorable attitudes towards the other group \citep[e.g.,][]{Hewstone1996, Pettigrew1998}. A key condition for these contact benefits, has been that the interaction is indeed perceived as positive --- making the interaction quality a crucial mechanism of inter-group contact (SOURCE)\footnote{Cite papers on frequency vs. quality.}. It is widely accepted that equal status, common goals, collaboration, and structural support during the interaction form the optimal conditions for a positive contact \citep[Allport's Optimal Contact conditions,][]{Allport1954b}. And indeed a major meta-analytic review showed, that intergroup contact benefits were larger when Allport's conditions were met. However, the meta-analysis also showed that contact resulted in more positive intergroup relations even when Allport's conditions were not met.\marginnote{We probably need to note that there are really good papers on the likely mechanisms of intergroup contact \citep[e.g.,][]{Brown2005}. But they don't discuss Allport's conditions.} It, thus, remains unclear why exactly Allport's conditions work and whether there might be an underlying psychological mechanism at play.
+
+\newthought{Solution}\marginnote{Paragraph on our proposal and aim of the article. Structure:
+\begin{enumerate}
+    \item Allport's Conditions = common needs
+    \item Main goal should be more powerful
+\end{enumerate}} 
+In this article, we propose that Allport's optimal contact conditions are effective in creating positive contact because they constitute common psychological needs of the interacting individuals. If this is indeed the case, the impact of fulfilling other fundamental needs should produce similar beneficial contact results. And more importantly, the satisfaction of key situation needs during the interaction should predict the positive contact effects most strongly.
+
+\newthought{Past Literature}
+We should probably add a short section on past literature that has examined psychological needs in intergroup contact in general \citep[e.g.,][]{Shnabel2008} as well as for particular groups, including migrants \citep[e.g.,][]{Celebi2017}.
+
+\noindent We should probably also include:
+\begin{displayquote}
+    Psychological needs might “explain the asymmetry of experiences and outcomes in intergroup interactions and identify an essential element for interventions: To achieve truly constructive intergroup relations, it is important that intergroup exchanges meet the psychological needs of both majority- and minority-group members” \\
+    \hfill --- \citep[][p. 611]{Dovidio2017}
+\end{displayquote}
+
+\section{The Present Research}
+To be written out. Conceptual elements are the hypotheses and the analysis plan:
+\subsection{Hypotheses}
+
+Based on this we formulated four main hypotheses:
+
+\begin{hyp}[H\ref{hyp:contact}] \label{hyp:contact}
+Based on the most general understanding of the contact hypothesis, an increase in frequency and quality of contact should jointly account for changes in more favorable outgroup attitudes.
+\end{hyp}
+
+\begin{subhyp}[H\ref{hyp:contactFreq}] \label{hyp:contactFreq}
+\addtolength{\leftskip}{2.5em}
+Participants \marginnote{[between participants]} with more intergroup interactions should have a more favorable outgroup attitudes.
+\end{subhyp}
+
+\begin{subhyp}[H\ref{hyp:contactDummy}] \label{hyp:contactDummy}
+\addtolength{\leftskip}{2.5em}
+Outgroup attitudes \marginnote{[within participants]}should be higher after an intergroup interaction compared to a time with no outgroup interaction.\\
+OR: Outgroup attitudes should increase more after an intergroup interaction compared to a time with no outgroup interaction.
+\end{subhyp}
+
+\begin{subhyp}[H\ref{hyp:contactFreqQual}] \label{hyp:contactFreqQual}
+\addtolength{\leftskip}{2.5em}
+Participants \marginnote{[between participants]} with more intergroup interactions should have a more favorable outgroup attitudes depending on the average interaction quality.
+\end{subhyp}
+
+\begin{subhyp}[H\ref{hyp:contactQualCor}] \label{hyp:contactQualCor}
+\addtolength{\leftskip}{2.5em}
+Alternative to H\ref{hyp:contactFreqQual}: \marginnote{[within participants] \\ \noindent if(interaction == intergroup)} Interaction quality should relate positively with outgroup attitudes.
+\end{subhyp}
+
+\begin{hyp}[H\ref{hyp:AllportsConditions}] \label{hyp:AllportsConditions}
+Based on Allport's optimal contact conditions, intergroup interactions with equal status, common goals, collaboration, and structural support should predict more favorable outgroup attitudes due to more positive interaction quality perceptions.
+\end{hyp}
+
+\setcounter{subhyp}{0}
+\begin{subhyp}[H\ref{hyp:AllportsPred}] \label{hyp:AllportsPred}
+\addtolength{\leftskip}{2.5em}
+Based on \marginnote{[within participants] \\ \noindent if(interaction == intergroup)}Allport's optimal contact conditions, outgroup attitudes should be more favorable after intergroup interactions with equal status, common goals, collaboration, and structural support.
+\end{subhyp}
+
+\begin{subhyp}[H\ref{hyp:AllportsQuality}] \label{hyp:AllportsQuality}
+\addtolength{\leftskip}{2.5em}
+Based on \marginnote{[within participants] \\ \noindent if(interaction == intergroup)} past research on the role of interaction quality, interaction quality should be more perceived as more favorable after intergroup interactions with equal status, common goals, collaboration, and structural support.
+\end{subhyp}
+
+\begin{subhyp}[H\ref{hyp:AllportsQualityMediation}] \label{hyp:AllportsQualityMediation}
+\addtolength{\leftskip}{2.5em}
+Based on \marginnote{[within participants] \\ \noindent if(interaction == intergroup)} past research on the role of interaction quality, the variance explained in outgroup attitudes by Allport's optimal contact should to a large extend be assumed by interaction quality.
+\end{subhyp}
+
+\begin{hyp}[H\ref{hyp:keyNeed}] \label{hyp:keyNeed}
+Based on our proposal, intergroup interactions with higher situational core need fulfillment should predict more favorable outgroup attitudes due to more positive interaction quality perceptions.
+\end{hyp}
+
+\setcounter{subhyp}{0}
+\begin{subhyp}[H\ref{hyp:keyNeedPred}] \label{hyp:keyNeedPred}
+\addtolength{\leftskip}{2.5em}
+Outgroup attitudes \marginnote{[within participants] \\ \noindent if(interaction == intergroup)}should be more favorable after intergroup interactions with high key need fulfillment.
+\end{subhyp}
+
+\begin{subhyp}[H\ref{hyp:keyNeedQual}] \label{hyp:keyNeedQual}
+\addtolength{\leftskip}{2.5em}
+Interaction Quality \marginnote{[within participants] \\ \noindent if(interaction == intergroup)}should be perceived as more positive after intergroup interactions with higher key need fulfillment.
+\end{subhyp}
+
+\begin{subhyp}[H\ref{hyp:keyNeedMediation}] \label{hyp:keyNeedMediation}
+\addtolength{\leftskip}{2.5em}
+The \marginnote{[within participants] \\ \noindent if(interaction == intergroup)} variance explained in outgroup attitudes by key need fulfillment should to a large extend be assumed by interaction quality.
+\end{subhyp}
+
+\begin{subhyp}[H\ref{hyp:keyNeedContactType}] \label{hyp:keyNeedContactType}
+\addtolength{\leftskip}{2.5em}
+The \marginnote{[between participants]} effect of key need fulfillment on outgroup attitudes should be specific to intergroup interactions and not be due to need fulfillment in general. Thus, the effect of key need fulfillment on outgroup attitudes should stronger for intergroup interact than for ingroup interactions. 
+\end{subhyp}
+
+\begin{subhyp}[H\ref{hyp:keyNeedSDT}] \label{hyp:keyNeedSDT}
+\addtolength{\leftskip}{2.5em}
+The \marginnote{[within participants] \\ \noindent if(interaction == intergroup)} effect of key need fulfillment on outgroup attitudes should be persist even when taking other fundamental psychological needs into account. Thus, the effect of key need fulfillment on outgroup attitudes should remain strong even after controlling for autonomy, competence, and relatedness fulfillment during the interaction (cf., self-determination theory). 
+\end{subhyp}
+
+\begin{hyp}[H\ref{hyp:comparison}] \label{hyp:comparison}
+Based on our proposal, intergroup interactions with higher situational core need fulfillment should predict outgroup attitudes at least as well as Allport's conditions.
+\end{hyp}
+
+\setcounter{subhyp}{0}
+\begin{subhyp}[H\ref{hyp:compModel}] \label{hyp:compModel}
+\addtolength{\leftskip}{2.5em}
+The need model \marginnote{[between models]} (H\ref{hyp:keyNeedPred}) should predict more variance in outgroup attitudes than the model based on Allport's conditions (H\ref{hyp:AllportsPred}).
+\end{subhyp}
+
+\begin{subhyp}[H\ref{hyp:compTogether}] \label{hyp:compTogether}
+\addtolength{\leftskip}{2.5em}
+The  effect \marginnote{[within one model]} of key need fulfillment on outgroup attitudes should  persist even when taking other Allport's conditions into account. Thus, the effect of key need fulfillment on outgroup attitudes should remain strong even after controlling for equal status, common goals, collaboration, and structural support.
+\end{subhyp}
+
+\subsection{Analysis Plan}
+This will be written out in broader terms without technical reverences. Current version for our discussion only.
+Each of the analysis steps tests the associated (sub-)hypothesis.
+\begin{enumerate}
+    \item Contact Hypothesis
+    \begin{enumerate}
+        \item Correlation: $r_{InteractionFrequency, OutgroupAttitudes} \neq 0$  
+        \item T-test: $\mu_{OutgroupInteraction} > \mu_{IngroupInteraction}$\marginnote{$IngroupInt$  or $\neg OutgroupInt$ (i.e., not outgroup interaction)} \\ 
+            \hspace{.75em}or: $\mu_{OutgroupInt, t} - \mu_{OutgroupInt, t-1} > \mu_{IngroupInt, t} - \mu_{IngroupInt, t-1}$
+        \item Interaction of average outgroup contact quantity and -quality: \\
+            \hspace{.75em}$Attitude \sim ContactFreq \times ContactQual$
+        \item Correlation: $r_{InteractionQuality, OutgroupAttitudes} \neq 0$
+    \end{enumerate}
+    \item Allport's Conditions
+    \begin{enumerate}
+        \item Regression: $Attitude \sim EqualStatus + CommonGoal + Collab + StructSupport$
+        \item Regression: $Attitude \sim EqualStatus + CommonGoal + Collab + StructSupport + InteractionQuality$
+    \end{enumerate}
+    \item Key Need Fulfillment
+    \begin{enumerate}
+        \item Correlation: $r_{KeyNeedFulfill, OutgroupAttitudes} \neq 0$  
+        \item Correlation: $r_{KeyNeedFulfill, InteractionQuality} \neq 0$  
+        \item Regression: $Attitude \sim KeyNeedFulfill + InteractionQuality$
+        \item Regression: $Attitude \sim KeyNeedFulfill \times ContactType$
+        \item Regression: $Attitude \sim KeyNeedFulfill + Autonomy + Competence + Relatedness$
+    \end{enumerate}
+    \item Comparison with Allport's Conditions
+    \begin{enumerate}
+        \item Model Comparison: $AIC_{KeyNeedModel} > AIC_{AllportModel}$  
+        \item Regression: $Attitude \sim KeyNeedFulfill + EqualStatus + CommonGoal + Collab + StructSupport$
+    \end{enumerate}
+\end{enumerate}
+
+
+\newpage
+\section{Studies 1: Worker Migrant Sample}
+\subsection{Methods}
+\subsection{Results}
+
+\section{Studies 2: Student Migrant Sample}
+\subsection{Methods}
+\subsection{Results}
+
+\section{Studies 3: Young Health Professional Migrant Sample}
+\subsection{Methods}
+\subsection{Results}
+
+\section{Discussion}
+
+\newpage
+\section{Parking Spot}
+
+\begin{framed}
+    \begin{definition}[Inter-group Contact]
+        "Whenever individuals belonging to one group interact, collectively or individually, with another group or its members in terms of their group identification, we have an instance of intergroup behavior" --- \citep[][p. 12]{Sherif1966a}
+        
+        \vspace{1em}
+        \noindent "Social psychologists define intergroup contact as face-to-face interaction between members of different groups" --- \citep[][Chapter 2]{Pettigrew2011}
+        
+        \vspace{1em}
+        \noindent From our own study: "With in-person interaction, we mean a continued interaction with another person (potentially in a group) that lasted at least 10 minutes. This interaction should be offline and face-to-face. It should include some form of verbal communication and should be uninterrupted to still count as the same interaction. Any individual interaction can last minutes or hours."
+    \end{definition}  
+\end{framed}
+
+\begin{framed}
+    \begin{definition}[Contact Hypothesis \& Optimal Contact Conditions]
+        "Prejudice (unless deeply rooted in the character structure of the individual) may be reduced by equal status contact between majority and minority groups in the pursuit of common goals. The effect is greatly enhanced if this contact is sanctioned by institutional supports (i.e., by law, custom or local atmosphere), and provided it is of a sort that leads to the perception of common interests and common humanity between members of the two groups." --- \citep[][p. 281]{Allport1954b}
+        
+        \noindent
+        \begin{enumerate}
+            \item \textbf{Equal Status:} Critical that both groups perceive equal status in the situation.
+            \item \textbf{Common Goal:} The contact should have an active, goal-oriented effort.
+            \item \textbf{Intergroup Cooperation:} Attainment of common goals must be an interdependent effort without intergroup competition.
+            \item \textbf{Support of Authorities, Law or Customs:} Contact should be backed by explicit support from authorities and social institutions.
+        \end{enumerate}
+        
+        \noindent In short: Frequent and positive contact with out-group members leads to more positive attitudes \citep[][]{Allport1954b, Hewstone1996, Pettigrew1998}
+    \end{definition}
+\end{framed}
+
+\begin{framed}
+    \begin{definition}[Contact Quality]
+         From MT: "Most often interaction quality has been defined and assessed as either a global self-reported evaluation \citep[e.g.,][]{Voci2003}, in terms of Allport’s optimal contact conditions \citep[e.g.,][]{Brown2005, Pettigrew2006}, or indirectly through the type of interaction partner \citep[e.g., intergroup friendship,][]{Turner2007}."
+    \end{definition}  
+\end{framed}
+
+\begin{framed}
+    \begin{definition}[Psychological Needs]
+        Own: "Tension or deficiency in the organism that elicits a (non-specific) motivational force organizing affect, cognition, and behavior to reduce this unsatisfactory situation and is to some extent necessary for the individual’s overall well-being" --- \citep[based on][]{Hull1943, Lewin1938, McClelland1987, Murray1938, Ryan2017, Steverink2006}
+    \end{definition}  
+\end{framed}
+
+%Other unused elements:  
+%\begin{displayquote}
+%    Quoted area look like this: \lipsum[1-1]
+%\end{displayquote}
+
+
+\newpage
+\printbibliography
+
+\end{document}
