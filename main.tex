@@ -1,0 +1,204 @@
+% define document type (i.e., template. Here: A4 APA manuscript with 12pt font)
+\documentclass[man, 12pt, a4paper]{apa7}
+
+% change margins (e.g., for margin comments):
+%\usepackage{geometry}
+% \geometry{
+% a4paper,
+% marginparwidth=30mm,
+% right=50mm,
+%}
+
+% add packages
+\usepackage[american]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{csquotes}
+\usepackage{hyperref}
+\usepackage[style=apa, sortcites=true, sorting=nyt, backend=biber, natbib=true, uniquename=false, uniquelist=false, useprefix=true]{biblatex}
+\usepackage{authblk}
+\usepackage{graphicx}
+\usepackage{setspace,caption}
+\usepackage{subcaption}
+\usepackage{enumitem}
+\usepackage{lipsum}
+\usepackage{soul}
+\usepackage{xcolor}
+\usepackage{fourier}
+\usepackage{stackengine}
+\usepackage{scalerel}
+\usepackage{fontawesome}
+\usepackage[normalem]{ulem}
+% \usepackage{longtable}
+\usepackage{amsmath}
+\usepackage{afterpage}
+\usepackage{float}
+\usepackage{array}
+\usepackage{censor}
+
+% add definition sections
+\newtheorem{definition}{Definition}
+
+% Select what to do with to-do notes: 
+% \usepackage[disable]{todonotes} % notes not showed
+% \usepackage[draft]{todonotes}   % notes showed
+
+% make warning with red triangle
+\newcommand\Warning[1][2ex]{%
+  \renewcommand\stacktype{L}%
+  \scaleto{\stackon[1.3pt]{\color{red}$\triangle$}{\tiny\bfseries !}}{#1}}%
+
+% make question with red triangle
+\newcommand\Question[1][2ex]{%
+  \renewcommand\stacktype{L}%
+  \scaleto{\stackon[1.3pt]{\color{red}$\triangle$}{\tiny\bfseries ?}}{#1}}%
+
+% formatting links in the PDF file
+\hypersetup{
+pdfpagemode={UseOutlines},
+bookmarksopen=true,
+bookmarksopenlevel=0,
+hypertexnames=false,
+colorlinks   = true, %Colours links instead of ugly boxes
+urlcolor     = blue, %Colour for external hyperlinks
+linkcolor    = blue, %Colour of internal links
+citecolor   = cyan, %Colour of citations
+pdfstartview={FitV},
+unicode,
+breaklinks=true,
+}
+
+% language settings
+\DeclareLanguageMapping{american}{american-apa}
+
+% add reference library file
+\addbibresource{references.bib}
+
+% Title and header
+\title{Psychological Needs During Intergroup Contact}
+\shorttitle{Needs in Intergroup Contact}
+
+% Authors
+\author[*,1,2]{Jannis Kreienkamp}
+\author[1,2]{Maximilian Agostini}
+\author[1,2]{Laura F. Bringmann}
+\author[1,2]{Peter de Jonge}
+\author[1,2]{Kai Epstude}
+%\affiliation{\hfill}
+\affil[1]{University of Groningen, Department of Psychology}
+\affil[2]{Author order to be discussed currently alphabetic by last name.}
+
+
+\authornote{
+   \addORCIDlink{* Jannis Kreienkamp}{0000-0002-1831-5604}\\
+   \addORCIDlink{Maximilian Agostini}{0000-0001-6435-7621}\\
+   \addORCIDlink{Laura F. Bringmann}{0000-0002-8091-9935}\\
+   \addORCIDlink{Peter de Jonge}{0000-0002-0866-6929}\\
+   \addORCIDlink{Kai Epstude}{0000-0001-9817-3847}
+
+We have no known conflict of interest to declare. The authors received no specific funding for this work. Source data and  software is available at \url{https://janniscodes.github.io/intergroup-contact-needs/}. Protocols, materials, analysis data, and code are available at \url{osf.io}. 
+
+Correspondence concerning this article should be addressed to Jannis Kreienkamp, Department of Psychology, University of Groningen, Grote Kruisstraat 2/1, 9712 TS Groningen (The Netherlands).  E-mail: j.kreienkamp@rug.nl}
+
+\leftheader{Kreienkamp}
+
+% Abstract
+\abstract{
+Abstract goes here.
+
+\noindent\textbf{Public significance statement}: Significance Statement goes here.
+}
+
+\keywords{Intergroup Contact, Psychological Needs, Outgroup Attitudes, Interaction Quality, Extensive Longitudinal Data}
+
+
+% set indentation size
+\setlength\parindent{1.27cm}
+
+% Start of the main document:
+\begin{document}
+
+% add title information (incl. title page and abstract)
+\maketitle
+
+% **CHEAT SHEET / LEGEND**
+%
+% Comments:
+% '%' starts a comment in LaTeX (not printed)
+% '\todo[inline]{} makes orange boxes in PDF
+% '\marginpar{}' notes in margins
+% '\footnote{}' footnote
+% '\Warning' important note indicator in PDF (triangle with exclamation mark)
+% '\Question' question note indicator in PDF (triangle with question mark)
+%
+% Citation (with Natbib citation style):
+% '\citep[e.g.][p. 15]{CitationKey}' citation in parentheses "(e.g., Berry, 2003, p. 15)"
+% '\citet{CitationKey}' citation in text "Berry (2003)"
+% '\citealt' and '\citealp' alternate citation without parentheses
+% '\citeauthor' and '\citeyear' only year or author
+% 
+% Headings:
+% '\part{}' and '\chapter{}' only relevant for multi-part or multi-chapter documents
+% '\section{}' heading level 1
+% '\subsection{}' heading level 2
+% '\subsubsection{}' heading level 3
+% '\paragraph{}' heading level 4
+% '\subparagraph{}' heading level 5
+%
+% formatting:
+% '\textbf{}' text bold font
+% '\textit{}' text italic font
+% '\underline{}' text underline
+% '\sout{}' text strike out
+% '\textsc{}' text small caps
+% '\vspace{1em}' add vertical space
+% '\hspace{1em}' add horizontal space
+% '\\' new line (i.e., line break)
+% '\pagebreak' start new page (i.e., page break)
+% '\noindent' do not indent current line (e.g., current paragraph)
+% 'begin{center}...end{center}' center text or object
+%
+% Math mode:
+% '$\alpha = .8$' mathematical equation inline
+% '$$\hat{y} = b_0 + b_1x$$' mathematical equation in its own line
+% '\begin{equation}...\end{equation}' multi-line equation
+% '\approx' approximate symbol
+% '\neq' not equal
+% '\bar' mean bar over letter
+% '\pm' plus minus sign 
+% '^{}' superscript
+% '_{}' subscript
+% '\fraq{numerator}{denominator}' fraction
+% '\sqrt[n]{}' square root
+% '\sum_{k=1}^n' sum for 1 through n
+%
+% Insert things from elsewhere:
+% '\input{filename}' inputs the raw (tex) file as a command (e.g., tables and R-Markdown imports)
+% '\include{filename}' includes section on new page (incl. possible auxiliary info)
+% '\includegraphics[settings]{filename}' add a figure or graph
+% '\caption{}' adds a caption to a table or figure
+% '\label{}' labels sections, tables, figures, etc. so that they can be referred to.
+% '\ref{}' refer to a labelled sections, tables, figures, etc.
+% '\begin{enumerate}...\end{enumerate}' numbered list
+% '\begin{itemize}...\end{itemize}' bullet-ed list
+% '\item' item in list section 
+%
+% Symbols:
+% '\&' and sign
+% '\%' percent sign
+% '\_' three dotes
+% '\#' hash symbol
+% ------------------------------------------------------------------
+
+% Relevance
+Conflict between social groups and their individual members remains a prevalent feature of the modern human condition. Prejudices, discrimination, and animosities continue to plague societies around the world. One of the main ameliorations proposed by social psychologists has been positive intergroup contact. Based on Allport's (\citeyear{Allport1954b}) contact hypothesis, a plethora of studies and interventions have worked on bringing different social groups together\footnote{Cite interventions of British ministries.}. 
+
+\printbibliography
+
+\appendix
+
+\section{Appendix A}
+\label{app:AppendixA}
+
+Here goes the Appendix.
+
+\end{document}
