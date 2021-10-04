@@ -8,7 +8,7 @@ author:
 - Peter de Jonge^1,2^
 - Kai Epstude^1,2^
 - ^1^University of Groningen, Department of Psychology
-- ^2^Author order to be discussed currently alphabetic by last name
+- ^2^Author order to be discussed; currently alphabetic by last name
 - "Author Information:"
 - "Correspondence concerning this article should be addressed to Jannis Kreienkamp, Department of Psychology, University of Groningen, Grote Kruisstraat 2/1, 9712 TS Groningen (The Netherlands).  E-mail: <a href='mailto:j.kreienkamp@rug.nl'>j.kreienkamp@rug.nl</a>"
 - 'The main manuscript is available at <a href="https://www.doi.org/ToBePublished" target="_blank">doi.org/ToBePublished</a>'
