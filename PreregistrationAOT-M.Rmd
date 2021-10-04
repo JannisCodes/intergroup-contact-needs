@@ -83,9 +83,8 @@ Example: If taste affects preference, then mean preference indices will be highe
 
 1. \label{hyp:contact}Based on the most general understanding of the contact hypothesis, an increase in frequency and quality of contact should jointly account for changes in more favorable outgroup attitudes.
     a. \label{hyp:contactFreq}Participants with more intergroup interactions should have a more favorable outgroup attitudes.
-    b. \label{hyp:contactDummy}Outgroup attitudes should be higher after an intergroup interaction compared to a time with no outgroup interaction. OR: Outgroup attitudes should increase more after an intergroup interaction compared to a time with no outgroup interaction.
+    b. \label{hyp:contactDummy}Outgroup attitudes should be higher after an intergroup interaction compared to a non-outgroup interaction.
     c. \label{hyp:contactFreqQual}Participants with more intergroup interactions should have a more favorable outgroup attitudes depending on the average interaction quality.
-    d. \label{hyp:contactQualCor}Alternative to H\ref{hyp:contactFreqQual}: Interaction quality should relate positively with outgroup attitudes.
 2. \label{hyp:AllportsConditions}Based on Allport's optimal contact conditions, intergroup interactions with equal status, common goals, collaboration, and structural support should predict more favorable outgroup attitudes due to more positive interaction quality perceptions.
     a. \label{hyp:AllportsPred}Based on Allport's optimal contact conditions, outgroup attitudes should be more favorable after intergroup interactions with equal status, common goals, collaboration, and structural support.
     b. \label{hyp:AllportsQuality}Based on past research on the role of interaction quality, interaction quality should be more perceived as more favorable after intergroup interactions with equal status, common goals, collaboration, and structural support.
@@ -112,7 +111,7 @@ Example: If taste affects preference, then mean preference indices will be highe
 ## Blinding
 <!-- Blinding describes who is aware of the experimental manipulations within a study. Select all that apply. Is there any additional blinding in this study? -->
 
-No blinding is involved in this study.
+No participant blinding is involved in this study.
 
 ## Study design
 <!-- Describe your study design. Examples include two-group, factorial, randomized block, and repeated measures. Is it a between (unpaired), within-subject (paired), or mixed design? Describe any counterbalancing required. Typical study designs for observation studies include cohort, cross sectional, and case-control studies.
@@ -202,7 +201,7 @@ Participants will be recruited until 80 participants finish the pre-measurement.
 
 Example: We manipulated the percentage of sugar by mass added to brownies. The four levels of this categorical variable are: 15%, 20%, 25%, or 40% cane sugar by mass. -->
 
-Enter your response here.
+Not applicable given that the study design is observational.
 
 
 ## Measured variables
@@ -212,8 +211,75 @@ Observational studies and meta-analyses will include only measured variables. As
 
 Example: The single outcome variable will be the perceived tastiness of the single brownie each participant will eat. We will measure this by asking participants ‘How much did you enjoy eating the brownie’ (on a scale of 1-7, 1 being 'not at all', 7 being 'a great deal') and 'How good did the brownie taste' (on a scale of 1-7, 1 being 'very bad', 7 being 'very good'). -->
 
-Enter your response here.
+**Key variables:**
 
+1. Whether an interaction happened during the past daytime period
+    a. Did you meet a Dutch person this [morning/afternoon]?
+    a. Did you meet a Non-Dutch person [morning/afternoon]?
+1. Number of interactions during the past daytime period
+    a. How many interactions with Dutch people did you have this [morning/afternoon]?
+    a. How many interactions with Non-Dutch people did you have this [morning/afternoon]?
+1. Key need assessment
+    a. What was your main goal during the interaction with [name interaction partner]?
+    a. During the interaction with [name interaction partner] your goal [free-text entry interaction key need] was fulfilled.
+1. Allport's Conditions (equal status, common goal, collaboration, and structural support)
+    a. The interaction with [name interaction partner] was on equal footing (same status)
+    a. [name interaction partner] shared your goal ([free-text entry interaction key need])
+    a. The interaction with [name interaction partner] was cooperative
+    a. The interaction with [name interaction partner] was voluntary
+1. Interaction Quality
+    a. Overall, the interaction with [name interaction partner] was: Unpleasant to Pleasant
+1. Outgroup Attitudes
+    a. After the interaction, how favorably do you feel towards the Dutch.
+
+
+**Control variables:**
+
+1. Self Determination Theory needs ("During the interaction with [name interaction partner]")
+    a. I was myself.
+    a. I felt competent.
+    a. I shared information about myself. 
+    a. [name interaction partner] shared information about themselves.
+1. General key need during daytime
+    a. What was your main goal during this [morning/afternoon]?
+    a. During this [morning/afternoon] your goal ([free-text entry daytime key need]) was fulfilled
+    a. How important was your goal ([free-text entry daytime key need]) to you:
+1. Student Goals ("Please rate the importance of each goal during the interaction with [name interaction partner]"):
+    a. Social support / social connection goals
+    a. Romantic or sexual relationship goals
+    a. Academic goals
+    a. Career goals
+    a. Financial goals
+    a. Health / fitness goals
+    a. Leisure / fun goals
+    a. Personal improvement / growth goals
+    a. Service / helping goals
+    a. Spiritual / religious goals
+
+
+**Additional Analyses:**
+
+1. Generalization from interaction partner to outgroup
+    a. After the interaction, how favorably do you feel towards [name interaction partner].
+    a. The interaction with [name interaction partner] was representative of the Dutch.
+1. Alternative interaction quality definition ("Overall, the interaction with [name interaction partner] was ...")
+    a. Unpleasant to Pleasant
+    a. Superficial to Meaningful
+    a. Ineffective to Effective
+    a. Unimportant to Important
+1. Potential moderation by the relationship with interaction partner
+    a. How close do you feel to [name interaction partner]?
+    a. How much do you trust [name interaction partner]?
+    a. What is your relationship with [name interaction partner]?
+1. Potential moderation by key need characteristics
+    a. [name interaction partner] helped fulfill your goal [free-text entry interaction key need].
+    a. How important was your goal ([free-text interaction key need]) to you?
+1. Potential moderation by the interaction characteristics
+    a. How long was the interaction? (in minutes)
+    a. What was the main language during the interaction?
+    a. The interaction was: With a single other / In a group
+    
+_Full variable information is available in the codebook ('Codebook_AOT-M_ItemsPerSection.xlsx')_
 
 ## Indices
 <!-- If any measurements are  going to be combined into an index (or even a mean), what measures will you use and how will they be combined? Include either a formula or a precise description of your method. If your are using a more complicated statistical method to combine measures (e.g. a factor analysis), you can note that here but describe the exact method in the analysis plan section.
@@ -222,7 +288,19 @@ If you are using multiple pieces of data to construct a single variable, how wil
 
 Example: We will take the mean of the two questions above to create a single measure of 'brownie enjoyment.'  -->
 
-Enter your response here.
+1. Mean Allport's conditions 
+    a. The interaction with [name interaction partner] was on equal footing (same status)
+    a. [name interaction partner] shared your goal ([free-text entry interaction key need])
+    a. The interaction with [name interaction partner] was cooperative
+    a. The interaction with [name interaction partner] was voluntary
+1. Mean belongingness during intergroup contact
+    a. I shared information about myself. 
+    a. [name interaction partner] shared information about themselves.
+1. Mean alternative interaction quality definition ("Overall, the interaction with [name interaction partner] was ...")
+    a. Unpleasant to Pleasant
+    a. Superficial to Meaningful
+    a. Ineffective to Effective
+    a. Unimportant to Important
 
 
 # Analysis Plan
@@ -241,15 +319,36 @@ This is perhaps the most important and most complicated question within the prer
 
 Example:  We will use a one-way between subjects ANOVA to analyze our results. The manipulated, categorical independent variable is 'sugar' whereas the dependent variable is our taste index. -->
 
-Enter your response here.
-
+1. Contact Hypothesis
+    a. Correlation: $r_{InteractionFrequency, OutgroupAttitudes} \neq 0$
+    a. T-test: $\mu_{OutgroupInteraction} > \mu_{IngroupInteraction}$
+    a. Regression: $Attitude \sim AverageContactFreq \times AverageContactQual$
+1. Allport's Conditions
+    a. Regression: $Attitude_{ij} \sim \gamma_{00} + \gamma_{10}AllportConditions_{ij} + u_{oj} + r_{ij}$
+    a. Regression: $Attitude_{ij} \sim \gamma_{00} + \gamma_{10}AllportConditions_{ij} + \gamma_{20}InteractionQuality_{ij} + u_{oj} + r_{ij}$
+    
+        with $u_{oj} \sim \mathcal{N}(0,\tau^2_{00})$ and $r_{ij} \sim \mathcal{N}(0,\sigma^2)$
+1. Key Need Fulfillment
+    a. Regression: $Attitude_{ij} \sim \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ij} + u_{oj} + r_{ij}$
+    a. Regression: $InteractionQuality_{ij} \sim \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ij} + u_{oj} + r_{ij}$
+    a. Regression: $Attitude_{ij} \sim \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ij} + \gamma_{20}InteractionQuality_{ij} + u_{oj} + r_{ij}$
+    a. Regression: $Attitude_{ij} \sim KeyNeedFulfill_{ij} \times OutgroupInteraction_{ij}$
+    a. Regression: $Attitude_{ij} \sim \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ij} + \gamma_{20}Autonomy_{ij} + \gamma_{30}Competence_{ij} + \gamma_{40}Relatedness_{ij} + u_{oj} + r_{ij}$
+    
+        with $u_{oj} \sim \mathcal{N}(0,\tau^2_{00})$ and $r_{ij} \sim \mathcal{N}(0,\sigma^2)$
+1. Comparison with Allport's Conditions
+    a. Model Comparison: $AIC_{KeyNeedModel} > AIC_{AllportModel}$
+    a. Regression: $Attitude_{ij} \sim \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ij} + \gamma_{20}AllportConditions_{ij} + u_{oj} + r_{ij}$
+    
+        with $u_{oj} \sim \mathcal{N}(0,\tau^2_{00})$ and $r_{ij} \sim \mathcal{N}(0,\sigma^2)$
+    
 
 ## Transformations
 <!-- If you plan on transforming, centering, recoding the data, or will require a coding scheme for categorical variables, please describe that process. If any categorical predictors are included in a regression, indicate how those variables will be coded (e.g. dummy coding, summation coding, etc.) and what the reference category will be.
 
 Example: The "Effect of sugar on brownie tastiness" does not require any additional transformations. However, if it were using a regression analysis and each level of sweet had been categorically described (e.g. not sweet, somewhat sweet, sweet, and very sweet), 'sweet' could be dummy coded with 'not sweet' as the reference category. -->
 
-Enter your response here.
+We will mean-center all level one predictors within participants (i.e., cluster mean centering). This is relevant for any predictor variable during the interaction (e.g., key need fulfillment, interaction quality, ...). We mean-center within-person predictors, because we obtain a meaningful intercept when having a random slope model [e.g., @Hamaker2014]
 
 
 ## Inference criteria
@@ -259,6 +358,7 @@ p-values, confidence intervals, and effect sizes are standard means for making a
 
 Example: We will use the standard p<.05 criteria for determining if the ANOVA and the post hoc test suggest that the results are significantly different from those expected if the null hypothesis were correct. The post-hoc Tukey-Kramer test adjusts for multiple comparisons. -->
 
+Enter your response here.
 
 ## Data exclusion
 <!-- How will you determine what data or samples, if any, to exclude from your analyses? How will outliers be handled? Will you use any awareness check? Any rule for excluding a particular set of data is acceptable. One may describe rules for excluding a participant or for identifying outlier data.
@@ -289,7 +389,7 @@ Enter your response here.
 ## Other (Optional)
 <!-- If there is any additional information that you feel needs to be included in your preregistration, please enter it here. Literature cited, disclosures of any related work such as replications or work that uses the same data, or other context that will be helpful for future readers would be appropriate here. -->
 
-Enter your response here.
+Not applicable.
 
 
 # References
