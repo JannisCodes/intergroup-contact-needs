@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2021.10.4)  4 OCT 2021 15:46
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2021.10.4)  4 OCT 2021 18:32
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -522,55 +522,57 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 Package hyperref Warning: The anchor of a bookmark and its parent's must not
 (hyperref)                be the same. Added a new anchor on input line 146.
 
-
-Package natbib Warning: Citation `MacInnis2015' on page 1 undefined on input li
-ne 160.
-
 [1
 
-{/Users/jannis/Library/TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
+{/Users/jannis/Library/TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] [
+2] [3]
 
 Package hyperref Warning: The anchor of a bookmark and its parent's must not
-(hyperref)                be the same. Added a new anchor on input line 189.
-
-[2]
-
-Package hyperref Warning: The anchor of a bookmark and its parent's must not
-(hyperref)                be the same. Added a new anchor on input line 214.
+(hyperref)                be the same. Added a new anchor on input line 298.
 
 
 Package hyperref Warning: The anchor of a bookmark and its parent's must not
-(hyperref)                be the same. Added a new anchor on input line 259.
+(hyperref)                be the same. Added a new anchor on input line 327.
 
-[3]
+[4]
 
-Package hyperref Warning: The anchor of a bookmark and its parent's must not
-(hyperref)                be the same. Added a new anchor on input line 277.
+Package natbib Warning: Citation `Arslan2020' on page 5 undefined on input line
+ 341.
 
-
-Package hyperref Warning: The anchor of a bookmark and its parent's must not
-(hyperref)                be the same. Added a new anchor on input line 309.
-
+[5]
 
 Package hyperref Warning: The anchor of a bookmark and its parent's must not
-(hyperref)                be the same. Added a new anchor on input line 317.
+(hyperref)                be the same. Added a new anchor on input line 411.
+
+
+Package hyperref Warning: The anchor of a bookmark and its parent's must not
+(hyperref)                be the same. Added a new anchor on input line 429.
+
+[6]
+
+Package hyperref Warning: The anchor of a bookmark and its parent's must not
+(hyperref)                be the same. Added a new anchor on input line 461.
+
+
+Package hyperref Warning: The anchor of a bookmark and its parent's must not
+(hyperref)                be the same. Added a new anchor on input line 469.
 
 (./PreregistrationAOT-M.bbl)
 
 Package natbib Warning: There were undefined citations.
 
-[4] (./PreregistrationAOT-M.aux)
+[7] (./PreregistrationAOT-M.aux)
 Package rerunfilecheck Info: File `PreregistrationAOT-M.out' has not changed.
-(rerunfilecheck)             Checksum: AD8F0BA1350C8C5F926E14DCB99AE051;3846.
+(rerunfilecheck)             Checksum: 4B9FFCFE453300F6C85C8CF08FB01F02;3810.
  ) 
 Here is how much of TeX's memory you used:
- 10548 strings out of 480534
- 153535 string characters out of 5901448
- 460906 words of memory out of 5000000
- 27965 multiletter control sequences out of 15000+600000
+ 10596 strings out of 480534
+ 154126 string characters out of 5901448
+ 462496 words of memory out of 5000000
+ 27988 multiletter control sequences out of 15000+600000
  444999 words of font info for 52 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 60i,11n,66p,278b,418s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 60i,11n,66p,278b,507s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/Users/jannis/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}</User
 s/jannis/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></Users/ja
 nnis/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></Users/jannis
@@ -581,10 +583,10 @@ TeX/texmf-dist/fonts/type1/public/lm/lmr17.pfb></Users/jannis/Library/TinyTeX/t
 exmf-dist/fonts/type1/public/lm/lmr8.pfb></Users/jannis/Library/TinyTeX/texmf-d
 ist/fonts/type1/public/lm/lmri10.pfb></Users/jannis/Library/TinyTeX/texmf-dist/
 fonts/type1/public/lm/lmri12.pfb>
-Output written on PreregistrationAOT-M.pdf (4 pages, 229982 bytes).
+Output written on PreregistrationAOT-M.pdf (7 pages, 238978 bytes).
 PDF statistics:
- 223 PDF objects out of 1000 (max. 8388607)
- 197 compressed objects within 2 object streams
- 46 named destinations out of 1000 (max. 500000)
+ 269 PDF objects out of 1000 (max. 8388607)
+ 239 compressed objects within 3 object streams
+ 71 named destinations out of 1000 (max. 500000)
  249 words of extra memory for PDF output out of 10000 (max. 10000000)
 
