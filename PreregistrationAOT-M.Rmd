@@ -161,23 +161,23 @@ The data was collected in a three step procedure:
 
 1. Entry Survey: A pre-measurement questionnaire (appr. 25 minutes) including demographic information, and relations to the Dutch majority. (payment: 2 Euros)
 2. Experience Recaps: At least 30 days of short reflection surveys (appr. 3—5 minutes) on intergroup interactions twice a day. (payment: 1 Euro per Recap; up to 2 Euros per day)
-3. Conclusion Survey: On the last day, we conclude with a post-measurement questionnaire (appr. 25 minutes) with some questions on habits and reflection of the study. (payment: 2 Euros)
+3. Conclusion Survey: On the last day, we conclude with a post-measurement questionnaire (appr. 25 minutes) with some questions on habits and reflections on the study. (payment: 2 Euros)
 
-After the initial 30 day duration, participants are offered the possibility to continue participating in the study either with payment if daily diary measures were missed during the initial study phase or without payment after a total of 60 daily diary measurements were completed. After the initial 30-day period, participants receive automated feedback based on their own well-being, attitudes, and motive responses as an additional initiative give participants access to their own data and to compensate study participation.
+After the initial 30 day duration, participants are offered the possibility to continue participating in the study either with payment if daily diary measures were missed during the initial study phase or without payment after a total of 60 daily diary measurements were completed. After the initial 30-day period, participants receive automated feedback visualizing the development of their own well-being, attitudes, and motive responses as an additional initiative to give participants access to their own data and to compensate study participation.
 
 ## Sample size
 <!-- Describe the sample size of your study. How many units will be analyzed in the study? This could be the number of people, birds, classrooms, plots, interactions, or countries included. If the units are not individuals, then describe the size requirements for each unit. If you are using a clustered or multilevel design, how many units are you collecting at each level of the analysis? For some studies, this will simply be the number of samples or the number of clusters. For others, this could be an expected range, minimum, or maximum number.
 
 Example: Our target sample size is 280 participants. We will attempt to recruit up to 320, assuming that not all will complete the total task. -->
 
-Our target sample size is a sum of 4,000 daily diary measurements. With 100% completion rate that would be archieved with 67 participants (60 daily diary responses each). Given that we expect some incomplete daily diary measurements, we aimed to recruit 80 participants.
+Our target sample size is a sum of 4,000 daily diary measurements. With 100% completion rate that would be archived with 67 participants (60 daily diary responses each). Given that we expect some incomplete daily diary measurements, we aimed to recruit 80 participants.
 
 ## Sample size rationale
 <!-- This could include a power analysis or an arbitrary constraint such as time, money, or personnel. This gives you an opportunity to specifically state how the sample size will be determined. A wide range of possible answers is acceptable; remember that transparency is more important than principled justifications. If you state any reason for a sample size upfront, it is better than stating no reason and leaving the reader to "fill in the blanks." Acceptable rationales include: a power analysis, an arbitrary number of subjects, or a number based on time or monetary constraints.
 
 Example: We used the software program G*Power to conduct a power analysis. Our goal was to obtain .95 power to detect a medium effect size of .25 at the standard .05 alpha error probability. -->
 
-The targeted sample size depended on a combination of different factors. Different analyses were planned as part of the collaboration and budgeting was a practical constraint. Some analyses were planned based on (1) the pre- to post measurements, (2) the dynamic developments over the daily diary measurements, as well (3) the contemporary effects within the daily diary measurements.
+The targeted sample size depended on a combination of different factors. Different analyses were planned as part of the collaboration and budgeting was a practical constraint. Some analyses were planned based on (1) the pre- to post measurements, (2) the dynamic developments over the daily diary measurements, or (3) the contemporary effects within the daily diary measurements.
 
 Power considerations of mixed effects model such as with extensive longitudinal data are difficult to estimate because of the complex covariance structures. Simulation studies based on the first two samples within this project indicated that with well-distributed scales, and small to medium effect sizes, 70-80 participants with at least seven daily diary measurements and a simple pre--post survey were sufficiently powerful (power = .8, alpha = .05) to answer most of the key research questions of the collaboration.
 
@@ -373,7 +373,7 @@ No checks will be performed to determine eligibility for inclusion besides verif
 
 Example: If a subject does not complete any of the three indices of tastiness, that subject will not be included in the analysis. -->
 
-Given the (unexpectedly) large sample size of contemporaneous measurements, we will remove all instances during which a participant did not respond to any of the relevant variables.
+Given the (expectedly) large sample size of contemporaneous measurements, we will remove all instances during which a participant did not respond to any of the relevant variables.
 
 
 ## Exploratory analyses (optional)
