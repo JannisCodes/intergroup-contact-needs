@@ -110,6 +110,27 @@ Note. Boxplots display the interquartile range (IQR, center box), and the whiske
 
 ## Data Import  
 
+```{r formrImport}
+# workers
+dtWorker <- list(
+  raw.pre = read_spss("data/S1_Workers/processed/cleaned/MT - Pre-Measure - 06-15-2018.sav"),
+  raw.post = read_spss("data/S1_Workers/processed/cleaned/MT - Post-Measure - 06-15-2018.sav"),
+  raw.morning = read_spss("data/S1_Workers/processed/cleaned/MT - Morning - 06-15-2018.sav"),
+  raw.afternoon = read_spss("data/S1_Workers/processed/cleaned/MT - Afternoon - 06-15-2018.sav")
+)
+
+# students
+dtStudents <- list(
+  raw.pre = read.csv(file = "data/S2_Students/raw/AOTS_Pre.csv", header = T, sep = ","),
+  raw.post = read.csv(file = "data/S2_Students/raw/AOTS_Post.csv", header = T, sep = ","),
+  raw.daily = read.csv(file = "data/S2_Students/raw/AOTS_Daily.csv", header = T, sep = ",")
+)
+
+# young medical professionals
+
+
+```
+
 ## Data Cleaning  
 
 ## Data Exclusions  
