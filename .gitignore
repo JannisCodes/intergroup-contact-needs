@@ -8,8 +8,7 @@ Icon[\r\r]
 Icon?
 Icon^M^M
 **/Icon?
-data/backup
-data/*.docx
+data
 Feedback/
 Backup/
 Misc/
