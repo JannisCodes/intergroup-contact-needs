@@ -112,6 +112,7 @@ Note. Boxplots display the interquartile range (IQR, center box), and the whiske
 
 ```{r formrImport}
 # workers
+# initial data cleaning was done in SPSS (syntax files are available in "")
 dtWorker <- list(
   raw.pre = read_spss("data/S1_Workers/processed/cleaned/MT - Pre-Measure - 06-15-2018.sav"),
   raw.post = read_spss("data/S1_Workers/processed/cleaned/MT - Post-Measure - 06-15-2018.sav"),
@@ -127,7 +128,11 @@ dtStudents <- list(
 )
 
 # young medical professionals
-
+dtMedical <- list(
+  raw.pre = c(),
+  raw.post = c(),
+  raw.daily = c()
+)
 
 ```
 
