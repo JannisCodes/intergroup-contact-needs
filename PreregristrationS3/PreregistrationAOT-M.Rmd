@@ -18,7 +18,7 @@ affiliation:
     institution : University of Groningen, Department of Psychology
   - id          : 2
     institution : Author order to be discussed; currently alphabetic by last name.
-bibliography: references.bib
+bibliography: "../references.bib"
 csl: apa.csl
 biblio-style: "apalike" 
 output: 
