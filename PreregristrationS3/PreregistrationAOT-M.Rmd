@@ -4,20 +4,18 @@ shorttitle      : "Preregistration: Needs During Intergroup Contact"
 date            : "`r Sys.setlocale('LC_TIME', 'C'); format(Sys.time(), '%d\\\\. %B %Y')`"
 author: 
   - name        : Jannis Kreienkamp
-    affiliation : "1,2"
+    affiliation : "1"
   - name        : Maximilian Agostini
-    affiliation : "1,2"
+    affiliation : "1"
   - name        : Laura Bringmann
-    affiliation : "1,2"
+    affiliation : "1"
   - name        : Peter de Jonge
-    affiliation : "1,2"
+    affiliation : "1"
   - name        : Kai Epstude
-    affiliation : "1,2"
+    affiliation : "1"
 affiliation:
   - id          : 1
     institution : University of Groningen, Department of Psychology
-  - id          : 2
-    institution : Author order to be discussed; currently alphabetic by last name.
 bibliography: "../references.bib"
 csl: apa.csl
 biblio-style: "apalike" 
@@ -71,7 +69,7 @@ Example: Effect of sugar on brownie tastiness. -->
 
 Example: Though there is strong evidence to suggest that sugar affects taste preferences, the effect has never been demonstrated in brownies. Therefore, we will measure taste preference for four different levels of sugar concentration in a standard brownie recipe to determine if the effect exists in this pastry. -->
 
-In its most essential interpretation, the intergroup contact hypothesis postulates that frequent and positive contact with an out-group reduces prejudice and increases favorable attitudes towards the other group [@Hewstone1996; @Pettigrew1998]. A key condition for these contact benefits, has been that the interaction is indeed perceived as positive --- making the interaction quality a crucial mechanism of inter-group contact [e.g., @MacInnis2015]. It is widely accepted that equal status, common goals, collaboration, and structural support during the interaction form the optimal conditions for a positive contact [Allport's Optimal Contact conditions, @Allport1954b]. And indeed a major meta-analytic review showed, that intergroup contact benefits were larger when Allport's conditions were met. However, the meta-analysis also showed that contact resulted in more positive intergroup relations even when Allport's conditions were not met.But they don't discuss Allport's conditions. It, thus, remains unclear why exactly Allport's conditions work and whether there might be an underlying psychological mechanism at play.
+In its most essential interpretation, the intergroup contact hypothesis postulates that frequent and positive contact with an out-group reduces prejudice and increases favorable attitudes towards the other group [@Hewstone1996; @Pettigrew1998]. A key condition for these contact benefits, has been that the interaction is perceived as positive --- making the interaction quality a crucial mechanism of inter-group contact [e.g., @MacInnis2015]. It is widely accepted that equal status, common goals, collaboration, and structural support during the interaction form the optimal conditions for a positive contact [Allport's Optimal Contact conditions, @Allport1954b]. And indeed a major meta-analytic review showed, that intergroup contact benefits were larger when Allport's conditions were met. However, the meta-analysis also showed that contact resulted in more positive intergroup relations even when Allport's conditions were not met. It, thus, remains unclear why exactly Allport's conditions work and whether there might be an underlying psychological mechanism at play.
 
 We propose that Allport's optimal contact conditions are effective in creating positive contact because they constitute common psychological needs of the interacting individuals. If this is indeed the case, the impact of fulfilling other fundamental needs should produce similar beneficial contact results. And more importantly, the satisfaction of key situation needs during the interaction should predict the positive contact effects most strongly.
 
@@ -147,7 +145,7 @@ An appropriate instance of using existing data would be collecting a sample size
 
 Example: An appropriate instance of using existing data would be collecting a sample size much larger than is required for the study, using a small portion of it to conduct exploratory analysis, and then registering one particular analysis that showed promising results. After registration, conduct the specified analysis on that part of the dataset that had not been investigated by the researcher up to that point. -->
 
-The data was collected as part of a larger collaboration on daily intergroup relations. The researchers have had no direct access to the data, as the data was collected using an automated system using the FormR framework [@Arslan2020]. 
+The data was collected as part of a larger collaboration on daily intergroup relations. The researchers have had no direct access to the data, as the data was collected using an automated system using the FormR framework [@Arslan2020]. The data were then downloaded and stored securely on an encrypted device until the eventual data analysis. None of the researchers have accessed the data thus far.
 
 
 ## Data collection procedures
@@ -319,28 +317,30 @@ This is perhaps the most important and most complicated question within the prer
 
 Example:  We will use a one-way between subjects ANOVA to analyze our results. The manipulated, categorical independent variable is 'sugar' whereas the dependent variable is our taste index. -->
 
+We will use a sequential analysis strategy in line with our proposed hypotheses. Given the nested structure of much of our data we test many of our hypotheses using a multilevel approach, where $y_{ti}$ denotes the response at measurement occasion $t$ ($t = 1, ...,T_i$, level 1) for individual $i$ ($i = 1, ..., n$, level 2). It should be noted that we will follow a hierarchical regression approach. We follow the common three-step procedure [e.g., @Bliese2013]: 
+
 1. Contact Hypothesis
     a. Correlation: $r_{InteractionFrequency, OutgroupAttitudes} \neq 0$
-    a. T-test: $\mu_{OutgroupInteraction} > \mu_{IngroupInteraction}$ (to build confidence in the persistence of the contact effect, we additionally compare the attitudes after an outgroup interaction to attitudes after no outgroup interaction (i.e., including instances where participants had no interaction at all).)
-    a. Regression: $Attitude \sim AverageContactFreq \times AverageContactQual$
+    a. T-test: $\mu_{0utgroupInteraction} > \mu_{IngroupInteraction}$ (to build confidence in the persistence of the contact effect, we additionally compare the attitudes after an outgroup interaction to attitudes after no outgroup interaction (i.e., including instances where participants had no interaction at all).)
+    a. Regression: $Attitude = AverageContactFreq \times AverageContactQual$
 1. Allport's Conditions
-    a. Regression: $Attitude_{ij} \sim \gamma_{00} + \gamma_{10}AllportConditions_{ij} + u_{oj} + r_{ij}$
-    a. Regression: $Attitude_{ij} \sim \gamma_{00} + \gamma_{10}AllportConditions_{ij} + \gamma_{20}InteractionQuality_{ij} + u_{oj} + r_{ij}$
+    a. Regression: $Attitude_{ti} = \gamma_{00} + \gamma_{10}AllportConditions_{ti} + u_{0i} + u_{1i} + e_{ti}$
+    a. Regression: $Attitude_{ti} = \gamma_{00} + \gamma_{10}AllportConditions_{ti} + \gamma_{20}InteractionQuality_{ti} + u_{0i} + u_{1i} + e_{ti}$
     
-        with $u_{oj} \sim \mathcal{N}(0,\tau^2_{00})$ and $r_{ij} \sim \mathcal{N}(0,\sigma^2)$
+        with $\begin{bmatrix} u_{0i}\\ u_{1i}\end{bmatrix} \sim \mathcal{N}(0,\Omega_u): \Omega_u=\begin{bmatrix} \tau_{0}^2 & \\ \tau_{01} & \tau_{1}^2 \end{bmatrix}$ and $e_{ti} \sim \mathcal{N}(0,\sigma^2)$
 1. Key Need Fulfillment
-    a. Regression: $Attitude_{ij} \sim \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ij} + u_{oj} + r_{ij}$
-    a. Regression: $InteractionQuality_{ij} \sim \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ij} + u_{oj} + r_{ij}$
-    a. Regression: $Attitude_{ij} \sim \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ij} + \gamma_{20}InteractionQuality_{ij} + u_{oj} + r_{ij}$
-    a. Regression: $Attitude_{ij} \sim KeyNeedFulfill_{ij} \times OutgroupInteraction_{ij}$
-    a. Regression: $Attitude_{ij} \sim \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ij} + \gamma_{20}Autonomy_{ij} + \gamma_{30}Competence_{ij} + \gamma_{40}Relatedness_{ij} + u_{oj} + r_{ij}$
+    a. Regression: $Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + u_{0i} + u_{1i} + e_{ti}$
+    a. Regression: $InteractionQuality_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + u_{0i} + u_{1i} + e_{ti}$
+    a. Regression: $Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + \gamma_{20}InteractionQuality_{ti} + u_{0i} + u_{1i} + e_{ti}$
+    a. Regression: $Attitude_{ti} = KeyNeedFulfill_{ti} \times OutgroupInteraction_{ti} + u_{0i} + u_{1i} + e_{ti}$
+    a. Regression: $Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + \gamma_{20}Autonomy_{ti} + \gamma_{30}Competence_{ti} + \gamma_{40}Relatedness_{ti} + u_{0i} + u_{1i} + e_{ti}$
     
-        with $u_{oj} \sim \mathcal{N}(0,\tau^2_{00})$ and $r_{ij} \sim \mathcal{N}(0,\sigma^2)$
+        with $\begin{bmatrix} u_{0i}\\ u_{1i}\end{bmatrix} \sim \mathcal{N}(0,\Omega_u): \Omega_u=\begin{bmatrix} \tau_{0}^2 & \\ \tau_{01} & \tau_{1}^2 \end{bmatrix}$ and $e_{ti} \sim \mathcal{N}(0,\sigma^2)$
 1. Comparison with Allport's Conditions
     a. Model Comparison: $AIC_{KeyNeedModel} > AIC_{AllportModel}$
-    a. Regression: $Attitude_{ij} \sim \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ij} + \gamma_{20}AllportConditions_{ij} + u_{oj} + r_{ij}$
+    a. Regression: $Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + \gamma_{20}AllportConditions_{ti} + u_{0i} + u_{1i} + e_{ti}$
     
-        with $u_{oj} \sim \mathcal{N}(0,\tau^2_{00})$ and $r_{ij} \sim \mathcal{N}(0,\sigma^2)$
+        with $\begin{bmatrix} u_{0i}\\ u_{1i}\end{bmatrix} \sim \mathcal{N}(0,\Omega_u): \Omega_u=\begin{bmatrix} \tau_{0}^2 & \\ \tau_{01} & \tau_{1}^2 \end{bmatrix}$ and $e_{ti} \sim \mathcal{N}(0,\sigma^2)$
     
 
 ## Transformations
