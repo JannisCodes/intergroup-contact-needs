@@ -61,7 +61,7 @@ csl: apa.csl
 lib <- c("rmarkdown", "knitr", "remedy", "bookdown", "psych",
          "ggplot2", "ggthemes", "haven", "RColorBrewer", "plotly", "gridExtra",
          "sessioninfo", "tibble", "pander", "devtools",
-         "data.table", "dplyr", "tidyr", "Hmisc", "kableExtra", 
+         "data.table", "plyr", "dplyr", "tidyr", "Hmisc", "kableExtra", 
          "stringr", "stringi", "reshape2", "lubridate")
 invisible(lapply(lib, library, character.only = TRUE))  
 rm(lib)  
@@ -137,6 +137,323 @@ dtMedical <- list(
 ```
 
 ## Data Cleaning  
+
+```{r cleanWorker}
+#  important names for Morning and Afternoon
+  names.m <- c(
+    "StartDate",
+    "EndDate",
+    "Finished",
+    "Duration__in_seconds_",
+    "RecordedDate",
+    "ExternalReference",
+    "Meta_Operating_System",
+    "Contact_dum",
+    "number",
+    "time",
+    "duration_1",
+    "dyad.group",
+    "gr_size",
+    "gr_type_1",
+    "gr_type_2",
+    "gr_type_3",
+    "gr_type_4",
+    "gr_type_5",
+    "gr_type_6",
+    "gr_type_7",
+    "gr_type_8",
+    "gr_type_9",
+    "gr_type_10",
+    "gr_type_11",
+    "gr_type_12",
+    "gr_type_13",
+    "gr_type_14",
+    "gr_type_15",
+    "gr_type_16",
+    "gr_type_17_TEXT",
+    "gr_context_1",
+    "gr_context_2",
+    "gr_context_3",
+    "gr_context_4",
+    "gr_context_5",
+    "gr_context_6",
+    "gr_context_7",
+    "gr_context_8",
+    "gr_context_9",
+    "gr_context_10",
+    "gr_context_11",
+    "gr_context_12",
+    "gr_context_13_TEXT",
+    "gr_context_14_TEXT",
+    "gr_dutchness",
+    "dyad_type_1",
+    "dyad_type_2",
+    "dyad_type_3",
+    "dyad_type_4",
+    "dyad_type_5",
+    "dyad_type_6",
+    "dyad_type_7",
+    "dyad_type_8",
+    "dyad_type_9",
+    "dyad_type_10",
+    "dyad_type_11",
+    "dyad_type_12",
+    "dyad_type_13",
+    "dyad_type_14",
+    "dyad_type_15",
+    "dyad_type_16",
+    "dyad_type_17_TEXT",
+    "Context_1",
+    "Context_2",
+    "Context_3",
+    "Context_4",
+    "Context_5",
+    "Context_6",
+    "Context_7",
+    "Context_8",
+    "Context_9",
+    "Context_10",
+    "Context_11",
+    "Context_12",
+    "Context_13_TEXT",
+    "Context_14_TEXT",
+    "keyMotive",
+    "keymotive_fulfillemt_1",
+    "keyMotive_Dutch_1",
+    "autonomy_1",
+    "competence_1",
+    "relatedness_self_1",
+    "relatedness_other_1",
+    "qualityAccidental_1",
+    "qualityVoluntary_1",
+    "qualityCooperative_1",
+    "qualityDutchy_1",
+    "quality_overall_1",
+    "quality_meaning_1",
+    "quality_star_1",
+    "wantInt",
+    "desire_type_1",
+    "desire_type_2",
+    "desire_type_3",
+    "desire_type_4",
+    "desire_type_5",
+    "desire_type_6",
+    "desire_type_7",
+    "desire_type_8",
+    "desire_type_9",
+    "desire_type_10",
+    "desire_type_11",
+    "desire_type_12",
+    "desire_type_13",
+    "desire_type_14",
+    "desire_type_15",
+    "desire_type_16",
+    "desire_type_17_TEXT",
+    "desire_context_1",
+    "desire_context_2",
+    "desire_context_3",
+    "desire_context_4",
+    "desire_context_5",
+    "desire_context_6",
+    "desire_context_7",
+    "desire_context_8",
+    "desire_context_9",
+    "desire_context_10",
+    "desire_context_11",
+    "desire_context_12",
+    "desire_context_13_TEXT",
+    "desire_context_14_TEXT",
+    "Reason_nodesire",
+    "keyMotive_noInt",
+    "keyMotive_noInt_fulf_1",
+    "autonomy_NoInt_1",
+    "competence_NoInt_1",
+    "relatedness_1_NoInt_1",
+    "thermometerDutch_1",
+    "thermometerDutchInt_2",
+    "ExWB_1",
+    "alertness1",
+    "calmness1",
+    "valence1",
+    "alertness2",
+    "calmness2",
+    "valence2",
+    "inNonDutch",
+    "NonDutchNum",
+    "NonDutchType_1",
+    "NonDutchType_2",
+    "NonDutchType_3",
+    "NonDutchType_4",
+    "NonDutchType_5",
+    "NonDutchType_6",
+    "NonDutchType_7",
+    "NonDutchType_8",
+    "NonDutchType_9",
+    "NonDutchType_10",
+    "NonDutchType_11",
+    "NonDutchType_12",
+    "NonDutchType_13",
+    "NonDutchType_14",
+    "NonDutchType_15_TEXT",
+    "date",
+    "time.0",
+    "LocationLatitude",
+    "LocationLongitude"
+  )
+  
+  names.a <- c(names.m, "keyInteraction_1", "keyInteractionTime")
+
+# Create reduced data sets for morning and afternoon
+  dat.mo <- dtWorker$raw.morning[, names.m]
+  dat.mo$daytime <- "morning"
+  
+  dat.af <- dtWorker$raw.afternoon[, names.a]
+  dat.af$daytime <- "afternoon"
+
+# merge morning and afternoon measurements with indicator [+ clean up]
+  daily.dat <- rbind.fill(dat.mo, dat.af)
+  daily.dat <- daily.dat[daily.dat$ExternalReference != 55951, ]
+  dtWorker$daily <- daily.dat
+  rm(dat.mo, dat.af, names.m, names.a, daily.dat)
+
+
+# names for pre-measurement
+  names.pre <- c(
+    "Finished",
+    "age",
+    "Gender",
+    "Living",
+    "roommate_1",
+    "roommate_2",
+    "roommate_3",
+    "nationality",
+    "SecondNationality",
+    "timeNL_1",
+    "Reason_2",
+    "Reason_5",
+    "Reason_7",
+    "Reason_8_TEXT",
+    "DutchLang",
+    "occupation_1",
+    "occupation_2",
+    "occupation_3",
+    "occupation_4",
+    "occupation_7",
+    "CurrentEducation_1",
+    "education_level",
+    "EduLang_2",
+    "RUG_faculty",
+    "Study.0",
+    "association",
+    "DutchMeetNum",
+    "DutchFriends_1",
+    "assimilation",
+    "separation",
+    "integration",
+    "marginalization",
+    "VIA_heritage",
+    "VIA_Dutch",
+    "SSAS_surrounding",
+    "SSAS_privat",
+    "SSAS_public",
+    "autonomy",
+    "relatedness",
+    "competence",
+    "anxiety",
+    "swl",
+    "alertness",
+    "calmness",
+    "valence",
+    "date",
+    "time",
+    "City",
+    "ZIP",
+    "id"
+  )
+  
+# reduced data set for pre measurement
+  dat.pre.red <- dtWorker$raw.pre[, names.pre]
+
+# merge with daily data [+ clean up]
+  df.pre <- merge(
+    x = dtWorker$daily,
+    y = dat.pre.red,
+    by.x = "ExternalReference",
+    by.y = "id",
+    all = T
+  )
+  rm(names.pre)
+
+# adjust duplicate names to fit to indicate daily or pre measurement  
+  names(df.pre) <- gsub("[[:punct:]]x", ".daily", names(df.pre))
+  names(df.pre) <- gsub("[[:punct:]]y", ".pre", names(df.pre))
+
+# names for post measurement  
+  names.post <- c(
+    "ExternalReference",
+    "assimilation",
+    "separation",
+    "integration",
+    "marginalization",
+    "VIA_heritage",
+    "VIA_Dutch",
+    "anxiety",
+    "swl",
+    "rosenberg",
+    "social_support",
+    "stress",
+    "discrimination",
+    "discrimination_month",
+    "NLE_1month",
+    "NLE_6month",
+    "NLE_12month"
+  )
+
+# reduced data set for post-measurement  
+  dat.post.red <- dtWorker$raw.post[, names.post]
+
+# merge post measurement with pre- and daily data  
+  df <- merge(
+    x = df.pre,
+    y = dat.post.red,
+    by.x = "ExternalReference",
+    by.y = "ExternalReference",
+    all = T
+  )
+
+# adjust duplicate names to indicate pre or post  
+  names(df) <- gsub("[[:punct:]]x", ".pre", names(df))
+  names(df) <- gsub("[[:punct:]]y", ".post", names(df))
+  
+# add to list
+  dtWorker$combined <- df
+  
+# create data frame with cleaned data
+  df <- dtWorker$combined %>%
+    filter(Finished.pre == 1,
+           Finished.daily == 1,
+           !is.na(ExternalReference))
+
+# add running number as measurement ID within participants   
+  df$measureID = rowidv(df, cols = c("ExternalReference"))
+  
+  dtWorker$clean <- df
+  
+# clean up
+  rm(df.pre, names.post, dat.post.red, dat.pre.red, df)
+
+# Export reduced Data
+  #write.csv(dtWorker$clean, "data/processed/MT_clean-merged_07-05-2018.csv", row.names = F)
+  #save(dtWorker$clean, file = "data/processed/MT_clean-merged_07-05-2018.RData")
+```
+
+```{r cleanStudents}
+
+```
+
+```{r cleanMedical}
+
+```
 
 ## Data Exclusions  
 
