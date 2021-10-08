@@ -448,11 +448,68 @@ dtMedical <- list(
 ```
 
 ```{r cleanStudents}
+# our own test IDs
+ownIDs <- c(
+  "beautifulLionfishXXXR5rcgVBzGu8hPvOqrK8UBJBw4owvi9nfRFSFu3lMzYhE",
+  "niceDogoXXXmB8JI5SFu78SF3DVof84mGUPPNUr14p2HYFTtp31a6D1OwAzM6F-K",
+  "amusedQuailXXXmhuc_fpTp8vPkMwDH1BzjaH1d1kHSO1bsPEfsnaEYk4WeVBfPi",
+  "juwGAbtXX0_1kmZtSVqKh3PGaHOICqUyU4iBkrT3nDsI_uifuD1gzKcZerxaM5FL"
+)
 
+# Prepare dfs for Cleaning
+df.pre <- dtStudents$raw.pre %>%
+  mutate_all(na_if,"") %>%
+  mutate_all(na_if,"NA") %>%
+  filter(!is.na(ended)) %>% # remove all who did not finish
+  filter(!e_mail %in% .$e_mail[duplicated(.$e_mail)]) %>% # remove all who did the pre questionnaire multiple times (b/c inconsistent ratings scales)
+  filter(!session %in% ownIDs) %>% # remove our own test 
+  mutate(session = as.character(session)) # turn factor into character strings (probably just precaution)
+
+df.post <- dtStudents$raw.post %>%
+  mutate_all(na_if,"") %>%
+  mutate_all(na_if,"NA") %>%
+  filter(!is.na(session)) %>% # remove own test runs
+  filter(!session %in% ownIDs) %>% # remove our own test 
+  filter(session %in% df.pre$session) %>% # remove anyone who wasn't in the pre
+  filter(!is.na(ended)) %>% # remove all who never finished
+  filter(!session %in% .$session[duplicated(.$session)]) %>% # remove all duplicate sessions
+  mutate(session = as.character(session)) # turn factor into character strings (probably just precaution)
+
+df.daily <- dtStudents$raw.daily %>%
+  mutate_all(na_if,"") %>%
+  mutate_all(na_if,"NA") %>%
+  filter(!session %in% ownIDs) %>% # remove our own test 
+  filter(session %in% df.pre$session) %>% # remove anyone who wasn't in the pre
+  filter(!is.na(ended)) %>% # remove all who never finished
+  mutate(session = as.character(session)) # turn factor into character strings (probably just precaution)
+
+# merge daily with pre
+dfPreDaily = merge(
+  x = df.daily,
+  y = df.pre,
+  by = "session",
+  suffixes = c(".daily", ".pre"),
+  all = F
+)
+  
+# merge daily with post 
+dfCombined = merge(
+  x = dfPreDaily,
+  y = df.post,
+  by = "session",
+  suffixes = c(".pre", ".post"),
+  all = F
+)
+
+# add to list
+dtStudents$clean <- dfCombined
+
+# clean up workspace
+rm(df.pre, df.daily, df.post, dfPreDaily, dfCombined, ownIDs)
 ```
 
 ```{r cleanMedical}
-
+#TBD
 ```
 
 ## Data Exclusions  
