@@ -1,5 +1,5 @@
 ---
-title           : "Psychological Needs During Intergroup Contact: Young Medical Professionals Sample"
+title           : "Psychological Needs During Intergroup Contact: An Extensive Longitudinal Study (Young Medical Professionals Sample)"
 shorttitle      : "Preregistration: Needs During Intergroup Contact"
 date            : "`r Sys.setlocale('LC_TIME', 'C'); format(Sys.time(), '%d\\\\. %B %Y')`"
 author: 
@@ -286,7 +286,7 @@ If you are using multiple pieces of data to construct a single variable, how wil
 
 Example: We will take the mean of the two questions above to create a single measure of 'brownie enjoyment.'  -->
 
-1. Mean Allport's conditions 
+1. Mean Allport's conditions. We create a mean-averaged index of Allport's conditions in response to past findings indicating that the conditions are best conceptualized jointly and as functioning together rather than as fully independent factors [@Pettigrew2006, p. 766]. Similar to past studies we thus hope to build a global indicator [e.g., see @Pettigrew2006]. As with other indices we will ensure that the individual items indeed relate to a common latent construct and are  meaningfully combine in an index. If this is not possible we will create sub-indices and/or assess the impact of the conditions separately.
     a. The interaction with [name interaction partner] was on equal footing (same status)
     a. [name interaction partner] shared your goal ([free-text entry interaction key need])
     a. The interaction with [name interaction partner] was cooperative
@@ -317,9 +317,9 @@ This is perhaps the most important and most complicated question within the prer
 
 Example:  We will use a one-way between subjects ANOVA to analyze our results. The manipulated, categorical independent variable is 'sugar' whereas the dependent variable is our taste index. -->
 
-We will use a sequential analysis strategy in line with our proposed hypotheses. Given the nested structure of much of our data we test many of our hypotheses using a multilevel approach, where $y_{ti}$ denotes the response at measurement occasion $t$ ($t = 1, ...,T_i$, level 1) for individual $i$ ($i = 1, ..., n$, level 2). It should be noted that we will follow a hierarchical regression approach. We follow the common three-step procedure [e.g., @Bliese2013]: 
+We will use a sequential analysis strategy in line with our proposed hypotheses. Given the nested structure of much of our data we test many of our hypotheses using a multilevel approach, where $y_{ti}$ denotes the response at measurement occasion $t$ ($t = 1, ...,T_i$; level 1) for individual $i$ ($i = 1, ..., n$; level 2). It should be noted that we will follow a hierarchical modeling approach. We follow the common four-step procedure [e.g., @Bliese2013]: (1) Test whether enough variation exists within and between participants to justify a multilevel structure, (2) (sequentially) add key predictors, (3) check whether a random slope explains an adequate amount of variance, and (4) check for autocorrelations and heteroscedasticity. For brevity we will only present the full multilevel regression formulas below.
 
-1. Contact Hypothesis
+1. Contact Hypothesis (using between participant aggregates only to meaningfully include interaction frequency)
     a. Correlation: $r_{InteractionFrequency, OutgroupAttitudes} \neq 0$
     a. T-test: $\mu_{0utgroupInteraction} > \mu_{IngroupInteraction}$ (to build confidence in the persistence of the contact effect, we additionally compare the attitudes after an outgroup interaction to attitudes after no outgroup interaction (i.e., including instances where participants had no interaction at all).)
     a. Regression: $Attitude = AverageContactFreq \times AverageContactQual$
@@ -348,7 +348,7 @@ We will use a sequential analysis strategy in line with our proposed hypotheses.
 
 Example: The "Effect of sugar on brownie tastiness" does not require any additional transformations. However, if it were using a regression analysis and each level of sweet had been categorically described (e.g. not sweet, somewhat sweet, sweet, and very sweet), 'sweet' could be dummy coded with 'not sweet' as the reference category. -->
 
-We will mean-center all level one predictors within participants (i.e., cluster mean centering). This is relevant for any predictor variable during the interaction (e.g., key need fulfillment, interaction quality, ...). We mean-center within-person predictors, because we obtain a meaningful intercept when having a random slope model [e.g., @Hamaker2014]
+We will mean-center all level-one predictors within participants (i.e., cluster mean centering). This is relevant for any predictor variable during the interaction (e.g., key need fulfillment, interaction quality, ...). We mean-center within-person predictors, to meaningfully distinguish within and between person variances and because we obtain a meaningful intercept when having a random slope model [e.g., @Hamaker2014].
 
 
 ## Inference criteria
@@ -365,7 +365,7 @@ We will use the standard p<.05 criteria for determining whether the correlation 
 
 Example: No checks will be performed to determine eligibility for inclusion besides verification that each subject answered each of the three tastiness indices. Outliers will be included in the analysis. -->
 
-No checks will be performed to determine eligibility for inclusion besides verification that each subject answered each of the variables of interest for a given analysis. Outliers will be included in the analysis.
+No checks will be performed to determine eligibility for inclusion besides verification that each subject answered each of the variables of interest for a given analysis. Outliers will generally be included in analyses, however we will use sensitivity analyses to assess the robustness of the results to outliers.
 
 
 ## Missing data
