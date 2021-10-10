@@ -136,7 +136,7 @@ dtMedical <- list(
 
 ```
 
-## Data Cleaning  
+## Data Cleaning & Data Exclusions  
 
 ```{r cleanWorker}
 #  important names for Morning and Afternoon
@@ -512,7 +512,105 @@ rm(df.pre, df.daily, df.post, dfPreDaily, dfCombined, ownIDs)
 #TBD
 ```
 
-## Data Exclusions  
+## Calculate needed transformations  
+
+```{r newVarsWorkers}
+# ID variables
+  short <- dtWorker$clean %>%
+    mutate(
+      PID = as.numeric(factor(ExternalReference)), # participant ID
+      TID = measureID-1, # time ID with t0 = 0 for meaningfull intercept interpretations
+      date = substr(StartDate,1,10), # awkward way of extracting date (best converted to )
+      time = substr(StartDate,12,19), # awkward way of extracting time
+      daynum = as.numeric(factor(date)), # all days as numeric for ordering
+      daycor = ifelse(daytime=="morning" & period_to_seconds(hms(time))<period_to_seconds(hms("12:00:00")) | daytime=="afternoon" & period_to_seconds(hms(time))<period_to_seconds(hms("19:00:00")),daynum-1,daynum), # correctly identify which date the questionnaire is about
+      daycor.lead = sprintf("%02d", daycor),
+      daytime.lt = ifelse(daytime=="morning","a","b"), # morning / afternoon to a / b 
+      day_time = paste(daycor.lead, daytime.lt, sep="_"), # combine day id with morning / afternoon
+      session = as.numeric(factor(day_time)) # day and time identifier as numeric id
+    )
+  
+  
+  df <- dtWorker$clean
+  
+  df$PID = as.numeric(factor(df$ExternalReference)) # participant ID
+  df$TID = df$measureID-1 # time ID with t0 = 0 for meaningful intercept interpretations
+  
+# Time and Date Variables: Correct morning / afternoon date where survey was collected the day after to indicate the correct date that was targeted
+  df$SubTime = chron::times(df$time.0)
+  df$SubTime[df$daytime == "afternoon"] = paste0(substring(as.character(df$time.0[df$daytime == "afternoon"]),4,8),":00")
+  
+  df$PPDate = as.Date(df$date.daily)
+  df$PPDate[df$SubTime < "11:50:00" & df$daytime == "morning"] = df$PPDate[df$SubTime < "11:50:00" & df$daytime == "morning"]-1
+  df$PPDate[df$SubTime < "18:50:00" & df$daytime == "afternoon"] = df$PPDate[df$SubTime < "18:50:00" & df$daytime == "afternoon"]-1
+  
+  df$time.daily = as.character(df$time.daily)
+  df$time.daily[df$daytime == "afternoon" & !is.na(df$time.daily!="<NA>")] = paste0(substring(as.character(df$time.daily[df$daytime == "afternoon" & !is.na(df$time.daily!="<NA>")]),4,8),":00")
+  
+# Mood scales
+  df$calmness.daily = rowSums(df[, c("calmness1", "calmness2")], na.rm = T)
+  df$alertness.daily = rowSums(df[, c("alertness1", "alertness2")], na.rm =T)
+  df$valence.daily = rowSums(df[, c("valence1", "valence2")], na.rm = T)
+  
+# Need scales
+  df$keyMotiveFulfilled = rowSums(df[,c("keymotive_fulfillemt_1","keyMotive_noInt_fulf_1")], na.rm=T)
+  df$autonomy.daily.all = rowSums(df[,c("autonomy_1","autonomy_NoInt_1")], na.rm=T)
+  df$competence.daily.all = rowSums(df[,c("competence_1","competence_NoInt_1")], na.rm=T)
+  #cor(df$relatedness_other_1, df$relatedness_self_1,use="complete.obs")
+  df$relatedness.daily.all = rowMeans(df[,c("relatedness_other_1","relatedness_self_1","relatedness_1_NoInt_1")], na.rm=T)
+
+# summarize by participant
+  df$number[is.na(df$number)] = 0
+  df$NonDutchNum[is.na(df$NonDutchNum)] = 0
+  count = aggregate(list(CtContactNL=df$Contact_dum,
+                         CtContactNonNl=df$inNonDutch,
+                         CtContactNLAll=df$number,
+                         CtContactNonNlAll=df$NonDutchNum), 
+                    by=list(ExternalReference=df$ExternalReference), 
+                    FUN=sum)
+  average = aggregate(list(AvKeyNeed=df$keyMotiveFulfilled,
+                           AvKeyNeedInt=df$keymotive_fulfillemt_1,
+                           AvKeyNeedNoInt=df$keyMotive_noInt_fulf_1,
+                           AvAutonomy=df$autonomy.daily.all,
+                           AvCompetence=df$competence.daily.all,
+                           AvRelatedness=df$relatedness.daily.all,
+                           AvThermo=df$thermometerDutch_1,
+                           AvWB=df$ExWB_1),
+                      by=list(ExternalReference=df$ExternalReference), 
+                      FUN=mean, na.rm=T)
+  
+  
+  df.btw = df[,-c(9:162)]
+  df.btw = df.btw[,-grep(names(df.btw),pattern="daily|ID|keyMotive")]
+  
+  df.btw = Reduce(function(x, y) merge(x, y, by="ExternalReference", all=TRUE), list(df.btw, count, average))
+  df.btw = df.btw[!duplicated(df.btw$ExternalReference),]
+  
+  df.btw[!is.na(df.btw$assimilation.post),]
+  
+  df.btw$CtContactNL_c = scale(df.btw$CtContactNL, scale = FALSE)
+  df.btw$AvKeyNeedInt_c = scale(df.btw$AvKeyNeedInt, scale = FALSE)
+  df.btw$AvKeyNeed_c = scale(df.btw$AvKeyNeed, scale = FALSE)
+  df.btw$CtContactNL_z = scale(df.btw$CtContactNL, scale = T)
+  df.btw$AvKeyNeedInt_z = scale(df.btw$AvKeyNeedInt, scale = T)
+  df.btw$AvKeyNeed_z = scale(df.btw$AvKeyNeed, scale = T)
+  
+  .GlobalEnv$df.btw = df.btw
+  
+  save(df.btw, file = "data/processed/df.btw.RData")  
+  #write_sav(df.btw, "data/processed/MT_clean-merged_pre-post.sav")
+  
+# export data to Mplus
+
+  df.mplus = remove_all_labels(select(df, PID, session, thermometerDutch_1, inNonDutch, Contact_dum, keyMotiveFulfilled, autonomy.daily.all, competence.daily.all, relatedness.daily.all))
+  names(df.mplus)= c("PID", "session", "att", "intin", "intout", "keymot", "aut", "comp", "rel")
+  mplus = df.mplus[order(df.mplus$PID, df.mplus$session),]
+  mplus.intcont = mplus[mplus$intout==1,]
+  prepareMplusData(mplus.intcont, "data/processed/dynamic-subset-intonly.dat")
+
+```
+
+
 
 
 
