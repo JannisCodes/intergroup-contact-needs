@@ -715,6 +715,30 @@ df <- df %>%
   dtStudents$full = df
 ```
 
+```{r newVarsMedical}
+# TBD
+```
+
+# **Worker Sample**
+
+## Contact Hypothesis
+
+## Need Fulfillment
+
+# **Student Sample**
+
+## Contact Hypothesis
+
+## Need Fulfillment
+
+# **Young Medical Professional Sample**
+
+## Contact Hypothesis
+
+## Allport's Conditions
+
+## Need Fulfillment
+
 
 # **Software Information**  
 The full session information with all relevant system information and all loaded and installed packages is available in the collapsible section below.  
