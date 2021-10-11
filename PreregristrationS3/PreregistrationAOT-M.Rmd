@@ -321,8 +321,8 @@ We will use a sequential analysis strategy in line with our proposed hypotheses.
 
 1. Contact Hypothesis (using between participant aggregates only to meaningfully include interaction frequency)
     a. Correlation: $r_{InteractionFrequency, OutgroupAttitudes} \neq 0$
-    a. T-test: $\mu_{0utgroupInteraction} > \mu_{IngroupInteraction}$ (to build confidence in the persistence of the contact effect, we additionally compare the attitudes after an outgroup interaction to attitudes after no outgroup interaction (i.e., including instances where participants had no interaction at all).)
-    a. Regression: $Attitude = AverageContactFreq \times AverageContactQual$
+    a. T-test: $\mu_{i,0utgroupInteraction} > \mu_{i,IngroupInteraction}$ (to build confidence in the persistence of the contact effect, we additionally compare the attitudes after an outgroup interaction to attitudes after no outgroup interaction (i.e., including instances where participants had no interaction at all).)
+    a. Regression: $Attitude = ContactFreq \times AverageContactQual$
 1. Allport's Conditions
     a. Regression: $Attitude_{ti} = \gamma_{00} + \gamma_{10}AllportConditions_{ti} + u_{0i} + u_{1i} + e_{ti}$
     a. Regression: $Attitude_{ti} = \gamma_{00} + \gamma_{10}AllportConditions_{ti} + \gamma_{20}InteractionQuality_{ti} + u_{0i} + u_{1i} + e_{ti}$

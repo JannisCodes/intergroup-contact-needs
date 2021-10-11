@@ -59,9 +59,10 @@ csl: apa.csl
 # To install all relevant packages please run "renv::restore()" (or renv::init() and then initiate from lockfile) in the console before the first use to ensure that all packages are using the correct version.
 # to store the packages in a contained library within the project folder: renv::settings$use.cache(FALSE) and add 'RENV_CONFIG_SANDBOX_ENABLED = FALSE' to an '.Renviron' file 
 lib <- c("rmarkdown", "knitr", "remedy", "bookdown", "psych",
-         "ggplot2", "ggthemes", "haven", "RColorBrewer", "plotly", "gridExtra",
+         "ggplot2", "ggthemes", "haven", "RColorBrewer", "plotly", "gridExtra", "ggpattern",
+         "lme4", "nlme", "jtools",
          "sessioninfo", "tibble", "pander", "devtools", "mada",
-         "data.table", "plyr", "dplyr", "tidyr", "Hmisc", "kableExtra", 
+         "data.table", "plyr", "dplyr", "tidyr", "Hmisc", "kableExtra", "papaja",
          "stringr", "stringi", "reshape2", "lubridate")
 invisible(lapply(lib, library, character.only = TRUE))  
 rm(lib)  
@@ -102,7 +103,7 @@ rm(lib)
 
 <br/>
 
-Note. Boxplots display the interquartile range (IQR, center box), and the whiskers extend 1.5*IQR from the lower and upper hinge. The white point indicates the mean and the white center line indicates the median.   
+<i class="fas fa-exclamation-circle"></i> Note. Boxplots display the interquartile range (IQR, center box), and the whiskers extend 1.5*IQR from the lower and upper hinge. The white point indicates the mean and the white center line indicates the median.   
 
 <br/>
 
@@ -691,11 +692,6 @@ createIntPartDf <- function(inp) {
   remergePP <- do.call(rbind.data.frame, PP)
     colnames(remergePP) <- paste(colnames(remergePP), "_Calc", sep = "")
 df <- cbind(df, remergePP);rm(remergePP)
-writeLines("Test whether newly calculate df and old df have the same order:")
-print(table(as.character(df$CC_Calc) == as.character(df$CC)))
-writeLines("If we also add the NAs we get the exact number:")
-print(sum(is.na(df$CC_Calc))+table(as.character(df$CC_Calc) == as.character(df$CC)))
-
 
 # ------------------------------------------------------------------------------------------------------------- 
 #                                 Center Relevant Variables
@@ -721,9 +717,554 @@ df <- df %>%
 
 # **Worker Sample**
 
+## Data Description
+
+<i class="fas fa-exclamation-triangle"></i> Still in 'scr/workerDescriptive.R'. Needs to be merged with this document.
+
 ## Contact Hypothesis
 
+### Interaction Frequency and Outgroup Attitudes
+
+\begin{equation}
+(\#eq:WorkerFreqQualR)
+r_{ContactFrequency, OutgroupAttitudes} \neq 0
+\end{equation}
+
+```{r WorkerFreqAttCor}
+# prepare data
+workerContactFreq <- dtWorker$full %>% 
+  group_by(ExternalReference) %>%
+  summarise(
+    n = n(),
+    SumContactNL = sum(Contact_dum),
+    PercContactNL = SumContactNL/n*100,
+    SumContactNLAll = sum(number),
+    AvAttitude = mean(thermometerDutch_1, na.rm=T)
+  ) %>%
+  mutate(
+    WinSumContactNL = DescTools::Winsorize(SumContactNL),
+    WinSumContactNLAll = DescTools::Winsorize(SumContactNLAll)
+  )
+
+# correlation panel 
+pairs.panels.new(workerContactFreq %>% select(SumContactNL, SumContactNLAll, AvAttitude), 
+                 labels = c("Sum:\nNumer of beeps with Outgroup Contact (NL)", 
+                            "Sum:\nNumber of Outgroup Contacts (NL)", 
+                            "Mean:\nOutgroup Attitudes (NL)"))
+
+# correlation panel with interaction sums winsorized
+pairs.panels.new(workerContactFreq %>% select(WinSumContactNL, WinSumContactNLAll, AvAttitude), 
+                 labels = c("Sum:\nNumer of beeps with Outgroup Contact (NL)\n[Winsorized]", 
+                            "Sum:\nNumber of Outgroup Contacts (NL)\n[Winsorized]", 
+                            "Mean:\nOutgroup Attitudes (NL)"))
+```
+
+TL;DR: Neither the number of interactions nor the number of measurement beeps with an interaction are significantly related with the average outgroup attitudes. This is to say that within our data participants with more outgroup interactions did not have significantly more positive outgroup attitudes. This might be due to the aggregation within the participants or the small sample size of between participant data. Nonetheless, the aggregate data does not support the notion that simply having more interactions with an outgroup results in more positive outgroup attitudes.
+
+### Outgroup Attitudes by Interaction Type
+
+\begin{equation}
+(\#eq:WorkerIntTypeQual)
+\mu_{i,0utgroupInteraction} > \mu_{i,IngroupInteraction}  \\
+Attitude = OutgroupInteraction \times NonOutgroupInteraction
+\end{equation}
+
+
+<div class="alert alert-info alert-dismissible fade in" role="alert">
+  <a class="close" data-dismiss="alert" aria-label="close">&times;</a>
+  <i class="fas fa-exclamation-triangle"></i> <b>Note: </b><br/>
+  mean difference alone probably even more stupid than only ignoring nested data, because we drop lots of data unnecessarily.  
+  And only outgroup interaction Yes / No also weird because interaction group includes people who had only an outgroup interaction and those who also had an interaction with a non-outgroup person, and the no outgroup interaction group includes those who had no interaction at all and those who had an interaction with a non-outgroup person (but no outgroup interaction).
+</div>
+
+#### Regression with interaction term
+
+Across participants: impact of different interaction types [probably meaningless because ignores response sets between participants]
+
+```{r workerInteractionTypePlt, fig.height=12}
+workerContactType <- dtWorker$full %>% 
+  group_by(
+    Contact_dum,
+    inNonDutch
+    ) %>%
+  summarise(
+    n = n(),
+    AttitudeM = mean(thermometerDutch_1, na.rm=T),
+    AttitudeSD = sd(thermometerDutch_1, na.rm=T),
+    AttitudeSE = AttitudeSD/sqrt(n),
+    AttitudeLwr = AttitudeM - 1.96*AttitudeSE,
+    AttitudeUpr = AttitudeM + 1.96*AttitudeSE
+  ) %>%
+  ungroup %>%
+  mutate(
+    InteractionType = paste(
+      ifelse(Contact_dum == 1, "Out", "NoOut"),
+      ifelse(inNonDutch == 1, "In", "NoIn"),
+      sep = ", "
+    )
+  )
+
+ggplot(workerContactType, aes(y = AttitudeM, x = as_factor(Contact_dum), fill = as_factor(inNonDutch))) +
+  geom_bar(stat = "identity", 
+                   color = "black", 
+                   position=position_dodge()) +
+  geom_errorbar(aes(ymin=AttitudeM, ymax=AttitudeUpr), width=.2,
+                 position=position_dodge(.9)) +
+  labs(
+    fill = "Non-Outgroup Interaction",
+    x = "Outgroup Interaction",
+    y = "Outgroup Attitude",
+    title = "Outgroup Attitudes by Interaction Type [95% CI]"
+  ) +
+  scale_fill_grey(
+    start = 0.2,
+    end = 0.8
+    ) +
+  scale_y_continuous(
+    limits = c(0, 100),
+    breaks = c(0, 15, 30, 40, 50, 60, 70, 85, 100),
+    labels = c("Very cold or unfavorable feelings 0°", 
+               "Quite cold and unfavorable feelings 15°", 
+               "Fairly cold and unfavorable feelings 30°", 
+               "A bit cold and unfavorable feelings 40°", 
+               "No feeling at all 50°", 
+               "A bit warm and favorable feelings 60°", 
+               "Fairly warm and favorable feelings 70° ", 
+               "Quite warm and favorable feelings 85° ", 
+               "Very warm and favorable feelings 100° ")
+  ) +
+  theme_Publication()
+```
+
+```{r workerInteractionTypeReg}
+# prepare dataframe
+workerInteractionType <- dtWorker$full %>%
+  mutate(
+    OutgroupInteraction = as_factor(Contact_dum),
+    NonOutgroupInteraction = as_factor(inNonDutch)
+  )
+
+# regression
+lmWorkerInteraction <- lm(thermometerDutch_1 ~ OutgroupInteraction * NonOutgroupInteraction, data = workerInteractionType)
+#summary(lmWorkerInteraction)
+# apa_table(
+#   apa_print(lmWorkerInteraction)$table, 
+#   caption = "Regression across all measurement points [ignoring nested data]."
+# ) 
+
+summ(
+  lmWorkerInteraction,
+  confint = TRUE, 
+  digits = 3,
+  center = TRUE
+     )
+```
+
+TL;DR: While controlling for interactions with non-Dutch people, outgroup attitudes were significantly higher when participants had an interaction with a Dutch person. The effect is relatively small (`r format(round(lmWorkerInteraction$coefficients["OutgroupInteractionYes"], 2), nsmall=2)` points on a 0--100 scale). More importantly, however, this analysis lumps all ESM beeps from every participants together and ignores that the data is nested within participants.
+
+#### ML Regression with interaction term
+
+##### Unconditional model
+
+make a model with only the data but a random intercept (unconditional model)   
+
+\begin{equation}
+(\#eq:WorkerEmptyModel)
+Attitude_{ti} = \gamma_{00} + u_{0i} + e_{ti} \\
+\textrm{with}\ u_{0i} \sim \mathcal{N}(0,\tau_{00}^2)\ \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+\end{equation}
+
+```{r Worker.Null.Model.ML}
+df <- dtWorker$full
+# Create and save Model
+  Null.ML.r = lme4::lmer(thermometerDutch_1~1 + (1|PID),data=df) #use optim if it does not converge
+  Null.ML = lme(thermometerDutch_1~1,random=~1|PID,data=df, control=list(opt="nlmimb")) #use optim if it does not converge
+
+# Get summary with p-values (Satterthwaite's method)
+  #summary(Null.ML.r) #or with the lme function
+  summ(Null.ML.r, digits = 3, center = TRUE)
+  
+# generate 95% parametric bootstrap CIs (and save them as a csv-file):
+  #write.csv(confint(lmer(thermometerDutch_1~1 + (1|PID),data=df),
+  #                  method="boot",nsim=1000, 
+  #                  parallel = "multicore", ncpus = 4, seed = 42),
+  #          "output/tables/ML-Null-CI.csv")
+
+# Save variances
+  v.null <- VarCorr(Null.ML) # save variances
+# The estimate of (between-group or Intercept variance, tau_{00}^2):
+  tau <- as.numeric(v.null[1])
+# and the estimate of (within-group or residual variancel, sigma^2) is:
+  sigma <- as.numeric(v.null[2])
+# The ICC estimate (between/between+within) is:
+  ICC <- (as.numeric(v.null[1])/(as.numeric(v.null[1])+as.numeric(v.null[2])))
+  ICC.Perc <- ((as.numeric(v.null[1])/(as.numeric(v.null[1])+as.numeric(v.null[2]))))*100
+```
+
+ICC $\tau_{00}^2 / (\tau_{00}^2 + \sigma^2)$: The ratio of the between-cluster variance to the total variance is called the Intraclass Correlation. It tells you the proportion of the total variance in Y that is accounted for by the clustering. (In this case the clustering means clustering observations per participant)  
+
+compare the random intercept model to a model without a random intercept (i.e., without levels at all)  
+
+```{r Null.Model.GLS}
+# Create and save Model
+  Null.gls <-  gls(thermometerDutch_1~1,data=df, control=list(opt="nlmimb"))
+
+# calculate Deviances manually:
+  Deviance.gls <- logLik(Null.gls)*-2
+  Deviance.null <- logLik(Null.ML)*-2
+
+# Compare the two null models:
+  anova(Null.gls, Null.ML) %>%
+    as.data.frame %>%
+    select(-call) %>%
+    kbl(., 
+        #label = "",
+        caption = "Worker: Model Comparison",
+        format = "html", 
+        linesep = "",
+        booktabs = T,
+        align = rep('c', ncol(.)),
+        digits = 3)  %>%
+  kable_styling(position = "left")
+```
+
+We find that an estimated `r format(round(ICC.Perc, 2), nsmall=2)`% of the variation in Feeling Thermometer scores is explained by between participant differences (clustering by PID). This is to say that `r format(round(ICC.Perc, 2), nsmall=2)`% of the variance in any individual report of Attitudes towards the Dutch can be explained by the properties of the individual who provided the rating. And we find that including 'participant' as a predictor adds significantly to the model.
+
+##### Add level one predictors
+
+\begin{equation}
+(\#eq:WorkerInteractionTypeModel)
+Attitude_{ti} = \gamma_{00} + \gamma_{10}OutgroupInteraction_{ti} + \gamma_{10}NonOutgroupInteraction_{ti} + u_{0i} + e_{ti} \\
+\textrm{with}\ u_{0i} \sim \mathcal{N}(0,\tau_{00}^2)\ \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+\end{equation}
+
+```{r interactionType}
+# Create and save Model
+  model.int = lme(thermometerDutch_1 ~ OutgroupInteraction + NonOutgroupInteraction, random=~1|PID,data=workerInteractionType)
+
+# Get summary with p-values (Satterthwaite's method)
+  summ(lmer(thermometerDutch_1 ~ OutgroupInteraction + NonOutgroupInteraction + (1|PID),data=workerInteractionType), 
+       confint = TRUE, digits = 3, center = TRUE)
+
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+  #write.csv(confint(lmer(thermometerDutch_1 ~ Contact_dum + inNonDutch + (1|PID),data=df), 
+  #                  method="boot",nsim=1000, parallel = "multicore", 
+  #                  ncpus = 4, seed = 42),
+  #          "output/tables/ML-Inter-CI.csv")
+
+# Compare new model to previous step
+  anova(Null.ML, model.int) %>%
+    as.data.frame %>%
+    select(-call) %>%
+    kbl(., 
+        #label = "",
+        caption = "Worker: Model Comparison",
+        format = "html", 
+        linesep = "",
+        booktabs = T,
+        align = rep('c', ncol(.)),
+        digits = 3)  %>%
+  kable_styling(position = "left")
+
+# Save variances
+  v.int <- lme4::VarCorr(model.int) 
+
+# The estimate of between-group (or Intercept variance) explained: 
+  # Variance Explained = 1 – (Var with Predictor/Var without Predictor)
+    v.int.btw <- 1 - (as.numeric(v.int[1])/as.numeric(v.null[1]))
+    v.int.btw.perc <-  (1 - (as.numeric(v.int[1])/as.numeric(v.null[1])))*100
+  # and the estimate of within-group (or residual variancel) explained is:
+    v.int.within <- 1 - (as.numeric(v.int[2])/as.numeric(v.null[2]))
+    v.int.within.perc <- (1 - (as.numeric(v.int[2])/as.numeric(v.null[2])))*100
+```
+
+tl;dr: Interaction with Dutch is great predictor, interactions with non-Dutch is not.
+
+\begin{equation}
+(\#eq:interactionTypeInteractionEq)
+Attitude_{ti} = \gamma_{00} + \gamma_{10}OutgroupInteraction_{ti} \times \gamma_{10}NonOutgroupInteraction_{ti} + u_{0i} + e_{ti} \\
+\textrm{with}\ u_{0i} \sim \mathcal{N}(0,\tau_{00}^2)\ \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+\end{equation}
+
+```{r interactionTypeInteraction}
+# Create and save Model
+  model.intX = lme(thermometerDutch_1 ~ OutgroupInteraction * NonOutgroupInteraction, random=~1|PID,data=workerInteractionType)
+
+# Get summary with p-values (Satterthwaite's method)
+  summ(lmer(thermometerDutch_1 ~ OutgroupInteraction * NonOutgroupInteraction + (1|PID),data=workerInteractionType), 
+       confint = TRUE, digits = 3, center = TRUE)
+
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+  #write.csv(confint(lmer(thermometerDutch_1 ~ Contact_dum + inNonDutch + (1|PID),data=df), 
+  #                  method="boot",nsim=1000, parallel = "multicore", 
+  #                  ncpus = 4, seed = 42),
+  #          "output/tables/ML-Inter-CI.csv")
+
+# Compare new model to previous step
+  anova(model.int, model.intX) %>%
+    as.data.frame %>%
+    select(-call) %>%
+    kbl(., 
+        #label = "",
+        caption = "Worker: Model Comparison",
+        format = "html", 
+        linesep = "",
+        booktabs = T,
+        align = rep('c', ncol(.)),
+        digits = 3)  %>%
+  kable_styling(position = "left")
+
+# Save variances
+  v.intX <- lme4::VarCorr(model.intX) 
+
+# The estimate of between-group (or Intercept variance) explained: 
+  # Variance Explained = 1 – (Var with Predictor/Var without Predictor)
+    v.intX.btw <- 1 - (as.numeric(v.intX[1])/as.numeric(v.int[1]))
+    v.intX.btw.perc <-  (1 - (as.numeric(v.intX[1])/as.numeric(v.int[1])))*100
+  # and the estimate of within-group (or residual variancel) explained is:
+    v.intX.within <- 1 - (as.numeric(v.intX[2])/as.numeric(v.int[2]))
+    v.intX.within.perc <- (1 - (as.numeric(v.intX[2])/as.numeric(v.int[2])))*100
+```
+
+TL;DR: Interaction term does not add anything at all.
+
+##### Check for Random Slopes
+
+\begin{equation}
+(\#eq:RandSlopesEq)
+Attitude_{ti} = \gamma_{00} + \gamma_{10}OutgroupInteraction_{ti} + \gamma_{10}NonOutgroupInteraction_{ti} + u_{0i} + u_{1i} + e_{ti}  \\
+\textrm{with}\ \begin{bmatrix} u_{0i}\\ u_{1i}\end{bmatrix} \sim \mathcal{N}(0,\Omega_u): \Omega_u=\begin{bmatrix} \tau_{0}^2 & \\ \tau_{01} & \tau_{1}^2 \end{bmatrix} \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+\end{equation}
+
+```{r RandSlopes}
+# Create and save Model (optimizer needed to reach convergence)
+  model.ran = lme(thermometerDutch_1~
+                         OutgroupInteraction + NonOutgroupInteraction, 
+                         random=~1+OutgroupInteraction+NonOutgroupInteraction|PID,
+                       control=lmeControl(opt='optim'), data=workerInteractionType)
+
+# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
+  summ(model.ran0 <- lmer(thermometerDutch_1 ~
+                           OutgroupInteraction + NonOutgroupInteraction + 
+                           (1+OutgroupInteraction+NonOutgroupInteraction|PID), 
+                         data=workerInteractionType), 
+       confint = TRUE, digits = 3, center = TRUE)
+  
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+  #write.csv(confint(model.ran0,
+  #               method="boot",nsim=1000, 
+  #               parallel = "multicore", ncpus = 4, seed = 42),
+  #          "output/tables/ML-RandomSlopes-CI.csv")
+
+# Compare new model to previous step
+  anova(model.int, model.ran) %>%
+    as.data.frame %>%
+    select(-call) %>%
+    kbl(., 
+        #label = "",
+        caption = "Worker: Model Comparison",
+        format = "html", 
+        linesep = "",
+        booktabs = T,
+        align = rep('c', ncol(.)),
+        digits = 3)  %>%
+  kable_styling(position = "left")
+
+# Save variances
+  v.ran = lme4::VarCorr(model.ran)
+
+# The estimate of between-group (or Intercept variance) explained: 
+  # Variance Explained = 1 – (Var with Predictor/Var without Predictor)
+    v.ran.btw <- 1 - (as.numeric(v.ran[1])/as.numeric(v.int[1]))
+    v.ran.btw.perc <-  (1 - (as.numeric(v.ran[1])/as.numeric(v.int[1])))*100
+  # and the estimate of within-group (or residual variancel) explained is:
+    v.ran.within <- 1 - (as.numeric(v.ran[2])/as.numeric(v.int[2]))
+    v.ran.within.perc <- (1 - (as.numeric(v.ran[2])/as.numeric(v.int[2])))*100
+
+# Assumption Checks: 
+  diag = sjPlot::plot_model(model.ran0, type = "diag")
+  grid.arrange(diag[[1]],diag[[2]]$`PID`,diag[[3]],diag[[4]])
+  
+# Plot prediction model
+  dat.new = workerInteractionType[,c("thermometerDutch_1","session","PID")]
+  dat.new$measure = predict(model.ran, workerInteractionType, re.form=NA)
+
+  (t.ppt = ggplot(data=dat.new, aes(x=session, y=measure)) + 
+    geom_line(alpha=1, color = "blue") +
+    geom_line(aes(y = thermometerDutch_1), alpha=1)+
+    facet_wrap(~PID, ncol = 6)+
+    xlab("Time")+
+    ylab("Outgroup Attitudes")+
+    theme_bw())
+  ggsave(filename = "Figures/Development per PPT.png", t.ppt,
+       width = 18, height = 12, dpi = 800, units = "cm", device='png')
+  
+  rm(dat.new)
+
+```
+
+TL;DR: Random slopes don't add much for this super simple model.
+
+### Interaction Frequency and Interaction Quality
+
+\begin{equation}
+(\#eq:FreqQual)
+Attitude = ContactFreq \times AverageContactQual
+\end{equation}
+
+```{r WorkerFreqQualCor}
+# prepare data
+workerAvFreQual <- dtWorker$full %>% 
+  group_by(ExternalReference) %>%
+  summarise(
+    n = n(),
+    SumContactNL = sum(Contact_dum),
+    PercContactNL = SumContactNL/n*100,
+    SumContactNLAll = sum(number),
+    AvAttitude = mean(thermometerDutch_1, na.rm = TRUE),
+    AvQuality = mean(quality_overall_1, na.rm = TRUE)
+  ) %>%
+  mutate(
+    WinSumContactNL = DescTools::Winsorize(SumContactNL),
+    WinSumContactNLAll = DescTools::Winsorize(SumContactNLAll)
+  )
+
+# correlation panel 
+pairs.panels.new(workerAvFreQual %>% select(SumContactNL, SumContactNLAll, AvQuality, AvAttitude), 
+                 labels = c("Sum:\nNumer of beeps with Outgroup Contact (NL)", 
+                            "Sum:\nNumber of Outgroup Contacts (NL)", 
+                            "Mean:\nInteraction Quality",
+                            "Mean:\nOutgroup Attitudes (NL)"))
+
+# correlation panel with interaction sums winsorized
+pairs.panels.new(workerAvFreQual %>% select(WinSumContactNL, WinSumContactNLAll, AvQuality, AvAttitude), 
+                 labels = c("Sum:\nNumer of beeps with Outgroup Contact (NL)\n[Winsorized]", 
+                            "Sum:\nNumber of Outgroup Contacts (NL)\n[Winsorized]", 
+                            "Mean:\nInteraction Quality",
+                            "Mean:\nOutgroup Attitudes (NL)"))
+```
+
+TL;DR: There is a medium sized correlation between the participants' Average Interaction Quality and their Average Outgroup Attitudes. Thus within our data participants with a higher quality outgroup interactions also held more positive attitudes towards that group. However, the frequency of intergroup interactions had no meaningfull correlation with either the average interaction quality or average outgroup attitudes.
+
+```{r WorkerFreqQualReg}
+# regression
+lmworkerFreqInt <- lm(AvAttitude ~ SumContactNL * AvQuality, data = workerAvFreQual)
+#summary(lmWorkerInteraction)
+# apa_table(
+#   apa_print(lmworkerFreqInt)$table, 
+#   caption = "Regression across all measurement points [ignoring nested data]."
+# ) 
+
+summ(
+  lmworkerFreqInt,
+  confint = TRUE, 
+  digits = 3,
+  center = TRUE
+     )
+
+interactions::interact_plot(lmworkerFreqInt, pred = AvQuality, modx = SumContactNL, interval = TRUE, partial.residuals = TRUE)
+
+interactions::johnson_neyman(lmworkerFreqInt, pred = AvQuality, modx = SumContactNL, alpha = .05)
+```
+
+TL;DR: We find that interaction quality is significantly related to higher outgroup attitudes (albeit with a small effect size). We also find that in our sample with an increasing number of interactions the positive effect of interaction quality becomes weaker. However, note that this is based on data aggregating all within participant nuances and is only the date of 21 people.
+
 ## Need Fulfillment
+
+### Need fulfillment and Attitudes 
+
+#### random intercept
+
+\begin{equation}
+(\#eq:AttitudeNeedEq)
+Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + u_{0i} + e_{ti} \\
+\textrm{with}\ u_{0i} \sim \mathcal{N}(0,\tau_{00}^2)\ \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+\end{equation}
+
+#### check for random slope
+
+\begin{equation}
+(\#eq:AttitudeNeedRandEq)
+Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + u_{0i} + u_{1i} + e_{ti}  \\
+\textrm{with}\ \begin{bmatrix} u_{0i}\\ u_{1i}\end{bmatrix} \sim \mathcal{N}(0,\Omega_u): \Omega_u=\begin{bmatrix} \tau_{0}^2 & \\ \tau_{01} & \tau_{1}^2 \end{bmatrix} \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+\end{equation}
+
+### Need fulfillment and Interaction Quality 
+
+#### random intercept
+
+\begin{equation}
+(\#eq:QualityNeedEq)
+InteractionQuality_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + u_{0i} + e_{ti} \\
+\textrm{with}\ u_{0i} \sim \mathcal{N}(0,\tau_{00}^2)\ \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+\end{equation}
+
+#### check for random slope
+
+\begin{equation}
+(\#eq:QualityNeedRandEq)
+InteractionQuality_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + u_{0i} + u_{1i} + e_{ti}  \\
+\textrm{with}\ \begin{bmatrix} u_{0i}\\ u_{1i}\end{bmatrix} \sim \mathcal{N}(0,\Omega_u): \Omega_u=\begin{bmatrix} \tau_{0}^2 & \\ \tau_{01} & \tau_{1}^2 \end{bmatrix} \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+\end{equation}
+
+### Need fulfillment, Interaction Quality, and Attitudes
+
+#### random intercept
+
+\begin{equation}
+(\#eq:AttitudeQualityNeedEq)
+Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + \gamma_{20}InteractionQuality_{ti} + u_{0i} + e_{ti} \\
+\textrm{with}\ u_{0i} \sim \mathcal{N}(0,\tau_{00}^2)\ \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+\end{equation}
+
+#### check for random slope
+
+\begin{equation}
+(\#eq:AttitudeQualityNeedRandEq)
+Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + \gamma_{20}InteractionQuality_{ti} + u_{0i} + u_{1i} + e_{ti}  \\
+\textrm{with}\ \begin{bmatrix} u_{0i}\\ u_{1i}\end{bmatrix} \sim \mathcal{N}(0,\Omega_u): \Omega_u=\begin{bmatrix} \tau_{0}^2 & \\ \tau_{01} & \tau_{1}^2 \end{bmatrix} \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+\end{equation}
+
+#### Compare models
+
+### Check for robustness
+
+#### Interaction Type
+
+##### random intercept
+
+\begin{equation}
+(\#eq:AttitudeNeedInteractionEq)
+Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + \gamma_{20}OutgroupInteraction_{ti} + \gamma_{30}KeyNeedFulfillXOutgroupInteraction_{ti} + u_{0i} + e_{ti} \\
+\textrm{with}\ u_{0i} \sim \mathcal{N}(0,\tau_{00}^2)\ \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+\end{equation}
+
+##### check for random slope
+
+\begin{equation}
+(\#eq:AttitudeNeedInteractionRandEq)
+Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + \gamma_{20}OutgroupInteraction_{ti} + \gamma_{30}KeyNeedFulfillXOutgroupInteraction_{ti}  + u_{0i} + u_{1i} + e_{ti}  \\
+\textrm{with}\ \begin{bmatrix} u_{0i}\\ u_{1i}\end{bmatrix} \sim \mathcal{N}(0,\Omega_u): \Omega_u=\begin{bmatrix} \tau_{0}^2 & \\ \tau_{01} & \tau_{1}^2 \end{bmatrix} \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+\end{equation}
+
+#### Other psychological needs
+
+##### random intercept
+
+\begin{equation}
+(\#eq:AttitudeNeedSdtEq)
+Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + \gamma_{20}Autonomy_{ti} + \gamma_{30}Competence_{ti} + \gamma_{40}Relatedness_{ti} + u_{0i} + e_{ti} \\
+\textrm{with}\ u_{0i} \sim \mathcal{N}(0,\tau_{00}^2)\ \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+\end{equation}
+
+##### check for random slope
+
+\begin{equation}
+(\#eq:AttitudeNeedSdtRandEq)
+Attitude_{ti} = \\gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + \gamma_{20}Autonomy_{ti} + \gamma_{30}Competence_{ti} + \gamma_{40}Relatedness_{ti} + u_{0i} + u_{1i} + e_{ti}  \\
+\textrm{with}\ \begin{bmatrix} u_{0i}\\ u_{1i}\end{bmatrix} \sim \mathcal{N}(0,\Omega_u): \Omega_u=\begin{bmatrix} \tau_{0}^2 & \\ \tau_{01} & \tau_{1}^2 \end{bmatrix} \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+\end{equation}
+
 
 # **Student Sample**
 
