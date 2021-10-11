@@ -60,7 +60,7 @@ csl: apa.csl
 # to store the packages in a contained library within the project folder: renv::settings$use.cache(FALSE) and add 'RENV_CONFIG_SANDBOX_ENABLED = FALSE' to an '.Renviron' file 
 lib <- c("rmarkdown", "knitr", "remedy", "bookdown", "psych",
          "ggplot2", "ggthemes", "haven", "RColorBrewer", "plotly", "gridExtra",
-         "sessioninfo", "tibble", "pander", "devtools",
+         "sessioninfo", "tibble", "pander", "devtools", "mada",
          "data.table", "plyr", "dplyr", "tidyr", "Hmisc", "kableExtra", 
          "stringr", "stringi", "reshape2", "lubridate")
 invisible(lapply(lib, library, character.only = TRUE))  
@@ -586,7 +586,7 @@ df <- dtWorker$clean
   
   warning("some variable transformations (esp. _c and _z) might be across all participants (i.e., not within PP).")
   
-  dtWorker$munge <- between
+  dtWorker$full <- between
   
   rm(df, between)
   
@@ -604,21 +604,17 @@ df <- dtWorker$clean
 
 
 ```{r newVarsStudents}
-df <- 
+df <- dtStudents$clean
 
 # Add ID variables
   df$PID = as.numeric(factor(df$session)) # participant ID
 
 # order time
-  # move this here? 
-  # date.period.order <- unique(raw$dat.daily$date_period)
-  date.period.order <- .GlobalEnv$date.period.order # <- @Max: Do you still need this? Order should be fine natively from FormR
-
-  df$TID <- factor(df$date_period, levels = date.period.order)
+  df$TID <- factor(df$date_period, levels = unique(dtStudents$raw.daily$date_period))
   df$TIDnum <- as.numeric(df$TID) #get numeric TID
   
   # check whether time ordering worked
-  df_ordered <- df %>%
+  df <- df %>%
     arrange(PID, TID) #%>%
     #View()
   
@@ -630,9 +626,8 @@ df <-
 # ------------------------------------------------------------------------------------------------------------- 
 #                                       Combine Variables
 # -------------------------------------------------------------------------------------------------------------
-source("lib/fun.panel.R")
 # Relatedness
-  .GlobalEnv$pairs.panels.new(df[c("RelatednessSelf","RelatednessOther")], 
+  pairs.panels.new(df[c("RelatednessSelf","RelatednessOther")], 
                               labels = c("I shared information about myself.", "X shared information about themselves."))
   df$RelatednessInteraction <- rowMeans(df[c("RelatednessSelf","RelatednessOther")], na.rm=T)
   df$RelatednessInteraction[df$RelatednessInteraction == "NaN"] <- NA
@@ -643,38 +638,10 @@ source("lib/fun.panel.R")
 # Anti-Sociality
   df$AntiSo <- rowMeans(df[,c("AntiSo1", "AntiSo2", "AntiSo3", "AntiSo4")], na.rm=T)
 
-# ------------------------------------------------------------------------------------------------------------- 
-#                                 Create Time Variables
-# -------------------------------------------------------------------------------------------------------------
-createTimeDf <- function(tmp) {
-# make dataframe for all variables that need t-1
-# @Max: LAGS AREN'T REALLY MEANINGFUL BECAUSE OF THE TIME INTERVAL DIFFERENCES, WE WILL DO THIS IN DSEM (MPLUS).
-  tmp <- data.frame(KeyNeedFullfillment = tmp$KeyNeedFullfillment,
-                    ProSo = tmp$ProSo,
-                    AntiSo = tmp$AntiSo,
-                    AttitudesDutch = tmp$AttitudesDutch)
-    length <- ncol(tmp) # get the length of tmp for later renaming of columns
-  
-  # use dplyr to create time series
-    tmp <- tmp %>% mutate_each(funs(lag(.,1))) %>% cbind(tmp, .)
-    colnames(tmp)[(length+1):ncol(tmp)] <- paste(colnames(tmp)[1:length], "Lag1", sep = "") #rename after specific length (add one so new columns get renamed after that)
-  tmp
-}  
-
-# split df per participants and run function
-  PP <- split(df, df$PID)
-  PP <- lapply(PP, createTimeDf); rm(createTimeDf)
-  
-# add variables back to df
-  tmp <- do.call(rbind.data.frame, PP)
-    colnames(tmp) <- paste(colnames(tmp), "Calc", sep = "")
-df <- cbind(tmp, df);rm(tmp)
 
 # ------------------------------------------------------------------------------------------------------------- 
 #                                 Add Variables related to interaction partner
 # -------------------------------------------------------------------------------------------------------------
-
-
 # create function for later lapply
 createIntPartDf <- function(inp) {
   
@@ -687,7 +654,7 @@ createIntPartDf <- function(inp) {
                     NewEthnicity = as.character(inp$NewEthnicity),
                     NewRelationship = as.character(inp$NewRelationship))
     
-    tmp$CC2 <- recode(tmp$CC, "'SOMEONE ELSE' = NA")
+    tmp$CC2 <- recode(tmp$CC, 'SOMEONE ELSE' = "NA")
     tmp$CC2 <- ifelse(tmp$CC == 1 | tmp$CC == "SOMEONE ELSE", as.character(tmp$NewName), as.character(tmp$CC2)) 
     # maybe add [[:space:]]\b to remove space before word boundary or ^[[:space:]] to remove space in the beginning of a string
     tmp$CC2 <- gsub("^[[:space:]]", "", tmp$CC2)
@@ -723,33 +690,29 @@ createIntPartDf <- function(inp) {
 # add variables back to df
   remergePP <- do.call(rbind.data.frame, PP)
     colnames(remergePP) <- paste(colnames(remergePP), "_Calc", sep = "")
-df <- cbind(remergePP, df);rm(remergePP)
-print("Test whether newly calculate df and old df have the same order:")
+df <- cbind(df, remergePP);rm(remergePP)
+writeLines("Test whether newly calculate df and old df have the same order:")
 print(table(as.character(df$CC_Calc) == as.character(df$CC)))
-print("If we also add the NAs we get the exact number:")
+writeLines("If we also add the NAs we get the exact number:")
 print(sum(is.na(df$CC_Calc))+table(as.character(df$CC_Calc) == as.character(df$CC)))
 
 
 # ------------------------------------------------------------------------------------------------------------- 
 #                                 Center Relevant Variables
 # -------------------------------------------------------------------------------------------------------------
-  # center within participant
-  # @Max: I removed the lagged variables so we can do it proberly in MPlus
-    df$ProSo_c <- ave(df$ProSoCalc, df$PID, FUN=function(x) scale(x, center = T, scale = F))
-    #df$ProSoLag1_c <- ave(df$ProSoLag1Calc, df$PID, FUN=function(x) scale(x, center = T, scale = F))
-    df$AntiSo_c <- ave(df$AntiSoCalc, df$PID, FUN=function(x) scale(x, center = T, scale = F))
-    #df$AntiSoLag1_c <- ave(df$AntiSoLag1Calc, df$PID, FUN=function(x) scale(x, center = T, scale = F))
-    df$KeyNeedFullfillment_c <- ave(df$KeyNeedFullfillmentCalc, df$PID, FUN=function(x) scale(x, center = T, scale = F))
-    #df$KeyNeedFullfillmentLag1_c <- ave(df$KeyNeedFullfillmentLag1Calc, df$PID, FUN=function(x) scale(x, center = T, scale = F))
-    
-    df$closeness_c <- ave(df$closeness_Calc, df$PID, FUN=function(x) scale(x, center = T, scale = F))
-    
-# variancec
-  df$var.AntiSo <- ave(df$AntiSo, df$PID, FUN=var)
 
-# send back to global environment
-  .GlobalEnv$df.full = df
+df <- df %>%
+  group_by(PID) %>% 
+  mutate(
+    KeyNeedFullfillment.cm = mean(KeyNeedFullfillment, na.rm = TRUE), # cluster mean (mean of PP)
+    KeyNeedFullfillment.cwc = KeyNeedFullfillment - KeyNeedFullfillment.cm, # cluster mean centered (within PP centered)
+    closeness.cm = mean(closeness_Calc, na.rm = TRUE),
+    closeness.cwc = closeness_Calc - closeness.cm
+    ) %>%  
+  ungroup()
 
+# store
+  dtStudents$full = df
 ```
 
 
