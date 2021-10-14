@@ -1266,7 +1266,7 @@ Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + u_{0i} + e_{ti} \
     v.keyneed.within.perc <- (1 - (as.numeric(v.keyneed[2])/as.numeric(v.out.null[2])))*100
 ```
 
-#### check for random slope
+#### random slope
 
 \begin{equation}
 (\#eq:AttitudeNeedRandEq)
@@ -1343,6 +1343,42 @@ Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + u_{0i} + u_{1i} +
 
 ### Need fulfillment and Interaction Quality 
 
+##### Unconditional model
+
+make a model with only the data but a random intercept (unconditional model) for the outgroup interaction subset.
+
+\begin{equation}
+(\#eq:WorkerOutQualEmptyModel)
+Attitude_{ti} = \gamma_{00} + u_{0i} + e_{ti} \\
+\textrm{with}\ u_{0i} \sim \mathcal{N}(0,\tau_{00}^2)\ \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+\end{equation}
+
+```{r workerNullQualKeyNeed}
+# Create and save Model
+  Null.Out.Qual.ML.r = lme4::lmer(quality_overall_1~1 + (1|PID),data=workerOutgroupInteraction) #use optim if it does not converge
+  Null.Out.Qual.ML = lme(quality_overall_1~1,random=~1|PID, data=workerOutgroupInteraction, control=list(opt="nlmimb")) #use optim if it does not converge
+
+# Get summary with p-values (Satterthwaite's method)
+  #summary(Null.ML.r) #or with the lme function
+  summ(Null.Out.Qual.ML.r, digits = 3, center = TRUE)
+  
+# generate 95% parametric bootstrap CIs (and save them as a csv-file):
+  #write.csv(confint(lmer(thermometerDutch_1~1 + (1|PID),data=df),
+  #                  method="boot",nsim=1000, 
+  #                  parallel = "multicore", ncpus = 4, seed = 42),
+  #          "output/tables/ML-Null-CI.csv")
+
+# Save variances
+  v.out.qual.null <- VarCorr(Null.Out.Qual.ML) # save variances
+# The estimate of (between-group or Intercept variance, tau_{00}^2):
+  tau <- as.numeric(v.out.qual.null[1])
+# and the estimate of (within-group or residual variancel, sigma^2) is:
+  sigma <- as.numeric(v.out.qual.null[2])
+# The ICC estimate (between/between+within) is:
+  ICC <- (as.numeric(v.out.qual.null[1])/(as.numeric(v.out.qual.null[1])+as.numeric(v.out.qual.null[2])))
+  ICC.Perc <- ((as.numeric(v.out.qual.null[1])/(as.numeric(v.out.qual.null[1])+as.numeric(v.out.qual.null[2]))))*100
+```
+
 #### random intercept
 
 \begin{equation}
@@ -1351,7 +1387,47 @@ InteractionQuality_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + u_{0i} 
 \textrm{with}\ u_{0i} \sim \mathcal{N}(0,\tau_{00}^2)\ \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
 \end{equation}
 
-#### check for random slope
+```{r workerInterceptQualKeyNeed}
+# Create and save Model
+  model.qual.keyneed = lme(quality_overall_1 ~ keymotive_fulfillemt_1, random=~1|PID,data=workerOutgroupInteraction)
+
+# Get summary with p-values (Satterthwaite's method)
+  summ(lmer(quality_overall_1 ~ keymotive_fulfillemt_1 + (1|PID),data=workerOutgroupInteraction), 
+       confint = TRUE, digits = 3, center = TRUE)
+
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+  #write.csv(confint(lmer(thermometerDutch_1 ~ Contact_dum + inNonDutch + (1|PID),data=df), 
+  #                  method="boot",nsim=1000, parallel = "multicore", 
+  #                  ncpus = 4, seed = 42),
+  #          "output/tables/ML-Inter-CI.csv")
+
+# Compare new model to previous step
+  anova(Null.Out.Qual.ML, model.qual.keyneed) %>%
+    as.data.frame %>%
+    select(-call) %>%
+    kbl(., 
+        #label = "",
+        caption = "Worker: Model Comparison",
+        format = "html", 
+        linesep = "",
+        booktabs = T,
+        align = rep('c', ncol(.)),
+        digits = 3)  %>%
+  kable_styling(position = "left")
+
+# Save variances
+  v.qual.keyneed <- lme4::VarCorr(model.qual.keyneed) 
+
+# The estimate of between-group (or Intercept variance) explained: 
+  # Variance Explained = 1 – (Var with Predictor/Var without Predictor)
+    v.qual.keyneed.btw <- 1 - (as.numeric(v.qual.keyneed[1])/as.numeric(v.out.qual.null[1]))
+    v.qual.keyneed.btw.perc <-  (1 - (as.numeric(v.qual.keyneed[1])/as.numeric(v.out.qual.null[1])))*100
+  # and the estimate of within-group (or residual variancel) explained is:
+    v.qual.keyneed.within <- 1 - (as.numeric(v.qual.keyneed[2])/as.numeric(v.out.qual.null[2]))
+    v.qual.keyneed.within.perc <- (1 - (as.numeric(v.qual.keyneed[2])/as.numeric(v.out.qual.null[2])))*100
+```
+
+#### random slope
 
 \begin{equation}
 (\#eq:QualityNeedRandEq)
