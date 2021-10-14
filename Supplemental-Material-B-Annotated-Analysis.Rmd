@@ -60,7 +60,7 @@ csl: apa.csl
 # to store the packages in a contained library within the project folder: renv::settings$use.cache(FALSE) and add 'RENV_CONFIG_SANDBOX_ENABLED = FALSE' to an '.Renviron' file 
 lib <- c("rmarkdown", "knitr", "remedy", "bookdown", "psych",
          "ggplot2", "ggthemes", "haven", "RColorBrewer", "plotly", "gridExtra", "ggpattern",
-         "lme4", "nlme", "jtools",
+         "lme4", "nlme", "jtools", "gtsummary",
          "sessioninfo", "tibble", "pander", "devtools", "mada",
          "data.table", "plyr", "dplyr", "tidyr", "Hmisc", "kableExtra", "papaja",
          "stringr", "stringi", "reshape2", "lubridate")
@@ -1173,6 +1173,51 @@ TL;DR: We find that interaction quality is significantly related to higher outgr
 
 ### Need fulfillment and Attitudes 
 
+##### Unconditional model
+
+make a model with only the data but a random intercept (unconditional model) for the outgroup interaction subset.
+
+```{r workerOutPrep}
+# see how large our outgroup interaction subset actually is 
+tbl_cross(workerInteractionType, row=OutgroupInteraction, col=NonOutgroupInteraction, percent="row")
+
+# create outgroup interaction subset
+workerOutgroupInteraction <- workerInteractionType %>%
+  filter(OutgroupInteraction == "Yes")
+```
+
+\begin{equation}
+(\#eq:WorkerOutEmptyModel)
+Attitude_{ti} = \gamma_{00} + u_{0i} + e_{ti} \\
+\textrm{with}\ u_{0i} \sim \mathcal{N}(0,\tau_{00}^2)\ \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+\end{equation}
+
+```{r Worker.Out.Null.Model.ML}
+# Create and save Model
+  Null.Out.ML.r = lme4::lmer(thermometerDutch_1~1 + (1|PID),data=workerOutgroupInteraction) #use optim if it does not converge
+  Null.Out.ML = lme(thermometerDutch_1~1,random=~1|PID, data=workerOutgroupInteraction, control=list(opt="nlmimb")) #use optim if it does not converge
+
+# Get summary with p-values (Satterthwaite's method)
+  #summary(Null.ML.r) #or with the lme function
+  summ(Null.Out.ML.r, digits = 3, center = TRUE)
+  
+# generate 95% parametric bootstrap CIs (and save them as a csv-file):
+  #write.csv(confint(lmer(thermometerDutch_1~1 + (1|PID),data=df),
+  #                  method="boot",nsim=1000, 
+  #                  parallel = "multicore", ncpus = 4, seed = 42),
+  #          "output/tables/ML-Null-CI.csv")
+
+# Save variances
+  v.out.null <- VarCorr(Null.Out.ML) # save variances
+# The estimate of (between-group or Intercept variance, tau_{00}^2):
+  tau <- as.numeric(v.out.null[1])
+# and the estimate of (within-group or residual variancel, sigma^2) is:
+  sigma <- as.numeric(v.out.null[2])
+# The ICC estimate (between/between+within) is:
+  ICC <- (as.numeric(v.out.null[1])/(as.numeric(v.out.null[1])+as.numeric(v.out.null[2])))
+  ICC.Perc <- ((as.numeric(v.out.null[1])/(as.numeric(v.out.null[1])+as.numeric(v.out.null[2]))))*100
+```
+
 #### random intercept
 
 \begin{equation}
@@ -1181,6 +1226,46 @@ Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + u_{0i} + e_{ti} \
 \textrm{with}\ u_{0i} \sim \mathcal{N}(0,\tau_{00}^2)\ \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
 \end{equation}
 
+```{r interceptAttKeyNeed}
+# Create and save Model
+  model.keyneed = lme(thermometerDutch_1 ~ keymotive_fulfillemt_1, random=~1|PID,data=workerOutgroupInteraction)
+
+# Get summary with p-values (Satterthwaite's method)
+  summ(lmer(thermometerDutch_1 ~ keymotive_fulfillemt_1 + (1|PID),data=workerOutgroupInteraction), 
+       confint = TRUE, digits = 3, center = TRUE)
+
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+  #write.csv(confint(lmer(thermometerDutch_1 ~ Contact_dum + inNonDutch + (1|PID),data=df), 
+  #                  method="boot",nsim=1000, parallel = "multicore", 
+  #                  ncpus = 4, seed = 42),
+  #          "output/tables/ML-Inter-CI.csv")
+
+# Compare new model to previous step
+  anova(Null.Out.ML, model.keyneed) %>%
+    as.data.frame %>%
+    select(-call) %>%
+    kbl(., 
+        #label = "",
+        caption = "Worker: Model Comparison",
+        format = "html", 
+        linesep = "",
+        booktabs = T,
+        align = rep('c', ncol(.)),
+        digits = 3)  %>%
+  kable_styling(position = "left")
+
+# Save variances
+  v.keyneed <- lme4::VarCorr(model.keyneed) 
+
+# The estimate of between-group (or Intercept variance) explained: 
+  # Variance Explained = 1 – (Var with Predictor/Var without Predictor)
+    v.keyneed.btw <- 1 - (as.numeric(v.keyneed[1])/as.numeric(v.out.null[1]))
+    v.keyneed.btw.perc <-  (1 - (as.numeric(v.keyneed[1])/as.numeric(v.out.null[1])))*100
+  # and the estimate of within-group (or residual variancel) explained is:
+    v.keyneed.within <- 1 - (as.numeric(v.keyneed[2])/as.numeric(v.out.null[2]))
+    v.keyneed.within.perc <- (1 - (as.numeric(v.keyneed[2])/as.numeric(v.out.null[2])))*100
+```
+
 #### check for random slope
 
 \begin{equation}
@@ -1188,6 +1273,73 @@ Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + u_{0i} + e_{ti} \
 Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + u_{0i} + u_{1i} + e_{ti}  \\
 \textrm{with}\ \begin{bmatrix} u_{0i}\\ u_{1i}\end{bmatrix} \sim \mathcal{N}(0,\Omega_u): \Omega_u=\begin{bmatrix} \tau_{0}^2 & \\ \tau_{01} & \tau_{1}^2 \end{bmatrix} \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
 \end{equation}
+
+```{r slopesAttKeyNeed}
+# Create and save Model (optimizer needed to reach convergence)
+  model.keyneed.ran = lme(thermometerDutch_1~
+                         keymotive_fulfillemt_1, 
+                         random=~1+keymotive_fulfillemt_1|PID,
+                       control=lmeControl(opt='optim'), data=workerOutgroupInteraction)
+
+# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
+  summ(model.keyneed.ran0 <- lmer(thermometerDutch_1 ~
+                           keymotive_fulfillemt_1 + 
+                           (1+keymotive_fulfillemt_1|PID), 
+                         data=workerOutgroupInteraction), 
+       confint = TRUE, digits = 3, center = TRUE)
+  
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+  #write.csv(confint(model.ran0,
+  #               method="boot",nsim=1000, 
+  #               parallel = "multicore", ncpus = 4, seed = 42),
+  #          "output/tables/ML-RandomSlopes-CI.csv")
+
+# Compare new model to previous step
+  anova(model.keyneed, model.keyneed.ran) %>%
+    as.data.frame %>%
+    select(-call) %>%
+    kbl(., 
+        #label = "",
+        caption = "Worker: Model Comparison",
+        format = "html", 
+        linesep = "",
+        booktabs = T,
+        align = rep('c', ncol(.)),
+        digits = 3)  %>%
+  kable_styling(position = "left")
+
+# Save variances
+  v.keyneed.ran = lme4::VarCorr(model.keyneed.ran)
+
+# The estimate of between-group (or Intercept variance) explained: 
+  # Variance Explained = 1 – (Var with Predictor/Var without Predictor)
+    v.keyneed.ran.btw <- 1 - (as.numeric(v.keyneed.ran[1])/as.numeric(v.keyneed[1]))
+    v.keyneed.ran.btw.perc <-  (1 - (as.numeric(v.keyneed.ran[1])/as.numeric(v.keyneed[1])))*100
+  # and the estimate of within-group (or residual variancel) explained is:
+    v.keyneed.ran.within <- 1 - (as.numeric(v.keyneed.ran[2])/as.numeric(v.keyneed[2]))
+    v.keyneed.ran.within.perc <- (1 - (as.numeric(v.keyneed.ran[2])/as.numeric(v.keyneed[2])))*100
+
+# Assumption Checks: 
+  diag = sjPlot::plot_model(model.keyneed.ran0, type = "diag")
+  grid.arrange(diag[[1]],diag[[2]]$`PID`,diag[[3]],diag[[4]])
+  
+# Plot prediction model
+  dat.new = workerOutgroupInteraction[,c("thermometerDutch_1","session","PID")]
+  dat.new$measure = predict(model.keyneed.ran, workerOutgroupInteraction, re.form=NA)
+
+  (t.ppt = ggplot(data=dat.new, aes(x=session, y=measure)) + 
+    geom_line(alpha=1, color = "blue") +
+    geom_line(aes(y = thermometerDutch_1), alpha=1)+
+    facet_wrap(~PID, ncol = 6)+
+    xlab("Time")+
+    ylab("Outgroup Attitudes")+
+    theme_bw())
+  ggsave(filename = "Figures/Development per PPT Out Keyneed.png", t.ppt,
+       width = 18, height = 12, dpi = 800, units = "cm", device='png')
+  
+  rm(dat.new)
+
+```
 
 ### Need fulfillment and Interaction Quality 
 
