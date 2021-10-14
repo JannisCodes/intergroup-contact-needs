@@ -1266,6 +1266,8 @@ Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + u_{0i} + e_{ti} \
     v.keyneed.within.perc <- (1 - (as.numeric(v.keyneed[2])/as.numeric(v.out.null[2])))*100
 ```
 
+TL;DR: Situational core need relates significantly to outgroup addititudes. The core need has little explained variance between participants (compared to the null model: Variance Explained = 1 – (Var with Predictor/Var without Predictor); `r format(round(v.keyneed.btw.perc, 2),nsmall=2)`%). The variance explained within participants is small to medium (`r format(round(v.keyneed.within.perc, 2),nsmall=2)`%)  
+
 #### random slope
 
 \begin{equation}
@@ -1340,6 +1342,14 @@ Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + u_{0i} + u_{1i} +
   rm(dat.new)
 
 ```
+
+TL;DR: The random slope adds significantly to the prediction model.  
+
+<div class="alert alert-warning alert-dismissible fade in" role="alert">
+  <a class="close" data-dismiss="alert" aria-label="close">&times;</a>
+  <i class="fas fa-exclamation-triangle"></i> <b>Check needed: </b><br/>
+  Something is with the variances explained (between = `r format(round(v.keyneed.ran.btw.perc, 2),nsmall=2)`%, within = `r format(round(v.keyneed.ran.within.perc, 2),nsmall=2)`%). This is when comparing the random intercepts to the random slopes model.
+</div>
 
 ### Need fulfillment and Interaction Quality 
 
@@ -1427,6 +1437,8 @@ InteractionQuality_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + u_{0i} 
     v.qual.keyneed.within.perc <- (1 - (as.numeric(v.qual.keyneed[2])/as.numeric(v.out.qual.null[2])))*100
 ```
 
+TL;DR: Situational core need relates significantly to interaction quality. The core need explained substantial variance between participants (`r format(round(v.qual.keyneed.btw.perc, 2),nsmall=2)`%). The variance explained within participants is also medium (`r format(round(v.qual.keyneed.within.perc, 2),nsmall=2)`%) 
+
 #### random slope
 
 \begin{equation}
@@ -1434,6 +1446,54 @@ InteractionQuality_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + u_{0i} 
 InteractionQuality_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + u_{0i} + u_{1i} + e_{ti}  \\
 \textrm{with}\ \begin{bmatrix} u_{0i}\\ u_{1i}\end{bmatrix} \sim \mathcal{N}(0,\Omega_u): \Omega_u=\begin{bmatrix} \tau_{0}^2 & \\ \tau_{01} & \tau_{1}^2 \end{bmatrix} \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
 \end{equation}
+
+```{r slopesQualKeyNeed}
+# Create and save Model (optimizer needed to reach convergence)
+  model.qual.keyneed.ran = lme(quality_overall_1~
+                         keymotive_fulfillemt_1, 
+                         random=~1+keymotive_fulfillemt_1|PID,
+                       control=lmeControl(opt='optim'), data=workerOutgroupInteraction)
+
+# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
+  summ(model.qual.keyneed.ran0 <- lmer(quality_overall_1 ~
+                           keymotive_fulfillemt_1 + 
+                           (1+keymotive_fulfillemt_1|PID), 
+                         data=workerOutgroupInteraction), 
+       confint = TRUE, digits = 3, center = TRUE)
+  
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+  #write.csv(confint(model.ran0,
+  #               method="boot",nsim=1000, 
+  #               parallel = "multicore", ncpus = 4, seed = 42),
+  #          "output/tables/ML-RandomSlopes-CI.csv")
+
+# Compare new model to previous step
+  anova(model.qual.keyneed, model.qual.keyneed.ran) %>%
+    as.data.frame %>%
+    select(-call) %>%
+    kbl(., 
+        #label = "",
+        caption = "Worker: Model Comparison",
+        format = "html", 
+        linesep = "",
+        booktabs = T,
+        align = rep('c', ncol(.)),
+        digits = 3)  %>%
+  kable_styling(position = "left")
+
+# Save variances
+  v.qual.keyneed.ran = lme4::VarCorr(model.qual.keyneed.ran)
+
+# The estimate of between-group (or Intercept variance) explained: 
+  # Variance Explained = 1 – (Var with Predictor/Var without Predictor)
+    v.qual.keyneed.ran.btw <- 1 - (as.numeric(v.qual.keyneed.ran[1])/as.numeric(v.qual.keyneed[1]))
+    v.qual.keyneed.ran.btw.perc <-  (1 - (as.numeric(v.qual.keyneed.ran[1])/as.numeric(v.qual.keyneed[1])))*100
+  # and the estimate of within-group (or residual variancel) explained is:
+    v.qual.keyneed.ran.within <- 1 - (as.numeric(v.qual.keyneed.ran[2])/as.numeric(v.qual.keyneed[2]))
+    v.qual.keyneed.ran.within.perc <- (1 - (as.numeric(v.qual.keyneed.ran[2])/as.numeric(v.qual.keyneed[2])))*100
+```
+
+TL;DR: random slopes does not add significantly. Stay with simpler model.
 
 ### Need fulfillment, Interaction Quality, and Attitudes
 
