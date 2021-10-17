@@ -596,6 +596,8 @@ rm(df.pre, df.daily, df.post, dfPreDaily, dfCombined, ownIDs)
 
 ## Calculate needed transformations  
 
+### Worker
+
 ```{r newVarsWorkers}
 df <- dtWorker$clean
 
@@ -702,6 +704,7 @@ workerInteractionType <- dtWorker$full %>%
 # prepareMplusData(mplus.intcont, "data/processed/dynamic-subset-intonly.dat")
 ```
 
+### Student
 
 ```{r newVarsStudents}
 df <- dtStudents$clean
@@ -842,7 +845,43 @@ df <- df %>%
 # store
 dtStudents$full <- df
 rm(df)
+
+# Between participants contact frequency
+studentContactFreq <- dtStudents$full %>%
+  group_by(PID) %>%
+  summarise(
+    n = n(),
+    SumContactNL = sum(InteractionDumDutch),
+    PercContactNL = SumContactNL / n * 100,
+    SumContactNLAll = sum(ContactNum[InteractionDumDutch == 1], na.rm = TRUE),
+    AvAttitude = mean(AttitudesDutch, na.rm = TRUE)
+  ) %>%
+  mutate(
+    WinSumContactNL = DescTools::Winsorize(SumContactNL),
+    WinSumContactNLAll = DescTools::Winsorize(SumContactNLAll)
+  )
+
+# dataframe where interaction types are recoded
+studentInteractionType <- dtStudents$full %>%
+  mutate(
+    NonDutchContact = replace_na(NonDutchContact, 2), # make second non-Dutch countable
+    NonDutchContact = NonDutchContact*-1+2 # recode (yes = 1 -> 1, no = 2 -> 0)
+  ) %>%
+  mutate(
+    OutgroupInteraction = factor(
+      InteractionDumDutch,
+      levels = c(0, 1),
+      labels = c("No", "Yes")
+    ),
+    NonOutgroupInteraction = factor(
+      rowSums(select(., c(InteractionDumNonDutch, NonDutchContact))), # combine the two non-Dutch Q.,
+      levels = c(0, 1),
+      labels = c("No", "Yes")
+    )
+  )
 ```
+
+### Medical
 
 ```{r newVarsMedical}
 # TBD
@@ -2511,9 +2550,1658 @@ ggsave(
 
 # **Student Sample**
 
+## Data Description
+
+<i class="fas fa-exclamation-triangle"></i> Still in 'scr/studentDescriptive.R'. Needs to be merged with this document.
+
 ## Contact Hypothesis
 
+### Interaction Frequency and Outgroup Attitudes
+
+\begin{equation}
+(\#eq:studentFreqQualR)
+r_{ContactFrequency, OutgroupAttitudes} \neq 0
+\end{equation}
+
+```{r studentFreqAttCor}
+# correlation panel
+pairs.panels.new(
+  studentContactFreq %>% select(SumContactNL, SumContactNLAll, AvAttitude),
+  labels = c(
+    "Sum:\nNumer of beeps with Outgroup Contact (NL)",
+    "Sum:\nNumber of Outgroup Contacts (NL)",
+    "Mean:\nOutgroup Attitudes (NL)"
+  )
+)
+
+# correlation panel with interaction sums winsorized
+pairs.panels.new(
+  studentContactFreq %>% select(WinSumContactNL, WinSumContactNLAll, AvAttitude),
+  labels = c(
+    "Sum:\nNumer of beeps with Outgroup Contact (NL)\n[Winsorized]",
+    "Sum:\nNumber of Outgroup Contacts (NL)\n[Winsorized]",
+    "Mean:\nOutgroup Attitudes (NL)"
+  )
+)
+```
+
+TL;DR: Neither the number of interactions nor the number of measurement beeps with an interaction are significantly related with the average outgroup attitudes. This is to say that within our data participants with more outgroup interactions did not have significantly more positive outgroup attitudes. This might be due to the aggregation within the participants or the small sample size of between participant data. Nonetheless, the aggregate data does not support the notion that simply having more interactions with an outgroup results in more positive outgroup attitudes.
+
+### Outgroup Attitudes by Interaction Type
+
+\begin{equation}
+(\#eq:studentIntTypeQual)
+\mu_{i,0utgroupInteraction} > \mu_{i,IngroupInteraction}  \\
+Attitude = OutgroupInteraction \times NonOutgroupInteraction
+\end{equation}
+
+
+<div class="alert alert-info alert-dismissible fade in" role="alert">
+  <a class="close" data-dismiss="alert" aria-label="close">&times;</a>
+  <i class="fas fa-exclamation-triangle"></i> <b>Note: </b><br/>
+  mean difference alone probably even more stupid than only ignoring nested data, because we drop lots of data unnecessarily.  
+  And only outgroup interaction Yes / No also weird because interaction group includes people who had only an outgroup interaction and those who also had an interaction with a non-outgroup person, and the no outgroup interaction group includes those who had no interaction at all and those who had an interaction with a non-outgroup person (but no outgroup interaction).
+</div>
+
+#### Regression with interaction term
+
+Across participants: impact of different interaction types [probably meaningless because ignores response sets between participants]
+
+```{r studentInteractionTypePlt, fig.height=12}
+# between participants interaction type
+studentContactType <- studentInteractionType %>%
+  group_by(
+    OutgroupInteraction,
+    NonOutgroupInteraction
+  ) %>%
+  summarise(
+    n = n(),
+    AttitudeM = mean(AttitudesDutch, na.rm = TRUE),
+    AttitudeSD = sd(AttitudesDutch, na.rm = TRUE),
+    AttitudeSE = AttitudeSD / sqrt(n),
+    AttitudeLwr = AttitudeM - 1.96 * AttitudeSE,
+    AttitudeUpr = AttitudeM + 1.96 * AttitudeSE
+  ) %>%
+  ungroup()
+
+# plot bar chart
+ggplot(
+  studentContactType,
+  aes(
+    y = AttitudeM,
+    x = OutgroupInteraction,
+    fill = NonOutgroupInteraction
+  )
+) +
+  geom_bar(
+    stat = "identity",
+    color = "black",
+    position = position_dodge()
+  ) +
+  geom_errorbar(aes(ymin = AttitudeM, ymax = AttitudeUpr),
+    width = .2,
+    position = position_dodge(.9)
+  ) +
+  labs(
+    fill = "Non-Outgroup Interaction",
+    x = "Outgroup Interaction",
+    y = "Outgroup Attitude",
+    title = "Outgroup Attitudes by Interaction Type [95% CI]"
+  ) +
+  scale_fill_grey(
+    start = 0.2,
+    end = 0.8
+  ) +
+  scale_y_continuous(
+    limits = c(0, 100),
+    breaks = c(0, 15, 30, 40, 50, 60, 70, 85, 100),
+    labels = c(
+      "Very cold or unfavorable feelings 0°",
+      "Quite cold and unfavorable feelings 15°",
+      "Fairly cold and unfavorable feelings 30°",
+      "A bit cold and unfavorable feelings 40°",
+      "No feeling at all 50°",
+      "A bit warm and favorable feelings 60°",
+      "Fairly warm and favorable feelings 70° ",
+      "Quite warm and favorable feelings 85° ",
+      "Very warm and favorable feelings 100° "
+    )
+  ) +
+  theme_Publication()
+```
+
+```{r studentModelOlsInteractionType}
+# create list to store student models
+mdlStudent <- list()
+
+# regression
+mdlStudent$lmAttInt <-
+  lm(AttitudesDutch ~ OutgroupInteraction * NonOutgroupInteraction,
+    data = studentInteractionType
+  )
+# summary(lmstudentAttInteraction)
+
+summ(
+  mdlStudent$lmAttInt,
+  confint = TRUE,
+  digits = 3,
+  center = TRUE
+)
+```
+
+TL;DR: While controlling for interactions with non-Dutch people, outgroup attitudes were significantly higher when participants had an interaction with a Dutch person. The effect is relatively small (`r format(round(mdlStudent$lmAttInt$coefficients["OutgroupInteractionYes"], 2), nsmall=2)` points on a 0--100 scale). More importantly, however, this analysis lumps all ESM beeps from every participants together and ignores that the data is nested within participants.
+
+#### ML Regression with interaction term
+
+##### Unconditional model
+
+make a model with only the data but a random intercept (unconditional model)   
+
+\begin{equation}
+(\#eq:studentEmptyModel)
+Attitude_{ti} = \gamma_{00} + u_{0i} + e_{ti} \\
+\textrm{with}\ u_{0i} \sim \mathcal{N}(0,\tau_{00}^2)\ \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+\end{equation}
+
+```{r studentModelMLAttNull}
+# Create and save Model
+mdlStudent$lmerAttNull <-
+  lme4::lmer(AttitudesDutch ~ 1 + (1 | PID),
+    data = dtStudents$full
+  ) # use optim if it does not converge
+
+mdlStudent$lmeAttNull <-
+  lme(
+    AttitudesDutch ~ 1,
+    random = ~ 1 | PID,
+    data = dtStudents$full,
+    control = list(opt = "nlmimb")
+  ) # use optim if it does not converge
+
+# Get summary with p-values (Satterthwaite's method)
+# summary(mdlStudent$lmerAttNull) #or with the lme function
+summ(mdlStudent$lmerAttNull, digits = 3, center = TRUE)
+
+# generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(lmer(AttitudesDutch~1 + (1|PID),data=dtStudent$full),
+#                  method="boot",nsim=1000,
+#                  parallel = "multicore", ncpus = 4, seed = 42),
+#          "output/tables/ML-Null-CI.csv")
+
+# Save variances
+mdlStudent$varAttNull <- 
+  VarCorr(mdlStudent$lmeAttNull) # save variances
+# The estimate of (between-group or Intercept variance, tau_{00}^2):
+mdlStudent$tauAttNull <- 
+  as.numeric(mdlStudent$varAttNull[1])
+# and the estimate of (within-group or residual variance, sigma^2) is:
+mdlStudent$sigmaAttNull <- 
+  as.numeric(mdlStudent$varAttNull[2])
+# The ICC estimate (between/between+within) is:
+mdlStudent$IccAttNull <-
+  (as.numeric(mdlStudent$varAttNull[1]) / (as.numeric(mdlStudent$varAttNull[1]) + as.numeric(mdlStudent$varAttNull[2])))
+mdlStudent$IccPercAttNull <-
+  ((as.numeric(mdlStudent$varAttNull[1]) / (as.numeric(mdlStudent$varAttNull[1]) + as.numeric(mdlStudent$varAttNull[2])))) * 100
+```
+
+ICC $\tau_{00}^2 / (\tau_{00}^2 + \sigma^2)$: The ratio of the between-cluster variance to the total variance is called the Intraclass Correlation. It tells you the proportion of the total variance in Y that is accounted for by the clustering. (In this case the clustering means clustering observations per participant)  
+
+compare the random intercept model to a model without a random intercept (i.e., without levels at all)  
+
+```{r studentModelInterceptNull}
+# Create and save Model
+mdlStudent$glsAttNull  <-
+  gls(AttitudesDutch ~ 1,
+      data = dtStudents$full,
+      control = list(opt = "nlmimb"))
+
+# calculate Deviances manually:
+mdlStudent$DevianceGlsNull <- logLik(mdlStudent$glsAttNull) * -2
+mdlStudent$DevianceMlNull <- logLik(mdlStudent$lmeAttNull) * -2
+
+# Compare the two null models:
+anova(mdlStudent$glsAttNull,
+      mdlStudent$lmeAttNull) %>% 
+  as.data.frame() %>%
+  select(-call) %>%
+  kbl(
+    .,
+    caption = "Student: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+```
+
+We find that an estimated `r format(round(mdlStudent$IccPercAttNull, 2), nsmall=2)`% of the variation in Feeling Thermometer scores is explained by between participant differences (clustering by PID). This is to say that `r format(round(mdlStudent$IccPercAttNull, 2), nsmall=2)`% of the variance in any individual report of Attitudes towards the Dutch can be explained by the properties of the individual who provided the rating. And we find that including 'participant' as a predictor adds significantly to the model.
+
+##### random intercept
+
+\begin{equation}
+(\#eq:StudentInteractionTypeModel)
+Attitude_{ti} = \gamma_{00} + \gamma_{10}OutgroupInteraction_{ti} + \gamma_{10}NonOutgroupInteraction_{ti} + u_{0i} + e_{ti} \\
+\textrm{with}\ u_{0i} \sim \mathcal{N}(0,\tau_{00}^2)\ \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+\end{equation}
+
+```{r studentModelInterceptAttType}
+# Create and save Model
+mdlStudent$lmeInterceptAttType <-
+  lme(
+    AttitudesDutch ~ OutgroupInteraction + NonOutgroupInteraction,
+    random =  ~ 1 | PID,
+    data = studentInteractionType
+  )
+
+# Get summary with p-values (Satterthwaite's method)
+summ(
+  lmer(
+    AttitudesDutch ~ OutgroupInteraction + NonOutgroupInteraction + (1 | PID),
+    data = studentInteractionType
+  ),
+  confint = TRUE,
+  digits = 3,
+  center = TRUE
+)
+
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(lmer(AttitudesDutch ~ Contact_dum + inNonDutch + (1|PID),data=studentInteractionType),
+#                  method="boot",nsim=1000, parallel = "multicore",
+#                  ncpus = 4, seed = 42),
+#          "output/tables/ML-Inter-CI.csv")
+
+# Compare new model to previous step
+anova(mdlStudent$lmeAttNull, 
+      mdlStudent$lmeInterceptAttType) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  kbl(
+    .,
+    caption = "Student: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlStudent$varInterceptAttType <- 
+  lme4::VarCorr(mdlStudent$lmeInterceptAttType)
+
+# The estimate of between-group (or Intercept variance) explained:
+# Variance Explained = 1 – (Var with Predictor/Var without Predictor)
+mdlStudent$varBtwInterceptAttType <-
+  1 - (as.numeric(mdlStudent$varInterceptAttType[1]) / as.numeric(mdlStudent$varAttNull[1]))
+mdlStudent$varBtwPercInterceptAttType <-
+  (1 - (as.numeric(mdlStudent$varInterceptAttType[1]) / as.numeric(mdlStudent$varAttNull[1]))) * 100
+# and the estimate of within-group (or residual variance) explained is:
+mdlStudent$varWithinInterceptAttType <-
+  1 - (as.numeric(mdlStudent$varInterceptAttType[2]) / as.numeric(mdlStudent$varAttNull[2]))
+mdlStudent$varWithinPercInterceptAttType <-
+  (1 - (as.numeric(mdlStudent$varInterceptAttType[2]) / as.numeric(mdlStudent$varAttNull[2]))) * 100
+```
+
+tl;dr: Interaction with Dutch is great predictor, interactions with non-Dutch is not.
+
+##### random slope
+
+\begin{equation}
+(\#eq:RandSlopesEq)
+Attitude_{ti} = \gamma_{00} + \gamma_{10}OutgroupInteraction_{ti} + \gamma_{10}NonOutgroupInteraction_{ti} + u_{0i} + u_{1i} + e_{ti}  \\
+\textrm{with}\ \begin{bmatrix} u_{0i}\\ u_{1i}\end{bmatrix} \sim \mathcal{N}(0,\Omega_u): \Omega_u=\begin{bmatrix} \tau_{0}^2 & \\ \tau_{01} & \tau_{1}^2 \end{bmatrix} \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+\end{equation}
+
+```{r studentModelSlopesInteractionType}
+# Create and save Model (optimizer needed to reach convergence)
+mdlStudent$lmeSlopesAttType <- lme(
+  AttitudesDutch ~
+    OutgroupInteraction + NonOutgroupInteraction,
+  random = ~ 1 + OutgroupInteraction + NonOutgroupInteraction | PID,
+  control = lmeControl(opt = "optim"),
+  data = studentInteractionType
+)
+
+# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
+summ(
+  mdlStudent$lmerSlopesAttType <- lmer(
+    AttitudesDutch ~
+      OutgroupInteraction + NonOutgroupInteraction +
+      (1 + OutgroupInteraction + NonOutgroupInteraction | PID),
+    data = studentInteractionType
+  ), 
+  confint = TRUE,
+  digits = 3,
+  center = TRUE
+)
+
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(model.ran0,
+#               method="boot",nsim=1000,
+#               parallel = "multicore", ncpus = 4, seed = 42),
+#          "output/tables/ML-RandomSlopes-CI.csv")
+
+# Compare new model to previous step
+anova(mdlStudent$lmeInterceptAttType, 
+      mdlStudent$lmeSlopesAttType) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  kbl(
+    .,
+    caption = "Student: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlStudent$varSlopesAttType <- 
+  lme4::VarCorr(mdlStudent$lmeSlopesAttType)
+
+# The estimate of between-group (or Intercept variance) explained:
+# Variance Explained = 1 – (Var with Predictor/Var without Predictor)
+mdlStudent$varBtwSlopesAttType <- 
+  1 - (as.numeric(mdlStudent$varSlopesAttType[1]) / as.numeric(mdlStudent$varInterceptAttType[1]))
+mdlStudent$varBtwPercSlopesAttType <- 
+  (1 - (as.numeric(mdlStudent$varSlopesAttType[1]) / as.numeric(mdlStudent$varInterceptAttType[1]))) * 100
+# and the estimate of within-group (or residual variance) explained is:
+mdlStudent$varWithinSlopesAttType <- 
+  1 - (as.numeric(mdlStudent$varSlopesAttType[2]) / as.numeric(mdlStudent$varInterceptAttType[2]))
+mdlStudent$varWithinPercSlopesAttType <- 
+  (1 - (as.numeric(mdlStudent$varSlopesAttType[2]) / as.numeric(mdlStudent$varInterceptAttType[2]))) * 100
+
+# Assumption Checks:
+mdlStudent$diagSlopesAttType <-
+  sjPlot::plot_model(mdlStudent$lmerSlopesAttType, type = "diag")
+grid.arrange(
+  mdlStudent$diagSlopesAttType[[1]],
+  mdlStudent$diagSlopesAttType[[2]]$`PID`,
+  mdlStudent$diagSlopesAttType[[3]],
+  mdlStudent$diagSlopesAttType[[4]]
+)
+
+# Plot prediction model
+mdlStudent$predSlopesAttType <- 
+  studentInteractionType %>%
+  select(AttitudesDutch, session, PID) %>% 
+  mutate(measure = predict(mdlStudent$lmeSlopesAttType,
+                           studentInteractionType,
+                           re.form = NA
+                           )
+         )
+
+(
+  mdlStudent$predPltSlopesAttType <-
+    ggplot(data = mdlStudent$predSlopesAttType, aes(x = session, y = measure)) +
+    geom_line(alpha = 1, color = "blue") +
+    geom_line(aes(y = AttitudesDutch), alpha = 1) +
+    facet_wrap(~ PID, ncol = 6) +
+    xlab("Time") +
+    ylab("Outgroup Attitudes") +
+    theme_Publication()
+)
+ggsave(
+  filename = "Figures/Student_PredictionPlot_SlopesAttType.png",
+  mdlStudent$predPltSlopesAttType,
+  width = 18,
+  height = 12,
+  dpi = 800,
+  units = "cm",
+  device = "png"
+)
+```
+
+TL;DR: Random slopes don't add much for this super simple model.
+
+### Interaction Frequency and Interaction Quality
+
+\begin{equation}
+(\#eq:FreqQual)
+Attitude = ContactFreq \times AverageContactQual
+\end{equation}
+
+```{r studentFreqQualCor}
+# prepare data
+studentAvFreQual <- dtStudents$full %>%
+  group_by(ExternalReference) %>%
+  summarise(
+    n = n(),
+    SumContactNL = sum(Contact_dum),
+    PercContactNL = SumContactNL / n * 100,
+    SumContactNLAll = sum(number),
+    AvAttitude = mean(AttitudesDutch, na.rm = TRUE),
+    AvQuality = mean(quality_overall_1, na.rm = TRUE)
+  ) %>%
+  mutate(
+    WinSumContactNL = DescTools::Winsorize(SumContactNL),
+    WinSumContactNLAll = DescTools::Winsorize(SumContactNLAll)
+  )
+
+# correlation panel
+pairs.panels.new(
+  studentAvFreQual %>% select(SumContactNL, SumContactNLAll, AvQuality, AvAttitude),
+  labels = c(
+    "Sum:\nNumer of beeps with Outgroup Contact (NL)",
+    "Sum:\nNumber of Outgroup Contacts (NL)",
+    "Mean:\nInteraction Quality",
+    "Mean:\nOutgroup Attitudes (NL)"
+  )
+)
+
+# correlation panel with interaction sums winsorized
+pairs.panels.new(
+  studentAvFreQual %>% select(WinSumContactNL, WinSumContactNLAll, AvQuality, AvAttitude),
+  labels = c(
+    "Sum:\nNumer of beeps with Outgroup Contact (NL)\n[Winsorized]",
+    "Sum:\nNumber of Outgroup Contacts (NL)\n[Winsorized]",
+    "Mean:\nInteraction Quality",
+    "Mean:\nOutgroup Attitudes (NL)"
+  )
+)
+```
+
+TL;DR: There is a medium sized correlation between the participants' Average Interaction Quality and their Average Outgroup Attitudes. Thus within our data participants with a higher quality outgroup interactions also held more positive attitudes towards that group. However, the frequency of intergroup interactions had no meaningfull correlation with either the average interaction quality or average outgroup attitudes.
+
+```{r studentModelOlsAttFreqQual}
+# regression
+mdlStudent$lmAttFreqQualX <-
+  lm(AvAttitude ~ SumContactNL * AvQuality, data = studentAvFreQual)
+# summary(mdlStudent$lmAttFreqQualX)
+
+summ(
+  mdlStudent$lmAttFreqQualX,
+  confint = TRUE,
+  digits = 3,
+  center = TRUE
+)
+
+interactions::interact_plot(
+  mdlStudent$lmAttFreqQualX,
+  pred = AvQuality,
+  modx = SumContactNL,
+  interval = TRUE,
+  partial.residuals = TRUE
+)
+
+interactions::johnson_neyman(mdlStudent$lmAttFreqQualX,
+                             pred = AvQuality,
+                             modx = SumContactNL,
+                             alpha = .05)
+```
+
+TL;DR: We find that interaction quality is significantly related to higher outgroup attitudes (albeit with a small effect size). We also find that in our sample with an increasing number of interactions the positive effect of interaction quality becomes weaker. However, note that this is based on data aggregating all within participant nuances and is only the date of 21 people.
+
 ## Need Fulfillment
+
+### Need fulfillment and Attitudes 
+
+##### Unconditional model
+
+make a model with only the data but a random intercept (unconditional model) for the outgroup interaction subset.
+
+```{r studentPrepOutgroupSubsample}
+# see how large our outgroup interaction subset actually is
+tbl_cross(
+  studentInteractionType,
+  row = OutgroupInteraction,
+  col = NonOutgroupInteraction,
+  percent = "row"
+)
+
+# create outgroup interaction subset
+studentOutgroupInteraction <- studentInteractionType %>%
+  filter(OutgroupInteraction == "Yes")
+
+# create empty list to organize models
+mdlStudentOut <- 
+  list(
+    Att = list(),
+    Qlt = list()
+  )
+```
+
+\begin{equation}
+(\#eq:studentOutEmptyModel)
+Attitude_{ti} = \gamma_{00} + u_{0i} + e_{ti} \\
+\textrm{with}\ u_{0i} \sim \mathcal{N}(0,\tau_{00}^2)\ \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+\end{equation}
+
+```{r studentOutModelMLAttNull}
+# Create and save Model
+mdlStudentOut$Att$lmerNull <-
+  lme4::lmer(AttitudesDutch ~ 1 + (1 | PID), 
+             data = studentOutgroupInteraction) # use optim if it does not converge
+mdlStudentOut$Att$lmeNull <-
+  lme(
+    AttitudesDutch ~ 1,
+    random = ~ 1 | PID,
+    data = studentOutgroupInteraction,
+    control = list(opt = "nlmimb")
+  ) # use optim if it does not converge
+
+# Get summary with p-values (Satterthwaite's method)
+# summary(Null.Out.ML.r) #or with the lme function
+summ(mdlStudentOut$Att$lmerNull, digits = 3, center = TRUE)
+
+# generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(lmer(AttitudesDutch~1 + (1|PID),data=studentOutgroupInteraction),
+#                  method="boot",nsim=1000,
+#                  parallel = "multicore", ncpus = 4, seed = 42),
+#          "output/tables/ML-Null-CI.csv")
+
+# Save variances
+mdlStudentOut$Att$varNull <- 
+  VarCorr(mdlStudentOut$Att$lmeNull) # save variances
+# The estimate of (between-group or Intercept variance, tau_{00}^2):
+mdlStudentOut$Att$tauNull <- 
+  as.numeric(mdlStudentOut$Att$varNull[1])
+# and the estimate of (within-group or residual variance, sigma^2) is:
+mdlStudentOut$Att$sigmaNull <- 
+  as.numeric(mdlStudentOut$Att$varNull[2])
+# The ICC estimate (between/between+within) is:
+mdlStudentOut$Att$IccNull <-
+  (as.numeric(mdlStudentOut$Att$varNull[1]) / (as.numeric(mdlStudentOut$Att$varNull[1]) + as.numeric(mdlStudentOut$Att$varNull[2])))
+mdlStudentOut$Att$IccPercNull <-
+  ((as.numeric(mdlStudentOut$Att$varNull[1]) / (as.numeric(mdlStudentOut$Att$varNull[1]) + as.numeric(mdlStudentOut$Att$varNull[2])))) * 100
+```
+
+#### random intercept
+
+\begin{equation}
+(\#eq:AttitudeNeedEq)
+Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + u_{0i} + e_{ti} \\
+\textrm{with}\ u_{0i} \sim \mathcal{N}(0,\tau_{00}^2)\ \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+\end{equation}
+
+```{r studentOutModelInterceptAttCore}
+# Create and save Model
+mdlStudentOut$Att$lmeInterceptCore <-
+  lme(
+    AttitudesDutch ~ keymotive_fulfillemt_1,
+    random = ~ 1 | PID,
+    data = studentOutgroupInteraction
+  )
+
+# Get summary with p-values (Satterthwaite's method)
+summ(
+  lmer(AttitudesDutch ~ keymotive_fulfillemt_1 + (1 | PID), 
+       data = studentOutgroupInteraction),
+  confint = TRUE,
+  digits = 3,
+  center = TRUE
+)
+
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(lmer(AttitudesDutch ~ Contact_dum + inNonDutch + (1|PID),data=studentOutgroupInteraction),
+#                  method="boot",nsim=1000, parallel = "multicore",
+#                  ncpus = 4, seed = 42),
+#          "output/tables/ML-Inter-CI.csv")
+
+# Compare new model to previous step
+anova(mdlStudentOut$Att$lmeNull, 
+      mdlStudentOut$Att$lmeInterceptCore) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  kbl(
+    .,
+    caption = "Student: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlStudentOut$Att$varInterceptCore <-
+  lme4::VarCorr(mdlStudentOut$Att$lmeInterceptCore)
+
+# The estimate of between-group (or Intercept variance) explained:
+# Variance Explained = 1 – (Var with Predictor/Var without Predictor)
+mdlStudentOut$Att$varBtwInterceptCore <- 
+  1 - (as.numeric(mdlStudentOut$Att$varInterceptCore[1]) / as.numeric(mdlStudentOut$Att$varNull[1]))
+mdlStudentOut$Att$varBtwPercInterceptCore <- 
+  (1 - (as.numeric(mdlStudentOut$Att$varInterceptCore[1]) / as.numeric(mdlStudentOut$Att$varNull[1]))) * 100
+# and the estimate of within-group (or residual variance) explained is:
+mdlStudentOut$Att$varWithinInterceptCore <-
+  1 - (as.numeric(mdlStudentOut$Att$varInterceptCore[2]) / as.numeric(mdlStudentOut$Att$varNull[2]))
+mdlStudentOut$Att$varWithinPercInterceptCore <-
+  (1 - (as.numeric(mdlStudentOut$Att$varInterceptCore[2]) / as.numeric(mdlStudentOut$Att$varNull[2]))) * 100
+```
+
+TL;DR: Situational core need relates significantly to outgroup attitudes. The core need has little explained variance between participants (compared to the null model: Variance Explained = 1 – (Var with Predictor/Var without Predictor); `r format(round(mdlStudentOut$Att$varBtwPercInterceptCore, 2),nsmall=2)`%). The variance explained within participants is small to medium (`r format(round(mdlStudentOut$Att$varWithinPercInterceptCore, 2),nsmall=2)`%)  
+
+#### random slope
+
+\begin{equation}
+(\#eq:AttitudeNeedRandEq)
+Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + u_{0i} + u_{1i} + e_{ti}  \\
+\textrm{with}\ \begin{bmatrix} u_{0i}\\ u_{1i}\end{bmatrix} \sim \mathcal{N}(0,\Omega_u): \Omega_u=\begin{bmatrix} \tau_{0}^2 & \\ \tau_{01} & \tau_{1}^2 \end{bmatrix} \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+\end{equation}
+
+```{r studentOutModelSlopesAttCore}
+# Create and save Model (optimizer needed to reach convergence)
+mdlStudentOut$Att$lmeSlopesCore <-
+  lme(
+    AttitudesDutch ~
+      keymotive_fulfillemt_1,
+    random = ~ 1 + keymotive_fulfillemt_1 | PID,
+    control = lmeControl(opt = "optim"),
+    data = studentOutgroupInteraction
+  )
+
+# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
+summ(
+  mdlStudentOut$Att$lmerSlopesCore <- lmer(
+    AttitudesDutch ~
+      keymotive_fulfillemt_1 +
+      (1 + keymotive_fulfillemt_1 | PID),
+    data = studentOutgroupInteraction
+  ),
+  confint = TRUE,
+  digits = 3,
+  center = TRUE
+)
+
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(model.ran0,
+#               method="boot",nsim=1000,
+#               parallel = "multicore", ncpus = 4, seed = 42),
+#          "output/tables/ML-RandomSlopes-CI.csv")
+
+# Compare new model to previous step
+anova(mdlStudentOut$Att$lmeInterceptCore, 
+      mdlStudentOut$Att$lmeSlopesCore) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  kbl(
+    .,
+    caption = "Student: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlStudentOut$Att$varSlopesCore <- 
+  lme4::VarCorr(mdlStudentOut$Att$lmeSlopesCore)
+
+# The estimate of between-group (or Intercept variance) explained:
+# Variance Explained = 1 – (Var with Predictor/Var without Predictor)
+mdlStudentOut$Att$varBtwSlopesCore <-
+  1 - (as.numeric(mdlStudentOut$Att$varSlopesCore[1]) / as.numeric(mdlStudentOut$Att$varInterceptCore[1]))
+mdlStudentOut$Att$varBtwPercSlopesCore <-
+  (1 - (as.numeric(mdlStudentOut$Att$varSlopesCore[1]) / as.numeric(mdlStudentOut$Att$varInterceptCore[1]))) * 100
+# and the estimate of within-group (or residual variance) explained is:
+mdlStudentOut$Att$varWithinSlopesCore <-
+  1 - (as.numeric(mdlStudentOut$Att$varSlopesCore[2]) / as.numeric(mdlStudentOut$Att$varInterceptCore[2]))
+mdlStudentOut$Att$varWithinPercSlopesCore <-
+  (1 - (as.numeric(mdlStudentOut$Att$varSlopesCore[2]) / as.numeric(mdlStudentOut$Att$varInterceptCore[2]))) * 100
+
+# Assumption Checks:
+mdlStudentOut$Att$diagSlopesCore <- 
+  sjPlot::plot_model(mdlStudentOut$Att$lmerSlopesCore, type = "diag")
+grid.arrange(
+  mdlStudentOut$Att$diagSlopesCore[[1]],
+  mdlStudentOut$Att$diagSlopesCore[[2]]$`PID`,
+  mdlStudentOut$Att$diagSlopesCore[[3]],
+  mdlStudentOut$Att$diagSlopesCore[[4]]
+)
+
+# Plot prediction model
+mdlStudentOut$Att$predSlopesCore <- 
+  studentOutgroupInteraction %>%
+  select(AttitudesDutch, session, PID) %>% 
+  mutate(measure = predict(mdlStudentOut$Att$lmeSlopesCore,
+                           studentOutgroupInteraction,
+                           re.form = NA
+                           )
+         )
+
+(
+  mdlStudentOut$Att$predPltSlopesCore <-
+    ggplot(data = mdlStudentOut$Att$predSlopesCore, aes(x = session, y = measure)) +
+    geom_line(alpha = 1, color = "blue") +
+    geom_line(aes(y = AttitudesDutch), alpha = 1) +
+    facet_wrap( ~ PID, ncol = 6) +
+    xlab("Time") +
+    ylab("Outgroup Attitudes") +
+    theme_Publication()
+)
+ggsave(
+  filename = "Figures/StudentOut_PredictionPlot_SlopesAttCore.png",
+  mdlStudentOut$Att$predPltSlopesCore,
+  width = 18,
+  height = 12,
+  dpi = 800,
+  units = "cm",
+  device = "png"
+)
+```
+
+TL;DR: The random slope adds significantly to the prediction model.  
+
+<div class="alert alert-warning alert-dismissible fade in" role="alert">
+  <a class="close" data-dismiss="alert" aria-label="close">&times;</a>
+  <i class="fas fa-exclamation-triangle"></i> <b>Check needed: </b><br/>
+  Something is with the variances explained (between = `r format(round(mdlStudentOut$Att$varBtwPercSlopesCore, 2),nsmall=2)`%, within = `r format(round(mdlStudentOut$Att$varWithinPercSlopesCore, 2),nsmall=2)`%). This is when comparing the random intercepts to the random slopes model.
+</div>
+
+### Need fulfillment and Interaction Quality 
+
+##### Unconditional model
+
+make a model with only the data but a random intercept (unconditional model) for the outgroup interaction subset.
+
+\begin{equation}
+(\#eq:studentOutQualEmptyModel)
+Attitude_{ti} = \gamma_{00} + u_{0i} + e_{ti} \\
+\textrm{with}\ u_{0i} \sim \mathcal{N}(0,\tau_{00}^2)\ \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+\end{equation}
+
+```{r studentOutModelMLQltNull}
+# Create and save Model
+mdlStudentOut$Qlt$lmerNull <-
+  lme4::lmer(quality_overall_1 ~ 1 + (1 | PID), 
+             data = studentOutgroupInteraction) # use optim if it does not converge
+mdlStudentOut$Qlt$lmeNull <-
+  lme(
+    quality_overall_1 ~ 1,
+    random = ~ 1 | PID,
+    data = studentOutgroupInteraction,
+    control = list(opt = "nlmimb")
+  ) # use optim if it does not converge
+
+# Get summary with p-values (Satterthwaite's method)
+# summary(Null.Out.Qual.ML.r) #or with the lme function
+summ(mdlStudentOut$Qlt$lmerNull, digits = 3, center = TRUE)
+
+# generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(lmer(AttitudesDutch~1 + (1|PID),data=studentOutgroupInteraction),
+#                  method="boot",nsim=1000,
+#                  parallel = "multicore", ncpus = 4, seed = 42),
+#          "output/tables/ML-Null-CI.csv")
+
+# Save variances
+mdlStudentOut$Qlt$varNull <- 
+  VarCorr(mdlStudentOut$Qlt$lmeNull) # save variances
+# The estimate of (between-group or Intercept variance, tau_{00}^2):
+mdlStudentOut$Qlt$tauNull <- 
+  as.numeric(mdlStudentOut$Qlt$varNull[1])
+# and the estimate of (within-group or residual variance, sigma^2) is:
+mdlStudentOut$Qlt$sigmaNull <- 
+  as.numeric(mdlStudentOut$Qlt$varNull[2])
+# The ICC estimate (between/between+within) is:
+mdlStudentOut$Qlt$IccNull <-
+  (as.numeric(mdlStudentOut$Qlt$varNull[1]) / (as.numeric(mdlStudentOut$Qlt$varNull[1]) + as.numeric(mdlStudentOut$Qlt$varNull[2])))
+mdlStudentOut$Qlt$IccPercNull <-
+  ((as.numeric(mdlStudentOut$Qlt$varNull[1]) / (as.numeric(mdlStudentOut$Qlt$varNull[1]) + as.numeric(mdlStudentOut$Qlt$varNull[2])))) * 100
+```
+
+#### random intercept
+
+\begin{equation}
+(\#eq:QualityNeedEq)
+InteractionQuality_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + u_{0i} + e_{ti} \\
+\textrm{with}\ u_{0i} \sim \mathcal{N}(0,\tau_{00}^2)\ \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+\end{equation}
+
+```{r studentOutModelInterceptQltCore}
+# Create and save Model
+mdlStudentOut$Qlt$lmeInterceptCore <-
+  lme(
+    quality_overall_1 ~ keymotive_fulfillemt_1,
+    random = ~ 1 | PID,
+    data = studentOutgroupInteraction
+  )
+
+# Get summary with p-values (Satterthwaite's method)
+summ(
+  lmer(quality_overall_1 ~ keymotive_fulfillemt_1 + (1 | PID), 
+       data = studentOutgroupInteraction),
+  confint = TRUE,
+  digits = 3,
+  center = TRUE
+)
+
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(lmer(quality_overall_1 ~ Contact_dum + inNonDutch + (1|PID),data=studentOutgroupInteraction),
+#                  method="boot",nsim=1000, parallel = "multicore",
+#                  ncpus = 4, seed = 42),
+#          "output/tables/ML-Inter-CI.csv")
+
+# Compare new model to previous step
+anova(mdlStudentOut$Qlt$lmeNull, 
+      mdlStudentOut$Qlt$lmeInterceptCore) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  kbl(
+    .,
+    caption = "Student: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlStudentOut$Qlt$varInterceptCore <-
+  lme4::VarCorr(mdlStudentOut$Qlt$lmeInterceptCore)
+
+# The estimate of between-group (or Intercept variance) explained:
+# Variance Explained = 1 – (Var with Predictor/Var without Predictor)
+mdlStudentOut$Qlt$varBtwInterceptCore <- 
+  1 - (as.numeric(mdlStudentOut$Qlt$varInterceptCore[1]) / as.numeric(mdlStudentOut$Qlt$varNull[1]))
+mdlStudentOut$Qlt$varBtwPercInterceptCore <- 
+  (1 - (as.numeric(mdlStudentOut$Qlt$varInterceptCore[1]) / as.numeric(mdlStudentOut$Qlt$varNull[1]))) * 100
+# and the estimate of within-group (or residual variance) explained is:
+mdlStudentOut$Qlt$varWithinInterceptCore <-
+  1 - (as.numeric(mdlStudentOut$Qlt$varInterceptCore[2]) / as.numeric(mdlStudentOut$Qlt$varNull[2]))
+mdlStudentOut$Qlt$varWithinPercInterceptCore <-
+  (1 - (as.numeric(mdlStudentOut$Qlt$varInterceptCore[2]) / as.numeric(mdlStudentOut$Qlt$varNull[2]))) * 100
+```
+
+TL;DR: Situational core need relates significantly to interaction quality. The core need explained substantial variance between participants (`r format(round(mdlStudentOut$Qlt$varBtwPercInterceptCore, 2),nsmall=2)`%). The variance explained within participants is also medium (`r format(round(mdlStudentOut$Qlt$varWithinPercInterceptCore, 2),nsmall=2)`%) 
+
+#### random slope
+
+\begin{equation}
+(\#eq:QualityNeedRandEq)
+InteractionQuality_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + u_{0i} + u_{1i} + e_{ti}  \\
+\textrm{with}\ \begin{bmatrix} u_{0i}\\ u_{1i}\end{bmatrix} \sim \mathcal{N}(0,\Omega_u): \Omega_u=\begin{bmatrix} \tau_{0}^2 & \\ \tau_{01} & \tau_{1}^2 \end{bmatrix} \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+\end{equation}
+
+```{r studentOutModelSlopesQltCore}
+# Create and save Model (optimizer needed to reach convergence)
+mdlStudentOut$Qlt$lmeSlopesCore <-
+  lme(
+    quality_overall_1 ~
+      keymotive_fulfillemt_1,
+    random = ~ 1 + keymotive_fulfillemt_1 | PID,
+    control = lmeControl(opt = "optim"),
+    data = studentOutgroupInteraction
+  )
+
+# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
+summ(
+  mdlStudentOut$Qlt$lmerSlopesCore <-
+    lmer(
+      quality_overall_1 ~
+        keymotive_fulfillemt_1 +
+        (1 + keymotive_fulfillemt_1 | PID),
+      data = studentOutgroupInteraction
+    ),
+  confint = TRUE,
+  digits = 3,
+  center = TRUE
+)
+
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(mdlStudentOut$Qlt$lmerSlopesCore,
+#               method="boot",nsim=1000,
+#               parallel = "multicore", ncpus = 4, seed = 42),
+#          "output/tables/ML-RandomSlopes-CI.csv")
+
+# Compare new model to previous step
+anova(mdlStudentOut$Qlt$lmeInterceptCore, 
+      mdlStudentOut$Qlt$lmeSlopesCore) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  kbl(
+    .,
+    caption = "Student: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlStudentOut$Qlt$varSlopesCore <- 
+  lme4::VarCorr(mdlStudentOut$Qlt$lmeSlopesCore)
+
+# The estimate of between-group (or Intercept variance) explained:
+# Variance Explained = 1 – (Var with Predictor/Var without Predictor)
+mdlStudentOut$Qlt$varBtwSlopesCore <-
+  1 - (as.numeric(mdlStudentOut$Qlt$varSlopesCore[1]) / as.numeric(mdlStudentOut$Qlt$varInterceptCore[1]))
+mdlStudentOut$Qlt$varBtwPercSlopesCore <-
+  (1 - (as.numeric(mdlStudentOut$Qlt$varSlopesCore[1]) / as.numeric(mdlStudentOut$Qlt$varInterceptCore[1]))) * 100
+# and the estimate of within-group (or residual variance) explained is:
+mdlStudentOut$Qlt$varWithinSlopesCore <-
+  1 - (as.numeric(mdlStudentOut$Qlt$varSlopesCore[2]) / as.numeric(mdlStudentOut$Qlt$varInterceptCore[2]))
+mdlStudentOut$Qlt$varWithinPercSlopesCore <-
+  (1 - (as.numeric(mdlStudentOut$Qlt$varSlopesCore[2]) / as.numeric(mdlStudentOut$Qlt$varInterceptCore[2]))) * 100
+```
+
+TL;DR: random slopes does not add significantly. Stay with simpler model.
+
+### Need fulfillment, Interaction Quality, and Attitudes
+
+#### random intercept
+
+\begin{equation}
+(\#eq:AttitudeQualityNeedEq)
+Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + \gamma_{20}InteractionQuality_{ti} + u_{0i} + e_{ti} \\
+\textrm{with}\ u_{0i} \sim \mathcal{N}(0,\tau_{00}^2)\ \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+\end{equation}
+
+```{r studentOutModelInterceptAttCoreQlt}
+# Create and save Model
+mdlStudentOut$Att$lmeInterceptCoreQlt <-
+  lme(
+    AttitudesDutch ~ keymotive_fulfillemt_1 + quality_overall_1,
+    random = ~ 1 | PID,
+    data = studentOutgroupInteraction
+  )
+
+# Get summary with p-values (Satterthwaite's method)
+summ(
+  lmer(
+    AttitudesDutch ~ keymotive_fulfillemt_1 + quality_overall_1 + (1 | PID),
+    data = studentOutgroupInteraction
+  ),
+  confint = TRUE,
+  digits = 3,
+  center = TRUE
+)
+
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(lmer(AttitudesDutch ~ Contact_dum + inNonDutch + (1|PID),data=studentOutgroupInteraction),
+#                  method="boot",nsim=1000, parallel = "multicore",
+#                  ncpus = 4, seed = 42),
+#          "output/tables/ML-Inter-CI.csv")
+
+# Compare new model to previous step
+anova(
+  mdlStudentOut$Att$lmeNull, 
+  mdlStudentOut$Att$lmeInterceptCoreQlt
+  ) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  kbl(
+    .,
+    caption = "Student: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlStudentOut$Att$varInterceptCoreQlt <-
+  lme4::VarCorr(mdlStudentOut$Att$lmeInterceptCoreQlt)
+
+# The estimate of between-group (or Intercept variance) explained:
+# Variance Explained = 1 – (Var with Predictor/Var without Predictor)
+mdlStudentOut$Att$varBtwInterceptCoreQlt <- 
+  1 - (as.numeric(mdlStudentOut$Att$varInterceptCoreQlt[1]) / as.numeric(mdlStudentOut$Att$varNull[1]))
+mdlStudentOut$Att$varBtwPercInterceptCoreQlt <- 
+  (1 - (as.numeric(mdlStudentOut$Att$varInterceptCoreQlt[1]) / as.numeric(mdlStudentOut$Att$varNull[1]))) * 100
+# and the estimate of within-group (or residual variance) explained is:
+mdlStudentOut$Att$varWithinInterceptCoreQlt <-
+  1 - (as.numeric(mdlStudentOut$Att$varInterceptCoreQlt[2]) / as.numeric(mdlStudentOut$Att$varNull[2]))
+mdlStudentOut$Att$varWithinPercInterceptCoreQlt <-
+  (1 - (as.numeric(mdlStudentOut$Att$varInterceptCoreQlt[2]) / as.numeric(mdlStudentOut$Att$varNull[2]))) * 100
+```
+
+TL;DR: Variance explained in outgroup attitudes is of medium effect size (between: `r format(round(mdlStudentOut$Att$varBtwPercInterceptCoreQlt,2),nsmall=2)`%, within: `r format(round(mdlStudentOut$Att$varWithinPercInterceptCoreQlt,2),nsmall=2)`%)
+
+#### random slope
+
+\begin{equation}
+(\#eq:AttitudeQualityNeedRandEq)
+Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + \gamma_{20}InteractionQuality_{ti} + u_{0i} + u_{1i} + e_{ti}  \\
+\textrm{with}\ \begin{bmatrix} u_{0i}\\ u_{1i}\end{bmatrix} \sim \mathcal{N}(0,\Omega_u): \Omega_u=\begin{bmatrix} \tau_{0}^2 & \\ \tau_{01} & \tau_{1}^2 \end{bmatrix} \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+\end{equation}
+
+```{r studentOutModelSlopesAttCoreQlt}
+# Create and save Model (optimizer needed to reach convergence)
+mdlStudentOut$Att$lmeSlopesCoreQlt <-
+  lme(
+    AttitudesDutch ~
+      keymotive_fulfillemt_1 + quality_overall_1,
+    random = ~ 1 + keymotive_fulfillemt_1 + quality_overall_1 | PID,
+    control = lmeControl(opt = "optim"),
+    data = studentOutgroupInteraction
+  )
+
+# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
+summ(
+  mdlStudentOut$Att$lmerSlopesCoreQlt <- lmer(
+    AttitudesDutch ~
+      keymotive_fulfillemt_1 + quality_overall_1 +
+      (1 + keymotive_fulfillemt_1 + quality_overall_1 | PID),
+    data = studentOutgroupInteraction
+  ),
+  confint = TRUE,
+  digits = 3,
+  center = TRUE
+)
+
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(model.ran0,
+#               method="boot",nsim=1000,
+#               parallel = "multicore", ncpus = 4, seed = 42),
+#          "output/tables/ML-RandomSlopes-CI.csv")
+
+# Compare new model to previous step
+anova(
+  mdlStudentOut$Att$lmeNull,
+  mdlStudentOut$Att$lmeInterceptCoreQlt,
+  mdlStudentOut$Att$lmeSlopesCoreQlt
+) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  kbl(
+    .,
+    caption = "Student: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlStudentOut$Att$varSlopesCoreQlt <- 
+  lme4::VarCorr(mdlStudentOut$Att$lmeSlopesCoreQlt)
+
+# The estimate of between-group (or Intercept variance) explained:
+# Variance Explained = 1 – (Var with Predictor/Var without Predictor)
+mdlStudentOut$Att$varBtwSlopesCoreQlt <-
+  1 - (as.numeric(mdlStudentOut$Att$varSlopesCoreQlt[1]) / as.numeric(mdlStudentOut$Att$varInterceptCoreQlt[1]))
+mdlStudentOut$Att$varBtwPercSlopesCoreQlt <-
+  (1 - (as.numeric(mdlStudentOut$Att$varSlopesCoreQlt[1]) / as.numeric(mdlStudentOut$Att$varInterceptCoreQlt[1]))) * 100
+# and the estimate of within-group (or residual variance) explained is:
+mdlStudentOut$Att$varWithinSlopesCoreQlt <-
+  1 - (as.numeric(mdlStudentOut$Att$varSlopesCoreQlt[2]) / as.numeric(mdlStudentOut$Att$varInterceptCoreQlt[2]))
+mdlStudentOut$Att$varWithinPercSlopesCoreQlt <-
+  (1 - (as.numeric(mdlStudentOut$Att$varSlopesCoreQlt[2]) / as.numeric(mdlStudentOut$Att$varInterceptCoreQlt[2]))) * 100
+
+# Assumption Checks:
+mdlStudentOut$Att$diagSlopesCoreQlt <- 
+  sjPlot::plot_model(mdlStudentOut$Att$lmerSlopesCoreQlt, type = "diag")
+grid.arrange(
+  mdlStudentOut$Att$diagSlopesCoreQlt[[1]],
+  mdlStudentOut$Att$diagSlopesCoreQlt[[2]]$`PID`,
+  mdlStudentOut$Att$diagSlopesCoreQlt[[3]],
+  mdlStudentOut$Att$diagSlopesCoreQlt[[4]]
+)
+
+# Plot prediction model
+mdlStudentOut$Att$predSlopesCoreQlt <- 
+  studentOutgroupInteraction %>%
+  select(AttitudesDutch, session, PID) %>% 
+  mutate(measure = predict(mdlStudentOut$Att$lmeSlopesCoreQlt,
+                           studentOutgroupInteraction,
+                           re.form = NA
+                           )
+         )
+
+(
+  mdlStudentOut$Att$predPltSlopesCoreQlt <-
+    ggplot(data = mdlStudentOut$Att$predSlopesCoreQlt, aes(x = session, y = measure)) +
+    geom_line(alpha = 1, color = "blue") +
+    geom_line(aes(y = AttitudesDutch), alpha = 1) +
+    facet_wrap( ~ PID, ncol = 6) +
+    xlab("Time") +
+    ylab("Outgroup Attitudes") +
+    theme_Publication()
+)
+ggsave(
+  filename = "Figures/StudentOut_PredictionPlot_SlopesAttCoreQlt.png",
+  mdlStudentOut$Att$predPltSlopesCoreQlt,
+  width = 18,
+  height = 12,
+  dpi = 800,
+  units = "cm",
+  device = "png"
+)
+```
+
+#### Compare models
+
+Interpretation of Mediation like results.
+
+### Check for robustness
+
+#### Interaction Type
+
+##### random intercept
+
+\begin{equation}
+(\#eq:AttitudeNeedInteractionEq)
+Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + \gamma_{20}OutgroupInteraction_{ti} + \gamma_{30}KeyNeedFulfillXOutgroupInteraction_{ti} + u_{0i} + e_{ti} \\
+\textrm{with}\ u_{0i} \sim \mathcal{N}(0,\tau_{00}^2)\ \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+\end{equation}
+
+```{r studentModelInterceptAttCoreInt}
+# Create and save Model
+mdlStudent$lmeInterceptAttCoreInt <-
+  lme(
+    AttitudesDutch ~ keyMotiveFulfilled * OutgroupInteraction,
+    random =  ~ 1 | PID,
+    data = studentInteractionType
+  )
+
+# Get summary with p-values (Satterthwaite's method)
+summ(
+  mdlStudent$lmerInterceptAttCoreInt <- lmer(
+    AttitudesDutch ~ keyMotiveFulfilled * OutgroupInteraction + (1 | PID),
+    data = studentInteractionType
+  ),
+  confint = TRUE,
+  digits = 3,
+  center = TRUE
+)
+
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(lmer(AttitudesDutch ~ Contact_dum + inNonDutch + (1|PID),data=studentInteractionType),
+#                  method="boot",nsim=1000, parallel = "multicore",
+#                  ncpus = 4, seed = 42),
+#          "output/tables/ML-Inter-CI.csv")
+
+# Compare new model to previous step
+anova(mdlStudent$lmeAttNull, 
+      mdlStudent$lmeInterceptAttCoreInt) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  kbl(
+    .,
+    caption = "Student: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlStudent$varInterceptAttCoreInt <- 
+  lme4::VarCorr(mdlStudent$lmeInterceptAttCoreInt)
+
+# The estimate of between-group (or Intercept variance) explained:
+# Variance Explained = 1 – (Var with Predictor/Var without Predictor)
+mdlStudent$varBtwInterceptAttCoreInt <-
+  1 - (as.numeric(mdlStudent$varInterceptAttCoreInt[1]) / as.numeric(mdlStudent$varAttNull[1]))
+mdlStudent$varBtwPercInterceptAttCoreInt <-
+  (1 - (as.numeric(mdlStudent$varInterceptAttCoreInt[1]) / as.numeric(mdlStudent$varAttNull[1]))) * 100
+# and the estimate of within-group (or residual variance) explained is:
+mdlStudent$varWithinInterceptAttCoreInt <-
+  1 - (as.numeric(mdlStudent$varInterceptAttCoreInt[2]) / as.numeric(mdlStudent$varAttNull[2]))
+mdlStudent$varWithinPercInterceptAttCoreInt <-
+  (1 - (as.numeric(mdlStudent$varInterceptAttCoreInt[2]) / as.numeric(mdlStudent$varAttNull[2]))) * 100
+```
+
+##### random slope
+
+\begin{equation}
+(\#eq:AttitudeNeedInteractionRandEq)
+Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + \gamma_{20}OutgroupInteraction_{ti} + \gamma_{30}KeyNeedFulfillXOutgroupInteraction_{ti}  + u_{0i} + u_{1i} + e_{ti}  \\
+\textrm{with}\ \begin{bmatrix} u_{0i}\\ u_{1i}\end{bmatrix} \sim \mathcal{N}(0,\Omega_u): \Omega_u=\begin{bmatrix} \tau_{0}^2 & \\ \tau_{01} & \tau_{1}^2 \end{bmatrix} \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+\end{equation}
+
+```{r studentModelSlopesAttCoreIntX}
+# Create and save Model (optimizer needed to reach convergence)
+mdlStudent$lmeSlopesAttCoreInt <- lme(
+  AttitudesDutch ~
+    keyMotiveFulfilled * OutgroupInteraction,
+  random = ~ 1 + keyMotiveFulfilled + OutgroupInteraction | PID,
+  control = lmeControl(opt = "optim"),
+  data = studentInteractionType
+)
+
+# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
+summ(
+  mdlStudent$lmerSlopesAttCoreInt <- lmer(
+    AttitudesDutch ~
+      keyMotiveFulfilled * OutgroupInteraction +
+      (1 + keyMotiveFulfilled + OutgroupInteraction | PID),
+    data = studentInteractionType
+  ), 
+  confint = TRUE,
+  digits = 3,
+  center = TRUE
+)
+
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(model.ran0,
+#               method="boot",nsim=1000,
+#               parallel = "multicore", ncpus = 4, seed = 42),
+#          "output/tables/ML-RandomSlopes-CI.csv")
+
+# Compare new model to previous step
+anova(mdlStudent$lmeAttNull, 
+      mdlStudent$lmeInterceptAttCoreInt,
+      mdlStudent$lmeSlopesAttCoreInt) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  kbl(
+    .,
+    caption = "Student: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlStudent$varSlopesAttCoreInt <- 
+  lme4::VarCorr(mdlStudent$lmeSlopesAttCoreInt)
+
+# The estimate of between-group (or Intercept variance) explained:
+# Variance Explained = 1 – (Var with Predictor/Var without Predictor)
+mdlStudent$varBtwSlopesAttCoreInt <- 
+  1 - (as.numeric(mdlStudent$varSlopesAttCoreInt[1]) / as.numeric(mdlStudent$varInterceptAttCoreInt[1]))
+mdlStudent$varBtwPercSlopesAttCoreInt <- 
+  (1 - (as.numeric(mdlStudent$varSlopesAttCoreInt[1]) / as.numeric(mdlStudent$varInterceptAttCoreInt[1]))) * 100
+# and the estimate of within-group (or residual variance) explained is:
+mdlStudent$varWithinSlopesAttCoreInt <- 
+  1 - (as.numeric(mdlStudent$varSlopesAttCoreInt[2]) / as.numeric(mdlStudent$varInterceptAttCoreInt[2]))
+mdlStudent$varWithinPercSlopesAttCoreInt <- 
+  (1 - (as.numeric(mdlStudent$varSlopesAttCoreInt[2]) / as.numeric(mdlStudent$varInterceptAttCoreInt[2]))) * 100
+
+# Assumption Checks:
+mdlStudent$diagSlopesAttCoreInt <-
+  sjPlot::plot_model(mdlStudent$lmerSlopesAttCoreInt, type = "diag")
+grid.arrange(
+  mdlStudent$diagSlopesAttCoreInt[[1]],
+  mdlStudent$diagSlopesAttCoreInt[[2]]$`PID`,
+  mdlStudent$diagSlopesAttCoreInt[[3]],
+  mdlStudent$diagSlopesAttCoreInt[[4]]
+)
+
+# Plot prediction model
+mdlStudent$predSlopesAttCoreInt <- 
+  studentInteractionType %>%
+  select(AttitudesDutch, session, PID) %>% 
+  mutate(measure = predict(mdlStudent$lmeSlopesAttCoreInt,
+                           studentInteractionType,
+                           re.form = NA
+                           )
+         )
+
+(
+  mdlStudent$predPltSlopesAttCoreInt <-
+    ggplot(data = mdlStudent$predSlopesAttCoreInt, aes(x = session, y = measure)) +
+    geom_line(alpha = 1, color = "blue") +
+    geom_line(aes(y = AttitudesDutch), alpha = 1) +
+    facet_wrap(~ PID, ncol = 6) +
+    xlab("Time") +
+    ylab("Outgroup Attitudes") +
+    theme_Publication()
+)
+ggsave(
+  filename = "Figures/Student_PredictionPlot_SlopesAttCoreInt.png",
+  mdlStudent$predPltSlopesAttCoreInt,
+  width = 18,
+  height = 12,
+  dpi = 800,
+  units = "cm",
+  device = "png"
+)
+```
+
+##### Plot Interaction
+
+```{r studentModelInterceptAttCoreIntPlt}
+# visualize interaction
+## Without ML structure
+ggplot(data = studentInteractionType,
+       aes(x = keyMotiveFulfilled,
+           y = AttitudesDutch,
+           fill = OutgroupInteraction)) +
+  #geom_point()+
+  geom_smooth(method = 'lm',
+              aes(linetype = OutgroupInteraction),
+              color = "black") +
+  #facet_wrap(~PID, ncol = 6)+
+  scale_linetype_manual(values = c("dashed", "solid")) +
+  scale_fill_manual(values = c("darkgrey", "black")) +
+  #scale_colour_manual(values=c("grey20", "black"), name="Intergroup Contact")+
+  scale_y_continuous(
+    limits = c(50, 100),
+    breaks = seq(50, 100, by = 10),
+    position = "left"
+  ) +
+  scale_x_continuous(limits = c(-50, 50), breaks = seq(-50, 50, by = 10)) +
+  labs(
+    title = "Without ML stucture",
+    x = "Fulfillment Core Need",
+    y = "Outgroup Attitudes",
+    fill = "Intergroup Contact",
+    linetype = "Intergroup Contact"
+  ) +
+  theme_Publication() +
+  theme(legend.position = "bottom",
+        legend.key.size = unit(1, "cm"))
+## With ML structure
+# create parameters for prediction
+datNew = data.frame(
+  OutgroupInteraction = factor(rep(c("No", "Yes"), each = 21)),
+  keyMotiveFulfilled = rep(seq(-50, 50, 5), 2),
+  PID = 0
+)
+
+# Predict values, clean up and calculate SE
+PI <-
+  merTools::predictInterval(
+    merMod = mdlStudent$lmerSlopesAttCoreInt,
+    newdata = datNew,
+    level = 0.95,
+    stat = "mean",
+    type = "linear.prediction",
+    include.resid.var = F,
+    fix.intercept.variance = F
+  )
+mdlStudent$predInterceptAttCoreIntX <- 
+  cbind(datNew, PI)
+mdlStudent$predInterceptAttCoreIntX$se <-
+  (mdlStudent$predInterceptAttCoreIntX$upr - mdlStudent$predInterceptAttCoreIntX$fit) / 1.96
+rm(datNew, PI)
+
+# Plot predicted values with SE
+ggplot(
+  mdlStudent$predInterceptAttCoreIntX,
+  aes(x = keyMotiveFulfilled,
+      y = fit,
+      fill = OutgroupInteraction)
+)+
+  #geom_point() +
+  geom_line(aes(linetype = as.factor(OutgroupInteraction)), size = 1) +
+  #facet_wrap(~PID, ncol = 6)+
+  geom_ribbon(data = mdlStudent$predInterceptAttCoreIntX,
+              aes(ymin = fit - se, ymax = fit + se),
+              alpha = 0.3) +
+  scale_x_continuous(breaks = seq(-50, 50, 10)) +
+  scale_y_continuous(limits = c(50, 100), breaks = seq(50, 100, 10)) +
+  scale_linetype_manual(values = c("dashed", "solid")) +
+  scale_fill_manual(values = c("darkgrey", "black")) +
+  labs(
+    x = "Fulfillment Core Need",
+    y = "Outgroup Attitude (NL)",
+    fill = "Intergroup Contact",
+    linetype = "Intergroup Contact",
+    title = "Based on Model Predictions"
+  ) +
+  theme_Publication()
+
+# #### Bayesian estimation !! ONLY RUN ON FINAL RENDER !! Takes forever ####
+# options(mc.cores = parallel::detectCores())  # Run many chains simultaneously
+# brmfit <- brm(
+#   AttitudesDutch ~ keyMotiveFulfilled * OutgroupInteraction + 
+#     (1 + keyMotiveFulfilled + OutgroupInteraction | PID),
+#   data = studentInteractionType,
+#   family = gaussian,
+#   iter = 1000,
+#   chains = 4
+# )
+# 
+# # create parameters for prediction:
+# datNew = data.frame(
+#   OutgroupInteraction = rep(c("No", "Yes"), each = 101),
+#   keyMotiveFulfilled = rep(seq(-50, 50, 1), 2)
+# )
+# # Save predicted values and adjust names and labels
+# fitavg <-
+#   cbind(datNew,
+#         fitted(brmfit, newdata = datNew, re_formula = NA)[, -2])
+# names(fitavg)[names(fitavg) == "Estimate"] = "pred"
+# fitavg$se <- (fitavg$Q97.5 - fitavg$pred) / 1.96
+# 
+# # Plot Bayesian SE prediction interval
+# ggplot(fitavg,
+#        aes(x = keyMotiveFulfilled,
+#            y = pred,
+#            fill = OutgroupInteraction)) +
+#   scale_x_continuous(breaks = seq(-50, 50, 10)) +
+#   scale_y_continuous(limits = c(50, 100), breaks = seq(50, 100, 10)) +
+#   geom_line(aes(linetype = OutgroupInteraction), size = 1) +
+#   geom_ribbon(aes(ymin = pred - se, ymax = pred + se), alpha = 0.2) +
+#   scale_linetype_manual(values = c("dashed", "solid")) +
+#   scale_fill_manual(values = c("darkgrey", "black")) +
+#   labs(
+#     x = "Fulfillment Core Need",
+#     y = "Outgroup Attitude (NL)",
+#     fill = "Intergroup Contact",
+#     linetype = "Intergroup Contact",
+#     title = "Based on Bayesian Prediction Interval"
+#   ) +
+#   theme_Publication()
+# 
+# # plot all overlayed posteriors:
+# pst <- posterior_samples(brmfit, "b")
+# ggplot(studentInteractionType,
+#        aes(x = keyMotiveFulfilled, y = AttitudesDutch)) +
+#   geom_point(shape = 4, alpha = .1) +
+#   geom_tile() +
+#   geom_abline(
+#     data = pst,
+#     aes(intercept = b_Intercept, slope = b_keyMotiveFulfilled),
+#     alpha = .025,
+#     size = .4
+#   ) +
+#   labs(title = "slope Posteriors",
+#        x = "Fulfillment Core Need",
+#        y = "Outgroup Attitudes (NL)") +
+#   theme_Publication()
+# rm(datNew, brmfit, fitavg, pst)
+```
+
+#### Other psychological needs
+
+##### random intercept
+
+\begin{equation}
+(\#eq:AttitudeNeedSdtEq)
+Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + \gamma_{20}Autonomy_{ti} + \gamma_{30}Competence_{ti} + \gamma_{40}Relatedness_{ti} + u_{0i} + e_{ti} \\
+\textrm{with}\ u_{0i} \sim \mathcal{N}(0,\tau_{00}^2)\ \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+\end{equation}
+
+```{r studentOutModelInterceptAttCoreSdt}
+# Create and save Model
+mdlStudentOut$Att$lmeInterceptCoreSdt <-
+  lme(
+    AttitudesDutch ~ keymotive_fulfillemt_1 + competence_1 + autonomy_1 + relatedness_1,
+    random = ~ 1 | PID,
+    data = studentOutgroupInteraction,
+    na.action = na.exclude
+  )
+
+# Get summary with p-values (Satterthwaite's method)
+summ(
+  mdlStudentOut$Att$lmerInterceptCoreSdt <- lmer(
+    AttitudesDutch ~ keymotive_fulfillemt_1 + competence_1 + autonomy_1 + relatedness_1 + (1 | PID),
+    data = studentOutgroupInteraction
+  ),
+  confint = TRUE,
+  digits = 3,
+  center = TRUE
+)
+
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(lmer(AttitudesDutch ~ Contact_dum + inNonDutch + (1|PID),data=studentOutgroupInteraction),
+#                  method="boot",nsim=1000, parallel = "multicore",
+#                  ncpus = 4, seed = 42),
+#          "output/tables/ML-Inter-CI.csv")
+
+# compute lme for core model with same number of observations for comparison
+# !! LOOK INTO MISSINGNESS (only one observation) !!
+lmeInterceptCoreRed <-
+  lme(
+    AttitudesDutch ~ keymotive_fulfillemt_1,
+    random = ~ 1 | PID,
+    data = studentOutgroupInteraction %>% filter(!is.na(autonomy_1))
+  )
+
+# Compare new model to previous step
+anova(
+  lmeInterceptCoreRed, 
+  mdlStudentOut$Att$lmeInterceptCoreSdt
+  ) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  kbl(
+    .,
+    caption = "Student: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+rm(lmeInterceptCoreRed)
+
+# Save variances
+mdlStudentOut$Att$varInterceptCoreSdt <-
+  lme4::VarCorr(mdlStudentOut$Att$lmeInterceptCoreSdt)
+
+# The estimate of between-group (or Intercept variance) explained:
+# Variance Explained = 1 – (Var with Predictor/Var without Predictor)
+mdlStudentOut$Att$varBtwInterceptCoreSdt <- 
+  1 - (as.numeric(mdlStudentOut$Att$varInterceptCoreSdt[1]) / as.numeric(mdlStudentOut$Att$varInterceptCore[1]))
+mdlStudentOut$Att$varBtwPercInterceptCoreSdt <- 
+  (1 - (as.numeric(mdlStudentOut$Att$varInterceptCoreSdt[1]) / as.numeric(mdlStudentOut$Att$varInterceptCore[1]))) * 100
+# and the estimate of within-group (or residual variance) explained is:
+mdlStudentOut$Att$varWithinInterceptCoreSdt <-
+  1 - (as.numeric(mdlStudentOut$Att$varInterceptCoreSdt[2]) / as.numeric(mdlStudentOut$Att$varInterceptCore[2]))
+mdlStudentOut$Att$varWithinPercInterceptCoreSdt <-
+  (1 - (as.numeric(mdlStudentOut$Att$varInterceptCoreSdt[2]) / as.numeric(mdlStudentOut$Att$varInterceptCore[2]))) * 100
+```
+
+##### random slope
+
+\begin{equation}
+(\#eq:AttitudeNeedSdtRandEq)
+Attitude_{ti} = \\gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + \gamma_{20}Autonomy_{ti} + \gamma_{30}Competence_{ti} + \gamma_{40}Relatedness_{ti} + u_{0i} + u_{1i} + e_{ti}  \\
+\textrm{with}\ \begin{bmatrix} u_{0i}\\ u_{1i}\end{bmatrix} \sim \mathcal{N}(0,\Omega_u): \Omega_u=\begin{bmatrix} \tau_{0}^2 & \\ \tau_{01} & \tau_{1}^2 \end{bmatrix} \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+\end{equation}
+
+```{r studentOutModelSlopesAttCoreSdt}
+# Create and save Model (optimizer needed to reach convergence)
+mdlStudentOut$Att$lmeSlopesCoreSdt <-
+  lme(
+    AttitudesDutch ~
+      keymotive_fulfillemt_1 + competence_1 + autonomy_1 + relatedness_1,
+    random = ~ 1 + keymotive_fulfillemt_1 + competence_1 + autonomy_1 + relatedness_1 | PID,
+    control = lmeControl(opt = "optim"),
+    data = studentOutgroupInteraction,
+    na.action = na.exclude
+  )
+
+# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
+summ(
+  mdlStudentOut$Att$lmerSlopesCoreSdt <- lmer(
+    AttitudesDutch ~
+      keymotive_fulfillemt_1 + competence_1 + autonomy_1 + relatedness_1 +
+      (1 + keymotive_fulfillemt_1 + competence_1 + autonomy_1 + relatedness_1 | PID),
+    data = studentOutgroupInteraction
+  ),
+  confint = TRUE,
+  digits = 3,
+  center = TRUE
+)
+
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(model.ran0,
+#               method="boot",nsim=1000,
+#               parallel = "multicore", ncpus = 4, seed = 42),
+#          "output/tables/ML-RandomSlopes-CI.csv")
+
+# Compare new model to previous step
+anova(mdlStudentOut$Att$lmeInterceptCoreSdt, 
+      mdlStudentOut$Att$lmeSlopesCoreSdt) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  kbl(
+    .,
+    caption = "Student: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlStudentOut$Att$varSlopesCoreSdt <- 
+  lme4::VarCorr(mdlStudentOut$Att$lmeSlopesCoreSdt)
+
+# The estimate of between-group (or Intercept variance) explained:
+# Variance Explained = 1 – (Var with Predictor/Var without Predictor)
+mdlStudentOut$Att$varBtwSlopesCoreSdt <-
+  1 - (as.numeric(mdlStudentOut$Att$varSlopesCoreSdt[1]) / as.numeric(mdlStudentOut$Att$varInterceptCoreSdt[1]))
+mdlStudentOut$Att$varBtwPercSlopesCoreSdt <-
+  (1 - (as.numeric(mdlStudentOut$Att$varSlopesCoreSdt[1]) / as.numeric(mdlStudentOut$Att$varInterceptCoreSdt[1]))) * 100
+# and the estimate of within-group (or residual variance) explained is:
+mdlStudentOut$Att$varWithinSlopesCoreSdt <-
+  1 - (as.numeric(mdlStudentOut$Att$varSlopesCoreSdt[2]) / as.numeric(mdlStudentOut$Att$varInterceptCoreSdt[2]))
+mdlStudentOut$Att$varWithinPercSlopesCoreSdt <-
+  (1 - (as.numeric(mdlStudentOut$Att$varSlopesCoreSdt[2]) / as.numeric(mdlStudentOut$Att$varInterceptCoreSdt[2]))) * 100
+
+# Assumption Checks:
+mdlStudentOut$Att$diagSlopesCoreSdt <- 
+  sjPlot::plot_model(mdlStudentOut$Att$lmerSlopesCoreSdt, type = "diag")
+grid.arrange(
+  mdlStudentOut$Att$diagSlopesCoreSdt[[1]],
+  mdlStudentOut$Att$diagSlopesCoreSdt[[2]]$`PID`,
+  mdlStudentOut$Att$diagSlopesCoreSdt[[3]],
+  mdlStudentOut$Att$diagSlopesCoreSdt[[4]]
+)
+
+# Plot prediction model
+mdlStudentOut$Att$predSlopesCoreSdt <- 
+  studentOutgroupInteraction %>%
+  filter(!is.na(autonomy_1)) %>%
+  select(AttitudesDutch, session, PID, autonomy_1) %>% 
+  mutate(measure = predict(mdlStudentOut$Att$lmeSlopesCoreSdt,
+                           studentOutgroupInteraction %>% filter(!is.na(autonomy_1)),
+                           re.form = NA
+                           )
+         )
+
+(
+  mdlStudentOut$Att$predPltSlopesCoreSdt <-
+    ggplot(data = mdlStudentOut$Att$predSlopesCoreSdt, aes(x = session, y = measure)) +
+    geom_line(alpha = 1, color = "blue") +
+    geom_line(aes(y = AttitudesDutch), alpha = 1) +
+    facet_wrap( ~ PID, ncol = 6) +
+    xlab("Time") +
+    ylab("Outgroup Attitudes") +
+    theme_Publication()
+)
+ggsave(
+  filename = "Figures/StudentOut_PredictionPlot_SlopesAttCoreStd.png",
+  mdlStudentOut$Att$predPltSlopesCoreSdt,
+  width = 18,
+  height = 12,
+  dpi = 800,
+  units = "cm",
+  device = "png"
+)
+```
 
 # **Young Medical Professional Sample**
 
