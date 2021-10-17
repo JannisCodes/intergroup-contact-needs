@@ -629,7 +629,7 @@ df$relatedness.daily.all <- rowMeans(df[, c(
   "relatedness_self_1",
   "relatedness_1_NoInt_1"
 )], na.rm = T)
-df$relatedness.daily.int <- rowMeans(df[, c("relatedness_other_1", "relatedness_self_1")], na.rm = T)
+df$relatedness_1 <- rowMeans(df[, c("relatedness_other_1", "relatedness_self_1")], na.rm = T)
 
 # summarize by participant (check that everything is within pp might not be the case for )
 between <- df %>%
@@ -1249,7 +1249,7 @@ mdlWorker$predSlopesAttType <-
     facet_wrap(~ PID, ncol = 6) +
     xlab("Time") +
     ylab("Outgroup Attitudes") +
-    theme_bw()
+    theme_Publication()
 )
 ggsave(
   filename = "Figures/Worker_PredictionPlot_SlopesAttType.png",
@@ -1581,7 +1581,7 @@ mdlWorkerOut$Att$predSlopesCore <-
     facet_wrap( ~ PID, ncol = 6) +
     xlab("Time") +
     ylab("Outgroup Attitudes") +
-    theme_bw()
+    theme_Publication()
 )
 ggsave(
   filename = "Figures/WorkerOut_PredictionPlot_SlopesAttCore.png",
@@ -1968,7 +1968,7 @@ mdlWorkerOut$Att$predSlopesCoreQlt <-
     facet_wrap( ~ PID, ncol = 6) +
     xlab("Time") +
     ylab("Outgroup Attitudes") +
-    theme_bw()
+    theme_Publication()
 )
 ggsave(
   filename = "Figures/WorkerOut_PredictionPlot_SlopesAttCoreQlt.png",
@@ -2001,7 +2001,7 @@ Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + \gamma_{20}Outgro
 # Create and save Model
 mdlWorker$lmeInterceptAttCoreInt <-
   lme(
-    thermometerDutch_1 ~ keyMotiveFulfilled * c,
+    thermometerDutch_1 ~ keyMotiveFulfilled * OutgroupInteraction,
     random =  ~ 1 | PID,
     data = workerInteractionType
   )
@@ -2054,11 +2054,126 @@ mdlWorker$varWithinInterceptAttCoreInt <-
   1 - (as.numeric(mdlWorker$varInterceptAttCoreInt[2]) / as.numeric(mdlWorker$varAttNull[2]))
 mdlWorker$varWithinPercInterceptAttCoreInt <-
   (1 - (as.numeric(mdlWorker$varInterceptAttCoreInt[2]) / as.numeric(mdlWorker$varAttNull[2]))) * 100
+```
 
+##### random slope
+
+\begin{equation}
+(\#eq:AttitudeNeedInteractionRandEq)
+Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + \gamma_{20}OutgroupInteraction_{ti} + \gamma_{30}KeyNeedFulfillXOutgroupInteraction_{ti}  + u_{0i} + u_{1i} + e_{ti}  \\
+\textrm{with}\ \begin{bmatrix} u_{0i}\\ u_{1i}\end{bmatrix} \sim \mathcal{N}(0,\Omega_u): \Omega_u=\begin{bmatrix} \tau_{0}^2 & \\ \tau_{01} & \tau_{1}^2 \end{bmatrix} \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+\end{equation}
+
+```{r workerModelSlopesAttCoreIntX}
+# Create and save Model (optimizer needed to reach convergence)
+mdlWorker$lmeSlopesAttCoreInt <- lme(
+  thermometerDutch_1 ~
+    keyMotiveFulfilled * OutgroupInteraction,
+  random = ~ 1 + keyMotiveFulfilled + OutgroupInteraction | PID,
+  control = lmeControl(opt = "optim"),
+  data = workerInteractionType
+)
+
+# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
+summ(
+  mdlWorker$lmerSlopesAttCoreInt <- lmer(
+    thermometerDutch_1 ~
+      keyMotiveFulfilled * OutgroupInteraction +
+      (1 + keyMotiveFulfilled + OutgroupInteraction | PID),
+    data = workerInteractionType
+  ), 
+  confint = TRUE,
+  digits = 3,
+  center = TRUE
+)
+
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(model.ran0,
+#               method="boot",nsim=1000,
+#               parallel = "multicore", ncpus = 4, seed = 42),
+#          "output/tables/ML-RandomSlopes-CI.csv")
+
+# Compare new model to previous step
+anova(mdlWorker$lmeAttNull, 
+      mdlWorker$lmeInterceptAttCoreInt,
+      mdlWorker$lmeSlopesAttCoreInt) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  kbl(
+    .,
+    caption = "Worker: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlWorker$varSlopesAttCoreInt <- 
+  lme4::VarCorr(mdlWorker$lmeSlopesAttCoreInt)
+
+# The estimate of between-group (or Intercept variance) explained:
+# Variance Explained = 1 – (Var with Predictor/Var without Predictor)
+mdlWorker$varBtwSlopesAttCoreInt <- 
+  1 - (as.numeric(mdlWorker$varSlopesAttCoreInt[1]) / as.numeric(mdlWorker$varInterceptAttCoreInt[1]))
+mdlWorker$varBtwPercSlopesAttCoreInt <- 
+  (1 - (as.numeric(mdlWorker$varSlopesAttCoreInt[1]) / as.numeric(mdlWorker$varInterceptAttCoreInt[1]))) * 100
+# and the estimate of within-group (or residual variance) explained is:
+mdlWorker$varWithinSlopesAttCoreInt <- 
+  1 - (as.numeric(mdlWorker$varSlopesAttCoreInt[2]) / as.numeric(mdlWorker$varInterceptAttCoreInt[2]))
+mdlWorker$varWithinPercSlopesAttCoreInt <- 
+  (1 - (as.numeric(mdlWorker$varSlopesAttCoreInt[2]) / as.numeric(mdlWorker$varInterceptAttCoreInt[2]))) * 100
+
+# Assumption Checks:
+mdlWorker$diagSlopesAttCoreInt <-
+  sjPlot::plot_model(mdlWorker$lmerSlopesAttCoreInt, type = "diag")
+grid.arrange(
+  mdlWorker$diagSlopesAttCoreInt[[1]],
+  mdlWorker$diagSlopesAttCoreInt[[2]]$`PID`,
+  mdlWorker$diagSlopesAttCoreInt[[3]],
+  mdlWorker$diagSlopesAttCoreInt[[4]]
+)
+
+# Plot prediction model
+mdlWorker$predSlopesAttCoreInt <- 
+  workerInteractionType %>%
+  select(thermometerDutch_1, session, PID) %>% 
+  mutate(measure = predict(mdlWorker$lmeSlopesAttCoreInt,
+                           workerInteractionType,
+                           re.form = NA
+                           )
+         )
+
+(
+  mdlWorker$predPltSlopesAttCoreInt <-
+    ggplot(data = mdlWorker$predSlopesAttCoreInt, aes(x = session, y = measure)) +
+    geom_line(alpha = 1, color = "blue") +
+    geom_line(aes(y = thermometerDutch_1), alpha = 1) +
+    facet_wrap(~ PID, ncol = 6) +
+    xlab("Time") +
+    ylab("Outgroup Attitudes") +
+    theme_Publication()
+)
+ggsave(
+  filename = "Figures/Worker_PredictionPlot_SlopesAttCoreInt.png",
+  mdlWorker$predPltSlopesAttCoreInt,
+  width = 18,
+  height = 12,
+  dpi = 800,
+  units = "cm",
+  device = "png"
+)
+```
+
+##### Plot Interaction
+
+```{r workerModelInterceptAttCoreIntPlt}
 # visualize interaction
 ## Without ML structure
 ggplot(data = workerInteractionType,
-       aes(x = keyMotiveFulfilled, 
+       aes(x = keyMotiveFulfilled,
            y = thermometerDutch_1,
            fill = OutgroupInteraction)) +
   #geom_point()+
@@ -2085,175 +2200,120 @@ ggplot(data = workerInteractionType,
   theme_Publication() +
   theme(legend.position = "bottom",
         legend.key.size = unit(1, "cm"))
-## With ML structure 
-# get predicted values and calculate SE
-plot.int <-
-  sjPlot::get_model_data(
-    mdlWorker$lmeInterceptAttCoreInt,
-    type = "pred",
-    terms = c(
-      "OutgroupInteraction",
-      paste("keyMotiveFulfilled [",paste(seq(-50, 50, 10), collapse = ", "),"]",collapse = "")
-    ),
-    pretty = F
-  )
-plot.int$se = (plot.int$conf.high - plot.int$predicted)/1.96
-  
-# plot predicted values with SE band
-ggplot(plot.int,
-       aes(
-         x = as.numeric(as.character(group)),
-         y = predicted,
-         group = as.factor(x)
-       )) +
-  geom_line(aes(linetype = as.factor(x)), size = 1) +
-  #geom_point(aes(shape=as.factor(x)), size=2, position = position_dodge(0.0)) +
-  geom_ribbon(aes(ymin = predicted - se, ymax = predicted + se), alpha =
-                0.2) +
-  scale_y_continuous(
-    limits = c(50, 100),
-    breaks = seq(50, 100, by = 10),
-    position = "left"
-  ) +
-  scale_x_continuous(breaks = seq(-50, 50, 10)) +
-  scale_linetype_manual(values = c("dashed", "solid")) +
-  xlab("Fulfillment Relatedness") +
-  ylab("Outgroup Attitudes") +
-  guides(
-    shape = guide_legend(title = "Intergroup Contact"),
-    linetype = guide_legend(title = "Intergroup Contact")
-  ) +
-  theme_bw() +
-  theme(legend.position = "bottom",
-        legend.key.size = unit(1, "cm"))
-
-#### Predict Standard errors with Options ####
-  # create parameters for prediction
-mdlWorker$predInterceptAttCoreInt <- 
-  workerOutgroupInteraction %>%
-  select(PID, thermometerDutch_1, OutgroupInteraction) %>% 
-  mutate(measure = predict(mdlWorker$lmerInterceptAttCoreInt,
-                           workerOutgroupInteraction,
-                           re.form = NA
-                           )
-         )
-
+## With ML structure
+# create parameters for prediction
 datNew = data.frame(
-  OutgroupInteraction = rep(c("No", "Yes"), each = 21),
-  keyMotiveFulfilled = rep(seq(-50, 50, 5), 2)
+  OutgroupInteraction = factor(rep(c("No", "Yes"), each = 21)),
+  keyMotiveFulfilled = rep(seq(-50, 50, 5), 2),
+  PID = 0
 )
 
 # Predict values, clean up and calculate SE
 PI <-
   merTools::predictInterval(
-    merMod = mdlWorker$lmerInterceptAttCoreInt,
+    merMod = mdlWorker$lmerSlopesAttCoreInt,
     newdata = datNew,
     level = 0.95,
-    n.sims = 10000,
     stat = "mean",
     type = "linear.prediction",
     include.resid.var = F,
     fix.intercept.variance = F
   )
-
-dat.mod = cbind(datNew, PI)
-dat.mod$se = (dat.mod$upr - dat.mod$fit) / 1.96
+mdlWorker$predInterceptAttCoreIntX <- 
+  cbind(datNew, PI)
+mdlWorker$predInterceptAttCoreIntX$se <-
+  (mdlWorker$predInterceptAttCoreIntX$upr - mdlWorker$predInterceptAttCoreIntX$fit) / 1.96
+rm(datNew, PI)
 
 # Plot predicted values with SE
-ggplot(dat.mod,
-       aes(x = keyMotiveFulfilled, 
-           y = thermometerDutch_1,
-           fill = OutgroupInteraction)) +
+ggplot(
+  mdlWorker$predInterceptAttCoreIntX,
+  aes(x = keyMotiveFulfilled,
+      y = fit,
+      fill = OutgroupInteraction)
+)+
   #geom_point() +
-  #geom_smooth(method="loess") +
-  #geom_ribbon(data=dat.mod,aes(ymin=lwr,ymax=upr),alpha=0.3) +
-  geom_line(aes(linetype = as.factor(Contact_dum.f)), size = 1) +
+  geom_line(aes(linetype = as.factor(OutgroupInteraction)), size = 1) +
   #facet_wrap(~PID, ncol = 6)+
-  geom_ribbon(data = dat.mod,
+  geom_ribbon(data = mdlWorker$predInterceptAttCoreIntX,
               aes(ymin = fit - se, ymax = fit + se),
               alpha = 0.3) +
-  scale_linetype_manual(values = c("dashed", "solid")) +
-  xlab("Fulfilment Relatedness") +
-  ylab("Outgroup Attitudes") +
-  guides(
-    color = guide_legend(title = "Intergroup Contact"),
-    linetype = guide_legend(title = "Intergroup Contact")
-  ) +
-  theme_Publication()
-
-
-#### Bayesian estimation ####
-library(brms)
-options(mc.cores = parallel::detectCores())  # Run many chains simultaneously
-brmfit <- brm(
-  thermometerDutch_1 ~ keyMotiveFulfilled * OutgroupInteraction + (1 | PID),
-  data = workerInteractionType,
-  family = gaussian,
-  iter = 1000,
-  chains = 4
-)
-
-# create parameters for prediction:
-datNew2 = data.frame(
-  OutgroupInteraction = rep(c("No", "Yes"), each = 101),
-  keyMotiveFulfilled = rep(seq(-50, 50, 1), 2)
-)
-# Save predicted values and adjust names and labels
-fitavg <-
-  cbind(datNew2,
-        fitted(brmfit, newdata = datNew2, re_formula = NA)[, -2])
-names(fitavg)[names(fitavg) == "Estimate"] = "pred"
-fitavg$se <- (fitavg$Q97.5 - fitavg$pred) / 1.96
-
-# Plot Bayesian SE prediction interval
-ggplot(fitavg,
-       aes(x = keyMotiveFulfilled,
-           y = pred,
-           group = OutgroupInteraction)) +
   scale_x_continuous(breaks = seq(-50, 50, 10)) +
   scale_y_continuous(limits = c(50, 100), breaks = seq(50, 100, 10)) +
-  geom_line(aes(linetype = OutgroupInteraction), size = 1) +
-  geom_ribbon(aes(ymin = pred - se, ymax = pred + se), alpha = 0.2) +
   scale_linetype_manual(values = c("dashed", "solid")) +
-  xlab("Fulfillment Competence") +
-  ylab("Outgroup Attitudes") +
-  guides(
-    color = guide_legend(title = "Intergroup Contact"),
-    linetype = guide_legend(title = "Intergroup Contact")
+  scale_fill_manual(values = c("darkgrey", "black")) +
+  labs(
+    x = "Fulfillment Core Need",
+    y = "Outgroup Attitude (NL)",
+    fill = "Intergroup Contact",
+    linetype = "Intergroup Contact",
+    title = "Based on Model Predictions"
   ) +
   theme_Publication()
 
-# plot all overlayed posteriors:
-pst <- posterior_samples(brmfit, "b")
-ggplot(workerInteractionType, aes(x = keyMotiveFulfilled, y = thermometerDutch_1)) +
-  geom_point(shape=4, alpha = .1) +
-  geom_tile() +
-  geom_abline(
-    data = pst,
-    aes(intercept = b_Intercept, slope = b_keyMotiveFulfilled),
-    alpha = .025,
-    size = .4
-  ) +
-  labs(
-    title = "slope Posteriors",
-    x = "Fulfillment Core Need",
-    y = "Outgroup Attitudes (NL)"
-  ) +
-  theme_Publication()
+# #### Bayesian estimation !! ONLY RUN ON FINAL RENDER !! Takes forever ####
+# options(mc.cores = parallel::detectCores())  # Run many chains simultaneously
+# brmfit <- brm(
+#   thermometerDutch_1 ~ keyMotiveFulfilled * OutgroupInteraction + 
+#     (1 + keyMotiveFulfilled + OutgroupInteraction | PID),
+#   data = workerInteractionType,
+#   family = gaussian,
+#   iter = 1000,
+#   chains = 4
+# )
+# 
+# # create parameters for prediction:
+# datNew = data.frame(
+#   OutgroupInteraction = rep(c("No", "Yes"), each = 101),
+#   keyMotiveFulfilled = rep(seq(-50, 50, 1), 2)
+# )
+# # Save predicted values and adjust names and labels
+# fitavg <-
+#   cbind(datNew,
+#         fitted(brmfit, newdata = datNew, re_formula = NA)[, -2])
+# names(fitavg)[names(fitavg) == "Estimate"] = "pred"
+# fitavg$se <- (fitavg$Q97.5 - fitavg$pred) / 1.96
+# 
+# # Plot Bayesian SE prediction interval
+# ggplot(fitavg,
+#        aes(x = keyMotiveFulfilled,
+#            y = pred,
+#            fill = OutgroupInteraction)) +
+#   scale_x_continuous(breaks = seq(-50, 50, 10)) +
+#   scale_y_continuous(limits = c(50, 100), breaks = seq(50, 100, 10)) +
+#   geom_line(aes(linetype = OutgroupInteraction), size = 1) +
+#   geom_ribbon(aes(ymin = pred - se, ymax = pred + se), alpha = 0.2) +
+#   scale_linetype_manual(values = c("dashed", "solid")) +
+#   scale_fill_manual(values = c("darkgrey", "black")) +
+#   labs(
+#     x = "Fulfillment Core Need",
+#     y = "Outgroup Attitude (NL)",
+#     fill = "Intergroup Contact",
+#     linetype = "Intergroup Contact",
+#     title = "Based on Bayesian Prediction Interval"
+#   ) +
+#   theme_Publication()
+# 
+# # plot all overlayed posteriors:
+# pst <- posterior_samples(brmfit, "b")
+# ggplot(workerInteractionType,
+#        aes(x = keyMotiveFulfilled, y = thermometerDutch_1)) +
+#   geom_point(shape = 4, alpha = .1) +
+#   geom_tile() +
+#   geom_abline(
+#     data = pst,
+#     aes(intercept = b_Intercept, slope = b_keyMotiveFulfilled),
+#     alpha = .025,
+#     size = .4
+#   ) +
+#   labs(title = "slope Posteriors",
+#        x = "Fulfillment Core Need",
+#        y = "Outgroup Attitudes (NL)") +
+#   theme_Publication()
+# rm(datNew, brmfit, fitavg, pst)
 ```
 
-##### random slope
-
-\begin{equation}
-(\#eq:AttitudeNeedInteractionRandEq)
-Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + \gamma_{20}OutgroupInteraction_{ti} + \gamma_{30}KeyNeedFulfillXOutgroupInteraction_{ti}  + u_{0i} + u_{1i} + e_{ti}  \\
-\textrm{with}\ \begin{bmatrix} u_{0i}\\ u_{1i}\end{bmatrix} \sim \mathcal{N}(0,\Omega_u): \Omega_u=\begin{bmatrix} \tau_{0}^2 & \\ \tau_{01} & \tau_{1}^2 \end{bmatrix} \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
-\end{equation}
-
 #### Other psychological needs
-
-Also check key need fulfillment generally.
-
 
 ##### random intercept
 
@@ -2263,13 +2323,190 @@ Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + \gamma_{20}Autono
 \textrm{with}\ u_{0i} \sim \mathcal{N}(0,\tau_{00}^2)\ \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
 \end{equation}
 
-##### check for random slope
+```{r workerOutModelInterceptAttCoreSdt}
+# Create and save Model
+mdlWorkerOut$Att$lmeInterceptCoreSdt <-
+  lme(
+    thermometerDutch_1 ~ keymotive_fulfillemt_1 + competence_1 + autonomy_1 + relatedness_1,
+    random = ~ 1 | PID,
+    data = workerOutgroupInteraction,
+    na.action = na.exclude
+  )
+
+# Get summary with p-values (Satterthwaite's method)
+summ(
+  mdlWorkerOut$Att$lmerInterceptCoreSdt <- lmer(
+    thermometerDutch_1 ~ keymotive_fulfillemt_1 + competence_1 + autonomy_1 + relatedness_1 + (1 | PID),
+    data = workerOutgroupInteraction
+  ),
+  confint = TRUE,
+  digits = 3,
+  center = TRUE
+)
+
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(lmer(thermometerDutch_1 ~ Contact_dum + inNonDutch + (1|PID),data=workerOutgroupInteraction),
+#                  method="boot",nsim=1000, parallel = "multicore",
+#                  ncpus = 4, seed = 42),
+#          "output/tables/ML-Inter-CI.csv")
+
+# compute lme for core model with same number of observations for comparison
+# !! LOOK INTO MISSINGNESS (only one observation) !!
+lmeInterceptCoreRed <-
+  lme(
+    thermometerDutch_1 ~ keymotive_fulfillemt_1,
+    random = ~ 1 | PID,
+    data = workerOutgroupInteraction %>% filter(!is.na(autonomy_1))
+  )
+
+# Compare new model to previous step
+anova(
+  lmeInterceptCoreRed, 
+  mdlWorkerOut$Att$lmeInterceptCoreSdt
+  ) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  kbl(
+    .,
+    caption = "Worker: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+rm(lmeInterceptCoreRed)
+
+# Save variances
+mdlWorkerOut$Att$varInterceptCoreSdt <-
+  lme4::VarCorr(mdlWorkerOut$Att$lmeInterceptCoreSdt)
+
+# The estimate of between-group (or Intercept variance) explained:
+# Variance Explained = 1 – (Var with Predictor/Var without Predictor)
+mdlWorkerOut$Att$varBtwInterceptCoreSdt <- 
+  1 - (as.numeric(mdlWorkerOut$Att$varInterceptCoreSdt[1]) / as.numeric(mdlWorkerOut$Att$varInterceptCore[1]))
+mdlWorkerOut$Att$varBtwPercInterceptCoreSdt <- 
+  (1 - (as.numeric(mdlWorkerOut$Att$varInterceptCoreSdt[1]) / as.numeric(mdlWorkerOut$Att$varInterceptCore[1]))) * 100
+# and the estimate of within-group (or residual variance) explained is:
+mdlWorkerOut$Att$varWithinInterceptCoreSdt <-
+  1 - (as.numeric(mdlWorkerOut$Att$varInterceptCoreSdt[2]) / as.numeric(mdlWorkerOut$Att$varInterceptCore[2]))
+mdlWorkerOut$Att$varWithinPercInterceptCoreSdt <-
+  (1 - (as.numeric(mdlWorkerOut$Att$varInterceptCoreSdt[2]) / as.numeric(mdlWorkerOut$Att$varInterceptCore[2]))) * 100
+```
+
+##### random slope
 
 \begin{equation}
 (\#eq:AttitudeNeedSdtRandEq)
 Attitude_{ti} = \\gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + \gamma_{20}Autonomy_{ti} + \gamma_{30}Competence_{ti} + \gamma_{40}Relatedness_{ti} + u_{0i} + u_{1i} + e_{ti}  \\
 \textrm{with}\ \begin{bmatrix} u_{0i}\\ u_{1i}\end{bmatrix} \sim \mathcal{N}(0,\Omega_u): \Omega_u=\begin{bmatrix} \tau_{0}^2 & \\ \tau_{01} & \tau_{1}^2 \end{bmatrix} \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
 \end{equation}
+
+```{r workerOutModelSlopesAttCoreSdt}
+# Create and save Model (optimizer needed to reach convergence)
+mdlWorkerOut$Att$lmeSlopesCoreSdt <-
+  lme(
+    thermometerDutch_1 ~
+      keymotive_fulfillemt_1 + competence_1 + autonomy_1 + relatedness_1,
+    random = ~ 1 + keymotive_fulfillemt_1 + competence_1 + autonomy_1 + relatedness_1 | PID,
+    control = lmeControl(opt = "optim"),
+    data = workerOutgroupInteraction,
+    na.action = na.exclude
+  )
+
+# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
+summ(
+  mdlWorkerOut$Att$lmerSlopesCoreSdt <- lmer(
+    thermometerDutch_1 ~
+      keymotive_fulfillemt_1 + competence_1 + autonomy_1 + relatedness_1 +
+      (1 + keymotive_fulfillemt_1 + competence_1 + autonomy_1 + relatedness_1 | PID),
+    data = workerOutgroupInteraction
+  ),
+  confint = TRUE,
+  digits = 3,
+  center = TRUE
+)
+
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(model.ran0,
+#               method="boot",nsim=1000,
+#               parallel = "multicore", ncpus = 4, seed = 42),
+#          "output/tables/ML-RandomSlopes-CI.csv")
+
+# Compare new model to previous step
+anova(mdlWorkerOut$Att$lmeInterceptCoreSdt, 
+      mdlWorkerOut$Att$lmeSlopesCoreSdt) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  kbl(
+    .,
+    caption = "Worker: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlWorkerOut$Att$varSlopesCoreSdt <- 
+  lme4::VarCorr(mdlWorkerOut$Att$lmeSlopesCoreSdt)
+
+# The estimate of between-group (or Intercept variance) explained:
+# Variance Explained = 1 – (Var with Predictor/Var without Predictor)
+mdlWorkerOut$Att$varBtwSlopesCoreSdt <-
+  1 - (as.numeric(mdlWorkerOut$Att$varSlopesCoreSdt[1]) / as.numeric(mdlWorkerOut$Att$varInterceptCoreSdt[1]))
+mdlWorkerOut$Att$varBtwPercSlopesCoreSdt <-
+  (1 - (as.numeric(mdlWorkerOut$Att$varSlopesCoreSdt[1]) / as.numeric(mdlWorkerOut$Att$varInterceptCoreSdt[1]))) * 100
+# and the estimate of within-group (or residual variance) explained is:
+mdlWorkerOut$Att$varWithinSlopesCoreSdt <-
+  1 - (as.numeric(mdlWorkerOut$Att$varSlopesCoreSdt[2]) / as.numeric(mdlWorkerOut$Att$varInterceptCoreSdt[2]))
+mdlWorkerOut$Att$varWithinPercSlopesCoreSdt <-
+  (1 - (as.numeric(mdlWorkerOut$Att$varSlopesCoreSdt[2]) / as.numeric(mdlWorkerOut$Att$varInterceptCoreSdt[2]))) * 100
+
+# Assumption Checks:
+mdlWorkerOut$Att$diagSlopesCoreSdt <- 
+  sjPlot::plot_model(mdlWorkerOut$Att$lmerSlopesCoreSdt, type = "diag")
+grid.arrange(
+  mdlWorkerOut$Att$diagSlopesCoreSdt[[1]],
+  mdlWorkerOut$Att$diagSlopesCoreSdt[[2]]$`PID`,
+  mdlWorkerOut$Att$diagSlopesCoreSdt[[3]],
+  mdlWorkerOut$Att$diagSlopesCoreSdt[[4]]
+)
+
+# Plot prediction model
+mdlWorkerOut$Att$predSlopesCoreSdt <- 
+  workerOutgroupInteraction %>%
+  filter(!is.na(autonomy_1)) %>%
+  select(thermometerDutch_1, session, PID, autonomy_1) %>% 
+  mutate(measure = predict(mdlWorkerOut$Att$lmeSlopesCoreSdt,
+                           workerOutgroupInteraction %>% filter(!is.na(autonomy_1)),
+                           re.form = NA
+                           )
+         )
+
+(
+  mdlWorkerOut$Att$predPltSlopesCoreSdt <-
+    ggplot(data = mdlWorkerOut$Att$predSlopesCoreSdt, aes(x = session, y = measure)) +
+    geom_line(alpha = 1, color = "blue") +
+    geom_line(aes(y = thermometerDutch_1), alpha = 1) +
+    facet_wrap( ~ PID, ncol = 6) +
+    xlab("Time") +
+    ylab("Outgroup Attitudes") +
+    theme_Publication()
+)
+ggsave(
+  filename = "Figures/WorkerOut_PredictionPlot_SlopesAttCoreStd.png",
+  mdlWorkerOut$Att$predPltSlopesCoreSdt,
+  width = 18,
+  height = 12,
+  dpi = 800,
+  units = "cm",
+  device = "png"
+)
+```
 
 
 # **Student Sample**
