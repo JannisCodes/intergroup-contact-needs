@@ -154,7 +154,11 @@ knitr::opts_chunk$set(
 
 # **Data Preparation**  
 
+In an initial preparatory step, we import the data into the R project environment and prepare the variables for further processing and later analyses.   
+
 ## Data Import  
+
+The data were collected using two different survey tools. For the study with sojourners (Study 1: worker) we used the survey platform Qualtrics XM, whereas the studies with international students (Study 2: student), and the international medical professionals (Study 3: medical) were conducted using the survey framework FormR. This means that the datasets had inconsistent file formats and naming conventions. For the Qualtrics study we pre-processed some variables to ease the import process (for the syntax files see the SPS files in '_data/S1_Workers/processed/cleaned_' and for the raw data files see '_data/S1_Workers/raw_'). For the two other studies, we import the raw csv files from their respective folders.  
 
 ```{r formrImport}
 # workers
@@ -182,6 +186,11 @@ dtMedical <- list(
 ```
 
 ## Data Cleaning & Data Exclusions  
+
+### Worker
+
+For the sojourner sample data was collected in four separate surveys: (1) the pre-measurement, (2) the daily morning survey, (3) the daily afternoon survey, as well as (4) a post-measurement. We combine the four individual surveys into one cohesive dataframe and drop superfluous variables that are not relevant to the analyses relevant here. We then format the time and date variables and add person- and measurement indices (for easy and meaningful addressing of the data). We also exclude our own test data.  
+<i class="fas fa-info-circle"></i> _Note:_ All data preparation steps are saved in the '_dtWorker_' list. 
 
 ```{r cleanWorker}
 #  important names for Morning and Afternoon
@@ -529,6 +538,11 @@ rm(df.pre, names.post, dat.post.red, dat.pre.red, df)
 # save(dtWorker$clean, file = "data/processed/MT_clean-merged_07-05-2018.RData")
 ```
 
+### Student
+
+For the student sample data was, similarly, collected in three separate surveys: (1) the pre-measurement, (2) the daily survey sent out at lunch and dinner time, and (3) a post-measurement. We combine the three individual surveys into one large dataframe and drop superfluous variables that are not relevant to the analyses relevant here. We exclude our own test data as well as one participant who entered the study twice (but gave different responses during the pre-measurement). We also reformat missing values and format core ID variables.  
+<i class="fas fa-info-circle"></i> _Note:_ All data preparation steps are saved in the '_dtStudents_' list. 
+
 ```{r cleanStudents}
 # our own test IDs
 ownIDs <- c(
@@ -590,6 +604,10 @@ dtStudents$clean <- dfCombined
 rm(df.pre, df.daily, df.post, dfPreDaily, dfCombined, ownIDs)
 ```
 
+### Medical
+
+To be done after preregistration.
+
 ```{r cleanMedical}
 # TBD
 ```
@@ -597,6 +615,12 @@ rm(df.pre, df.daily, df.post, dfPreDaily, dfCombined, ownIDs)
 ## Calculate needed transformations  
 
 ### Worker
+
+For the worker sample, the data transformation stage had three main aims: 
+
+1. We first corrected time indicators within the surveys. In some cases participants completed their daily diary surveys for the afternoon after midnight. In these cases the measurement still is in reference to the previous day and is indicated in the corrected variable.   
+2. We then created indices of scales. Some indices were multi-item scales while some indices combine equivalent measurement for different situational circumstances (e.g., competence perceptions after interactions and at measurement occasions without interactions).   
+3. Finally, we calculated several basic participant summaries (averages across all measurement occasions).   
 
 ```{r newVarsWorkers}
 df <- dtWorker$clean
@@ -616,11 +640,6 @@ df$PPDate[df$SubTime < "18:50:00" &
   df$daytime == "afternoon"] <- df$PPDate[df$SubTime < "18:50:00" &
   df$daytime == "afternoon"] - 1
 
-# Mood scales
-df$calmness.daily <- rowSums(df[, c("calmness1", "calmness2")], na.rm = T)
-df$alertness.daily <- rowSums(df[, c("alertness1", "alertness2")], na.rm = T)
-df$valence.daily <- rowSums(df[, c("valence1", "valence2")], na.rm = T)
-
 # Need scales
 df$keyMotiveFulfilled <- rowSums(df[, c("keymotive_fulfillemt_1", "keyMotive_noInt_fulf_1")], na.rm = T)
 df$autonomy.daily.all <- rowSums(df[, c("autonomy_1", "autonomy_NoInt_1")], na.rm = T)
@@ -631,6 +650,14 @@ df$relatedness.daily.all <- rowMeans(df[, c(
   "relatedness_self_1",
   "relatedness_1_NoInt_1"
 )], na.rm = T)
+
+pairs.panels.new(
+  df[c("relatedness_self_1", "relatedness_other_1")],
+  labels = c(
+    "I shared information about myself.",
+    "X shared information about themselves."
+  )
+)
 df$relatedness_1 <- rowMeans(df[, c("relatedness_other_1", "relatedness_self_1")], na.rm = T)
 
 # summarize by participant (check that everything is within pp might not be the case for )
@@ -705,6 +732,14 @@ workerInteractionType <- dtWorker$full %>%
 ```
 
 ### Student
+
+For the worker sample, the data transformation stage had three main aims: 
+
+1. We first create person, survey type, and measurement ID variables.   
+2. We then created indices of scales. Some indices were multi-item scales while some indices combine equivalent measurement for different situational circumstances (e.g., competence perceptions after interactions and at measurement occasions without interactions).   
+3. We add information about the interaction partner to the beep during which a person was selected as an interaction partner.   
+4. We cluster mean-center key variables within participants.   
+5. Finally, we calculated several basic participant summaries (averages across all measurement occasions).   
 
 ```{r newVarsStudents}
 df <- dtStudents$clean
@@ -905,11 +940,26 @@ studentOutPltIDs <-
 
 ### Medical
 
+To be done after preregistration.   
+
 ```{r newVarsMedical}
 # TBD
 ```
 
 # **Worker Sample**
+
+The first sample we assess is the smaller sojourner study. We will sequentially test our main hypotheses for this study:
+
+1. \label{hyp:contact}Based on the most general understanding of the contact hypothesis, an increase in frequency and quality of contact should jointly account for changes in more favorable outgroup attitudes.
+    a. \label{hyp:contactFreq}Participants with more intergroup interactions should have a more favorable outgroup attitudes.
+    b. \label{hyp:contactDummy}Outgroup attitudes should be higher after an intergroup interaction compared to a non-outgroup interaction.
+    c. \label{hyp:contactFreqQual}Participants with more intergroup interactions should have a more favorable outgroup attitudes depending on the average interaction quality.
+2. \label{hyp:keyNeed}Based on our proposal, intergroup interactions with higher situational core need fulfillment should predict more favorable outgroup attitudes due to more positive interaction quality perceptions.
+    a. \label{hyp:keyNeedPred}Outgroup attitudes should be more favorable after intergroup interactions with high key need fulfillment.
+    b. \label{hyp:keyNeedQual}Interaction Quality should be perceived as more positive after intergroup interactions with higher key need fulfillment.
+    c. \label{hyp:keyNeedMediation}The variance explained in outgroup attitudes by key need fulfillment should to a large extend be assumed by interaction quality.
+    d. \label{hyp:keyNeedContactType}The effect of key need fulfillment on outgroup attitudes should be specific to intergroup interactions and not be due to need fulfillment in general. Thus, the effect of key need fulfillment on outgroup attitudes should stronger for intergroup interact than for ingroup interactions.
+    e. \label{hyp:keyNeedSDT}The effect of key need fulfillment on outgroup attitudes should be persist even when taking other fundamental psychological needs into account. Thus, the effect of key need fulfillment on outgroup attitudes should remain strong even after controlling for autonomy, competence, and relatedness fulfillment during the interaction (cf., self-determination theory). 
 
 ## Data Description
 
@@ -917,7 +967,11 @@ studentOutPltIDs <-
 
 ## Contact Hypothesis
 
+We test the most general contact hypothesis in two steps. First, we assess whether more intergroup interactions are related to to more positive outgroup attitudes. Second, we test whether a potential positive effect on outgroup attitudes depends on the interaction quality (jointly with the number of interactions).   
+
 ### Interaction Frequency and Outgroup Attitudes
+
+To test the impact of the overall number of interactions, we hope to find that there is a significant relationship between the number of interactions a participant had and the average outgroup attitude.  
 
 \begin{equation}
 (\#eq:WorkerFreqQualR)
@@ -946,27 +1000,26 @@ pairs.panels.new(
 )
 ```
 
-TL;DR: Neither the number of interactions nor the number of measurement beeps with an interaction are significantly related with the average outgroup attitudes. This is to say that within our data participants with more outgroup interactions did not have significantly more positive outgroup attitudes. This might be due to the aggregation within the participants or the small sample size of between participant data. Nonetheless, the aggregate data does not support the notion that simply having more interactions with an outgroup results in more positive outgroup attitudes.
+We find that neither the number of interactions nor the number of measurement beeps with an interaction are significantly related with the average outgroup attitudes. This is to say that within our data, participants with more outgroup interactions did not have significantly more positive outgroup attitudes. This might be due to the aggregation within the participants or the small sample size of between participant data. Nonetheless, the aggregate data does not support the notion that simply having more interactions with an outgroup results in more positive outgroup attitudes.
 
 ### Outgroup Attitudes by Interaction Type
 
+In a next step we take into account that having an interaction with an outgroup member, does not happen in a social vacuum. Participants who indicated that they had an interaction with an outgroup member include measurement occasions during which someone either only had an interaction with an outgroup member as well as times during which a person also had interaction(s) with a non-Dutch person. Inversely, participants who indicated that they did not have an interaction with a Dutch person might either have had no interaction at all or had an interaction with a non-Dutch person. We, thus consider all possible combinations and their independent influences on outgroup attitudes.  
+
+#### OLS regression
+
+We first assess the impact of the different interaction types across all measurement points (lumping all beeps together).
+
 \begin{equation}
 (\#eq:WorkerIntTypeQual)
-\mu_{i,0utgroupInteraction} > \mu_{i,IngroupInteraction}  \\
-Attitude = OutgroupInteraction \times NonOutgroupInteraction
+Attitude = OutgroupInteraction + NonOutgroupInteraction
 \end{equation}
-
 
 <div class="alert alert-info alert-dismissible fade in" role="alert">
   <a class="close" data-dismiss="alert" aria-label="close">&times;</a>
-  <i class="fas fa-exclamation-triangle"></i> <b>Note: </b><br/>
-  mean difference alone probably even more stupid than only ignoring nested data, because we drop lots of data unnecessarily.  
-  And only outgroup interaction Yes / No also weird because interaction group includes people who had only an outgroup interaction and those who also had an interaction with a non-outgroup person, and the no outgroup interaction group includes those who had no interaction at all and those who had an interaction with a non-outgroup person (but no outgroup interaction).
+  <i class="fas fa-info-circle"></i> <b>Note: </b><br/>
+  This step ignores the nested nature of the data (and consequently, response sets between participants). However, a purely cross-sectional approach with retrospective evaluations is common within the field and the analysis here offers a first cross-sectional insight (even with the independence assumption violated).
 </div>
-
-#### Regression with interaction term
-
-Across participants: impact of different interaction types [probably meaningless because ignores response sets between participants]
 
 ```{r workerInteractionTypePlt, fig.height=12}
 # between participants interaction type
@@ -1055,13 +1108,15 @@ summ(
 )
 ```
 
-TL;DR: While controlling for interactions with non-Dutch people, outgroup attitudes were significantly higher when participants had an interaction with a Dutch person. The effect is relatively small (`r format(round(mdlWorker$lmAttInt$coefficients["OutgroupInteractionYes"], 2), nsmall=2)` points on a 0--100 scale). More importantly, however, this analysis lumps all ESM beeps from every participants together and ignores that the data is nested within participants.
+We find that while controlling for interactions with non-Dutch people, outgroup attitudes were significantly higher when participants had an interaction with a Dutch person. The effect is relatively small (`r format(round(mdlWorker$lmAttInt$coefficients["OutgroupInteractionYes"], 2), nsmall=2)` points on a 0--100 scale). More importantly, however, this analysis lumps all ESM beeps from every participants together and ignores that the data is nested within participants.
 
-#### ML Regression with interaction term
+#### ML regression
+
+We, thus, proceed with a multilevel analysis, which acknowledges that the measurements are nested within participants.  
 
 ##### Unconditional model
 
-make a model with only the data but a random intercept (unconditional model)   
+We start by creating an empty random intercept model (i.e., let the outgroup attitude intercept be different between participants; unconditional model)
 
 \begin{equation}
 (\#eq:WorkerEmptyModel)
@@ -1110,9 +1165,7 @@ mdlWorker$IccPercAttNull <-
   ((as.numeric(mdlWorker$varAttNull[1]) / (as.numeric(mdlWorker$varAttNull[1]) + as.numeric(mdlWorker$varAttNull[2])))) * 100
 ```
 
-ICC $\tau_{00}^2 / (\tau_{00}^2 + \sigma^2)$: The ratio of the between-cluster variance to the total variance is called the Intraclass Correlation. It tells you the proportion of the total variance in Y that is accounted for by the clustering. (In this case the clustering means clustering observations per participant)  
-
-compare the random intercept model to a model without a random intercept (i.e., without levels at all)  
+We then compare the random intercept model to a model without a random intercept (i.e., without levels at all).  
 
 ```{r workerModelInterceptNull}
 # Create and save Model
@@ -1130,6 +1183,13 @@ anova(mdlWorker$glsAttNull,
       mdlWorker$lmeAttNull) %>% 
   as.data.frame() %>%
   select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  add_rownames(., var = "Description") %>%
+  mutate(Description = gsub(".*\\$", "", Description)) %>%
   kbl(
     .,
     caption = "Worker: Model Comparison",
@@ -1142,9 +1202,15 @@ anova(mdlWorker$glsAttNull,
   kable_styling(position = "left")
 ```
 
-We find that an estimated `r format(round(mdlWorker$IccPercAttNull, 2), nsmall=2)`% of the variation in Feeling Thermometer scores is explained by between participant differences (clustering by PID). This is to say that `r format(round(mdlWorker$IccPercAttNull, 2), nsmall=2)`% of the variance in any individual report of Attitudes towards the Dutch can be explained by the properties of the individual who provided the rating. And we find that including 'participant' as a predictor adds significantly to the model.
+Comapring the two empty model, we find that there is indeed a significant amount of variance explained by including a random intercept.   
 
-##### random intercept
+To assess the variances within and between participants we look at the ICC $\tau_{00}^2 / (\tau_{00}^2 + \sigma^2)$: The ratio of the between-cluster variance to the total variance is called the Intraclass Correlation. It tells you the proportion of the total variance in Y that is accounted for by the clustering. (In this case the clustering means clustering observations per participant)  
+
+We find that an estimated `r format(round(mdlWorker$IccPercAttNull, 2), nsmall=2)`% of the variation in Feeling Thermometer scores is explained by between participant differences (clustering by PID). This is to say that `r format(round(mdlWorker$IccPercAttNull, 2), nsmall=2)`% of the variance in any individual report of Attitudes towards the Dutch can be explained by the properties of the individual who provided the rating. And we find that including 'participant' as a predictor adds significantly to the model.  
+
+##### random intercept with predictors  
+
+To this random intercept model we now add the two types of interactions possible at each measurement point as contemporaneous predictors of outgroup attitudes. That is: We check whether within participants having an outgroup interaction (or a non-outgroup interaction) is associated with more positive outgroup attitudes at the same measurement point.  
 
 \begin{equation}
 (\#eq:WorkerInteractionTypeModel)
@@ -1183,6 +1249,13 @@ anova(mdlWorker$lmeAttNull,
       mdlWorker$lmeInterceptAttType) %>%
   as.data.frame() %>%
   select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  add_rownames(., var = "Description") %>%
+  mutate(Description = gsub(".*\\$", "", Description)) %>%
   kbl(
     .,
     caption = "Worker: Model Comparison",
@@ -1211,9 +1284,13 @@ mdlWorker$varWithinPercInterceptAttType <-
   (1 - (as.numeric(mdlWorker$varInterceptAttType[2]) / as.numeric(mdlWorker$varAttNull[2]))) * 100
 ```
 
-tl;dr: Interaction with Dutch is great predictor, interactions with non-Dutch is not.
+We find that a random intercept model with the two interaction types as predictors explains significantly more variance then an empty random intercept model. Looking at the individual coefficients, we find that having an outgroup interaction is indeed associated with significantly more positive outgroup attitudes, while having an interaction with a non-Dutch person does not significantly relate to more positive or negative attitudes towards the Dutch.  
+
+TL;DR: Interaction with Dutch is great predictor, interactions with non-Dutch is not.
 
 ##### random slope
+
+In a next step, we check whether further letting the effect of the different interaction types vary between participants explains additional variance in outgroup attitudes (i.e., random slopes).   
 
 \begin{equation}
 (\#eq:RandSlopesEq)
@@ -1255,6 +1332,13 @@ anova(mdlWorker$lmeInterceptAttType,
       mdlWorker$lmeSlopesAttType) %>%
   as.data.frame() %>%
   select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  add_rownames(., var = "Description") %>%
+  mutate(Description = gsub(".*\\$", "", Description)) %>%
   kbl(
     .,
     caption = "Worker: Model Comparison",
@@ -1323,9 +1407,13 @@ ggsave(
 )
 ```
 
+We find that adding the random slopes does not add significantly beyond the random intercept model. This is unusual because this might indicate the the effect is very consistent across participants. However, this might also be the case due to a small number of participants, or other measurement issues.  
+
 TL;DR: Random slopes don't add much for this super simple model.
 
 ### Interaction Frequency and Interaction Quality
+
+In a final step we check whether the effect outgroup interactions, in part, depends on the quality during the interactions. Because we can only assess interaction quality when there is an interaction, it is difficult to assess this with the interaction dummy as a within person predictor. Instead, we will use an aggregate measure of interaction qualtity and average interaction quality to consider the two predictors jointly.  
 
 \begin{equation}
 (\#eq:FreqQual)
@@ -1372,7 +1460,7 @@ pairs.panels.new(
 )
 ```
 
-TL;DR: There is a medium sized correlation between the participants' Average Interaction Quality and their Average Outgroup Attitudes. Thus within our data participants with a higher quality outgroup interactions also held more positive attitudes towards that group. However, the frequency of intergroup interactions had no meaningfull correlation with either the average interaction quality or average outgroup attitudes.
+Within the data, we find a medium sized correlation between the participants' Average Interaction Quality and their Average Outgroup Attitudes. Thus within our data participants with a higher quality outgroup interactions also held more positive attitudes towards that group. However, the frequency of intergroup interactions had no meaningfull correlation with either the average interaction quality or average outgroup attitudes.
 
 ```{r workerModelOlsAttFreqQual}
 # regression
@@ -1401,15 +1489,19 @@ interactions::johnson_neyman(mdlWorker$lmAttFreqQualX,
                              alpha = .05)
 ```
 
-TL;DR: We find that interaction quality is significantly related to higher outgroup attitudes (albeit with a small effect size). We also find that in our sample with an increasing number of interactions the positive effect of interaction quality becomes weaker. However, note that this is based on data aggregating all within participant nuances and is only the date of 21 people.
+We find that interaction quality is significantly related to higher outgroup attitudes (albeit with a small effect size). We also find that in our sample with an increasing number of interactions the positive effect of interaction quality becomes weaker. However, it should be noted that this is based on data aggregating all within participant nuances and is only the date of 21 people.  
 
 ## Need Fulfillment
 
-### Need fulfillment and Attitudes 
+The main proposal of our article is that the success of an outgroup interaction might be explained by whether or not the interaction fulfilled the person's core situational need. This should, in turn, be due to a higher perceived interaction quality. We will this sequentially test whether the fulfillment of the core need during an interaction is (1) related to more positive outgroup attitudes, (2) higher perceived interaction quality, and (3) whether the variance explained by the core need is assumed by the perceived interaction quality if considered jointly.     
+
+### Need fulfillment and Attitudes  
+
+In a first step we, thus, test the relationship between outgroup attitudes and the fulfillment of the core situational need during the interaction.  
 
 ##### Unconditional model
 
-make a model with only the data but a random intercept (unconditional model) for the outgroup interaction subset.
+We again start by creating an empty random intercept model (i.e., let the outgroup attitude intercept be different between participants; unconditional model). Note that this unconditional model differs from the empty model created earlier because for this set of analyses we will only consider the subsample of measurement points during which an outgroup interaction was reported. This is necessary because measurements of needs during the interaction and perceived interaction quality are only meaningful within an interaction context.   
 
 ```{r workerPrepOutgroupSubsample}
 # see how large our outgroup interaction subset actually is
@@ -1431,6 +1523,8 @@ mdlWorkerOut <-
     Qlt = list()
   )
 ```
+
+<i class="fas fa-question-circle"></i> _Note to self:_ For completeness, we should probably check this against an empty model without random intercept.  
 
 \begin{equation}
 (\#eq:WorkerOutEmptyModel)
@@ -1477,7 +1571,9 @@ mdlWorkerOut$Att$IccPercNull <-
   ((as.numeric(mdlWorkerOut$Att$varNull[1]) / (as.numeric(mdlWorkerOut$Att$varNull[1]) + as.numeric(mdlWorkerOut$Att$varNull[2])))) * 100
 ```
 
-#### random intercept
+#### random intercept with level one predictors
+
+We thus add the core interaction need fulfillment to the multilevel random intercept model.  
 
 \begin{equation}
 (\#eq:AttitudeNeedEq)
@@ -1514,6 +1610,11 @@ anova(mdlWorkerOut$Att$lmeNull,
       mdlWorkerOut$Att$lmeInterceptCore) %>%
   as.data.frame() %>%
   select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
   kbl(
     .,
     caption = "Worker: Model Comparison",
@@ -1542,9 +1643,11 @@ mdlWorkerOut$Att$varWithinPercInterceptCore <-
   (1 - (as.numeric(mdlWorkerOut$Att$varInterceptCore[2]) / as.numeric(mdlWorkerOut$Att$varNull[2]))) * 100
 ```
 
-TL;DR: Situational core need relates significantly to outgroup attitudes. The core need has little explained variance between participants (compared to the null model: Variance Explained = 1 – (Var with Predictor/Var without Predictor); `r format(round(mdlWorkerOut$Att$varBtwPercInterceptCore, 2),nsmall=2)`%). The variance explained within participants is small to medium (`r format(round(mdlWorkerOut$Att$varWithinPercInterceptCore, 2),nsmall=2)`%)  
+We find that the the model with the added predictor indeed explains more variance in outgroup attitudes than the unconditional model. Looking at the individual coefficients, we find that the situational core need relates significantly to outgroup attitudes. The core need has little explained variance between participants (compared to the null model: Variance Explained = 1 – (Var with Predictor/Var without Predictor); `r format(round(mdlWorkerOut$Att$varBtwPercInterceptCore, 2),nsmall=2)`%). The variance explained within participants is small to medium (`r format(round(mdlWorkerOut$Att$varWithinPercInterceptCore, 2),nsmall=2)`%).  
 
 #### random slope
+
+In a next step, we check whether further letting the effect of core need fulfillment vary between participants explains additional variance in outgroup attitudes (i.e., random slope).   
 
 \begin{equation}
 (\#eq:AttitudeNeedRandEq)
@@ -1587,6 +1690,11 @@ anova(mdlWorkerOut$Att$lmeInterceptCore,
       mdlWorkerOut$Att$lmeSlopesCore) %>%
   as.data.frame() %>%
   select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
   kbl(
     .,
     caption = "Worker: Model Comparison",
@@ -1655,19 +1763,23 @@ ggsave(
 )
 ```
 
+We find that adding the random slopes does add significantly beyond the random intercept model. We also find that the core need remains a strong predictor (even when letting the influence vary between participants).  
+
 TL;DR: The random slope adds significantly to the prediction model.  
 
 <div class="alert alert-warning alert-dismissible fade in" role="alert">
   <a class="close" data-dismiss="alert" aria-label="close">&times;</a>
   <i class="fas fa-exclamation-triangle"></i> <b>Check needed: </b><br/>
-  Something is with the variances explained (between = `r format(round(mdlWorkerOut$Att$varBtwPercSlopesCore, 2),nsmall=2)`%, within = `r format(round(mdlWorkerOut$Att$varWithinPercSlopesCore, 2),nsmall=2)`%). This is when comparing the random intercepts to the random slopes model.
+  Something is with the variances explained (between = `r format(round(mdlWorkerOut$Att$varBtwPercSlopesCore, 2),nsmall=2)`%, within = `r format(round(mdlWorkerOut$Att$varWithinPercSlopesCore, 2),nsmall=2)`%). This is when comparing the random intercepts to the random slopes model. Check with materials from Laura!!
 </div>
 
-### Need fulfillment and Interaction Quality 
+### Need fulfillment and Interaction Quality   
+
+Based on the assertion that the relationship between core need fulfillment and outgroup attitudes is explained by a higher perceived interaction, the core need fulfillement should also significantly predict perceived interaction quality.  
 
 ##### Unconditional model
 
-make a model with only the data but a random intercept (unconditional model) for the outgroup interaction subset.
+Given that we now have the perceived interaction quality as our outcome variable of interest we again begin with an unconditional model (i.e., empty random intercept model), to see whether there is enough variance to explain within the participants. Similarly to before this is again done wihin the subsample of measurements during which an outgroup interaction was reported.  
 
 \begin{equation}
 (\#eq:WorkerOutQualEmptyModel)
@@ -1714,7 +1826,13 @@ mdlWorkerOut$Qlt$IccPercNull <-
   ((as.numeric(mdlWorkerOut$Qlt$varNull[1]) / (as.numeric(mdlWorkerOut$Qlt$varNull[1]) + as.numeric(mdlWorkerOut$Qlt$varNull[2])))) * 100
 ```
 
-#### random intercept
+We again find a reasonable amount of variance within the participants.   
+
+<i class="fas fa-question-circle"></i> _Note to self:_ For completeness, we should probably check this against an empty model without random intercept. 
+
+#### random intercept with level one predictor  
+
+We again add the core interaction need fulfillment to the multilevel random intercept model.  
 
 \begin{equation}
 (\#eq:QualityNeedEq)
@@ -1751,6 +1869,11 @@ anova(mdlWorkerOut$Qlt$lmeNull,
       mdlWorkerOut$Qlt$lmeInterceptCore) %>%
   as.data.frame() %>%
   select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
   kbl(
     .,
     caption = "Worker: Model Comparison",
@@ -1779,9 +1902,12 @@ mdlWorkerOut$Qlt$varWithinPercInterceptCore <-
   (1 - (as.numeric(mdlWorkerOut$Qlt$varInterceptCore[2]) / as.numeric(mdlWorkerOut$Qlt$varNull[2]))) * 100
 ```
 
-TL;DR: Situational core need relates significantly to interaction quality. The core need explained substantial variance between participants (`r format(round(mdlWorkerOut$Qlt$varBtwPercInterceptCore, 2),nsmall=2)`%). The variance explained within participants is also medium (`r format(round(mdlWorkerOut$Qlt$varWithinPercInterceptCore, 2),nsmall=2)`%) 
+
+The predictor again adds a significant amount of explained variances beyond the empty model and looking at the slope coefficient, we find that the situational core need fulifillment relates significantly to perceived interaction quality. The core need explained substantial variance between participants (`r format(round(mdlWorkerOut$Qlt$varBtwPercInterceptCore, 2),nsmall=2)`%). The variance explained within participants is also medium (`r format(round(mdlWorkerOut$Qlt$varWithinPercInterceptCore, 2),nsmall=2)`%).  
 
 #### random slope
+
+As before, we check whether further letting the effect of core need fulfillment vary between participants explains additional variance in outgroup attitudes (i.e., random slope).   
 
 \begin{equation}
 (\#eq:QualityNeedRandEq)
@@ -1825,6 +1951,11 @@ anova(mdlWorkerOut$Qlt$lmeInterceptCore,
       mdlWorkerOut$Qlt$lmeSlopesCore) %>%
   as.data.frame() %>%
   select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
   kbl(
     .,
     caption = "Worker: Model Comparison",
@@ -1853,11 +1984,15 @@ mdlWorkerOut$Qlt$varWithinPercSlopesCore <-
   (1 - (as.numeric(mdlWorkerOut$Qlt$varSlopesCore[2]) / as.numeric(mdlWorkerOut$Qlt$varInterceptCore[2]))) * 100
 ```
 
-TL;DR: random slopes does not add significantly. Stay with simpler model.
+We find that adding the random slopes does not add significantly beyond the random intercept model. This is unusual because this might indicate the the effect is very consistent across participants. However, we also see that when taking the possibility to varying slopes into account, the core need fulfillment remains a significant predictor of perceived interaction quality.  
 
-### Need fulfillment, Interaction Quality, and Attitudes
+### Need fulfillment, Interaction Quality, and Attitudes  
 
-#### random intercept
+In our final main step, we will jointly consider the effect of core need fulfillment and perceived interaction quality on outgroup attitudes. We expect that if the relationship between core need fulfillment and outgroup attitudes is indeed explained by a higher perceived interaction quality, the interaction quality perception should assume the explained variance of the core contact need fulfillment.  
+
+#### random intercept with level one predictors  
+
+We thus add both the core need fulfillment and perceived interaction quality to a random intercept model of outgroup attitudes.  
 
 \begin{equation}
 (\#eq:AttitudeQualityNeedEq)
@@ -1898,6 +2033,11 @@ anova(
   ) %>%
   as.data.frame() %>%
   select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
   kbl(
     .,
     caption = "Worker: Model Comparison",
@@ -1926,15 +2066,19 @@ mdlWorkerOut$Att$varWithinPercInterceptCoreQlt <-
   (1 - (as.numeric(mdlWorkerOut$Att$varInterceptCoreQlt[2]) / as.numeric(mdlWorkerOut$Att$varNull[2]))) * 100
 ```
 
-TL;DR: Variance explained in outgroup attitudes is of medium effect size (between: `r format(round(mdlWorkerOut$Att$varBtwPercInterceptCoreQlt,2),nsmall=2)`%, within: `r format(round(mdlWorkerOut$Att$varWithinPercInterceptCoreQlt,2),nsmall=2)`%)
+Unsurprisingly, the model with the two predictors adds significantly beyond the empty unconditional model. However, more importantly, looking at the coefficients, we find that the effect of core need fulfillemnt indeed is indeed strongly reduced and the variance is explained by the perceived interaction quality. The variance explained in outgroup attitudes is of medium effect size (between: `r format(round(mdlWorkerOut$Att$varBtwPercInterceptCoreQlt,2),nsmall=2)`%, within: `r format(round(mdlWorkerOut$Att$varWithinPercInterceptCoreQlt,2),nsmall=2)`%).  
 
 #### random slope
+
+We again check whether further letting the effects vary between participants explains additional variance in outgroup attitudes (i.e., random slope).   
 
 \begin{equation}
 (\#eq:AttitudeQualityNeedRandEq)
 Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + \gamma_{20}InteractionQuality_{ti} + u_{0i} + u_{1i} + e_{ti}  \\
 \textrm{with}\ \begin{bmatrix} u_{0i}\\ u_{1i}\end{bmatrix} \sim \mathcal{N}(0,\Omega_u): \Omega_u=\begin{bmatrix} \tau_{0}^2 & \\ \tau_{01} & \tau_{1}^2 \end{bmatrix} \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
 \end{equation}
+
+<i class="fas fa-question-circle"></i> Check whether the omega matrix is correct should probably have as many taus as gammas.  
 
 ```{r workerOutModelSlopesAttCoreQlt}
 # Create and save Model (optimizer needed to reach convergence)
@@ -1974,6 +2118,11 @@ anova(
 ) %>%
   as.data.frame() %>%
   select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
   kbl(
     .,
     caption = "Worker: Model Comparison",
@@ -2042,15 +2191,19 @@ ggsave(
 )
 ```
 
-#### Compare models
+We find that adding the random slopes does add significantly beyond the random intercept model. We also find that the perceived interaction quality remains a strong predictor (even when letting the slopes vary between participants).  
 
-Interpretation of Mediation like results.
+### Check for robustness  
 
-### Check for robustness
+To build further confidence in our results, we assess a few additional models that might offer alternative explanations of the effects we find.  
 
-#### Interaction Type
+#### Interaction Type  
 
-##### random intercept
+To make certain that the effect of core need fulfillment is specific to the interaction we compare the the effect to fulfillment of the situation core need when no outgroup interaction took place.  
+
+##### random intercept   
+
+Here we go back to the full dataset and add generalized situational core need fulfillment (either during an interaction or about the daytime in general) and whether an outgroup interaction happened as well as their interaction term to a random intercept model of outgroup attitudes.  
 
 \begin{equation}
 (\#eq:AttitudeNeedInteractionEq)
@@ -2089,13 +2242,20 @@ anova(mdlWorker$lmeAttNull,
       mdlWorker$lmeInterceptAttCoreInt) %>%
   as.data.frame() %>%
   select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  add_rownames(., var = "Description") %>%
+  mutate(Description = gsub(".*\\$", "", Description)) %>%
   kbl(
     .,
     caption = "Worker: Model Comparison",
     format = "html",
     linesep = "",
     booktabs = T,
-    align = rep("c", ncol(.)),
+    align = c("l", rep("c", ncol(.)-1)),
     digits = 3
   ) %>%
   kable_styling(position = "left")
@@ -2117,7 +2277,11 @@ mdlWorker$varWithinPercInterceptAttCoreInt <-
   (1 - (as.numeric(mdlWorker$varInterceptAttCoreInt[2]) / as.numeric(mdlWorker$varAttNull[2]))) * 100
 ```
 
+We find that the model explains significantly more variance than the empty null model. However, more interestingly, looking at the coefficients, we find that, as seen earlier, having an outgroup interaction has a strong effect on outgroup attitudes. Importantly, we find that there is no main effect of key need fulfillment but a significant interaction effect of core need fulfillment and outgroup contact. This indicates that it is not key need fulfillment in general --- but only key need fulfillment during an outgroup contact that predicts more positive outgroup attitudes.  
+
 ##### random slope
+
+We again check whether further letting the effects vary between participants explains additional variance in outgroup attitudes (i.e., random slope).  
 
 \begin{equation}
 (\#eq:AttitudeNeedInteractionRandEq)
@@ -2160,6 +2324,13 @@ anova(mdlWorker$lmeAttNull,
       mdlWorker$lmeSlopesAttCoreInt) %>%
   as.data.frame() %>%
   select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  add_rownames(., var = "Description") %>%
+  mutate(Description = gsub(".*\\$", "", Description)) %>%
   kbl(
     .,
     caption = "Worker: Model Comparison",
@@ -2228,7 +2399,11 @@ ggsave(
 )
 ```
 
-##### Plot Interaction
+We find that adding the random slopes does add significantly beyond the random intercept model. We also see that when taking the possibility to varying slopes into account, the coefficient interpretations remains consistent (i.e., outgroup contact and its interaction with core need fulfillment remain significant predictors of positive outgroup attitudes).  
+
+##### Plot Interaction   
+
+Before we move on, we shortly illustrate the interaction effect of how the effect of core need fulfillment differed by whether an outgroup contact took place or not. To this end we illustrate (1) the raw data points (without taking the nested nature into account), as well as a plot of the model predicted values and their prediction interval (taking the nested structure into account based; similar to an interaction plot).  
 
 ```{r workerModelInterceptAttCoreIntPlt}
 # visualize interaction
@@ -2376,7 +2551,11 @@ ggplot(
 
 #### Other psychological needs
 
-##### random intercept
+In a final step we check whether during the interaction the core situational need is a meaningful predictor even when taking other fundamental psychological needs into account. We focus on the three commonly considered self determination needs: competence, autonomy, and relatedness.  
+
+##### random intercept with level ome predictors  
+
+We add the core need fulfillment with the three self determiantion needs to a random intercept model of outgroup attitudes.  
 
 \begin{equation}
 (\#eq:AttitudeNeedSdtEq)
@@ -2411,22 +2590,37 @@ summ(
 #                  ncpus = 4, seed = 42),
 #          "output/tables/ML-Inter-CI.csv")
 
-# compute lme for core model with same number of observations for comparison
-# !! LOOK INTO MISSINGNESS (only one observation) !!
-lmeInterceptCoreRed <-
+# To be compared against a model with only the self determination theory needs
+mdlWorkerOut$Att$lmeInterceptSdt <-
   lme(
-    thermometerDutch_1 ~ keymotive_fulfillemt_1,
+    thermometerDutch_1 ~ competence_1 + autonomy_1 + relatedness_1,
     random = ~ 1 | PID,
-    data = workerOutgroupInteraction %>% filter(!is.na(autonomy_1))
+    data = workerOutgroupInteraction,
+    na.action = na.exclude
   )
 
-# Compare new model to previous step
+summ(
+  mdlWorkerOut$Att$lmerInterceptSdt <- lmer(
+    thermometerDutch_1 ~ competence_1 + autonomy_1 + relatedness_1 + (1 | PID),
+    data = workerOutgroupInteraction
+  ),
+  confint = TRUE,
+  digits = 3,
+  center = TRUE
+)
+
+# Compare new model to previous steps
 anova(
-  lmeInterceptCoreRed, 
+  mdlWorkerOut$Att$lmeInterceptSdt,
   mdlWorkerOut$Att$lmeInterceptCoreSdt
   ) %>%
   as.data.frame() %>%
   select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
   kbl(
     .,
     caption = "Worker: Model Comparison",
@@ -2456,7 +2650,11 @@ mdlWorkerOut$Att$varWithinPercInterceptCoreSdt <-
   (1 - (as.numeric(mdlWorkerOut$Att$varInterceptCoreSdt[2]) / as.numeric(mdlWorkerOut$Att$varInterceptCore[2]))) * 100
 ```
 
-##### random slope
+We compare the models of the core need and the SDT need fulfillments to a model that only includes the SDT needs. We find that the core need adds significantly above the SDT needs. We find that next to relatedness, the core need explains the most variance and compared to the model with only the SDT needs, the core need fulfillment flexibly takes on some of the explained variance of all of the three fundamental needs (i.e., reduction in SDT beta weights). 
+
+##### random slope  
+
+We again check whether further letting the effects vary between participants explains additional variance in outgroup attitudes (i.e., random slope).  
 
 \begin{equation}
 (\#eq:AttitudeNeedSdtRandEq)
@@ -2500,6 +2698,11 @@ anova(mdlWorkerOut$Att$lmeInterceptCoreSdt,
       mdlWorkerOut$Att$lmeSlopesCoreSdt) %>%
   as.data.frame() %>%
   select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
   kbl(
     .,
     caption = "Worker: Model Comparison",
@@ -2569,6 +2772,7 @@ ggsave(
 )
 ```
 
+We find that adding the random slopes does add significantly beyond the random intercept model. We also see that when taking the possibility to varying slopes into account, the coefficient interpretations remains consistent (i.e., core need and relatedness remain the strongest and only significant predictors). Note however a slight reduction in the p value of the core need fulfillment.   
 
 # **Student Sample**
 
@@ -2786,6 +2990,13 @@ anova(mdlStudent$glsAttNull,
       mdlStudent$lmeAttNull) %>% 
   as.data.frame() %>%
   select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  add_rownames(., var = "Description") %>%
+  mutate(Description = gsub(".*\\$", "", Description)) %>%
   kbl(
     .,
     caption = "Student: Model Comparison",
@@ -2839,6 +3050,13 @@ anova(mdlStudent$lmeAttNull,
       mdlStudent$lmeInterceptAttType) %>%
   as.data.frame() %>%
   select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  add_rownames(., var = "Description") %>%
+  mutate(Description = gsub(".*\\$", "", Description)) %>%
   kbl(
     .,
     caption = "Student: Model Comparison",
@@ -2911,6 +3129,13 @@ anova(mdlStudent$lmeInterceptAttType,
       mdlStudent$lmeSlopesAttType) %>%
   as.data.frame() %>%
   select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  add_rownames(., var = "Description") %>%
+  mutate(Description = gsub(".*\\$", "", Description)) %>%
   kbl(
     .,
     caption = "Student: Model Comparison",
@@ -3155,6 +3380,11 @@ anova(mdlStudentOut$Att$lmeNull,
       mdlStudentOut$Att$lmeInterceptCore) %>%
   as.data.frame() %>%
   select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
   kbl(
     .,
     caption = "Student: Model Comparison",
@@ -3228,6 +3458,11 @@ anova(mdlStudentOut$Att$lmeInterceptCore,
       mdlStudentOut$Att$lmeSlopesCore) %>%
   as.data.frame() %>%
   select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
   kbl(
     .,
     caption = "Student: Model Comparison",
@@ -3393,6 +3628,11 @@ anova(mdlStudentOut$Qlt$lmeNull,
       mdlStudentOut$Qlt$lmeInterceptCore) %>%
   as.data.frame() %>%
   select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
   kbl(
     .,
     caption = "Student: Model Comparison",
@@ -3467,6 +3707,11 @@ anova(mdlStudentOut$Qlt$lmeInterceptCore,
       mdlStudentOut$Qlt$lmeSlopesCore) %>%
   as.data.frame() %>%
   select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
   kbl(
     .,
     caption = "Student: Model Comparison",
@@ -3581,6 +3826,11 @@ anova(
   ) %>%
   as.data.frame() %>%
   select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
   kbl(
     .,
     caption = "Student: Model Comparison",
@@ -3657,6 +3907,11 @@ anova(
 ) %>%
   as.data.frame() %>%
   select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
   kbl(
     .,
     caption = "Student: Model Comparison",
@@ -3773,6 +4028,13 @@ anova(mdlStudent$lmeAttNull,
       mdlStudent$lmeInterceptAttCoreInt) %>%
   as.data.frame() %>%
   select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  add_rownames(., var = "Description") %>%
+  mutate(Description = gsub(".*\\$", "", Description)) %>%
   kbl(
     .,
     caption = "Student: Model Comparison",
@@ -3844,13 +4106,20 @@ anova(mdlStudent$lmeAttNull,
       mdlStudent$lmeSlopesAttCoreInt) %>%
   as.data.frame() %>%
   select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  add_rownames(., var = "Description") %>%
+  mutate(Description = gsub(".*\\$", "", Description)) %>%
   kbl(
     .,
     caption = "Student: Model Comparison",
     format = "html",
     linesep = "",
-    booktabs = T,
-    align = rep("c", ncol(.)),
+    booktabs = TRUE,
+    align = rep("l", ncol(.)),
     digits = 3
   ) %>%
   kable_styling(position = "left")
@@ -4096,13 +4365,38 @@ summ(
 #                  ncpus = 4, seed = 42),
 #          "output/tables/ML-Inter-CI.csv")
 
+# To be compared against a model with only SDT needs
+mdlStudentOut$Att$lmeInterceptSdt <-
+  lme(
+    AttitudesDutch ~ Competence + Autonomy + RelatednessInteraction,
+    random = ~ 1 | PID,
+    data = studentOutgroupInteraction,
+    na.action = na.exclude
+  )
+
+summ(
+  mdlStudentOut$Att$lmerInterceptSdt <- lmer(
+    AttitudesDutch ~ Competence + Autonomy + RelatednessInteraction + (1 | PID),
+    data = studentOutgroupInteraction
+  ),
+  confint = TRUE,
+  digits = 3,
+  center = TRUE
+)
+
+
 # Compare new model to previous step
 anova(
-  mdlStudentOut$Att$lmeInterceptCore, 
+  mdlStudentOut$Att$lmeInterceptSdt, 
   mdlStudentOut$Att$lmeInterceptCoreSdt
   ) %>%
   as.data.frame() %>%
   select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
   kbl(
     .,
     caption = "Student: Model Comparison",
@@ -4223,6 +4517,11 @@ anova(mdlStudentOut$Att$lmeInterceptCoreSdt,
       mdlStudentOut$Att$lmeSlopesCoreSdt) %>%
   as.data.frame() %>%
   select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
   kbl(
     .,
     caption = "Student: Model Comparison",
