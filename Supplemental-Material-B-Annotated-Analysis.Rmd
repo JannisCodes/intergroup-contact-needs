@@ -854,7 +854,8 @@ studentContactFreq <- dtStudents$full %>%
     SumContactNL = sum(InteractionDumDutch),
     PercContactNL = SumContactNL / n * 100,
     SumContactNLAll = sum(ContactNum[InteractionDumDutch == 1], na.rm = TRUE),
-    AvAttitude = mean(AttitudesDutch, na.rm = TRUE)
+    AvAttitude = mean(AttitudesDutch, na.rm = TRUE),
+    AvQuality = mean(quality_overall, na.rm = TRUE)
   ) %>%
   mutate(
     WinSumContactNL = DescTools::Winsorize(SumContactNL),
@@ -879,6 +880,27 @@ studentInteractionType <- dtStudents$full %>%
       labels = c("No", "Yes")
     )
   )
+
+# select a subset of IDs to display in plots
+studentPltIDs <-
+  studentInteractionType %>%
+  group_by(PID) %>%
+  summarise(n = n()) %>%
+  slice_max(n, n = 20) %>% # chose the 20 with the most number of measurements
+  select(PID) %>%
+  as.matrix %>%
+  as.vector
+
+# select a subset of IDs to display in plots (only outgroup interactions)
+studentOutPltIDs <-
+  studentInteractionType %>%
+  filter(OutgroupInteraction == "Yes") %>%
+  group_by(PID) %>%
+  summarise(n = n()) %>%
+  slice_max(n, n = 20) %>% # chose the 20 with the most number of measurements
+  select(PID) %>%
+  as.matrix %>%
+  as.vector
 ```
 
 ### Medical
@@ -2929,7 +2951,7 @@ grid.arrange(
 # Plot prediction model
 mdlStudent$predSlopesAttType <- 
   studentInteractionType %>%
-  select(AttitudesDutch, session, PID) %>% 
+  select(AttitudesDutch, TIDnum, PID) %>% 
   mutate(measure = predict(mdlStudent$lmeSlopesAttType,
                            studentInteractionType,
                            re.form = NA
@@ -2938,7 +2960,8 @@ mdlStudent$predSlopesAttType <-
 
 (
   mdlStudent$predPltSlopesAttType <-
-    ggplot(data = mdlStudent$predSlopesAttType, aes(x = session, y = measure)) +
+    ggplot(data = mdlStudent$predSlopesAttType %>% filter(PID %in% studentPltIDs), 
+           aes(x = TIDnum, y = measure)) +
     geom_line(alpha = 1, color = "blue") +
     geom_line(aes(y = AttitudesDutch), alpha = 1) +
     facet_wrap(~ PID, ncol = 6) +
@@ -2967,25 +2990,9 @@ Attitude = ContactFreq \times AverageContactQual
 \end{equation}
 
 ```{r studentFreqQualCor}
-# prepare data
-studentAvFreQual <- dtStudents$full %>%
-  group_by(ExternalReference) %>%
-  summarise(
-    n = n(),
-    SumContactNL = sum(Contact_dum),
-    PercContactNL = SumContactNL / n * 100,
-    SumContactNLAll = sum(number),
-    AvAttitude = mean(AttitudesDutch, na.rm = TRUE),
-    AvQuality = mean(quality_overall_1, na.rm = TRUE)
-  ) %>%
-  mutate(
-    WinSumContactNL = DescTools::Winsorize(SumContactNL),
-    WinSumContactNLAll = DescTools::Winsorize(SumContactNLAll)
-  )
-
 # correlation panel
 pairs.panels.new(
-  studentAvFreQual %>% select(SumContactNL, SumContactNLAll, AvQuality, AvAttitude),
+  studentContactFreq %>% select(SumContactNL, SumContactNLAll, AvQuality, AvAttitude),
   labels = c(
     "Sum:\nNumer of beeps with Outgroup Contact (NL)",
     "Sum:\nNumber of Outgroup Contacts (NL)",
@@ -2996,7 +3003,7 @@ pairs.panels.new(
 
 # correlation panel with interaction sums winsorized
 pairs.panels.new(
-  studentAvFreQual %>% select(WinSumContactNL, WinSumContactNLAll, AvQuality, AvAttitude),
+  studentContactFreq %>% select(WinSumContactNL, WinSumContactNLAll, AvQuality, AvAttitude),
   labels = c(
     "Sum:\nNumer of beeps with Outgroup Contact (NL)\n[Winsorized]",
     "Sum:\nNumber of Outgroup Contacts (NL)\n[Winsorized]",
@@ -3006,12 +3013,12 @@ pairs.panels.new(
 )
 ```
 
-TL;DR: There is a medium sized correlation between the participants' Average Interaction Quality and their Average Outgroup Attitudes. Thus within our data participants with a higher quality outgroup interactions also held more positive attitudes towards that group. However, the frequency of intergroup interactions had no meaningfull correlation with either the average interaction quality or average outgroup attitudes.
+TL;DR: There is no meaningfull correlation between the participants' Average Interaction Quality and their Average Outgroup Attitudes. However, the frequency of intergroup interactions had a significant correlation with both the average interaction quality and average outgroup attitudes.
 
 ```{r studentModelOlsAttFreqQual}
 # regression
 mdlStudent$lmAttFreqQualX <-
-  lm(AvAttitude ~ SumContactNL * AvQuality, data = studentAvFreQual)
+  lm(AvAttitude ~ SumContactNL * AvQuality, data = studentContactFreq)
 # summary(mdlStudent$lmAttFreqQualX)
 
 summ(
@@ -3023,19 +3030,19 @@ summ(
 
 interactions::interact_plot(
   mdlStudent$lmAttFreqQualX,
-  pred = AvQuality,
-  modx = SumContactNL,
+  pred = SumContactNL,
+  modx = AvQuality,
   interval = TRUE,
   partial.residuals = TRUE
 )
 
 interactions::johnson_neyman(mdlStudent$lmAttFreqQualX,
-                             pred = AvQuality,
-                             modx = SumContactNL,
+                             pred = SumContactNL,
+                             modx = AvQuality,
                              alpha = .05)
 ```
 
-TL;DR: We find that interaction quality is significantly related to higher outgroup attitudes (albeit with a small effect size). We also find that in our sample with an increasing number of interactions the positive effect of interaction quality becomes weaker. However, note that this is based on data aggregating all within participant nuances and is only the date of 21 people.
+TL;DR: We find that, although the effect goes into the right direction (i.e., higher average interaction quality increases the positive effect of intergroup contact), there was no effect of average interaction quality (neither directly nor in a moderating role of interaction frequency). However, this regression ignores within person relationships of these variables (i.e., summarizes all within person variances into average scores).
 
 ## Need Fulfillment
 
@@ -3123,14 +3130,14 @@ Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + u_{0i} + e_{ti} \
 # Create and save Model
 mdlStudentOut$Att$lmeInterceptCore <-
   lme(
-    AttitudesDutch ~ keymotive_fulfillemt_1,
+    AttitudesDutch ~ KeyNeedFullfillment,
     random = ~ 1 | PID,
     data = studentOutgroupInteraction
   )
 
 # Get summary with p-values (Satterthwaite's method)
 summ(
-  lmer(AttitudesDutch ~ keymotive_fulfillemt_1 + (1 | PID), 
+  lmer(AttitudesDutch ~ KeyNeedFullfillment + (1 | PID), 
        data = studentOutgroupInteraction),
   confint = TRUE,
   digits = 3,
@@ -3191,8 +3198,8 @@ Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + u_{0i} + u_{1i} +
 mdlStudentOut$Att$lmeSlopesCore <-
   lme(
     AttitudesDutch ~
-      keymotive_fulfillemt_1,
-    random = ~ 1 + keymotive_fulfillemt_1 | PID,
+      KeyNeedFullfillment,
+    random = ~ 1 + KeyNeedFullfillment | PID,
     control = lmeControl(opt = "optim"),
     data = studentOutgroupInteraction
   )
@@ -3201,8 +3208,8 @@ mdlStudentOut$Att$lmeSlopesCore <-
 summ(
   mdlStudentOut$Att$lmerSlopesCore <- lmer(
     AttitudesDutch ~
-      keymotive_fulfillemt_1 +
-      (1 + keymotive_fulfillemt_1 | PID),
+      KeyNeedFullfillment +
+      (1 + KeyNeedFullfillment | PID),
     data = studentOutgroupInteraction
   ),
   confint = TRUE,
@@ -3261,7 +3268,7 @@ grid.arrange(
 # Plot prediction model
 mdlStudentOut$Att$predSlopesCore <- 
   studentOutgroupInteraction %>%
-  select(AttitudesDutch, session, PID) %>% 
+  select(AttitudesDutch, TIDnum, PID) %>% 
   mutate(measure = predict(mdlStudentOut$Att$lmeSlopesCore,
                            studentOutgroupInteraction,
                            re.form = NA
@@ -3270,7 +3277,8 @@ mdlStudentOut$Att$predSlopesCore <-
 
 (
   mdlStudentOut$Att$predPltSlopesCore <-
-    ggplot(data = mdlStudentOut$Att$predSlopesCore, aes(x = session, y = measure)) +
+    ggplot(data = mdlStudentOut$Att$predSlopesCore %>% filter(PID %in% studentOutPltIDs), 
+           aes(x = TIDnum, y = measure)) +
     geom_line(alpha = 1, color = "blue") +
     geom_line(aes(y = AttitudesDutch), alpha = 1) +
     facet_wrap( ~ PID, ncol = 6) +
@@ -3305,18 +3313,18 @@ make a model with only the data but a random intercept (unconditional model) for
 
 \begin{equation}
 (\#eq:studentOutQualEmptyModel)
-Attitude_{ti} = \gamma_{00} + u_{0i} + e_{ti} \\
+InteractionQuality_{ti} = \gamma_{00} + u_{0i} + e_{ti} \\
 \textrm{with}\ u_{0i} \sim \mathcal{N}(0,\tau_{00}^2)\ \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
 \end{equation}
 
 ```{r studentOutModelMLQltNull}
 # Create and save Model
 mdlStudentOut$Qlt$lmerNull <-
-  lme4::lmer(quality_overall_1 ~ 1 + (1 | PID), 
+  lme4::lmer(quality_overall ~ 1 + (1 | PID), 
              data = studentOutgroupInteraction) # use optim if it does not converge
 mdlStudentOut$Qlt$lmeNull <-
   lme(
-    quality_overall_1 ~ 1,
+    quality_overall ~ 1,
     random = ~ 1 | PID,
     data = studentOutgroupInteraction,
     control = list(opt = "nlmimb")
@@ -3360,14 +3368,14 @@ InteractionQuality_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + u_{0i} 
 # Create and save Model
 mdlStudentOut$Qlt$lmeInterceptCore <-
   lme(
-    quality_overall_1 ~ keymotive_fulfillemt_1,
+    quality_overall ~ KeyNeedFullfillment,
     random = ~ 1 | PID,
     data = studentOutgroupInteraction
   )
 
 # Get summary with p-values (Satterthwaite's method)
 summ(
-  lmer(quality_overall_1 ~ keymotive_fulfillemt_1 + (1 | PID), 
+  mdlStudentOut$Qlt$lmerInterceptCore <- lmer(quality_overall ~ KeyNeedFullfillment + (1 | PID), 
        data = studentOutgroupInteraction),
   confint = TRUE,
   digits = 3,
@@ -3375,7 +3383,7 @@ summ(
 )
 
 # Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(quality_overall_1 ~ Contact_dum + inNonDutch + (1|PID),data=studentOutgroupInteraction),
+# write.csv(confint(lmer(quality_overall ~ Contact_dum + inNonDutch + (1|PID),data=studentOutgroupInteraction),
 #                  method="boot",nsim=1000, parallel = "multicore",
 #                  ncpus = 4, seed = 42),
 #          "output/tables/ML-Inter-CI.csv")
@@ -3427,9 +3435,9 @@ InteractionQuality_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + u_{0i} 
 # Create and save Model (optimizer needed to reach convergence)
 mdlStudentOut$Qlt$lmeSlopesCore <-
   lme(
-    quality_overall_1 ~
-      keymotive_fulfillemt_1,
-    random = ~ 1 + keymotive_fulfillemt_1 | PID,
+    quality_overall ~
+      KeyNeedFullfillment,
+    random = ~ 1 + KeyNeedFullfillment | PID,
     control = lmeControl(opt = "optim"),
     data = studentOutgroupInteraction
   )
@@ -3438,9 +3446,9 @@ mdlStudentOut$Qlt$lmeSlopesCore <-
 summ(
   mdlStudentOut$Qlt$lmerSlopesCore <-
     lmer(
-      quality_overall_1 ~
-        keymotive_fulfillemt_1 +
-        (1 + keymotive_fulfillemt_1 | PID),
+      quality_overall ~
+        KeyNeedFullfillment +
+        (1 + KeyNeedFullfillment | PID),
       data = studentOutgroupInteraction
     ),
   confint = TRUE,
@@ -3485,9 +3493,50 @@ mdlStudentOut$Qlt$varWithinSlopesCore <-
   1 - (as.numeric(mdlStudentOut$Qlt$varSlopesCore[2]) / as.numeric(mdlStudentOut$Qlt$varInterceptCore[2]))
 mdlStudentOut$Qlt$varWithinPercSlopesCore <-
   (1 - (as.numeric(mdlStudentOut$Qlt$varSlopesCore[2]) / as.numeric(mdlStudentOut$Qlt$varInterceptCore[2]))) * 100
+
+# Assumption Checks:
+mdlStudentOut$Qlt$diagSlopesCore <-
+  sjPlot::plot_model(mdlStudentOut$Qlt$lmerSlopesCore, type = "diag")
+grid.arrange(
+  mdlStudentOut$Qlt$diagSlopesCore[[1]],
+  mdlStudentOut$Qlt$diagSlopesCore[[2]]$`PID`,
+  mdlStudentOut$Qlt$diagSlopesCore[[3]],
+  mdlStudentOut$Qlt$diagSlopesCore[[4]]
+)
+
+# Plot prediction model
+mdlStudentOut$Qlt$predSlopesCore <- 
+  studentOutgroupInteraction %>%
+  select(AttitudesDutch, TIDnum, PID) %>% 
+  mutate(measure = predict(mdlStudentOut$Qlt$lmeSlopesCore,
+                           studentOutgroupInteraction,
+                           re.form = NA
+                           )
+         )
+
+(
+  mdlStudentOut$Qlt$predPltSlopesCore <-
+    ggplot(data = mdlStudentOut$Qlt$predSlopesCore %>% filter(PID %in% studentOutPltIDs), 
+           aes(x = TIDnum, y = measure)) +
+    geom_line(alpha = 1, color = "blue") +
+    geom_line(aes(y = AttitudesDutch), alpha = 1) +
+    facet_wrap(~ PID, ncol = 6) +
+    xlab("Time") +
+    ylab("Outgroup Attitudes") +
+    theme_Publication()
+)
+ggsave(
+  filename = "Figures/StudentOut_PredictionPlot_SlopesCore.png",
+  mdlStudentOut$Qlt$predPltSlopesCore,
+  width = 18,
+  height = 12,
+  dpi = 800,
+  units = "cm",
+  device = "png"
+)
 ```
 
-TL;DR: random slopes does not add significantly. Stay with simpler model.
+TL;DR: random slopes does add significantly.
 
 ### Need fulfillment, Interaction Quality, and Attitudes
 
@@ -3503,7 +3552,7 @@ Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + \gamma_{20}Intera
 # Create and save Model
 mdlStudentOut$Att$lmeInterceptCoreQlt <-
   lme(
-    AttitudesDutch ~ keymotive_fulfillemt_1 + quality_overall_1,
+    AttitudesDutch ~ KeyNeedFullfillment + quality_overall,
     random = ~ 1 | PID,
     data = studentOutgroupInteraction
   )
@@ -3511,7 +3560,7 @@ mdlStudentOut$Att$lmeInterceptCoreQlt <-
 # Get summary with p-values (Satterthwaite's method)
 summ(
   lmer(
-    AttitudesDutch ~ keymotive_fulfillemt_1 + quality_overall_1 + (1 | PID),
+    AttitudesDutch ~ KeyNeedFullfillment + quality_overall + (1 | PID),
     data = studentOutgroupInteraction
   ),
   confint = TRUE,
@@ -3575,8 +3624,8 @@ Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + \gamma_{20}Intera
 mdlStudentOut$Att$lmeSlopesCoreQlt <-
   lme(
     AttitudesDutch ~
-      keymotive_fulfillemt_1 + quality_overall_1,
-    random = ~ 1 + keymotive_fulfillemt_1 + quality_overall_1 | PID,
+      KeyNeedFullfillment + quality_overall,
+    random = ~ 1 + KeyNeedFullfillment + quality_overall | PID,
     control = lmeControl(opt = "optim"),
     data = studentOutgroupInteraction
   )
@@ -3585,8 +3634,8 @@ mdlStudentOut$Att$lmeSlopesCoreQlt <-
 summ(
   mdlStudentOut$Att$lmerSlopesCoreQlt <- lmer(
     AttitudesDutch ~
-      keymotive_fulfillemt_1 + quality_overall_1 +
-      (1 + keymotive_fulfillemt_1 + quality_overall_1 | PID),
+      KeyNeedFullfillment + quality_overall +
+      (1 + KeyNeedFullfillment + quality_overall | PID),
     data = studentOutgroupInteraction
   ),
   confint = TRUE,
@@ -3648,7 +3697,7 @@ grid.arrange(
 # Plot prediction model
 mdlStudentOut$Att$predSlopesCoreQlt <- 
   studentOutgroupInteraction %>%
-  select(AttitudesDutch, session, PID) %>% 
+  select(AttitudesDutch, TIDnum, PID) %>% 
   mutate(measure = predict(mdlStudentOut$Att$lmeSlopesCoreQlt,
                            studentOutgroupInteraction,
                            re.form = NA
@@ -3657,7 +3706,8 @@ mdlStudentOut$Att$predSlopesCoreQlt <-
 
 (
   mdlStudentOut$Att$predPltSlopesCoreQlt <-
-    ggplot(data = mdlStudentOut$Att$predSlopesCoreQlt, aes(x = session, y = measure)) +
+    ggplot(data = mdlStudentOut$Att$predSlopesCoreQlt %>% filter(PID %in% studentOutPltIDs), 
+           aes(x = TIDnum, y = measure)) +
     geom_line(alpha = 1, color = "blue") +
     geom_line(aes(y = AttitudesDutch), alpha = 1) +
     facet_wrap( ~ PID, ncol = 6) +
@@ -3696,7 +3746,7 @@ Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + \gamma_{20}Outgro
 # Create and save Model
 mdlStudent$lmeInterceptAttCoreInt <-
   lme(
-    AttitudesDutch ~ keyMotiveFulfilled * OutgroupInteraction,
+    AttitudesDutch ~ KeyNeedFullfillment * OutgroupInteraction,
     random =  ~ 1 | PID,
     data = studentInteractionType
   )
@@ -3704,7 +3754,7 @@ mdlStudent$lmeInterceptAttCoreInt <-
 # Get summary with p-values (Satterthwaite's method)
 summ(
   mdlStudent$lmerInterceptAttCoreInt <- lmer(
-    AttitudesDutch ~ keyMotiveFulfilled * OutgroupInteraction + (1 | PID),
+    AttitudesDutch ~ KeyNeedFullfillment * OutgroupInteraction + (1 | PID),
     data = studentInteractionType
   ),
   confint = TRUE,
@@ -3763,8 +3813,8 @@ Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + \gamma_{20}Outgro
 # Create and save Model (optimizer needed to reach convergence)
 mdlStudent$lmeSlopesAttCoreInt <- lme(
   AttitudesDutch ~
-    keyMotiveFulfilled * OutgroupInteraction,
-  random = ~ 1 + keyMotiveFulfilled + OutgroupInteraction | PID,
+    KeyNeedFullfillment * OutgroupInteraction,
+  random = ~ 1 + KeyNeedFullfillment + OutgroupInteraction | PID,
   control = lmeControl(opt = "optim"),
   data = studentInteractionType
 )
@@ -3773,8 +3823,8 @@ mdlStudent$lmeSlopesAttCoreInt <- lme(
 summ(
   mdlStudent$lmerSlopesAttCoreInt <- lmer(
     AttitudesDutch ~
-      keyMotiveFulfilled * OutgroupInteraction +
-      (1 + keyMotiveFulfilled + OutgroupInteraction | PID),
+      KeyNeedFullfillment * OutgroupInteraction +
+      (1 + KeyNeedFullfillment + OutgroupInteraction | PID),
     data = studentInteractionType
   ), 
   confint = TRUE,
@@ -3834,7 +3884,7 @@ grid.arrange(
 # Plot prediction model
 mdlStudent$predSlopesAttCoreInt <- 
   studentInteractionType %>%
-  select(AttitudesDutch, session, PID) %>% 
+  select(AttitudesDutch, TIDnum, PID) %>% 
   mutate(measure = predict(mdlStudent$lmeSlopesAttCoreInt,
                            studentInteractionType,
                            re.form = NA
@@ -3843,7 +3893,8 @@ mdlStudent$predSlopesAttCoreInt <-
 
 (
   mdlStudent$predPltSlopesAttCoreInt <-
-    ggplot(data = mdlStudent$predSlopesAttCoreInt, aes(x = session, y = measure)) +
+    ggplot(data = mdlStudent$predSlopesAttCoreInt %>% filter(PID %in% studentPltIDs), 
+           aes(x = TIDnum, y = measure)) +
     geom_line(alpha = 1, color = "blue") +
     geom_line(aes(y = AttitudesDutch), alpha = 1) +
     facet_wrap(~ PID, ncol = 6) +
@@ -3868,7 +3919,7 @@ ggsave(
 # visualize interaction
 ## Without ML structure
 ggplot(data = studentInteractionType,
-       aes(x = keyMotiveFulfilled,
+       aes(x = KeyNeedFullfillment,
            y = AttitudesDutch,
            fill = OutgroupInteraction)) +
   #geom_point()+
@@ -3884,7 +3935,7 @@ ggplot(data = studentInteractionType,
     breaks = seq(50, 100, by = 10),
     position = "left"
   ) +
-  scale_x_continuous(limits = c(-50, 50), breaks = seq(-50, 50, by = 10)) +
+  scale_x_continuous(limits = c(0, 100), breaks = seq(0, 100, by = 10)) +
   labs(
     title = "Without ML stucture",
     x = "Fulfillment Core Need",
@@ -3899,7 +3950,7 @@ ggplot(data = studentInteractionType,
 # create parameters for prediction
 datNew = data.frame(
   OutgroupInteraction = factor(rep(c("No", "Yes"), each = 21)),
-  keyMotiveFulfilled = rep(seq(-50, 50, 5), 2),
+  KeyNeedFullfillment = rep(seq(0, 100, 5), 2),
   PID = 0
 )
 
@@ -3923,7 +3974,7 @@ rm(datNew, PI)
 # Plot predicted values with SE
 ggplot(
   mdlStudent$predInterceptAttCoreIntX,
-  aes(x = keyMotiveFulfilled,
+  aes(x = KeyNeedFullfillment,
       y = fit,
       fill = OutgroupInteraction)
 )+
@@ -3933,7 +3984,7 @@ ggplot(
   geom_ribbon(data = mdlStudent$predInterceptAttCoreIntX,
               aes(ymin = fit - se, ymax = fit + se),
               alpha = 0.3) +
-  scale_x_continuous(breaks = seq(-50, 50, 10)) +
+  scale_x_continuous(breaks = seq(0, 100, 10)) +
   scale_y_continuous(limits = c(50, 100), breaks = seq(50, 100, 10)) +
   scale_linetype_manual(values = c("dashed", "solid")) +
   scale_fill_manual(values = c("darkgrey", "black")) +
@@ -3949,8 +4000,8 @@ ggplot(
 # #### Bayesian estimation !! ONLY RUN ON FINAL RENDER !! Takes forever ####
 # options(mc.cores = parallel::detectCores())  # Run many chains simultaneously
 # brmfit <- brm(
-#   AttitudesDutch ~ keyMotiveFulfilled * OutgroupInteraction + 
-#     (1 + keyMotiveFulfilled + OutgroupInteraction | PID),
+#   AttitudesDutch ~ KeyNeedFullfillment * OutgroupInteraction + 
+#     (1 + KeyNeedFullfillment + OutgroupInteraction | PID),
 #   data = studentInteractionType,
 #   family = gaussian,
 #   iter = 1000,
@@ -3960,7 +4011,7 @@ ggplot(
 # # create parameters for prediction:
 # datNew = data.frame(
 #   OutgroupInteraction = rep(c("No", "Yes"), each = 101),
-#   keyMotiveFulfilled = rep(seq(-50, 50, 1), 2)
+#   KeyNeedFullfillment = rep(seq(0, 100, 1), 2)
 # )
 # # Save predicted values and adjust names and labels
 # fitavg <-
@@ -3971,10 +4022,10 @@ ggplot(
 # 
 # # Plot Bayesian SE prediction interval
 # ggplot(fitavg,
-#        aes(x = keyMotiveFulfilled,
+#        aes(x = KeyNeedFullfillment,
 #            y = pred,
 #            fill = OutgroupInteraction)) +
-#   scale_x_continuous(breaks = seq(-50, 50, 10)) +
+#   scale_x_continuous(breaks = seq(0, 100, 10)) +
 #   scale_y_continuous(limits = c(50, 100), breaks = seq(50, 100, 10)) +
 #   geom_line(aes(linetype = OutgroupInteraction), size = 1) +
 #   geom_ribbon(aes(ymin = pred - se, ymax = pred + se), alpha = 0.2) +
@@ -3992,12 +4043,12 @@ ggplot(
 # # plot all overlayed posteriors:
 # pst <- posterior_samples(brmfit, "b")
 # ggplot(studentInteractionType,
-#        aes(x = keyMotiveFulfilled, y = AttitudesDutch)) +
+#        aes(x = KeyNeedFullfillment, y = AttitudesDutch)) +
 #   geom_point(shape = 4, alpha = .1) +
 #   geom_tile() +
 #   geom_abline(
 #     data = pst,
-#     aes(intercept = b_Intercept, slope = b_keyMotiveFulfilled),
+#     aes(intercept = b_Intercept, slope = b_KeyNeedFullfillment),
 #     alpha = .025,
 #     size = .4
 #   ) +
@@ -4022,7 +4073,7 @@ Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + \gamma_{20}Autono
 # Create and save Model
 mdlStudentOut$Att$lmeInterceptCoreSdt <-
   lme(
-    AttitudesDutch ~ keymotive_fulfillemt_1 + competence_1 + autonomy_1 + relatedness_1,
+    AttitudesDutch ~ KeyNeedFullfillment + Competence + Autonomy + RelatednessInteraction,
     random = ~ 1 | PID,
     data = studentOutgroupInteraction,
     na.action = na.exclude
@@ -4031,7 +4082,7 @@ mdlStudentOut$Att$lmeInterceptCoreSdt <-
 # Get summary with p-values (Satterthwaite's method)
 summ(
   mdlStudentOut$Att$lmerInterceptCoreSdt <- lmer(
-    AttitudesDutch ~ keymotive_fulfillemt_1 + competence_1 + autonomy_1 + relatedness_1 + (1 | PID),
+    AttitudesDutch ~ KeyNeedFullfillment + Competence + Autonomy + RelatednessInteraction + (1 | PID),
     data = studentOutgroupInteraction
   ),
   confint = TRUE,
@@ -4045,18 +4096,9 @@ summ(
 #                  ncpus = 4, seed = 42),
 #          "output/tables/ML-Inter-CI.csv")
 
-# compute lme for core model with same number of observations for comparison
-# !! LOOK INTO MISSINGNESS (only one observation) !!
-lmeInterceptCoreRed <-
-  lme(
-    AttitudesDutch ~ keymotive_fulfillemt_1,
-    random = ~ 1 | PID,
-    data = studentOutgroupInteraction %>% filter(!is.na(autonomy_1))
-  )
-
 # Compare new model to previous step
 anova(
-  lmeInterceptCoreRed, 
+  mdlStudentOut$Att$lmeInterceptCore, 
   mdlStudentOut$Att$lmeInterceptCoreSdt
   ) %>%
   as.data.frame() %>%
@@ -4071,7 +4113,6 @@ anova(
     digits = 3
   ) %>%
   kable_styling(position = "left")
-rm(lmeInterceptCoreRed)
 
 # Save variances
 mdlStudentOut$Att$varInterceptCoreSdt <-
@@ -4099,23 +4140,71 @@ Attitude_{ti} = \\gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + \gamma_{20}Auton
 \end{equation}
 
 ```{r studentOutModelSlopesAttCoreSdt}
-# Create and save Model (optimizer needed to reach convergence)
+# Check Correlations 
+studentOutgroupInteraction %>% 
+  select(AttitudesDutch, KeyNeedFullfillment, Competence, Autonomy, RelatednessInteraction) %>%
+  pairs.panels.new
+
+studentRed <- 
+  studentOutgroupInteraction %>% 
+  # select(PID, AttitudesDutch, KeyNeedFullfillment, Competence, Autonomy, RelatednessInteraction) %>%
+  group_by(PID) %>%
+  filter(
+    sd(AttitudesDutch) != 0,
+    sd(KeyNeedFullfillment) != 0,
+    sd(Competence) != 0,
+    sd(Autonomy) != 0,
+    sd(RelatednessInteraction) != 0
+  ) %>%
+  ungroup
+
+studentRedCor <- 
+  studentOutgroupInteraction %>%
+  group_by(PID) %>%
+  summarise(
+    rAttCore = cor(AttitudesDutch, KeyNeedFullfillment),
+    rAttComp = cor(AttitudesDutch, Competence),
+    rAttAut = cor(AttitudesDutch, Autonomy),
+    rAttRel = cor(AttitudesDutch, RelatednessInteraction),
+    rCoreComp = cor(KeyNeedFullfillment, Competence),
+    rCoreAut = cor(KeyNeedFullfillment, Autonomy),
+    rCoreRel = cor(KeyNeedFullfillment, RelatednessInteraction),
+    rCompAut = cor(Competence, Autonomy),
+    rCompRel = cor(Competence, RelatednessInteraction),
+    rAutRel = cor(Autonomy, RelatednessInteraction)
+  ) %>%
+  filter_at(vars(-PID), all_vars(abs(.) != "1"))
+  # mutate(corMean = rowMeans(abs(.[2:ncol(.)]))) %>%
+  # filter(corMean != "1")
+
+studentRed2 <- 
+  studentOutgroupInteraction %>%
+  filter(PID %in% studentRedCor$PID)
+
+# Create and save Model (optimizer needed to reach convergence) 
+# Problem because some PPTs have 100 on all measures (SD = 0) AND/OR
+# For some all cor = 1 or -1
+# Removing these PPTs or their measurement beeps doesn't help
+# However, removing eithe the Core Need, Autonomy, or Relatedness from the random slopes lets the model converge
+# --> looks like there is an overfitting issue? But why does it work in lmer?
+# FOR NOW: Autonomy removed from random slopes because weakest predictor
 mdlStudentOut$Att$lmeSlopesCoreSdt <-
-  lme(
+  nlme::lme(
     AttitudesDutch ~
-      keymotive_fulfillemt_1 + competence_1 + autonomy_1 + relatedness_1,
-    random = ~ 1 + keymotive_fulfillemt_1 + competence_1 + autonomy_1 + relatedness_1 | PID,
-    control = lmeControl(opt = "optim"),
-    data = studentOutgroupInteraction,
-    na.action = na.exclude
+      KeyNeedFullfillment + Competence + Autonomy + RelatednessInteraction,
+    random = ~ 1 + KeyNeedFullfillment + Competence + RelatednessInteraction | PID, # Autonomy + 
+    #method = "ML",
+    #control = lmeControl(opt = "optim", optimMethod = "L-BFGS-B"),
+    control = lmeControl(opt = "optim", maxIter = 100, msMaxIter = 100),
+    data = studentOutgroupInteraction
   )
 
 # Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
 summ(
   mdlStudentOut$Att$lmerSlopesCoreSdt <- lmer(
     AttitudesDutch ~
-      keymotive_fulfillemt_1 + competence_1 + autonomy_1 + relatedness_1 +
-      (1 + keymotive_fulfillemt_1 + competence_1 + autonomy_1 + relatedness_1 | PID),
+      KeyNeedFullfillment + Competence + Autonomy + RelatednessInteraction +
+      (1 + KeyNeedFullfillment + Competence + Autonomy + RelatednessInteraction | PID),
     data = studentOutgroupInteraction
   ),
   confint = TRUE,
@@ -4174,17 +4263,17 @@ grid.arrange(
 # Plot prediction model
 mdlStudentOut$Att$predSlopesCoreSdt <- 
   studentOutgroupInteraction %>%
-  filter(!is.na(autonomy_1)) %>%
-  select(AttitudesDutch, session, PID, autonomy_1) %>% 
+  select(AttitudesDutch, TIDnum, PID) %>% 
   mutate(measure = predict(mdlStudentOut$Att$lmeSlopesCoreSdt,
-                           studentOutgroupInteraction %>% filter(!is.na(autonomy_1)),
+                           studentOutgroupInteraction,
                            re.form = NA
                            )
          )
 
 (
   mdlStudentOut$Att$predPltSlopesCoreSdt <-
-    ggplot(data = mdlStudentOut$Att$predSlopesCoreSdt, aes(x = session, y = measure)) +
+    ggplot(data = mdlStudentOut$Att$predSlopesCoreSdt %>% filter(PID %in% studentOutPltIDs),
+           aes(x = TIDnum, y = measure)) +
     geom_line(alpha = 1, color = "blue") +
     geom_line(aes(y = AttitudesDutch), alpha = 1) +
     facet_wrap( ~ PID, ncol = 6) +
