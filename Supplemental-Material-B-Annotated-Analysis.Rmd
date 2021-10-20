@@ -969,7 +969,7 @@ The first sample we assess is the smaller sojourner study. We will sequentially 
 
 We test the most general contact hypothesis in two steps. First, we assess whether more intergroup interactions are related to to more positive outgroup attitudes. Second, we test whether a potential positive effect on outgroup attitudes depends on the interaction quality (jointly with the number of interactions).   
 
-### Interaction Frequency and Outgroup Attitudes
+### Interaction Frequency and Attitudes
 
 To test the impact of the overall number of interactions, we hope to find that there is a significant relationship between the number of interactions a participant had and the average outgroup attitude.  
 
@@ -1985,7 +1985,7 @@ mdlWorkerOut$Qlt$varWithinPercSlopesCore <-
 
 We find that adding the random slopes does not add significantly beyond the random intercept model. This is unusual because this might indicate the the effect is very consistent across participants. However, we also see that when taking the possibility to varying slopes into account, the core need fulfillment remains a significant predictor of perceived interaction quality.  
 
-### Need fulfillment, Interaction Quality, and Attitudes  
+### Interaction Needs,Quality, and Attitudes  
 
 In our final main step, we will jointly consider the effect of core need fulfillment and perceived interaction quality on outgroup attitudes. We expect that if the relationship between core need fulfillment and outgroup attitudes is indeed explained by a higher perceived interaction quality, the interaction quality perception should assume the explained variance of the core contact need fulfillment.  
 
@@ -2798,7 +2798,7 @@ We will test our main hypotheses for this study in a sequential manner.
 
 We again test the most general contact hypothesis in two steps. First, we assess whether more intergroup interactions are related to to more positive outgroup attitudes. Second, we test whether a potential positive effect on outgroup attitudes depends on the interaction quality (jointly with the number of interactions).   
 
-### Interaction Frequency and Outgroup Attitudes
+### Interaction Frequency and Attitudes
 
 To test the impact of the overall number of interactions, we hope to find a significant relationship between the number of interactions a participant had and the average outgroup attitude.  
 
@@ -3838,7 +3838,7 @@ ggsave(
 
 We find that adding the random slopes does add significantly beyond the random intercept model.   
 
-### Need fulfillment, Interaction Quality, and Attitudes  
+### Interaction Needs,Quality, and Attitudes  
 
 In our final main step, we will jointly consider the effect of core need fulfillment and perceived interaction quality on outgroup attitudes. We expect that if the relationship between core need fulfillment and outgroup attitudes is indeed explained by a higher perceived interaction quality, the interaction quality perception should assume the explained variance of the core contact need fulfillment.  
 
