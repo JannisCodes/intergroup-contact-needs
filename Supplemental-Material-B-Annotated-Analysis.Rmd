@@ -1116,7 +1116,7 @@ We, thus, proceed with a multilevel analysis, which acknowledges that the measur
 
 ##### Unconditional model
 
-We start by creating an empty random intercept model (i.e., let the outgroup attitude intercept be different between participants; unconditional model)
+We start by creating an empty random intercept model (i.e., let the outgroup attitude intercept be different between participants; unconditional model).  
 
 \begin{equation}
 (\#eq:WorkerEmptyModel)
@@ -1202,9 +1202,9 @@ anova(mdlWorker$glsAttNull,
   kable_styling(position = "left")
 ```
 
-Comapring the two empty model, we find that there is indeed a significant amount of variance explained by including a random intercept.   
+Comparing the two empty model, we find that there is indeed a significant amount of variance explained by including a random intercept.   
 
-To assess the variances within and between participants we look at the ICC $\tau_{00}^2 / (\tau_{00}^2 + \sigma^2)$: The ratio of the between-cluster variance to the total variance is called the Intraclass Correlation. It tells you the proportion of the total variance in Y that is accounted for by the clustering. (In this case the clustering means clustering observations per participant)  
+To assess the variances within and between participants we look at the ICC $\tau_{00}^2 / (\tau_{00}^2 + \sigma^2)$: The ratio of the between-cluster variance to the total variance is called the Intraclass Correlation. It tells you the proportion of the total variance in Y that is accounted for by the clustering. (In this case the clustering means clustering observations per participant).  
 
 We find that an estimated `r format(round(mdlWorker$IccPercAttNull, 2), nsmall=2)`% of the variation in Feeling Thermometer scores is explained by between participant differences (clustering by PID). This is to say that `r format(round(mdlWorker$IccPercAttNull, 2), nsmall=2)`% of the variance in any individual report of Attitudes towards the Dutch can be explained by the properties of the individual who provided the rating. And we find that including 'participant' as a predictor adds significantly to the model.  
 
@@ -1413,7 +1413,7 @@ TL;DR: Random slopes don't add much for this super simple model.
 
 ### Interaction Frequency and Interaction Quality
 
-In a final step we check whether the effect outgroup interactions, in part, depends on the quality during the interactions. Because we can only assess interaction quality when there is an interaction, it is difficult to assess this with the interaction dummy as a within person predictor. Instead, we will use an aggregate measure of interaction qualtity and average interaction quality to consider the two predictors jointly.  
+In a final step we check whether the effect outgroup interactions, in part, depends on the quality during the interactions. Because we can only assess interaction quality when there is an interaction, it is difficult to assess this with the interaction dummy as a within person predictor. Instead, we will use an aggregate measure of interaction quality and average interaction quality to consider the two predictors jointly.  
 
 \begin{equation}
 (\#eq:FreqQual)
@@ -1460,7 +1460,7 @@ pairs.panels.new(
 )
 ```
 
-Within the data, we find a medium sized correlation between the participants' Average Interaction Quality and their Average Outgroup Attitudes. Thus within our data participants with a higher quality outgroup interactions also held more positive attitudes towards that group. However, the frequency of intergroup interactions had no meaningfull correlation with either the average interaction quality or average outgroup attitudes.
+Within the data, we find a medium sized correlation between the participants' Average Interaction Quality and their Average Outgroup Attitudes. Thus within our data participants with a higher quality outgroup interactions also held more positive attitudes towards that group. However, the frequency of intergroup interactions had no meaningful correlation with either the average interaction quality or average outgroup attitudes.  
 
 ```{r workerModelOlsAttFreqQual}
 # regression
@@ -1779,7 +1779,7 @@ Based on the assertion that the relationship between core need fulfillment and o
 
 ##### Unconditional model
 
-Given that we now have the perceived interaction quality as our outcome variable of interest we again begin with an unconditional model (i.e., empty random intercept model), to see whether there is enough variance to explain within the participants. Similarly to before this is again done wihin the subsample of measurements during which an outgroup interaction was reported.  
+Given that we now have the perceived interaction quality as our outcome variable of interest we again begin with an unconditional model (i.e., empty random intercept model), to see whether there is enough variance to explain within the participants. Similarly to before this is again done within the subsample of measurements during which an outgroup interaction was reported.  
 
 \begin{equation}
 (\#eq:WorkerOutQualEmptyModel)
@@ -1901,7 +1901,6 @@ mdlWorkerOut$Qlt$varWithinInterceptCore <-
 mdlWorkerOut$Qlt$varWithinPercInterceptCore <-
   (1 - (as.numeric(mdlWorkerOut$Qlt$varInterceptCore[2]) / as.numeric(mdlWorkerOut$Qlt$varNull[2]))) * 100
 ```
-
 
 The predictor again adds a significant amount of explained variances beyond the empty model and looking at the slope coefficient, we find that the situational core need fulifillment relates significantly to perceived interaction quality. The core need explained substantial variance between participants (`r format(round(mdlWorkerOut$Qlt$varBtwPercInterceptCore, 2),nsmall=2)`%). The variance explained within participants is also medium (`r format(round(mdlWorkerOut$Qlt$varWithinPercInterceptCore, 2),nsmall=2)`%).  
 
@@ -2555,7 +2554,7 @@ In a final step we check whether during the interaction the core situational nee
 
 ##### random intercept with level ome predictors  
 
-We add the core need fulfillment with the three self determiantion needs to a random intercept model of outgroup attitudes.  
+We add the core need fulfillment with the three self determination needs to a random intercept model of outgroup attitudes.  
 
 \begin{equation}
 (\#eq:AttitudeNeedSdtEq)
@@ -2776,13 +2775,32 @@ We find that adding the random slopes does add significantly beyond the random i
 
 # **Student Sample**
 
+The second sample we assess is larger study with international psychology students at Western European university. The hypotheses mirror those of the first study and are re-iterated here:
+
+1. \label{hyp:contact}Based on the most general understanding of the contact hypothesis, an increase in frequency and quality of contact should jointly account for changes in more favorable outgroup attitudes.
+    a. \label{hyp:contactFreq}Participants with more intergroup interactions should have a more favorable outgroup attitudes.
+    b. \label{hyp:contactDummy}Outgroup attitudes should be higher after an intergroup interaction compared to a non-outgroup interaction.
+    c. \label{hyp:contactFreqQual}Participants with more intergroup interactions should have a more favorable outgroup attitudes depending on the average interaction quality.
+2. \label{hyp:keyNeed}Based on our proposal, intergroup interactions with higher situational core need fulfillment should predict more favorable outgroup attitudes due to more positive interaction quality perceptions.
+    a. \label{hyp:keyNeedPred}Outgroup attitudes should be more favorable after intergroup interactions with high key need fulfillment.
+    b. \label{hyp:keyNeedQual}Interaction Quality should be perceived as more positive after intergroup interactions with higher key need fulfillment.
+    c. \label{hyp:keyNeedMediation}The variance explained in outgroup attitudes by key need fulfillment should to a large extend be assumed by interaction quality.
+    d. \label{hyp:keyNeedContactType}The effect of key need fulfillment on outgroup attitudes should be specific to intergroup interactions and not be due to need fulfillment in general. Thus, the effect of key need fulfillment on outgroup attitudes should stronger for intergroup interact than for ingroup interactions.
+    e. \label{hyp:keyNeedSDT}The effect of key need fulfillment on outgroup attitudes should be persist even when taking other fundamental psychological needs into account. Thus, the effect of key need fulfillment on outgroup attitudes should remain strong even after controlling for autonomy, competence, and relatedness fulfillment during the interaction (cf., self-determination theory).  
+
+We will test our main hypotheses for this study in a sequential manner.  
+
 ## Data Description
 
 <i class="fas fa-exclamation-triangle"></i> Still in 'scr/studentDescriptive.R'. Needs to be merged with this document.
 
 ## Contact Hypothesis
 
+We again test the most general contact hypothesis in two steps. First, we assess whether more intergroup interactions are related to to more positive outgroup attitudes. Second, we test whether a potential positive effect on outgroup attitudes depends on the interaction quality (jointly with the number of interactions).   
+
 ### Interaction Frequency and Outgroup Attitudes
+
+To test the impact of the overall number of interactions, we hope to find a significant relationship between the number of interactions a participant had and the average outgroup attitude.  
 
 \begin{equation}
 (\#eq:studentFreqQualR)
@@ -2811,9 +2829,15 @@ pairs.panels.new(
 )
 ```
 
-TL;DR: Neither the number of interactions nor the number of measurement beeps with an interaction are significantly related with the average outgroup attitudes. This is to say that within our data participants with more outgroup interactions did not have significantly more positive outgroup attitudes. This might be due to the aggregation within the participants or the small sample size of between participant data. Nonetheless, the aggregate data does not support the notion that simply having more interactions with an outgroup results in more positive outgroup attitudes.
+We find that both the number of interactions and the number of measurement beeps with an interaction are significantly related with the average outgroup attitudes. This is to say that within our data, participants with more outgroup interactions did have significantly more positive outgroup attitudes. This is inconsistent with the results we found in the worker sample.  
 
 ### Outgroup Attitudes by Interaction Type
+
+In a next step we take into account that having an interaction with an outgroup member, does not happen in a social vacuum. Participants who indicated that they had an interaction with an outgroup member include measurement occasions during which someone either only had an interaction with an outgroup member as well as times during which a person also had interaction(s) with a non-Dutch person. Inversely, participants who indicated that they did not have an interaction with a Dutch person might either have had no interaction at all or had an interaction with a non-Dutch person. We, thus consider all possible combinations and their independent influences on outgroup attitudes.  
+
+#### OLS regression
+
+We first assess the impact of the different interaction types across all measurement points (lumping all beeps together).
 
 \begin{equation}
 (\#eq:studentIntTypeQual)
@@ -2824,14 +2848,9 @@ Attitude = OutgroupInteraction \times NonOutgroupInteraction
 
 <div class="alert alert-info alert-dismissible fade in" role="alert">
   <a class="close" data-dismiss="alert" aria-label="close">&times;</a>
-  <i class="fas fa-exclamation-triangle"></i> <b>Note: </b><br/>
-  mean difference alone probably even more stupid than only ignoring nested data, because we drop lots of data unnecessarily.  
-  And only outgroup interaction Yes / No also weird because interaction group includes people who had only an outgroup interaction and those who also had an interaction with a non-outgroup person, and the no outgroup interaction group includes those who had no interaction at all and those who had an interaction with a non-outgroup person (but no outgroup interaction).
+  <i class="fas fa-info-circle"></i> <b>Note: </b><br/>
+  This step ignores the nested nature of the data (and consequently, response sets between participants). However, a purely cross-sectional approach with retrospective evaluations is common within the field and the analysis here offers a first cross-sectional insight (even with the independence assumption violated).
 </div>
-
-#### Regression with interaction term
-
-Across participants: impact of different interaction types [probably meaningless because ignores response sets between participants]
 
 ```{r studentInteractionTypePlt, fig.height=12}
 # between participants interaction type
@@ -2915,13 +2934,15 @@ summ(
 )
 ```
 
-TL;DR: While controlling for interactions with non-Dutch people, outgroup attitudes were significantly higher when participants had an interaction with a Dutch person. The effect is relatively small (`r format(round(mdlStudent$lmAttInt$coefficients["OutgroupInteractionYes"], 2), nsmall=2)` points on a 0--100 scale). More importantly, however, this analysis lumps all ESM beeps from every participants together and ignores that the data is nested within participants.
+We find that while controlling for interactions with non-Dutch people, outgroup attitudes were significantly higher when participants had an interaction with a Dutch person. The effect is of a medium size (`r format(round(mdlStudent$lmAttInt$coefficients["OutgroupInteractionYes"], 2), nsmall=2)` points on a 0--100 scale). However, this analysis lumps all ESM beeps from every participants together and ignores that the data is nested within participants.
 
-#### ML Regression with interaction term
+#### ML Regression with interaction term  
 
-##### Unconditional model
+We, thus, proceed with a multilevel analysis, which acknowledges that the measurements are nested within participants.  
 
-make a model with only the data but a random intercept (unconditional model)   
+##### Unconditional model  
+
+We start by creating an empty random intercept model (i.e., let the outgroup attitude intercept be different between participants; unconditional model).  
 
 \begin{equation}
 (\#eq:studentEmptyModel)
@@ -2970,9 +2991,7 @@ mdlStudent$IccPercAttNull <-
   ((as.numeric(mdlStudent$varAttNull[1]) / (as.numeric(mdlStudent$varAttNull[1]) + as.numeric(mdlStudent$varAttNull[2])))) * 100
 ```
 
-ICC $\tau_{00}^2 / (\tau_{00}^2 + \sigma^2)$: The ratio of the between-cluster variance to the total variance is called the Intraclass Correlation. It tells you the proportion of the total variance in Y that is accounted for by the clustering. (In this case the clustering means clustering observations per participant)  
-
-compare the random intercept model to a model without a random intercept (i.e., without levels at all)  
+We then compare the random intercept model to a model without a random intercept (i.e., without levels at all).  
 
 ```{r studentModelInterceptNull}
 # Create and save Model
@@ -3009,9 +3028,15 @@ anova(mdlStudent$glsAttNull,
   kable_styling(position = "left")
 ```
 
-We find that an estimated `r format(round(mdlStudent$IccPercAttNull, 2), nsmall=2)`% of the variation in Feeling Thermometer scores is explained by between participant differences (clustering by PID). This is to say that `r format(round(mdlStudent$IccPercAttNull, 2), nsmall=2)`% of the variance in any individual report of Attitudes towards the Dutch can be explained by the properties of the individual who provided the rating. And we find that including 'participant' as a predictor adds significantly to the model.
+Comparing the two empty model, we find that there is indeed a significant amount of variance explained by including a random intercept.   
 
-##### random intercept
+To assess the variances within and between participants we look at the ICC $\tau_{00}^2 / (\tau_{00}^2 + \sigma^2)$: The ratio of the between-cluster variance to the total variance is called the Intraclass Correlation. It tells you the proportion of the total variance in Y that is accounted for by the clustering. (In this case the clustering means clustering observations per participant).  
+
+We find that an estimated `r format(round(mdlStudent$IccPercAttNull, 2), nsmall=2)`% of the variation in Feeling Thermometer scores is explained by between participant differences (clustering by PID). This is to say that `r format(round(mdlStudent$IccPercAttNull, 2), nsmall=2)`% of the variance in any individual report of Attitudes towards the Dutch can be explained by the properties of the individual who provided the rating. And we find that including 'participant' as a predictor adds significantly to the model.  
+
+##### random intercept with predictors  
+
+To this random intercept model we now add the two types of interactions possible at each measurement point as contemporaneous predictors of outgroup attitudes. That is: We check whether within participants having an outgroup interaction (or a non-outgroup interaction) is associated with more positive outgroup attitudes at the same measurement point.  
 
 \begin{equation}
 (\#eq:StudentInteractionTypeModel)
@@ -3085,9 +3110,13 @@ mdlStudent$varWithinPercInterceptAttType <-
   (1 - (as.numeric(mdlStudent$varInterceptAttType[2]) / as.numeric(mdlStudent$varAttNull[2]))) * 100
 ```
 
-tl;dr: Interaction with Dutch is great predictor, interactions with non-Dutch is not.
+We find that a random intercept model with the two interaction types as predictors explains significantly more variance then an empty random intercept model. Looking at the individual coefficients, we find that having an outgroup interaction is indeed associated with significantly more positive outgroup attitudes, while having an interaction with a non-Dutch person does not significantly relate to more positive or negative attitudes towards the Dutch.  
+
+TL;DR: Interaction with Dutch is great predictor, interactions with non-Dutch is not.
 
 ##### random slope
+
+In a next step, we check whether further letting the effect of the different interaction types vary between participants explains additional variance in outgroup attitudes (i.e., random slopes).   
 
 \begin{equation}
 (\#eq:RandSlopesEq)
@@ -3205,9 +3234,13 @@ ggsave(
 )
 ```
 
-TL;DR: Random slopes don't add much for this super simple model.
+We find that adding the random slopes does add significantly beyond the random intercept model. This is is different to the previous study where the random slope did not add significantly.  
+
+TL;DR: Random slopes adds significantly.  
 
 ### Interaction Frequency and Interaction Quality
+
+In a final step we check whether the effect outgroup interactions, in part, depends on the quality during the interactions. Because we can only assess interaction quality when there is an interaction, it is difficult to assess this with the interaction dummy as a within person predictor. Instead, we will use an aggregate measure of interaction quality and average interaction quality to consider the two predictors jointly.  
 
 \begin{equation}
 (\#eq:FreqQual)
@@ -3238,7 +3271,7 @@ pairs.panels.new(
 )
 ```
 
-TL;DR: There is no meaningfull correlation between the participants' Average Interaction Quality and their Average Outgroup Attitudes. However, the frequency of intergroup interactions had a significant correlation with both the average interaction quality and average outgroup attitudes.
+Within the data, we find no significant correlation between the participants' Average Interaction Quality and their Average Outgroup Attitudes. Thus, within our data participants with a higher quality outgroup interactions did not hold more positive attitudes towards that group. However, the frequency of intergroup interactions had a meaningful correlation with both the average interaction quality or average outgroup attitudes.   
 
 ```{r studentModelOlsAttFreqQual}
 # regression
@@ -3267,15 +3300,19 @@ interactions::johnson_neyman(mdlStudent$lmAttFreqQualX,
                              alpha = .05)
 ```
 
-TL;DR: We find that, although the effect goes into the right direction (i.e., higher average interaction quality increases the positive effect of intergroup contact), there was no effect of average interaction quality (neither directly nor in a moderating role of interaction frequency). However, this regression ignores within person relationships of these variables (i.e., summarizes all within person variances into average scores).
+We find that in our student sample there is only a relationship between the number of outgroup contacts but no significant effect of average perceived contact quality. Nor do we find that in this sample the impact of the number of interactions is moderated by the average contact quality. This is not entirely consistent with the sojourner sample, where average contact quality did have a meaningful effect on outgroup attitudes. This effect is not necessarily surprising given that the variables aggregate all within person variation and there were substantially more measurements where participants did not have an interaction (but reported their outgroup attitudes) than measurements that followed an outgroup contact.  
 
-## Need Fulfillment
+## Need Fulfillment  
 
-### Need fulfillment and Attitudes 
+The main proposal of our article is that the success of an outgroup interaction might be explained by whether or not the interaction fulfilled the person's core situational need. This should, in turn, be due to a higher perceived interaction quality. We will this sequentially test whether the fulfillment of the core need during an interaction is (1) related to more positive outgroup attitudes, (2) higher perceived interaction quality, and (3) whether the variance explained by the core need is assumed by the perceived interaction quality if considered jointly.     
 
-##### Unconditional model
+### Need fulfillment and Attitudes  
 
-make a model with only the data but a random intercept (unconditional model) for the outgroup interaction subset.
+In a first step we, thus, test the relationship between outgroup attitudes and the fulfillment of the core situational need during the interaction.  
+
+##### Unconditional model  
+
+We again start by creating an empty random intercept model (i.e., let the outgroup attitude intercept be different between participants; unconditional model). Note that this unconditional model differs from the empty model created earlier because for this set of analyses we will only consider the subsample of measurement points during which an outgroup interaction was reported. This is necessary because measurements of needs during the interaction and perceived interaction quality are only meaningful within an interaction context.   
 
 ```{r studentPrepOutgroupSubsample}
 # see how large our outgroup interaction subset actually is
@@ -3297,6 +3334,8 @@ mdlStudentOut <-
     Qlt = list()
   )
 ```
+
+<i class="fas fa-question-circle"></i> _Note to self:_ For completeness, we should probably check this against an empty model without random intercept.  
 
 \begin{equation}
 (\#eq:studentOutEmptyModel)
@@ -3343,7 +3382,9 @@ mdlStudentOut$Att$IccPercNull <-
   ((as.numeric(mdlStudentOut$Att$varNull[1]) / (as.numeric(mdlStudentOut$Att$varNull[1]) + as.numeric(mdlStudentOut$Att$varNull[2])))) * 100
 ```
 
-#### random intercept
+#### random intercept with level one predictors
+
+We thus add the core interaction need fulfillment to the multilevel random intercept model.  
 
 \begin{equation}
 (\#eq:AttitudeNeedEq)
@@ -3413,9 +3454,11 @@ mdlStudentOut$Att$varWithinPercInterceptCore <-
   (1 - (as.numeric(mdlStudentOut$Att$varInterceptCore[2]) / as.numeric(mdlStudentOut$Att$varNull[2]))) * 100
 ```
 
-TL;DR: Situational core need relates significantly to outgroup attitudes. The core need has little explained variance between participants (compared to the null model: Variance Explained = 1 – (Var with Predictor/Var without Predictor); `r format(round(mdlStudentOut$Att$varBtwPercInterceptCore, 2),nsmall=2)`%). The variance explained within participants is small to medium (`r format(round(mdlStudentOut$Att$varWithinPercInterceptCore, 2),nsmall=2)`%)  
+We find that the the model with the added predictor indeed explains more variance in outgroup attitudes than the unconditional model. Looking at the individual coefficients, we find that the situational core need relates significantly to outgroup attitudes. The core need has little explained variance between participants (compared to the null model: Variance Explained = 1 – (Var with Predictor/Var without Predictor); `r format(round(mdlStudentOut$Att$varBtwPercInterceptCore, 2),nsmall=2)`%). The variance explained within participants is small to medium (`r format(round(mdlStudentOut$Att$varWithinPercInterceptCore, 2),nsmall=2)`%).   
 
 #### random slope
+
+In a next step, we check whether further letting the effect of core need fulfillment vary between participants explains additional variance in outgroup attitudes (i.e., random slope).   
 
 \begin{equation}
 (\#eq:AttitudeNeedRandEq)
@@ -3532,19 +3575,23 @@ ggsave(
 )
 ```
 
+We find that adding the random slopes does add significantly beyond the random intercept model. We also find that the core need remains a strong predictor (even when letting the influence vary between participants).  
+
 TL;DR: The random slope adds significantly to the prediction model.  
 
 <div class="alert alert-warning alert-dismissible fade in" role="alert">
   <a class="close" data-dismiss="alert" aria-label="close">&times;</a>
   <i class="fas fa-exclamation-triangle"></i> <b>Check needed: </b><br/>
-  Something is with the variances explained (between = `r format(round(mdlStudentOut$Att$varBtwPercSlopesCore, 2),nsmall=2)`%, within = `r format(round(mdlStudentOut$Att$varWithinPercSlopesCore, 2),nsmall=2)`%). This is when comparing the random intercepts to the random slopes model.
+  Something is with the variances explained (between = `r format(round(mdlStudentOut$Att$varBtwPercSlopesCore, 2),nsmall=2)`%, within = `r format(round(mdlStudentOut$Att$varWithinPercSlopesCore, 2),nsmall=2)`%). This is when comparing the random intercepts to the random slopes model. Check with materials from Laura!!
 </div>
 
-### Need fulfillment and Interaction Quality 
+### Need fulfillment and Interaction Quality   
+
+Based on the assertion that the relationship between core need fulfillment and outgroup attitudes is explained by a higher perceived interaction, the core need fulfillment should also significantly predict perceived interaction quality.  
 
 ##### Unconditional model
 
-make a model with only the data but a random intercept (unconditional model) for the outgroup interaction subset.
+Given that we now have the perceived interaction quality as our outcome variable of interest we again begin with an unconditional model (i.e., empty random intercept model), to see whether there is enough variance to explain within the participants. Similarly to before this is again done within the subsample of measurements during which an outgroup interaction was reported.  
 
 \begin{equation}
 (\#eq:studentOutQualEmptyModel)
@@ -3591,7 +3638,13 @@ mdlStudentOut$Qlt$IccPercNull <-
   ((as.numeric(mdlStudentOut$Qlt$varNull[1]) / (as.numeric(mdlStudentOut$Qlt$varNull[1]) + as.numeric(mdlStudentOut$Qlt$varNull[2])))) * 100
 ```
 
-#### random intercept
+We again find a reasonable amount of variance within the participants.   
+
+<i class="fas fa-question-circle"></i> _Note to self:_ For completeness, we should probably check this against an empty model without random intercept. 
+
+#### random intercept with level one predictor  
+
+We again add the core interaction need fulfillment to the multilevel random intercept model.  
 
 \begin{equation}
 (\#eq:QualityNeedEq)
@@ -3661,9 +3714,11 @@ mdlStudentOut$Qlt$varWithinPercInterceptCore <-
   (1 - (as.numeric(mdlStudentOut$Qlt$varInterceptCore[2]) / as.numeric(mdlStudentOut$Qlt$varNull[2]))) * 100
 ```
 
-TL;DR: Situational core need relates significantly to interaction quality. The core need explained substantial variance between participants (`r format(round(mdlStudentOut$Qlt$varBtwPercInterceptCore, 2),nsmall=2)`%). The variance explained within participants is also medium (`r format(round(mdlStudentOut$Qlt$varWithinPercInterceptCore, 2),nsmall=2)`%) 
+The predictor again adds a significant amount of explained variances beyond the empty model and looking at the slope coefficient, we find that the situational core need fulfillment relates significantly to perceived interaction quality. The core need explained substantial variance between participants (`r format(round(mdlStudentOut$Qlt$varBtwPercInterceptCore, 2),nsmall=2)`%). The variance explained within participants is also medium (`r format(round(mdlStudentOut$Qlt$varWithinPercInterceptCore, 2),nsmall=2)`%).  
 
 #### random slope
+
+As before, we check whether further letting the effect of core need fulfillment vary between participants explains additional variance in outgroup attitudes (i.e., random slope).   
 
 \begin{equation}
 (\#eq:QualityNeedRandEq)
@@ -3781,11 +3836,15 @@ ggsave(
 )
 ```
 
-TL;DR: random slopes does add significantly.
+We find that adding the random slopes does add significantly beyond the random intercept model.   
 
-### Need fulfillment, Interaction Quality, and Attitudes
+### Need fulfillment, Interaction Quality, and Attitudes  
 
-#### random intercept
+In our final main step, we will jointly consider the effect of core need fulfillment and perceived interaction quality on outgroup attitudes. We expect that if the relationship between core need fulfillment and outgroup attitudes is indeed explained by a higher perceived interaction quality, the interaction quality perception should assume the explained variance of the core contact need fulfillment.  
+
+#### random intercept with level one predictors  
+
+We thus add both the core need fulfillment and perceived interaction quality to a random intercept model of outgroup attitudes.  
 
 \begin{equation}
 (\#eq:AttitudeQualityNeedEq)
@@ -3859,9 +3918,11 @@ mdlStudentOut$Att$varWithinPercInterceptCoreQlt <-
   (1 - (as.numeric(mdlStudentOut$Att$varInterceptCoreQlt[2]) / as.numeric(mdlStudentOut$Att$varNull[2]))) * 100
 ```
 
-TL;DR: Variance explained in outgroup attitudes is of medium effect size (between: `r format(round(mdlStudentOut$Att$varBtwPercInterceptCoreQlt,2),nsmall=2)`%, within: `r format(round(mdlStudentOut$Att$varWithinPercInterceptCoreQlt,2),nsmall=2)`%)
+Unsurprisingly, the model with the two predictors adds significantly beyond the empty unconditional model. However, more importantly, looking at the coefficients, we find that the effect of core need fulfillment indeed is indeed strongly reduced and the variance is explained by the perceived interaction quality. The variance explained in outgroup attitudes is of medium effect size (between: `r format(round(mdlStudentOut$Att$varBtwPercInterceptCoreQlt,2),nsmall=2)`%, within: `r format(round(mdlStudentOut$Att$varWithinPercInterceptCoreQlt,2),nsmall=2)`%).  
 
 #### random slope
+
+We again check whether further letting the effects vary between participants explains additional variance in outgroup attitudes (i.e., random slope).   
 
 \begin{equation}
 (\#eq:AttitudeQualityNeedRandEq)
@@ -3981,15 +4042,19 @@ ggsave(
 )
 ```
 
-#### Compare models
+We find that adding the random slopes does add significantly beyond the random intercept model. We also find that the perceived interaction quality remains a strong predictor (even when letting the slopes vary between participants).  
 
-Interpretation of Mediation like results.
+### Check for robustness  
 
-### Check for robustness
+To build further confidence in our results, we assess a few additional models that might offer alternative explanations of the effects we find.  
 
-#### Interaction Type
+#### Interaction Type  
 
-##### random intercept
+To make certain that the effect of core need fulfillment is specific to the interaction we compare the the effect to fulfillment of the situation core need when no outgroup interaction took place.  
+
+##### random intercept   
+
+Here we go back to the full dataset and add generalized situational core need fulfillment (either during an interaction or about the daytime in general) and whether an outgroup interaction happened as well as their interaction term to a random intercept model of outgroup attitudes.  
 
 \begin{equation}
 (\#eq:AttitudeNeedInteractionEq)
@@ -4063,7 +4128,11 @@ mdlStudent$varWithinPercInterceptAttCoreInt <-
   (1 - (as.numeric(mdlStudent$varInterceptAttCoreInt[2]) / as.numeric(mdlStudent$varAttNull[2]))) * 100
 ```
 
+We find that the model explains significantly more variance than the empty null model. However, more interestingly, looking at the coefficients, we find that, as seen earlier, having an outgroup interaction has a strong effect on outgroup attitudes. Importantly, we find that there is a main effect of key need fulfillment but also a significant interaction effect of core need fulfillment and outgroup contact. This indicates that it is not simply key need fulfillment in general --- but especially key need fulfillment during an outgroup contact that predicts more positive outgroup attitudes.  
+
 ##### random slope
+
+We again check whether further letting the effects vary between participants explains additional variance in outgroup attitudes (i.e., random slope).  
 
 \begin{equation}
 (\#eq:AttitudeNeedInteractionRandEq)
@@ -4182,7 +4251,11 @@ ggsave(
 )
 ```
 
-##### Plot Interaction
+We find that adding the random slopes does add significantly beyond the random intercept model. We also see that when taking the possibility to varying slopes into account, the coefficient interpretations remains consistent (i.e., outgroup contact and its interaction with core need fulfillment remain important predictors of positive outgroup attitudes).  
+
+##### Plot Interaction   
+
+Before we move on, we shortly illustrate the interaction effect of how the effect of core need fulfillment differed by whether an outgroup contact took place or not. To this end we illustrate (1) the raw data points (without taking the nested nature into account), as well as a plot of the model predicted values and their prediction interval (taking the nested structure into account based; similar to an interaction plot).  
 
 ```{r studentModelInterceptAttCoreIntPlt}
 # visualize interaction
@@ -4328,9 +4401,15 @@ ggplot(
 # rm(datNew, brmfit, fitavg, pst)
 ```
 
+The plots indicate that especially once we take the nested data structure into account we can see a substantially stronger effect of core need fulfillment on outgroup attitudes during outgroup contacts than without outgroup contacts.  
+
 #### Other psychological needs
 
-##### random intercept
+In a final step we check whether during the interaction the core situational need is a meaningful predictor even when taking other fundamental psychological needs into account. We focus on the three commonly considered self determination needs: competence, autonomy, and relatedness.  
+
+##### random intercept with level ome predictors  
+
+We add the core need fulfillment with the three self determination needs to a random intercept model of outgroup attitudes.  
 
 \begin{equation}
 (\#eq:AttitudeNeedSdtEq)
@@ -4387,6 +4466,7 @@ summ(
 
 # Compare new model to previous step
 anova(
+  mdlStudentOut$Att$lmeNull,
   mdlStudentOut$Att$lmeInterceptSdt, 
   mdlStudentOut$Att$lmeInterceptCoreSdt
   ) %>%
@@ -4425,7 +4505,11 @@ mdlStudentOut$Att$varWithinPercInterceptCoreSdt <-
   (1 - (as.numeric(mdlStudentOut$Att$varInterceptCoreSdt[2]) / as.numeric(mdlStudentOut$Att$varInterceptCore[2]))) * 100
 ```
 
-##### random slope
+We find that the the model with the added predictor indeed explains more variance in outgroup attitudes than the unconditional model and we find that adding the core need adds further explained variance --- beyond the self determination needs. Looking at the individual coefficients, we find that the situational core need relates significantly to outgroup attitudes, that it is a stronger predictor than any of the self determination theory needs and that it assumes some of the variance explained by the self determination theory needs (when compared to a model without the core need). 
+
+##### random slope  
+
+We again check whether further letting the effects vary between participants explains additional variance in outgroup attitudes (i.e., random slope).  
 
 \begin{equation}
 (\#eq:AttitudeNeedSdtRandEq)
@@ -4590,6 +4674,8 @@ ggsave(
   device = "png"
 )
 ```
+
+We find that adding the random slopes does add significantly beyond the random intercept model. We also see that when taking the possibility to varying slopes into account, the coefficient interpretations remains consistent (i.e., core need and relatedness remain the strongest and only significant predictors).   
 
 # **Young Medical Professional Sample**
 
