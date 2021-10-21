@@ -117,8 +117,8 @@ Our first study
 <!-- \label{fig:PrismaCombined} -->
 <!-- \end{figure} -->
 
-<!-- \input{Tables/ExclusionsCombined} <!-- Placing this here is not ideal because it is only being created later but probably works. --> -->
-<!-- <!-- \input{Tables/TheoreticalExclusion} --> -->
+<!-- \input{Tables/ExclusionsCombined} --> 
+<!-- \input{Tables/TheoreticalExclusion} -->
 
 
 
