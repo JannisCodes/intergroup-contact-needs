@@ -81,7 +81,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r import}
+```{r import, include=FALSE}
 load("data/wrangled.RData")
 ```
 
@@ -110,22 +110,22 @@ Our first study
 
 
 
-\begin{figure}[h]
-\centering
-\caption{PRISMA Diagrams for the Theoretical, Methodological, and Empirical Literature.}
-\makebox[\textwidth]{\includegraphics[width=\paperwidth]{Figures/PrismaCombined}}
-\label{fig:PrismaCombined}
-\end{figure}
+<!-- \begin{figure}[h] -->
+<!-- \centering -->
+<!-- \caption{PRISMA Diagrams for the Theoretical, Methodological, and Empirical Literature.} -->
+<!-- \makebox[\textwidth]{\includegraphics[width=\paperwidth]{Figures/PrismaCombined}} -->
+<!-- \label{fig:PrismaCombined} -->
+<!-- \end{figure} -->
 
-\input{Tables/ExclusionsCombined} <!-- Placing this here is not ideal because it is only being created later but probably works. -->
-<!-- \input{Tables/TheoreticalExclusion} -->
+<!-- \input{Tables/ExclusionsCombined} <!-- Placing this here is not ideal because it is only being created later but probably works. --> -->
+<!-- <!-- \input{Tables/TheoreticalExclusion} --> -->
 
 
 
-\begin{figure}[h]
-\centering
-\caption{Literature Levels: (A) Bar graph of the experience aspect frequencies for theoretical, methodological, and broader empirical literature. (B) Bar graph of the number of experience aspects used for theoretical, methodological, and broader empirical literature. (C) Average number of additional aspects included when the aspect was considered for theoretical, methodological, and broader empirical literature [Mean ± 95\%CI].}
-\includegraphics[width=\textwidth]{Figures/LiteratureComparison-1}
-\caption*{Note that in (C) within each literature body the aspects are not mutually exclusive (and thus not independent) because scales can include multiple experience aspects.}
-\label{fig:LiteratureComparison}
-\end{figure}
+<!-- \begin{figure}[h] -->
+<!-- \centering -->
+<!-- \caption{Literature Levels: (A) Bar graph of the experience aspect frequencies for theoretical, methodological, and broader empirical literature. (B) Bar graph of the number of experience aspects used for theoretical, methodological, and broader empirical literature. (C) Average number of additional aspects included when the aspect was considered for theoretical, methodological, and broader empirical literature [Mean ± 95\%CI].} -->
+<!-- \includegraphics[width=\textwidth]{Figures/LiteratureComparison-1} -->
+<!-- \caption*{Note that in (C) within each literature body the aspects are not mutually exclusive (and thus not independent) because scales can include multiple experience aspects.} -->
+<!-- \label{fig:LiteratureComparison} -->
+<!-- \end{figure} -->
