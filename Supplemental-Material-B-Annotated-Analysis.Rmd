@@ -4685,6 +4685,27 @@ We find that adding the random slopes does add significantly beyond the random i
 
 ## Need Fulfillment
 
+# **Export for Methods and Results**  
+
+We also export all relevant data for the Methods and Results section, which are written in a separate RMarkdown file and is linked to the full $\LaTeX{}$ manuscript file in Overleaf.   
+
+```{r dataExport}
+# collect supplementary data files
+# Worker sample
+dtWorkerSupp <- lapply(ls(pattern = "worker"), get)
+names(dtWorkerSupp) <- ls(pattern = "worker")
+
+# Student sample
+dtStudentSupp <- lapply(ls(pattern = "student"), get)
+names(dtStudentSupp) <- ls(pattern = "student")
+
+# Medical sample
+dtMedicalSupp <- lapply(ls(pattern = "medical"), get)
+names(dtMedicalSupp) <- ls(pattern = "medical")
+
+# collect and export all data files
+save(list = ls(pattern = "dt"), file = "data/wrangled.RData")
+```
 
 # **Software Information**  
 The full session information with all relevant system information and all loaded and installed packages is available in the collapsible section below.  
