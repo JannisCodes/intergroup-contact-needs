@@ -109,10 +109,6 @@ knitr::opts_chunk$set(
 load("data/wrangled.RData")
 ```
 
-\newcommand{\nTheo}{`r nrow(dt.Theories.Included)`}
-\newcommand{\nMeth}{`r nrow(dt.Scales.Included)`}
-\newcommand{\nEmp}{`r nrow(dt.Empirical.included)`}
-
 \section{Study 1}
 
 \subsectio{Methods}
