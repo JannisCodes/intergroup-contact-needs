@@ -1,0 +1,157 @@
+---
+output: latex_fragment
+editor_options:
+  chunk_output_type: console
+bibliography: references.bib
+csl: apa.csl
+---
+
+```{r setup, include=FALSE}
+# R Studio Clean-Up
+cat("\014") # clear console
+# rm(list=ls()) # clear workspace - use restart R instead [cmd/alt + shift + F10]
+gc() # garbage collector
+
+# Install and Load Packages
+# !IMPORTANT!
+# BEFORE FIRST RENDER:
+# To install all relevant packages please run "renv::restore()" (or renv::init() and then initiate from lockfile) in the console before the first use to ensure that all packages are using the correct version.
+# to store the packages in a contained library within the project folder: renv::settings$use.cache(FALSE) and add 'RENV_CONFIG_SANDBOX_ENABLED = FALSE' to an '.Renviron' file
+lib <- c(
+  "rmarkdown",
+  "knitr",
+  "remedy",
+  "bookdown",
+  "brms",
+  "psych",
+  "ggplot2",
+  "ggthemes",
+  "haven",
+  "RColorBrewer",
+  "plotly",
+  "gridExtra",
+  "ggpattern",
+  "lme4",
+  "nlme",
+  "jtools",
+  "gtsummary",
+  "sessioninfo",
+  "tibble",
+  "pander",
+  "devtools",
+  "mada",
+  "data.table",
+  "plyr",
+  "dplyr",
+  "tidyr",
+  "Hmisc",
+  "kableExtra",
+  "papaja",
+  "stringr",
+  "stringi",
+  "reshape2",
+  "lubridate"
+)
+invisible(lapply(lib, library, character.only = TRUE))
+rm(lib)
+
+# Load Custom Packages
+source("./scripts/functions/fun.panel.R")
+source("./scripts/functions/themes.R")
+source("./scripts/functions/binaryCor.R")
+
+# Markdown Options
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file()) # set working directory
+knitr::opts_knit$get("root.dir") # check working directory
+options(
+  scipen = 999,
+  digits = 4,
+  width = 400
+) # removes scientific quotation
+# knitr::opts_chunk$set(echo = TRUE, cache = F, cache.path = rprojroot::find_rstudio_root_file('cache/')) # cache settings
+knitr::knit_hooks$set(
+  error = function(x, options) {
+    paste('\n\n<div class="alert alert-danger">',
+      gsub("##", "\n", gsub("^##\ Error", "**Error**", x)),
+      "</div>",
+      sep = "\n"
+    )
+  },
+  warning = function(x, options) {
+    paste('\n\n<div class="alert alert-warning">',
+      gsub("##", "\n", gsub("^##\ Warning:", "**Warning**", x)),
+      "</div>",
+      sep = "\n"
+    )
+  },
+  message = function(x, options) {
+    paste('\n\n<div class="alert alert-info">',
+      gsub("##", "\n", x),
+      "</div>",
+      sep = "\n"
+    )
+  }
+)
+htmltools::tagList(rmarkdown::html_dependency_font_awesome())
+
+# Global Chunk Options
+knitr::opts_chunk$set(
+  fig.width = 12,
+  fig.height = 8,
+  fig.path = "Figures/",
+  echo = TRUE,
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+```{r import}
+load("data/wrangled.RData")
+```
+
+\newcommand{\nTheo}{`r nrow(dt.Theories.Included)`}
+\newcommand{\nMeth}{`r nrow(dt.Scales.Included)`}
+\newcommand{\nEmp}{`r nrow(dt.Empirical.included)`}
+
+\section{Study 1}
+
+\subsectio{Methods}
+
+\subsection{Results}
+
+
+\section{Study 2}
+
+\subsectio{Methods}
+
+\subsection{Results}
+
+
+\section{Study 2}
+
+\subsectio{Methods}
+
+\subsection{Results}
+
+
+
+
+\begin{figure}[h]
+\centering
+\caption{PRISMA Diagrams for the Theoretical, Methodological, and Empirical Literature.}
+\makebox[\textwidth]{\includegraphics[width=\paperwidth]{Figures/PrismaCombined}}
+\label{fig:PrismaCombined}
+\end{figure}
+
+\input{Tables/ExclusionsCombined} <!-- Placing this here is not ideal because it is only being created later but probably works. -->
+<!-- \input{Tables/TheoreticalExclusion} -->
+
+
+
+\begin{figure}[h]
+\centering
+\caption{Literature Levels: (A) Bar graph of the experience aspect frequencies for theoretical, methodological, and broader empirical literature. (B) Bar graph of the number of experience aspects used for theoretical, methodological, and broader empirical literature. (C) Average number of additional aspects included when the aspect was considered for theoretical, methodological, and broader empirical literature [Mean ± 95\%CI].}
+\includegraphics[width=\textwidth]{Figures/LiteratureComparison-1}
+\caption*{Note that in (C) within each literature body the aspects are not mutually exclusive (and thus not independent) because scales can include multiple experience aspects.}
+\label{fig:LiteratureComparison}
+\end{figure}
