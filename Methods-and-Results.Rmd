@@ -138,8 +138,11 @@ table(as.character(workerSampleInfo$nationality))
 
 \subsubsection{Materials}
 
-\subsubsubsection{Intergroup Contact} 
+\paragraph{Intergroup Contact} 
 To test the prerequisite effect of intergroup contact, every ‘Experience Recap’ started with the question “\textit{Did you meet a Dutch person this morning [/afternoon]? (In person interaction for at least 10 minutes)}” 
+
+\paragraph{Intergroup Contact} To test the prerequisite effect of intergroup contact, every ‘Experience Recap’ started with the question “\textit{Did you meet a Dutch person this morning [/afternoon]? (In person interaction for at least 10 minutes)}” 
+
 
 \subsection{Results}
 
