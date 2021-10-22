@@ -26,21 +26,15 @@
 \usepackage{fourier}
 \usepackage{stackengine}
 \usepackage{scalerel}
-\usepackage{fontawesome}
+\usepackage{fontawesome5}
 \usepackage[normalem]{ulem}
 % \usepackage{longtable}
 \usepackage{amsmath}
+\usepackage{ntheorem}
 \usepackage{afterpage}
 \usepackage{float}
 \usepackage{array}
 \usepackage{censor}
-
-% add definition sections
-\newtheorem{definition}{Definition}
-
-% Select what to do with to-do notes: 
-% \usepackage[disable]{todonotes} % notes not showed
-% \usepackage[draft]{todonotes}   % notes showed
 
 % make warning with red triangle
 \newcommand\Warning[1][2ex]{%
@@ -51,6 +45,25 @@
 \newcommand\Question[1][2ex]{%
   \renewcommand\stacktype{L}%
   \scaleto{\stackon[1.3pt]{\color{red}$\triangle$}{\tiny\bfseries ?}}{#1}}%
+  
+% add definition sections
+\theoremstyle{break}
+\newtheorem{definition}{Definition}
+
+% add hypothesis sections
+\theoremstyle{plain}
+\theoremseparator{:}
+\newtheorem{hyp}{Hypothesis}
+
+\newtheorem{subhyp}{Hypothesis}
+   \renewcommand\thesubhyp{\thehyp\alph{subhyp}}
+
+% add quote section
+\usepackage{csquotes}
+
+% framed box section
+\usepackage{framed}
+\emergencystretch=1em
 
 % formatting links in the PDF file
 \hypersetup{
@@ -194,6 +207,8 @@ Abstract goes here.
 Conflict between social groups and their individual members remains a prevalent feature of the modern human condition. Prejudices, discrimination, and animosities continue to plague societies around the world. One of the main ameliorations proposed by social psychologists has been positive intergroup contact. Based on Allport's (\citeyear{Allport1954b}) contact hypothesis, a plethora of studies and interventions have worked on bringing different social groups together\footnote{Cite interventions of British ministries.}. 
 
 \section{The Present Research}
+
+\faQuestionCircle\ Not sure where this goes: To ensure that our sample would have a considerable number of intergroup contacts we focused on the minority group perspective in our second study. We followed a group of young migrants who had (daily) intergroup contacts with majority Dutch people. This design allowed us to test whether intergroup interactions and the fulfillment of psychological needs could jointly predict the development of attitudes towards the outgroup (i.e., the Dutch host society). 
 
 \input{Methods-and-Results}
 
