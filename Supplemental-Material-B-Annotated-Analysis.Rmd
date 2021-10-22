@@ -965,6 +965,13 @@ The first sample we assess is the smaller sojourner study. We will sequentially 
 
 <i class="fas fa-exclamation-triangle"></i> Still in 'scr/workerDescriptive.R'. Needs to be merged with this document.
 
+### Participants  
+
+### Interactions  
+
+### Variable distributions  
+
+
 ## Contact Hypothesis
 
 We test the most general contact hypothesis in two steps. First, we assess whether more intergroup interactions are related to to more positive outgroup attitudes. Second, we test whether a potential positive effect on outgroup attitudes depends on the interaction quality (jointly with the number of interactions).   
