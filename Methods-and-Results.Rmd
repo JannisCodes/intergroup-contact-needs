@@ -94,7 +94,7 @@ Based on our main hypotheses, the aim of our first study is to specifically test
 \subsection{Methods}
 
 ```{r workerSampleInfo, include=FALSE}
-
+# combine education measure
 workerOccupation <- 
   dtWorker$clean %>%
   select(PID, starts_with("occupation")) %>%
@@ -105,6 +105,7 @@ workerOccupation <-
   mutate(occupation = trimws(occupation, which = "both", whitespace = "[/]")) %>%
   distinct
 
+# summarize participant characteristics
 workerSampleInfo <- 
   dtWorker$clean %>%
   group_by(PID) %>%
@@ -112,20 +113,24 @@ workerSampleInfo <-
     dailiesN = n(), 
     age = age,
     gender = as_factor(Gender),
-    edu = as_factor(education_level)
+    edu = as_factor(education_level),
+    nationality = as_factor(nationality)
   ) %>%
   distinct
 
+# add occupation variable
 workerSampleInfo <- merge(workerSampleInfo, workerOccupation)
 rm(workerOccupation)
 
+# look at frequencies of characteristics 
 table(workerSampleInfo$gender)
 table(workerSampleInfo$edu)
 table(workerSampleInfo$occupation)
+table(as.character(workerSampleInfo$nationality))
 ```
 
 
-\subsubsection{Participants} After receiving ethical approval from the University of Groningen, we recruited `r nrow(workerSampleInfo)` migrants using the local paid participant pool and specifically targeted non-Dutch migrants to participate in our study for a compensation of up to 34 Euros – each two Euros for pre- and post-questionnaire as well as 50 Eurocents for every experience sampling measure. Participants reported on their interactions for at least 30 days with two daily measures (capturing the morning and afternoon). With this design, we aimed at getting 50-60 measurements per participant (\textit{M} = `r format(round(mean(workerSampleInfo$dailiesN),2), nsmall=2)`, \textit{M} = `r format(round(sd(workerSampleInfo$dailiesN),2), nsmall=2)`). This is a common number of measurements found in experience sampling studies \citep[e.g., for a systematic review see][]{AanhetRot2012} and should offer sufficient power to model processes within and between participants. The sample consisted of relatively young, educated, and western migrants from the global north ($M_{age}$ = `r format(round(mean(workerSampleInfo$age),2), nsmall=2)`, $SD_{age}$ = `r format(round(sd(workerSampleInfo$age),2), nsmall=2)`, `r nrow(workerSampleInfo %>% filter(gender == "Female"))` women, `r nrow(workerSampleInfo %>% filter(occupation == "student"))` students). The sample accurately describes one of the largest groups of migrants in the region \citep[][]{GemeenteGroningen2015}.
+\subsubsection{Participants} After receiving ethical approval from the University of Groningen, we recruited `r nrow(workerSampleInfo)` migrants using the local paid participant pool and specifically targeted non-Dutch migrants to participate in our study for a compensation of up to 34 Euros – each two Euros for pre- and post-questionnaire as well as 50 Eurocents for every experience sampling measure. Participants reported on their interactions for at least 30 days with two daily measures (capturing the morning and afternoon). With this design, we aimed at getting 50-60 measurements per participant (\textit{M} = `r format(round(mean(workerSampleInfo$dailiesN),2), nsmall=2)`, \textit{M} = `r format(round(sd(workerSampleInfo$dailiesN),2), nsmall=2)`, \textit{total N} = `r sum(workerSampleInfo$dailiesN)`). This is a common number of measurements found in experience sampling studies and should offer sufficient power to model processes within and between participants \citep[e.g., for a systematic review see][]{AanhetRot2012}. The sample consisted of relatively young, educated, and western migrants from the global north ($M_{age}$ = `r format(round(mean(workerSampleInfo$age),2), nsmall=2)`, $SD_{age}$ = `r format(round(sd(workerSampleInfo$age),2), nsmall=2)`, `r nrow(workerSampleInfo %>% filter(gender == "Female"))` women, `r nrow(workerSampleInfo %>% filter(occupation == "student"))` students). The sample accurately describes one of the largest groups of migrants in the region \citep[][]{GemeenteGroningen2015}.
 
 \subsubsection{Procedure}
 
