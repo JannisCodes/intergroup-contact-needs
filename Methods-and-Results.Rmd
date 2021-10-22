@@ -87,12 +87,17 @@ load("data/wrangled.RData")
 
 \section{Study 1}
 
-Our first study 
+Based on our main hypotheses, the aim of our first study is to specifically test the general contact hypothesis, the influence of core need fulfillment, and perceived interaction quality during intergroup contacts. To this aim, we conducted an intensive longitudinal survey study with recent economic migrants to the Netherlands, gathering a large body of ecologically valid data on need satisfaction in real-life intergroup contact situations. 
 
 \subsection{Methods}
 
-\subsection{Results}
+\subsubsection{Participants}
 
+\subsubsection{Procedure}
+
+\subsubsection{Materials}
+
+\subsection{Results}
 
 \section{Study 2}
 
@@ -100,32 +105,38 @@ Our first study
 
 \subsection{Results}
 
-
 \section{Study 2}
 
 \subsection{Methods}
 
 \subsection{Results}
-
-
-
 
 <!-- \begin{figure}[h] -->
+
 <!-- \centering -->
+
 <!-- \caption{PRISMA Diagrams for the Theoretical, Methodological, and Empirical Literature.} -->
+
 <!-- \makebox[\textwidth]{\includegraphics[width=\paperwidth]{Figures/PrismaCombined}} -->
+
 <!-- \label{fig:PrismaCombined} -->
+
 <!-- \end{figure} -->
 
-<!-- \input{Tables/ExclusionsCombined} --> 
+<!-- \input{Tables/ExclusionsCombined} -->
+
 <!-- \input{Tables/TheoreticalExclusion} -->
 
-
-
 <!-- \begin{figure}[h] -->
+
 <!-- \centering -->
+
 <!-- \caption{Literature Levels: (A) Bar graph of the experience aspect frequencies for theoretical, methodological, and broader empirical literature. (B) Bar graph of the number of experience aspects used for theoretical, methodological, and broader empirical literature. (C) Average number of additional aspects included when the aspect was considered for theoretical, methodological, and broader empirical literature [Mean ± 95\%CI].} -->
+
 <!-- \includegraphics[width=\textwidth]{Figures/LiteratureComparison-1} -->
+
 <!-- \caption*{Note that in (C) within each literature body the aspects are not mutually exclusive (and thus not independent) because scales can include multiple experience aspects.} -->
+
 <!-- \label{fig:LiteratureComparison} -->
+
 <!-- \end{figure} -->
