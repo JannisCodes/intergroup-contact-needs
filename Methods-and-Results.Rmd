@@ -129,6 +129,9 @@ table(workerSampleInfo$gender)
 table(workerSampleInfo$edu)
 table(workerSampleInfo$occupation)
 table(as.character(workerSampleInfo$nationality))
+
+histogram(dtWorkerSupp$workerAvFreQual$SumContactNL)
+
 ```
 
 
@@ -138,11 +141,13 @@ table(as.character(workerSampleInfo$nationality))
 
 \subsubsection{Materials}
 
-\paragraph{Intergroup Contact} 
-To test the prerequisite effect of intergroup contact, every ‘Experience Recap’ started with the question “\textit{Did you meet a Dutch person this morning [/afternoon]? (In person interaction for at least 10 minutes)}” 
+\paragraph{Intergroup Contact}To test the prerequisite effect of intergroup contact, every experience sampling measurement started with the question “\textit{Did you meet a Dutch person this morning [/afternoon]? (In person interaction for at least 10 minutes)}” (`r (sum(dtWorkerSupp$workerAvFreQual$SumContactNL) / nrow(dtWorkerSupp$workerInteractionType) * 100) %>% round(2) %>% format(nsmall=2)`\% of all `r nrow(dtWorkerSupp$workerInteractionType)` daily diary responses). 
 
-\paragraph{Intergroup Contact} To test the prerequisite effect of intergroup contact, every ‘Experience Recap’ started with the question “\textit{Did you meet a Dutch person this morning [/afternoon]? (In person interaction for at least 10 minutes)}” 
+\paragraph{Psychological Needs}
 
+\paragraph{Perceived Interaction Quality}
+
+\paragraph{Outgroup Attitudes}
 
 \subsection{Results}
 

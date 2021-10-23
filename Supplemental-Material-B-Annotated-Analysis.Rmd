@@ -967,7 +967,54 @@ The first sample we assess is the smaller sojourner study. We will sequentially 
 
 ### Participants  
 
+```{r workerSampleInfo}
+# combine education measure
+workerOccupation <- 
+  dtWorker$clean %>%
+  select(PID, starts_with("occupation")) %>%
+  mutate_all(as_factor) %>% 
+  mutate_all(as.character) %>%
+  replace(is.na(.), "") %>%
+  unite("occupation", -PID, sep = "/") %>%
+  mutate(occupation = trimws(occupation, which = "both", whitespace = "[/]")) %>%
+  distinct
+
+# summarize participant characteristics
+workerSampleInfo <- 
+  dtWorker$clean %>%
+  group_by(PID) %>%
+  summarise(
+    dailiesN = n(), 
+    age = age,
+    gender = as_factor(Gender),
+    edu = as_factor(education_level),
+    nationality = as_factor(nationality)
+  ) %>%
+  distinct
+
+# add occupation variable
+workerSampleInfo <- merge(workerSampleInfo, workerOccupation)
+rm(workerOccupation)
+
+# look at frequencies of characteristics 
+table(workerSampleInfo$gender)
+table(workerSampleInfo$edu)
+table(workerSampleInfo$occupation)
+table(as.character(workerSampleInfo$nationality))
+```
+
 ### Interactions  
+
+```{r workerInteractionInfo}
+# duration of survey should include median and MAD
+seconds_to_period(median(dtWorker$clean$Duration__in_seconds_))
+seconds_to_period(round(mad(dtWorker$clean$Duration__in_seconds_)))
+
+workerOutIntPerc <- (sum(dtWorkerSupp$workerAvFreQual$SumContactNL) / nrow(dtWorkerSupp$workerInteractionType) * 100) %>% round(2) %>% format(nsmall=2)
+
+```
+
+To test the prerequisite effect of intergroup contact, every daily diary measurement started with the question “_Did you meet a Dutch person this morning [/afternoon]? (In person interaction for at least 10 minutes)_” (`r workerOutIntPerc`% of all `r nrow(dtWorkerSupp$workerInteractionType)` recorded Recaps included an interaction with Dutch majority members). This question is our main predictor to test whether having an intergroup contact indeed has an influence on one’s rating of the outgroup attitudes during the respective morning or afternoon (i.e., a longitudinal test of the contact hypothesis). Methodologically, this question also determined the following survey flow for the participants. If they had interactions with Dutch people, they were asked to report details on the duration, type, and quality of the interaction. If they did not have interactions with Dutch people, participants were asked to report on their desire to have an interaction – this was done to balance the duration of the two answer options to not make it more attractive for a participant to answer that they did not have an interaction.
 
 ### Variable distributions  
 
