@@ -100,6 +100,7 @@ rm(lib)
 source("./scripts/functions/fun.panel.R")
 source("./scripts/functions/themes.R")
 source("./scripts/functions/binaryCor.R")
+source("./scripts/functions/MlCorMat.R")
 
 # Markdown Options
 knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file()) # set working directory

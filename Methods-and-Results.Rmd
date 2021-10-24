@@ -26,6 +26,7 @@ lib <- c(
   "psych",
   "ggplot2",
   "ggthemes",
+  "purrr",
   "haven",
   "RColorBrewer",
   "plotly",
@@ -50,7 +51,8 @@ lib <- c(
   "stringr",
   "stringi",
   "reshape2",
-  "lubridate"
+  "lubridate",
+  "misty"
 )
 invisible(lapply(lib, library, character.only = TRUE))
 rm(lib)
@@ -59,6 +61,7 @@ rm(lib)
 source("./scripts/functions/fun.panel.R")
 source("./scripts/functions/themes.R")
 source("./scripts/functions/binaryCor.R")
+source("./scripts/functions/MlCorMat.R")
 
 # Markdown Options
 knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file()) # set working directory
@@ -130,18 +133,100 @@ table(workerSampleInfo$edu)
 table(workerSampleInfo$occupation)
 table(as.character(workerSampleInfo$nationality))
 
-histogram(dtWorkerSupp$workerAvFreQual$SumContactNL)
-histogram(dtWorkerSupp$workerAvFreQual$PercContactNL)
+# categorical variables:
+# - outgroup contact
+# - non-outgroup contact
 
-histogram(dtWorkerSupp$workerAvFreQual$WinSumContactNL)
+# continuous variables:
+# - Core Need fulfillment
+# - SDT Competence
+# - SDT Autonomy
+# - SDT Relatedness
+# - Interaction Quality
+# - Outgroup Attitudes
+######
+# within cor
+# between cor
+# ---
+# Grand mean
+# SD between
+# SD within
+# Proportion of variance
+# __ __ __
+# Note:
+# N within ppt.s 
+######
 
-dtWorkerSupp$workerAvFreQual$WinSumContactNL %>% max
+# divide into trait and state
+dtWorkerSupp$workerWithinBetween <-
+  MlTraitState(
+    data = dtWorkerSupp$workerInteractionType,
+    id = "PID",
+    selection =
+      c(
+        "keyMotiveFulfilled",
+        "competence.daily.all",
+        "autonomy.daily.all",
+        "relatedness.daily.all",
+        "thermometerDutch_1",
+        "keymotive_fulfillemt_1",
+        "competence_1",
+        "autonomy_1",
+        "relatedness_1"
+      )
+  )
 
-DescTools::Winsorize(dtWorkerSupp$workerAvFreQual$PercContactNL)
+workerMlCor <-
+  MlCorMat(
+    data = dtWorkerSupp$workerInteractionType,
+    id = "PID",
+    selection = c("keyMotiveFulfilled", "competence.daily.all", "autonomy.daily.all", "relatedness.daily.all", "thermometerDutch_1") ,
+    labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Attitudes NL")
+  ) 
 
-dtWorkerSupp$workerAvFreQual$PercContactNL[dtWorkerSupp$workerAvFreQual$PercContactNL > 0] %>% max %>% round(2) %>% format(nsmall=2)
+workerMlCor %>%
+  kable(
+    .,
+    caption = "Worker: Multilevel Core Variable Descriptives",
+    format = "latex",
+    booktabs = TRUE,
+    align = c("l", rep("c", ncol(.) - 1))
+  ) %>%
+  footnote(
+    general = c(
+      "Upper triangle: Between-person correlations;",
+      "Lower triangle: Within-person coorelations;",
+      "*** p < .001, ** p < .01,  * p < .05"
+    )
+  ) %>%
+  save_kable("Tables/workerVarDescr.tex")
 
-# misty::multilevel.descript(dtWorkerSupp$workerAvFreQual$SumContactNL, cluster = dtWorkerSupp$workerAvFreQual$ExternalReference)
+workerOutMlCor <-
+  MlCorMat(
+    data = dtWorkerSupp$workerInteractionType %>% filter(OutgroupInteraction == "Yes"),
+    id = "PID",
+    selection = c("keymotive_fulfillemt_1", "competence_1", "autonomy_1", "relatedness_1", "thermometerDutch_1") ,
+    labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Attitudes NL")
+  )
+
+workerOutMlCor %>%
+  kable(
+    .,
+    caption = "Worker: Multilevel Core Variable Descriptives (Outgroup Contact Only)",
+    format = "latex",
+    booktabs = TRUE,
+    align = c("l", rep("c", ncol(.) - 1))
+  ) %>%
+  footnote(
+    general = c(
+      "Upper triangle: Between-person correlations;",
+      "Lower triangle: Within-person coorelations;",
+      "*** p < .001, ** p < .01,  * p < .05"
+    )
+  ) %>%
+  save_kable("Tables/workerOutVarDescr.tex")
+
+# misty::multilevel.descript(dtWorkerSupp$workerWithinBetween$keyMotiveFulfilled, cluster = dtWorkerSupp$workerWithinBetween$PID)
 ```
 
 
@@ -152,13 +237,21 @@ dtWorkerSupp$workerAvFreQual$PercContactNL[dtWorkerSupp$workerAvFreQual$PercCont
 \subsubsection{Materials}
 
 \paragraph{Intergroup Contact}To test the prerequisite effect of intergroup contact, every experience sampling measurement started with the question “\textit{Did you meet a Dutch person this morning [/afternoon]? (In person interaction for at least 10 minutes)}”. Our participants recorded between `r dtWorkerSupp$workerAvFreQual$SumContactNL[dtWorkerSupp$workerAvFreQual$SumContactNL > 0] %>% min`--`r dtWorkerSupp$workerAvFreQual$SumContactNL[dtWorkerSupp$workerAvFreQual$SumContactNL > 0] %>% max`
-(`r dtWorkerSupp$workerAvFreQual$PercContactNL[dtWorkerSupp$workerAvFreQual$PercContactNL > 0] %>% min %>% round(2) %>% format(nsmall=2)`--`r dtWorkerSupp$workerAvFreQual$PercContactNL[dtWorkerSupp$workerAvFreQual$PercContactNL > 0] %>% min %>% round(2) %>% format(nsmall=2)`\% of individual daily diary measurements; $N_{total}$ = `r (sum(dtWorkerSupp$workerAvFreQual$SumContactNL) / nrow(dtWorkerSupp$workerInteractionType) * 100) %>% round(2) %>% format(nsmall=2)`\% of all `r nrow(dtWorkerSupp$workerInteractionType)` daily diary responses)\footnote{Two participants only recorded two daily diary measurements each and non of these included outgroup contacts. These participants are removed from any analyses including outgroup contacts.}.
+(`r dtWorkerSupp$workerAvFreQual$PercContactNL[dtWorkerSupp$workerAvFreQual$PercContactNL > 0] %>% min %>% round(2) %>% format(nsmall=2)`--`r dtWorkerSupp$workerAvFreQual$PercContactNL[dtWorkerSupp$workerAvFreQual$PercContactNL > 0] %>% max %>% round(2) %>% format(nsmall=2)`\% of individual daily diary measurements; `r (sum(dtWorkerSupp$workerAvFreQual$SumContactNL) / nrow(dtWorkerSupp$workerInteractionType) * 100) %>% round(2) %>% format(nsmall=2)`\% of all `r nrow(dtWorkerSupp$workerInteractionType)` daily diary responses)\footnote{Two participants only recorded two daily diary measurements each and non of these included outgroup contacts. These participants are removed from any analyses including outgroup contacts.}.
 
-\paragraph{Psychological Needs}
+\paragraph{Psychological Needs} Irrespective of whether participants had an interaction with Dutch people or not, everyone answered a short series of questions on psychological need fulfillment. However, whereas participants with interactions reported on the need fulfillment during the interaction, people without interactions with Dutch people judged the past daytime period in general. To assess the fulfillment of psychological needs, we included two types of need measurement: (1) the core situational need and (2) general self-determination theory needs.
+
+For the core situational need, we asked participants in an open ended text field: “\textit{What was your most important goal [during the interaction / this morning / this afternoon]?}”. We then used the participant’s open text entry of their core need to see how much this was fulfilled during the interaction or the past daytime period: “\textit{[The interaction / you] fulfilled your goal: [-previous text entry-]}” on a continuous slider scale ranging from strongly disagree (-50) to strongly agree (+50).
+
+We, additionally, included a common measure of three self-determination theory needs \citep[taken from][]{Downie2008}. The items were introduced either by “\textit{During the interaction:}” or “\textit{This morning [/afternoon]:}” and measured autonomy (“\textit{I was myself.}”), competence (“\textit{I felt competent.}”), and relatedness (without intergroup contact “\textit{I had a strong need to belong}”; with intergroup contact: “\textit{I shared information about myself.}” and “\textit{The other(s) shared information about themselves.}”). All items were rated on a continuous slider scale from very little (-50) to a great deal (+50).
+
 
 \paragraph{Perceived Interaction Quality}
 
 \paragraph{Outgroup Attitudes}
+
+\input{Tables/workerVarDescr}
+\input{Tables/workerOutVarDescr}
 
 \subsection{Results}
 
