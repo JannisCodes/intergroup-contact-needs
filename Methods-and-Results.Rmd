@@ -133,6 +133,14 @@ table(as.character(workerSampleInfo$nationality))
 histogram(dtWorkerSupp$workerAvFreQual$SumContactNL)
 histogram(dtWorkerSupp$workerAvFreQual$PercContactNL)
 
+histogram(dtWorkerSupp$workerAvFreQual$WinSumContactNL)
+
+dtWorkerSupp$workerAvFreQual$WinSumContactNL %>% max
+
+DescTools::Winsorize(dtWorkerSupp$workerAvFreQual$PercContactNL)
+
+dtWorkerSupp$workerAvFreQual$PercContactNL[dtWorkerSupp$workerAvFreQual$PercContactNL > 0] %>% max %>% round(2) %>% format(nsmall=2)
+
 # misty::multilevel.descript(dtWorkerSupp$workerAvFreQual$SumContactNL, cluster = dtWorkerSupp$workerAvFreQual$ExternalReference)
 ```
 
@@ -143,7 +151,8 @@ histogram(dtWorkerSupp$workerAvFreQual$PercContactNL)
 
 \subsubsection{Materials}
 
-\paragraph{Intergroup Contact}To test the prerequisite effect of intergroup contact, every experience sampling measurement started with the question “\textit{Did you meet a Dutch person this morning [/afternoon]? (In person interaction for at least 10 minutes)}” (`r (sum(dtWorkerSupp$workerAvFreQual$SumContactNL) / nrow(dtWorkerSupp$workerInteractionType) * 100) %>% round(2) %>% format(nsmall=2)`\% of all `r nrow(dtWorkerSupp$workerInteractionType)` daily diary responses). 
+\paragraph{Intergroup Contact}To test the prerequisite effect of intergroup contact, every experience sampling measurement started with the question “\textit{Did you meet a Dutch person this morning [/afternoon]? (In person interaction for at least 10 minutes)}”. Our participants recorded between `r dtWorkerSupp$workerAvFreQual$SumContactNL[dtWorkerSupp$workerAvFreQual$SumContactNL > 0] %>% min`--`r dtWorkerSupp$workerAvFreQual$SumContactNL[dtWorkerSupp$workerAvFreQual$SumContactNL > 0] %>% max`
+(`r dtWorkerSupp$workerAvFreQual$PercContactNL[dtWorkerSupp$workerAvFreQual$PercContactNL > 0] %>% min %>% round(2) %>% format(nsmall=2)`--`r dtWorkerSupp$workerAvFreQual$PercContactNL[dtWorkerSupp$workerAvFreQual$PercContactNL > 0] %>% min %>% round(2) %>% format(nsmall=2)`\% of individual daily diary measurements; $N_{total}$ = `r (sum(dtWorkerSupp$workerAvFreQual$SumContactNL) / nrow(dtWorkerSupp$workerInteractionType) * 100) %>% round(2) %>% format(nsmall=2)`\% of all `r nrow(dtWorkerSupp$workerInteractionType)` daily diary responses)\footnote{Two participants only recorded two daily diary measurements each and non of these included outgroup contacts. These participants are removed from any analyses including outgroup contacts.}.
 
 \paragraph{Psychological Needs}
 
