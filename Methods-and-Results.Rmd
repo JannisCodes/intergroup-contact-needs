@@ -131,7 +131,9 @@ table(workerSampleInfo$occupation)
 table(as.character(workerSampleInfo$nationality))
 
 histogram(dtWorkerSupp$workerAvFreQual$SumContactNL)
+histogram(dtWorkerSupp$workerAvFreQual$PercContactNL)
 
+# misty::multilevel.descript(dtWorkerSupp$workerAvFreQual$SumContactNL, cluster = dtWorkerSupp$workerAvFreQual$ExternalReference)
 ```
 
 
@@ -150,6 +152,17 @@ histogram(dtWorkerSupp$workerAvFreQual$SumContactNL)
 \paragraph{Outgroup Attitudes}
 
 \subsection{Results}
+
+\paragraph{Contact Hypothesis}
+
+\paragraph{Core Need}
+
+- Att ~ Need & Qlt ~ Need
+- Att ~ Need + Qual
+
+\paragraph{Robustness}
+
+
 
 \section{Study 2}
 
