@@ -201,6 +201,8 @@ workerMlCor %>%
       "*** p < .001, ** p < .01,  * p < .05"
     )
   ) %>%
+  gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
+  gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
   save_kable("Tables/workerVarDescr.tex")
 ```
 
@@ -228,6 +230,8 @@ workerOutMlCor %>%
       "*** p < .001, ** p < .01,  * p < .05"
     )
   ) %>%
+  gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
+  gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
   save_kable("Tables/workerOutVarDescr.tex")
 
 # misty::multilevel.descript(dtWorkerSupp$workerWithinBetween$keyMotiveFulfilled, cluster = dtWorkerSupp$workerWithinBetween$PID)
