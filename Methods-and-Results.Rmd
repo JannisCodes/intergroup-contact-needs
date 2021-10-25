@@ -264,7 +264,7 @@ We, additionally, included a common measure of three self-determination theory n
 
 \subsection{Results}
 
-```{r WorkerFreqAttCor}
+```{r WorkerFreqAttCor, include=FALSE}
 # correlation panel
 pairs.panels.new(
   dtWorkerSupp$workerAvFreQual %>% select(SumContactNL, SumContactNLAll, AvQuality, AvAttitude),
@@ -290,7 +290,7 @@ pairs.panels.new(
 
 \paragraph{Contact Hypothesis}We tested the most general contact hypothesis in two steps. First, we assessed whether more intergroup interactions were related to to more positive outgroup attitudes. Second, we tested whether a potential positive effect on outgroup attitudes depended on the interaction quality (jointly with the number of interactions). We find that neither the number of interactions nor the number of daily diary responses with an interaction were significantly related with the average outgroup attitudes. This is to say that within our data, participants with more outgroup interactions did not have significantly more positive outgroup attitudes. This might be due to the aggregation within the participants or the small sample size of between participant data. Nonetheless, the aggregate data does not support the notion that simply having more interactions with an outgroup results in more positive outgroup attitudes.
 
-```{r workerModelOlsAttFreqQual}
+```{r workerModelOlsAttFreqQual, include=FALSE}
 # create list to store Worker models
 mdlWorker <- list()
 
@@ -325,7 +325,7 @@ interactions::johnson_neyman(mdlWorker$lmAttFreqQualX,
 
 However, despite the missing relationship with the number of interactions, we find a medium sized correlation between the participants' Average Interaction Quality and their Average Outgroup Attitudes. Thus within our data participants with a higher quality outgroup interactions also held more positive attitudes towards that group. And when considering the number of interactions and average interaction quality jointly in a linear regression, we additionally find a statistically significant interaction term (\textit{b} = `r coef(summary(mdlWorker$lmAttFreqQualX))["SumContactNL:AvQuality","Estimate"] %>% round(2) %>% format(nsmall=2)`, \textit{t}(`r mdlWorker$lmAttFreqQualX$df.residual`) = `r coef(summary(mdlWorker$lmAttFreqQualX))["SumContactNL:AvQuality","t value"] %>% round(2) %>% format(nsmall=2)`, \textit{p} = `r coef(summary(mdlWorker$lmAttFreqQualX))["SumContactNL:AvQuality","Pr(>|t|)"] %>% round(3) %>% format(nsmall=3)`, $\eta_p^2$ = `r mdlWorker$lmAttFreqQualXEta %>% filter(Parameter == "SumContactNL:AvQuality") %>% select(Eta2_partial) %>% as.numeric %>% round(2) %>% format(nsmall=2)`). Looking at a floodlight analysis of the effect, we find that in our sample with an increasing number of interactions the positive effect of average interaction quality becomes weaker. However, it should be noted that this is based on data aggregating all within participant nuances and is only the date of 21 people. 
 
-```{r workerModelMLAttNull}
+```{r workerModelMLAttNull, include=FALSE}
 # Create and save Model
 mdlWorker$lmerAttNull <-
   lme4::lmer(thermometerDutch_1 ~ 1 + (1 | PID),
@@ -365,7 +365,7 @@ mdlWorker$IccAttNull <-
 mdlWorker$IccPercAttNull <-
   ((as.numeric(mdlWorker$varAttNull[1]) / (as.numeric(mdlWorker$varAttNull[1]) + as.numeric(mdlWorker$varAttNull[2])))) * 100
 ```
-```{r workerModelInterceptAttType}
+```{r workerModelInterceptAttType, include=FALSE}
 # Create and save Model
 mdlWorker$lmeInterceptAttType <-
   lme(
