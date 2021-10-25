@@ -1284,7 +1284,7 @@ mdlWorker$lmeInterceptAttType <-
 
 # Get summary with p-values (Satterthwaite's method)
 summ(
-  lmer(
+  mdlWorker$lmerInterceptAttType <- lmer(
     thermometerDutch_1 ~ OutgroupInteraction + NonOutgroupInteraction + (1 | PID),
     data = workerInteractionType
   ),
@@ -1529,6 +1529,9 @@ summ(
   digits = 3,
   center = TRUE
 )
+
+mdlWorker$lmAttFreqQualXEta <-
+  effectsize::eta_squared(mdlWorker$lmAttFreqQualX, partial = TRUE)
 
 interactions::interact_plot(
   mdlWorker$lmAttFreqQualX,

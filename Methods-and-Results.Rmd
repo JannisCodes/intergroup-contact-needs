@@ -116,6 +116,8 @@ workerSampleInfo <-
   group_by(PID) %>%
   summarise(
     dailiesN = n(), 
+    morningN = sum(daytime=="morning"),
+    afternoonN = sum(daytime=="afternoon"),
     age = age,
     gender = as_factor(Gender),
     edu = as_factor(education_level),
@@ -240,7 +242,7 @@ workerOutMlCor %>%
 
 \subsubsection{Participants} After receiving ethical approval from the University of Groningen, we recruited `r nrow(workerSampleInfo)` migrants using the local paid participant pool and specifically targeted non-Dutch migrants to participate in our study. Participants reported on their interactions for at least 30 days with two daily measures (capturing the morning and afternoon). With this design, we aimed at getting 50-60 measurements per participant (\textit{M} = `r format(round(mean(workerSampleInfo$dailiesN),2), nsmall=2)`, \textit{M} = `r format(round(sd(workerSampleInfo$dailiesN),2), nsmall=2)`, \textit{total N} = `r sum(workerSampleInfo$dailiesN)`). This is a common number of measurements found in experience sampling studies and should offer sufficient power to model processes within and between participants \citep[e.g., for a systematic review see][]{AanhetRot2012}. Participants were compensated for their participation with up to 34 Euros – each two Euros for pre- and post-questionnaire as well as 50 Eurocents for every experience sampling measurement occasion. The sample consisted of relatively young, educated, and western migrants from the global north ($M_{age}$ = `r format(round(mean(workerSampleInfo$age),2), nsmall=2)`, $SD_{age}$ = `r format(round(sd(workerSampleInfo$age),2), nsmall=2)`, `r nrow(workerSampleInfo %>% filter(gender == "Female"))` women, `r nrow(workerSampleInfo %>% filter(occupation == "student"))` students). The sample accurately describes one of the largest groups of migrants in the region \citep[][]{GemeenteGroningen2015}.
 
-\subsubsection{Procedure} The study itself consisted of three main parts, an introductory pre-measurement, and the daily experience sampling measurements, as well as a concluding post-measurement. After giving informed consent, participants started by filling in an online pre-questionnaire assessing demographics and general information about their immigration. Over the next thirty days, the participants then were invited twice a day (at 12 pm and 7pm) to reflect upon their interactions, psychological need fulfillments, and current attitudes towards the Dutch outgroup (\textit{median duration} = `r seconds_to_period(median(dtWorker$clean$Duration__in_seconds_))`, \textit{MAD duration} = `r seconds_to_period(round(mad(dtWorker$clean$Duration__in_seconds_)))`). After the final day of daily diary measurements, participants were invited to fill in a longer post measurement survey that mirrored the pre-measurement. All key variables in for this study were part of the short daily diary surveys. 
+\subsubsection{Procedure} The study itself consisted of three main parts, an introductory pre-measurement, and the daily experience sampling measurements, as well as a concluding post-measurement. After giving informed consent, participants started by filling in an online pre-questionnaire assessing demographics and general information about their immigration. Over the next thirty days, the participants then were invited twice a day (at 12 pm and 7pm) to reflect upon their interactions, psychological need fulfillments, and current attitudes towards the Dutch outgroup (\textit{median duration} = `r seconds_to_period(median(dtWorker$clean$Duration__in_seconds_))`, \textit{MAD duration} = `r seconds_to_period(round(mad(dtWorker$clean$Duration__in_seconds_)))`).  General compliance was high (`r format(round(sum(workerSampleInfo$dailiesN)/(nrow(workerSampleInfo)*62)*100,2), nsmall=2)`\% of all invited surveys were filled in)\footnote{Two participants completed only two days (among the others, participation was `r format(round(sum(workerSampleInfo$dailiesN[workerSampleInfo$dailiesN>3])/(nrow(workerSampleInfo[workerSampleInfo$dailiesN>3,])*62)*100,2), nsmall=2)`\%)}. The response rates were approximately equal during mornings (\textit{n} = `r sum(workerSampleInfo$morningN)`) and afternoons (\textit{n} = `r sum(workerSampleInfo$afternoonN)`) and most measurements were completed within four hours of the invitation. After the final day of daily diary measurements, participants were invited to fill in a longer post measurement survey that mirrored the pre-measurement. All key variables in for this study were part of the short daily diary surveys. 
 
 \subsubsection{Materials}
 
@@ -262,7 +264,176 @@ We, additionally, included a common measure of three self-determination theory n
 
 \subsection{Results}
 
-\paragraph{Contact Hypothesis}
+```{r WorkerFreqAttCor}
+# correlation panel
+pairs.panels.new(
+  dtWorkerSupp$workerAvFreQual %>% select(SumContactNL, SumContactNLAll, AvQuality, AvAttitude),
+  labels = c(
+    "Sum:\nNumer of beeps with Outgroup Contact (NL)",
+    "Sum:\nNumber of Outgroup Contacts (NL)",
+    "Mean:\nInteraction Quality",
+    "Mean:\nOutgroup Attitudes (NL)"
+  )
+)
+
+# correlation panel with interaction sums winsorized
+pairs.panels.new(
+  dtWorkerSupp$workerAvFreQual %>% select(WinSumContactNL, WinSumContactNLAll, AvQuality, AvAttitude),
+  labels = c(
+    "Sum:\nNumer of beeps with Outgroup Contact (NL)\n[Winsorized]",
+    "Sum:\nNumber of Outgroup Contacts (NL)\n[Winsorized]",
+    "Mean:\nInteraction Quality",
+    "Mean:\nOutgroup Attitudes (NL)"
+  )
+)
+```
+
+\paragraph{Contact Hypothesis}We tested the most general contact hypothesis in two steps. First, we assessed whether more intergroup interactions were related to to more positive outgroup attitudes. Second, we tested whether a potential positive effect on outgroup attitudes depended on the interaction quality (jointly with the number of interactions). We find that neither the number of interactions nor the number of daily diary responses with an interaction were significantly related with the average outgroup attitudes. This is to say that within our data, participants with more outgroup interactions did not have significantly more positive outgroup attitudes. This might be due to the aggregation within the participants or the small sample size of between participant data. Nonetheless, the aggregate data does not support the notion that simply having more interactions with an outgroup results in more positive outgroup attitudes.
+
+```{r workerModelOlsAttFreqQual}
+# create list to store Worker models
+mdlWorker <- list()
+
+# regression
+mdlWorker$lmAttFreqQualX <-
+  lm(AvAttitude ~ SumContactNL * AvQuality, data = dtWorkerSupp$workerAvFreQual)
+# summary(lmWorkerAttFreqQualX)
+
+summ(
+  mdlWorker$lmAttFreqQualX,
+  confint = TRUE,
+  digits = 3,
+  center = TRUE
+)
+
+mdlWorker$lmAttFreqQualXEta <-
+  effectsize::eta_squared(mdlWorker$lmAttFreqQualX, partial = TRUE)
+
+interactions::interact_plot(
+  mdlWorker$lmAttFreqQualX,
+  pred = AvQuality,
+  modx = SumContactNL,
+  interval = TRUE,
+  partial.residuals = TRUE
+)
+
+interactions::johnson_neyman(mdlWorker$lmAttFreqQualX,
+                             pred = AvQuality,
+                             modx = SumContactNL,
+                             alpha = .05)
+```
+
+However, despite the missing relationship with the number of interactions, we find a medium sized correlation between the participants' Average Interaction Quality and their Average Outgroup Attitudes. Thus within our data participants with a higher quality outgroup interactions also held more positive attitudes towards that group. And when considering the number of interactions and average interaction quality jointly in a linear regression, we additionally find a statistically significant interaction term (\textit{b} = `r coef(summary(mdlWorker$lmAttFreqQualX))["SumContactNL:AvQuality","Estimate"] %>% round(2) %>% format(nsmall=2)`, \textit{t}(`r mdlWorker$lmAttFreqQualX$df.residual`) = `r coef(summary(mdlWorker$lmAttFreqQualX))["SumContactNL:AvQuality","t value"] %>% round(2) %>% format(nsmall=2)`, \textit{p} = `r coef(summary(mdlWorker$lmAttFreqQualX))["SumContactNL:AvQuality","Pr(>|t|)"] %>% round(3) %>% format(nsmall=3)`, $\eta_p^2$ = `r mdlWorker$lmAttFreqQualXEta %>% filter(Parameter == "SumContactNL:AvQuality") %>% select(Eta2_partial) %>% as.numeric %>% round(2) %>% format(nsmall=2)`). Looking at a floodlight analysis of the effect, we find that in our sample with an increasing number of interactions the positive effect of average interaction quality becomes weaker. However, it should be noted that this is based on data aggregating all within participant nuances and is only the date of 21 people. 
+
+```{r workerModelMLAttNull}
+# Create and save Model
+mdlWorker$lmerAttNull <-
+  lme4::lmer(thermometerDutch_1 ~ 1 + (1 | PID),
+    data = dtWorker$full
+  ) # use optim if it does not converge
+
+mdlWorker$lmeAttNull <-
+  lme(
+    thermometerDutch_1 ~ 1,
+    random = ~ 1 | PID,
+    data = dtWorker$full,
+    control = list(opt = "nlmimb")
+  ) # use optim if it does not converge
+
+# Get summary with p-values (Satterthwaite's method)
+# summary(lmerWorkerAttNull) #or with the lme function
+summ(mdlWorker$lmerAttNull, digits = 3, center = TRUE)
+
+# generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(lmer(thermometerDutch_1~1 + (1|PID),data=dtWorker$full),
+#                  method="boot",nsim=1000,
+#                  parallel = "multicore", ncpus = 4, seed = 42),
+#          "output/tables/ML-Null-CI.csv")
+
+# Save variances
+mdlWorker$varAttNull <- 
+  VarCorr(mdlWorker$lmeAttNull) # save variances
+# The estimate of (between-group or Intercept variance, tau_{00}^2):
+mdlWorker$tauAttNull <- 
+  as.numeric(mdlWorker$varAttNull[1])
+# and the estimate of (within-group or residual variance, sigma^2) is:
+mdlWorker$sigmaAttNull <- 
+  as.numeric(mdlWorker$varAttNull[2])
+# The ICC estimate (between/between+within) is:
+mdlWorker$IccAttNull <-
+  (as.numeric(mdlWorker$varAttNull[1]) / (as.numeric(mdlWorker$varAttNull[1]) + as.numeric(mdlWorker$varAttNull[2])))
+mdlWorker$IccPercAttNull <-
+  ((as.numeric(mdlWorker$varAttNull[1]) / (as.numeric(mdlWorker$varAttNull[1]) + as.numeric(mdlWorker$varAttNull[2])))) * 100
+```
+```{r workerModelInterceptAttType}
+# Create and save Model
+mdlWorker$lmeInterceptAttType <-
+  lme(
+    thermometerDutch_1 ~ OutgroupInteraction + NonOutgroupInteraction,
+    random =  ~ 1 | PID,
+    data = dtWorkerSupp$workerInteractionType
+  )
+
+# Get summary with p-values (Satterthwaite's method)
+summ(
+  mdlWorker$lmerInterceptAttType <- lmer(
+    thermometerDutch_1 ~ OutgroupInteraction + NonOutgroupInteraction + (1 | PID),
+    data = dtWorkerSupp$workerInteractionType
+  ),
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+
+mdlWorker$lmerInterceptAttTypeCI <- confint(mdlWorker$lmerInterceptAttType)
+
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(lmer(thermometerDutch_1 ~ Contact_dum + inNonDutch + (1|PID),data=dtWorker$full),
+#                  method="boot",nsim=1000, parallel = "multicore",
+#                  ncpus = 4, seed = 42),
+#          "output/tables/ML-Inter-CI.csv")
+
+# Compare new model to previous step
+anova(mdlWorker$lmeAttNull, 
+      mdlWorker$lmeInterceptAttType) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  add_rownames(., var = "Description") %>%
+  mutate(Description = gsub(".*\\$", "", Description)) %>%
+  kbl(
+    .,
+    caption = "Worker: Model Comparison",
+    format = "latex",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlWorker$varInterceptAttType <- 
+  lme4::VarCorr(mdlWorker$lmeInterceptAttType)
+
+# The estimate of between-group (or Intercept variance) explained:
+# Variance Explained = 1 – (Var with Predictor/Var without Predictor)
+mdlWorker$varBtwInterceptAttType <-
+  1 - (as.numeric(mdlWorker$varInterceptAttType[1]) / as.numeric(mdlWorker$varAttNull[1]))
+mdlWorker$varBtwPercInterceptAttType <-
+  (1 - (as.numeric(mdlWorker$varInterceptAttType[1]) / as.numeric(mdlWorker$varAttNull[1]))) * 100
+# and the estimate of within-group (or residual variance) explained is:
+mdlWorker$varWithinInterceptAttType <-
+  1 - (as.numeric(mdlWorker$varInterceptAttType[2]) / as.numeric(mdlWorker$varAttNull[2]))
+mdlWorker$varWithinPercInterceptAttType <-
+  (1 - (as.numeric(mdlWorker$varInterceptAttType[2]) / as.numeric(mdlWorker$varAttNull[2]))) * 100
+```
+
+We additionally used a multilevel regression to check whether having an interaction with an outgroup member had a situational (i.e., contemporaneous) effect within the participants. We find that having an outgroup interaction is indeed associated with significantly more positive outgroup attitudes within the participants (\textit{b} = `r coef(summary(mdlWorker$lmeInterceptAttType))["OutgroupInteractionYes","Value"] %>% round(2) %>% format(nsmall=2)`, \textit{t}(`r mdlWorker$lmeInterceptAttType$fixDF$X["OutgroupInteractionYes"] %>% as.numeric`) = `r coef(summary(mdlWorker$lmeInterceptAttType))["OutgroupInteractionYes","t-value"] %>% round(2) %>% format(nsmall=2)`, \textit{p} `r ifelse(coef(summary(mdlWorker$lmeInterceptAttType))["OutgroupInteractionYes","p-value"]<.001, "< .001", paste0("= ", coef(summary(mdlWorker$lmeInterceptAttType))["OutgroupInteractionYes","p-value"] %>% round(3) %>% format(nsmall=3)))`, \textit{95\%CI}[`r mdlWorker$lmerInterceptAttTypeCI["OutgroupInteractionYes", "2.5 %"]`, `r mdlWorker$lmerInterceptAttTypeCI["OutgroupInteractionYes", "97.5 %"]`]), even after controlling for having an interaction with a non-Dutch (which did not relate to outgroup attitudes independently; For full results see Online Supplementary Materials B).
 
 \paragraph{Core Need}
 
