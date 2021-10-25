@@ -177,6 +177,24 @@ dtWorkerSupp$workerWithinBetween <-
         "relatedness_1"
       )
   )
+dtWorkerSupp$workerOutWithinBetween <-
+  MlTraitState(
+    data = dtWorkerSupp$workerInteractionType %>% filter(OutgroupInteraction == "Yes"),
+    id = "PID",
+    selection =
+      c(
+        "keyMotiveFulfilled",
+        "competence.daily.all",
+        "autonomy.daily.all",
+        "relatedness.daily.all",
+        "thermometerDutch_1",
+        "keymotive_fulfillemt_1",
+        "competence_1",
+        "autonomy_1",
+        "relatedness_1"
+      )
+  )
+
 ```
 
 ```{r workerVarDescr, include=FALSE}
@@ -435,7 +453,234 @@ mdlWorker$varWithinPercInterceptAttType <-
 
 We additionally used a multilevel regression to check whether having an interaction with an outgroup member had a situational (i.e., contemporaneous) effect within the participants. We find that having an outgroup interaction is indeed associated with significantly more positive outgroup attitudes within the participants (\textit{b} = `r coef(summary(mdlWorker$lmeInterceptAttType))["OutgroupInteractionYes","Value"] %>% round(2) %>% format(nsmall=2)`, \textit{t}(`r mdlWorker$lmeInterceptAttType$fixDF$X["OutgroupInteractionYes"] %>% as.numeric`) = `r coef(summary(mdlWorker$lmeInterceptAttType))["OutgroupInteractionYes","t-value"] %>% round(2) %>% format(nsmall=2)`, \textit{p} `r ifelse(coef(summary(mdlWorker$lmeInterceptAttType))["OutgroupInteractionYes","p-value"]<.001, "< .001", paste0("= ", coef(summary(mdlWorker$lmeInterceptAttType))["OutgroupInteractionYes","p-value"] %>% round(3) %>% format(nsmall=3)))`, \textit{95\%CI}[`r mdlWorker$lmerInterceptAttTypeCI["OutgroupInteractionYes", "2.5 %"] %>% round(2) %>% format(nsmall=2)`, `r mdlWorker$lmerInterceptAttTypeCI["OutgroupInteractionYes", "97.5 %"] %>% round(2) %>% format(nsmall=2)`]), even after controlling for having an interaction with a non-Dutch (which did not relate to outgroup attitudes independently; For full results see Online Supplementary Materials B)\footnote{Interestingly, adding random slopes to this model did not significantly add explained variance. This is unusual because this might indicate the the effect is very consistent across participants. However, this might also be the case due to a small number of participants, or other measurement issues.}. Thus, in our first data we find mixed results, where outgroup contacts show a positive effect on outgroup attitudes in the moment but these results do not translate into average differences between participants, keeping in mind that the between-participant analyses in the aggregated form are based in a small sample size.
 
-\paragraph{Core Need}t be explained by whether or not the interaction fulfilled the person's core situational need. This should, in turn, be due to a higher perceived interaction quality. We will this sequentially test whether the fulfillment of the core need during an interaction is (1) related to more positive outgroup attitudes, (2) higher perceived interaction quality, and (3) whether the variance explained by the core need is assumed by the perceived interaction quality if considered jointly. 
+\paragraph{Core Need}The main proposal of our article is that the success of an outgroup interaction might be explained by whether or not the interaction fulfilled the person's core situational need. This should, in turn, be due to a higher perceived interaction quality. We will this sequentially test whether the fulfillment of the core need during an interaction is (1) related to more positive outgroup attitudes, (2) higher perceived interaction quality, and (3) whether the variance explained by the core need is assumed by the perceived interaction quality if considered jointly. 
+
+```{r workerOutModelMLAttNull, include=FALSE}
+# create empty list to organize models
+mdlWorkerOut <- 
+  list(
+    Att = list(),
+    Qlt = list()
+  )
+
+# Create and save Model
+mdlWorkerOut$Att$lmerNull <-
+  lme4::lmer(thermometerDutch_1 ~ 1 + (1 | PID), 
+             data = dtWorkerSupp$workerOutgroupInteraction) # use optim if it does not converge
+mdlWorkerOut$Att$lmeNull <-
+  lme(
+    thermometerDutch_1 ~ 1,
+    random = ~ 1 | PID,
+    data = dtWorkerSupp$workerOutgroupInteraction,
+    control = list(opt = "nlmimb")
+  ) # use optim if it does not converge
+
+# Get summary with p-values (Satterthwaite's method)
+# summary(Null.Out.ML.r) #or with the lme function
+summ(mdlWorkerOut$Att$lmerNull, digits = 3, center = TRUE)
+
+# generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(lmer(thermometerDutch_1~1 + (1|PID),data=dtWorker$full),
+#                  method="boot",nsim=1000,
+#                  parallel = "multicore", ncpus = 4, seed = 42),
+#          "output/tables/ML-Null-CI.csv")
+
+# Save variances
+mdlWorkerOut$Att$varNull <- 
+  VarCorr(mdlWorkerOut$Att$lmeNull) # save variances
+# The estimate of (between-group or Intercept variance, tau_{00}^2):
+mdlWorkerOut$Att$tauNull <- 
+  as.numeric(mdlWorkerOut$Att$varNull[1])
+# and the estimate of (within-group or residual variance, sigma^2) is:
+mdlWorkerOut$Att$sigmaNull <- 
+  as.numeric(mdlWorkerOut$Att$varNull[2])
+# The ICC estimate (between/between+within) is:
+mdlWorkerOut$Att$IccNull <-
+  (as.numeric(mdlWorkerOut$Att$varNull[1]) / (as.numeric(mdlWorkerOut$Att$varNull[1]) + as.numeric(mdlWorkerOut$Att$varNull[2])))
+mdlWorkerOut$Att$IccPercNull <-
+  ((as.numeric(mdlWorkerOut$Att$varNull[1]) / (as.numeric(mdlWorkerOut$Att$varNull[1]) + as.numeric(mdlWorkerOut$Att$varNull[2])))) * 100
+```
+```{r workerOutModelInterceptAttCore, include=FALSE}
+# Create and save Model
+mdlWorkerOut$Att$lmeInterceptCore <-
+  lme(
+    thermometerDutch_1 ~ keymotive_fulfillemt_1_cwc,
+    random = ~ 1 | PID,
+    data = dtWorkerSupp$workerOutWithinBetween
+  )
+
+# Get summary with p-values (Satterthwaite's method)
+summ(
+  mdlWorkerOut$Att$lmerInterceptCore <-
+    lmer(
+      thermometerDutch_1 ~ keymotive_fulfillemt_1_cwc + (1 | PID),
+      data = dtWorkerSupp$workerOutWithinBetween
+    ),
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(lmer(thermometerDutch_1 ~ Contact_dum + inNonDutch + (1|PID),data=workerOutgroupInteraction),
+#                  method="boot",nsim=1000, parallel = "multicore",
+#                  ncpus = 4, seed = 42),
+#          "output/tables/ML-Inter-CI.csv")
+
+# Compare new model to previous step
+anova(mdlWorkerOut$Att$lmeNull, 
+      mdlWorkerOut$Att$lmeInterceptCore) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Worker: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlWorkerOut$Att$varInterceptCore <-
+  lme4::VarCorr(mdlWorkerOut$Att$lmeInterceptCore)
+
+# The estimate of between-group (or Intercept variance) explained:
+# Variance Explained = 1 – (Var with Predictor/Var without Predictor)
+mdlWorkerOut$Att$varBtwInterceptCore <-
+  1 - (mdlWorkerOut$Att$varInterceptCore["(Intercept)", "Variance"] %>% as.numeric / mdlWorkerOut$Att$varNull["(Intercept)", "Variance"] %>% as.numeric)
+mdlWorkerOut$Att$varBtwPercInterceptCore <-
+  (1 - (mdlWorkerOut$Att$varInterceptCore["(Intercept)", "Variance"] %>% as.numeric / mdlWorkerOut$Att$varNull["(Intercept)", "Variance"] %>% as.numeric)) * 100
+# and the estimate of within-group (or residual variance) explained is:
+mdlWorkerOut$Att$varWithinInterceptCore <-
+  1 - (mdlWorkerOut$Att$varInterceptCore["Residual", "Variance"] %>% as.numeric / mdlWorkerOut$Att$varNull["Residual", "Variance"] %>% as.numeric)
+mdlWorkerOut$Att$varWithinPercInterceptCore <-
+  (1 - (mdlWorkerOut$Att$varInterceptCore["Residual", "Variance"] %>% as.numeric / mdlWorkerOut$Att$varNull["Residual", "Variance"] %>% as.numeric)) * 100
+```
+```{r workerOutModelSlopesAttCore, include=FALSE}
+# Create and save Model (optimizer needed to reach convergence)
+mdlWorkerOut$Att$lmeSlopesCore <-
+  lme(
+    thermometerDutch_1 ~
+      keymotive_fulfillemt_1_cwc,
+    random = ~ 1 + keymotive_fulfillemt_1_cwc | PID,
+    control = lmeControl(opt = "optim"),
+    data = dtWorkerSupp$workerOutWithinBetween
+  )
+
+# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
+summ(
+  mdlWorkerOut$Att$lmerSlopesCore <- lmer(
+    thermometerDutch_1 ~
+      keymotive_fulfillemt_1_cwc +
+      (1 + keymotive_fulfillemt_1_cwc | PID),
+    data = dtWorkerSupp$workerOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+
+mdlWorkerOut$Att$lmerSlopesCoreCI <- confint(mdlWorkerOut$Att$lmerSlopesCore)
+
+r2mlm::r2mlm(mdlWorkerOut$Att$lmerSlopesCore, bargraph = TRUE)
+mitml::multilevelR2(mdlWorkerOut$Att$lmerSlopesCore)
+sjstats::r2(mdlWorkerOut$Att$lmerSlopesCore, mdlWorkerOut$Att$lmerNull)
+performance::r2(mdlWorkerOut$Att$lmerSlopesCore)
+performance::model_performance(mdlWorkerOut$Att$lmerSlopesCore)
+performance::compare_performance(mdlWorkerOut$Att$lmerNull, mdlWorkerOut$Att$lmerSlopesCore)
+
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(model.ran0,
+#               method="boot",nsim=1000,
+#               parallel = "multicore", ncpus = 4, seed = 42),
+#          "output/tables/ML-RandomSlopes-CI.csv")
+
+# Compare new model to previous step
+anova(mdlWorkerOut$Att$lmeNull, 
+      mdlWorkerOut$Att$lmeInterceptCore, 
+      mdlWorkerOut$Att$lmeSlopesCore) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Worker: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlWorkerOut$Att$varSlopesCore <- 
+  lme4::VarCorr(mdlWorkerOut$Att$lmerSlopesCore)
+
+# The estimate of between-group (or Intercept variance) explained:
+# Variance Explained = 1 – (Var with Predictor/Var without Predictor)
+mdlWorkerOut$Att$varBtwSlopesCore <-
+  1 - (mdlWorkerOut$Att$varSlopesCore["(Intercept)", "Variance"] %>% as.numeric / mdlWorkerOut$Att$varInterceptCore["(Intercept)", "Variance"] %>% as.numeric)
+mdlWorkerOut$Att$varBtwPercSlopesCore <-
+  (1 - (mdlWorkerOut$Att$varSlopesCore["(Intercept)", "Variance"] %>% as.numeric / mdlWorkerOut$Att$varInterceptCore["(Intercept)", "Variance"] %>% as.numeric)) * 100
+# and the estimate of within-group (or residual variance) explained is:
+mdlWorkerOut$Att$varWithinSlopesCore <-
+  1 - (mdlWorkerOut$Att$varSlopesCore["Residual", "Variance"] %>% as.numeric / mdlWorkerOut$Att$varInterceptCore["Residual", "Variance"] %>% as.numeric)
+mdlWorkerOut$Att$varWithinPercSlopesCore <-
+  (1 - (mdlWorkerOut$Att$varSlopesCore["Residual", "Variance"] %>% as.numeric / mdlWorkerOut$Att$varInterceptCore["Residual", "Variance"] %>% as.numeric)) * 100
+
+# Assumption Checks:
+mdlWorkerOut$Att$diagSlopesCore <- 
+  sjPlot::plot_model(mdlWorkerOut$Att$lmerSlopesCore, type = "diag")
+grid.arrange(
+  mdlWorkerOut$Att$diagSlopesCore[[1]],
+  mdlWorkerOut$Att$diagSlopesCore[[2]]$`PID`,
+  mdlWorkerOut$Att$diagSlopesCore[[3]],
+  mdlWorkerOut$Att$diagSlopesCore[[4]]
+)
+
+# Plot prediction model
+mdlWorkerOut$Att$predSlopesCore <- 
+  dtWorkerSupp$workerOutWithinBetween %>%
+  select(thermometerDutch_1, session, PID) %>% 
+  mutate(measure = predict(mdlWorkerOut$Att$lmeSlopesCore,
+                           dtWorkerSupp$workerOutWithinBetween,
+                           re.form = NA
+                           )
+         )
+
+(
+  mdlWorkerOut$Att$predPltSlopesCore <-
+    ggplot(data = mdlWorkerOut$Att$predSlopesCore, aes(x = session, y = measure)) +
+    geom_line(alpha = 1, color = "blue") +
+    geom_line(aes(y = thermometerDutch_1), alpha = 1) +
+    facet_wrap( ~ PID, ncol = 6) +
+    xlab("Time") +
+    ylab("Outgroup Attitudes") +
+    theme_Publication()
+)
+ggsave(
+  filename = "Figures/WorkerOut_PredictionPlot_SlopesAttCore.png",
+  mdlWorkerOut$Att$predPltSlopesCore,
+  width = 18,
+  height = 12,
+  dpi = 800,
+  units = "cm",
+  device = "png"
+)
+```
 
 - Att ~ Need & Qlt ~ Need
 - Att ~ Need + Qual

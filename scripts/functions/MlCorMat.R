@@ -206,19 +206,39 @@ MlTraitState <-
     # calculate trait scores (participant means)
     data <- 
       data %>%
-      select(id, selection) %>%
+      #select(id, selection) %>%
+      mutate_at(selection, list(gm = ~mean(., na.rm=TRUE))) %>% # grand mean
+      mutate_at(selection, list(gmc = ~.-mean(., na.rm=TRUE))) %>% # grand mean centered
       group_by_at(vars(matches(id))) %>%
-      mutate_at(selection, list(trait = ~mean(., na.rm=TRUE))) %>%
+      mutate_at(selection, list(cm = ~mean(., na.rm=TRUE))) %>% # cluster mean
       ungroup 
     
+    # center within cluster
     data <-
       map_dfc(selection,
               ~ data %>%
                 transmute(
-                  !!str_c(.x, '_state') :=
-                    !!rlang::sym(.x)-!!rlang::sym(str_c(.x, "_trait"))
+                  !!str_c(.x, '_cwc') :=
+                    !!rlang::sym(.x)-!!rlang::sym(str_c(.x, "_cm"))
                 )) %>%
       bind_cols(data, .)
     
+    # cluster mean centered
+    data <- 
+      data %>%
+      mutate_at(paste0(selection, "_cm"), list(c = ~.-mean(., na.rm=TRUE))) # grand mean
+    
     data
   }
+
+
+var_reduction = function(m0, m1){
+  library(tidyverse)
+  lme4::VarCorr(m0) %>% 
+    as.data.frame %>% 
+    select(grp, var_m0 = vcov) %>% 
+    left_join(lme4::VarCorr(m1) %>% 
+                as.data.frame %>% 
+                select(grp, var_m1 = vcov)) %>% 
+    mutate(var_red = 1 - var_m1 / var_m0) 
+}
