@@ -281,7 +281,7 @@ MlCoeffLatex <- function(lmeMdl = NULL, lmerCI = NULL, varName = NULL) {
     paste0(
       "\\textit{b} = ", b, 
       ", t(", df, ") = ", t,
-      ", \\textit{p} = ", p,
+      ", \\textit{p} ", p,
       ", \\textit{95\\%CI}[", CIlwr, ", ", CIupr, "]"
     )
   }
