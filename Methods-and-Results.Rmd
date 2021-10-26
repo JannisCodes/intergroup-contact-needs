@@ -304,7 +304,7 @@ pairs.panels.new(
 )
 ```
 
-\paragraph{Contact Hypothesis}We tested the most general contact hypothesis in two steps. First, we assessed whether more intergroup interactions were related to to more positive outgroup attitudes. Second, we tested whether a potential positive effect on outgroup attitudes depended on the interaction quality (jointly with the number of interactions). We find that neither the number of interactions nor the number of daily diary responses with an interaction were significantly related with the average outgroup attitudes. This is to say that within our data, participants with more outgroup interactions did not have significantly more positive outgroup attitudes. This might be due to the aggregation within the participants or the small sample size of between participant data. Nonetheless, the aggregate data does not support the notion that simply having more interactions with an outgroup results in more positive outgroup attitudes.
+\paragraph{Contact Hypothesis}We tested the most general contact hypothesis in two steps. First, we assessed whether more intergroup interactions were related to to more positive outgroup attitudes. Second, we tested whether a potential positive effect on outgroup attitudes depended on the interaction quality (jointly with the number of interactions). We find that neither the number of interactions nor the number of daily diary responses with an interaction were significantly related with the average outgroup attitudes. This is to say that within our data, participants with more outgroup interactions did not have significantly more positive outgroup attitudes. This might be due to the aggregation within the participants or the small sample size of between participant data. Nonetheless, the aggregated data does not support the notion that simply having more interactions with an outgroup results in more positive outgroup attitudes.
 
 ```{r workerModelOlsAttFreqQual, include=FALSE}
 # create list to store Worker models
@@ -1006,12 +1006,400 @@ We find that in the highest multilevel models, the fulfillment of core situation
 \faQuestionCircle\ Are we sure that we don't want some sort of bootstrapped indirect effect? 
 
 \paragraph{Robustness}
+```{r workerModelInterceptAttCoreInt, include=FALSE}
+# Create and save Model
+mdlWorker$lmeInterceptAttCoreInt <-
+  lme(
+    thermometerDutch_1 ~ keyMotiveFulfilled_cwc * OutgroupInteraction,
+    random =  ~ 1 | PID,
+    data = dtWorkerSupp$workerWithinBetween
+  )
 
-\subparagraph{Interaction Type}
+# Get summary with p-values (Satterthwaite's method)
+summ(
+  mdlWorker$lmerInterceptAttCoreInt <- lmer(
+    thermometerDutch_1 ~ keyMotiveFulfilled_cwc * OutgroupInteraction + (1 | PID),
+    data = dtWorkerSupp$workerWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3
+)
 
-\subparagraph{Other Needs}
+mdlWorker$lmerInterceptAttCoreIntCI <- 
+  confint(mdlWorker$lmerInterceptAttCoreInt)
 
-For full results see Online Supplementary Information B.
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(lmer(thermometerDutch_1 ~ Contact_dum + inNonDutch + (1|PID),data=dtWorker$full),
+#                  method="boot",nsim=1000, parallel = "multicore",
+#                  ncpus = 4, seed = 42),
+#          "output/tables/ML-Inter-CI.csv")
+
+# Compare new model to previous step
+anova(mdlWorker$lmeAttNull, 
+      mdlWorker$lmeInterceptAttCoreInt) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  add_rownames(., var = "Description") %>%
+  mutate(Description = gsub(".*\\$", "", Description)) %>%
+  kbl(
+    .,
+    caption = "Worker: Model Comparison",
+    format = "latex",
+    linesep = "",
+    booktabs = T,
+    align = c("l", rep("c", ncol(.)-1)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlWorker$varInterceptAttCoreInt <- 
+  lme4::VarCorr(mdlWorker$lmeInterceptAttCoreInt)
+```
+```{r workerModelSlopesAttCoreIntX, include=FALSE}
+# Create and save Model (optimizer needed to reach convergence)
+mdlWorker$lmeSlopesAttCoreInt <- lme(
+  thermometerDutch_1 ~
+    keyMotiveFulfilled_cwc * OutgroupInteraction,
+  random = ~ 1 + keyMotiveFulfilled_cwc + OutgroupInteraction | PID,
+  control = lmeControl(opt = "optim"),
+  data = dtWorkerSupp$workerWithinBetween
+)
+
+# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
+summ(
+  mdlWorker$lmerSlopesAttCoreInt <- lmer(
+    thermometerDutch_1 ~
+      keyMotiveFulfilled_cwc * OutgroupInteraction +
+      (1 + keyMotiveFulfilled_cwc + OutgroupInteraction | PID),
+    data = dtWorkerSupp$workerWithinBetween
+  ), 
+  confint = TRUE,
+  digits = 3
+)
+
+mdlWorker$lmerSlopesAttCoreIntCI <- 
+  confint(mdlWorker$lmerSlopesAttCoreInt)
+
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(model.ran0,
+#               method="boot",nsim=1000,
+#               parallel = "multicore", ncpus = 4, seed = 42),
+#          "output/tables/ML-RandomSlopes-CI.csv")
+
+# Compare new model to previous step
+anova(mdlWorker$lmeAttNull, 
+      mdlWorker$lmeInterceptAttCoreInt,
+      mdlWorker$lmeSlopesAttCoreInt) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  add_rownames(., var = "Description") %>%
+  mutate(Description = gsub(".*\\$", "", Description)) %>%
+  kbl(
+    .,
+    caption = "Worker: Model Comparison",
+    format = "latex",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlWorker$varSlopesAttCoreInt <- 
+  lme4::VarCorr(mdlWorker$lmeSlopesAttCoreInt)
+
+# Assumption Checks:
+mdlWorker$diagSlopesAttCoreInt <-
+  sjPlot::plot_model(mdlWorker$lmerSlopesAttCoreInt, type = "diag")
+grid.arrange(
+  mdlWorker$diagSlopesAttCoreInt[[1]],
+  mdlWorker$diagSlopesAttCoreInt[[2]]$`PID`,
+  mdlWorker$diagSlopesAttCoreInt[[3]],
+  mdlWorker$diagSlopesAttCoreInt[[4]]
+)
+
+# Plot prediction model
+mdlWorker$predSlopesAttCoreInt <- 
+  dtWorkerSupp$workerWithinBetween %>%
+  select(thermometerDutch_1, session, PID) %>% 
+  mutate(measure = predict(mdlWorker$lmeSlopesAttCoreInt,
+                           dtWorkerSupp$workerWithinBetween,
+                           re.form = NA
+                           )
+         )
+
+(
+  mdlWorker$predPltSlopesAttCoreInt <-
+    ggplot(data = mdlWorker$predSlopesAttCoreInt, aes(x = session, y = measure)) +
+    geom_line(alpha = 1, color = "blue") +
+    geom_line(aes(y = thermometerDutch_1), alpha = 1) +
+    facet_wrap(~ PID, ncol = 6) +
+    xlab("Time") +
+    ylab("Outgroup Attitudes") +
+    theme_Publication()
+)
+ggsave(
+  filename = "Figures/Worker_PredictionPlot_SlopesAttCoreInt.png",
+  mdlWorker$predPltSlopesAttCoreInt,
+  width = 18,
+  height = 12,
+  dpi = 800,
+  units = "cm",
+  device = "png"
+)
+```
+
+To build further confidence in our results, we assessed two additional models that might offer alternative explanations of the effects we find. First, to make certain that the effect of core need fulfillment is specific to the interaction we compare the the effect to fulfillment of the situation core need when no outgroup interaction took place. Here we go back to the full dataset and assess the generalized situational core need fulfillment (either during an interaction or about the daytime in general) and whether the effect differed during daily diary measurements with and without outgroup contacts. We find that there is no main effect of core need fulfillment (random slopes model; `r MlCoeffLatex(lmeMdl = mdlWorker$lmeSlopesAttCoreInt, lmerCI = mdlWorker$lmerSlopesAttCoreIntCI, varName = "keyMotiveFulfilled_cwc")`) but a significant interaction effect of core need fulfillment and outgroup contact (`r MlCoeffLatex(lmeMdl = mdlWorker$lmeSlopesAttCoreInt, lmerCI = mdlWorker$lmerSlopesAttCoreIntCI, varName = "keyMotiveFulfilled_cwc:OutgroupInteractionYes")`). Together with a significant main effect of having an outgroup contact, this indicates that it is not key need fulfillment in general --- but only key need fulfillment during an outgroup contact that predicts more positive outgroup attitudes. 
+
+```{r workerOutModelInterceptAttCoreSdt, include=FALSE}
+# Create and save Model
+mdlWorkerOut$Att$lmeInterceptCoreSdt <-
+  lme(
+    thermometerDutch_1 ~ keymotive_fulfillemt_1_cwc + competence_1_cwc + autonomy_1_cwc + relatedness_1_cwc,
+    random = ~ 1 | PID,
+    data = dtWorkerSupp$workerOutWithinBetween,
+    na.action = na.exclude
+  )
+
+# Get summary with p-values (Satterthwaite's method)
+summ(
+  mdlWorkerOut$Att$lmerInterceptCoreSdt <- lmer(
+    thermometerDutch_1 ~ keymotive_fulfillemt_1_cwc + competence_1_cwc + autonomy_1_cwc + relatedness_1_cwc + (1 | PID),
+    data = dtWorkerSupp$workerOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3
+)
+
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(lmer(thermometerDutch_1 ~ Contact_dum + inNonDutch + (1|PID),data=workerOutgroupInteraction),
+#                  method="boot",nsim=1000, parallel = "multicore",
+#                  ncpus = 4, seed = 42),
+#          "output/tables/ML-Inter-CI.csv")
+
+# To be compared against a model with only the self determination theory needs
+mdlWorkerOut$Att$lmeInterceptSdt <-
+  lme(
+    thermometerDutch_1 ~ competence_1_cwc + autonomy_1_cwc + relatedness_1_cwc,
+    random = ~ 1 | PID,
+    data = dtWorkerSupp$workerOutWithinBetween,
+    na.action = na.exclude
+  )
+
+summ(
+  mdlWorkerOut$Att$lmerInterceptSdt <- lmer(
+    thermometerDutch_1 ~ competence_1_cwc + autonomy_1_cwc + relatedness_1_cwc + (1 | PID),
+    data = dtWorkerSupp$workerOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3
+)
+
+# Compare new model to previous steps
+anova(
+  mdlWorkerOut$Att$lmeInterceptSdt,
+  mdlWorkerOut$Att$lmeInterceptCoreSdt
+  ) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Worker: Model Comparison",
+    format = "latex",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+rm(lmeInterceptCoreRed)
+
+# Save variances
+mdlWorkerOut$Att$varInterceptCoreSdt <-
+  lme4::VarCorr(mdlWorkerOut$Att$lmeInterceptCoreSdt)
+```
+```{r workerOutModelSlopesAttCoreSdt, include=FALSE}
+# Create and save Model (optimizer needed to reach convergence)
+mdlWorkerOut$Att$lmeSlopesCoreSdt <-
+  lme(
+    thermometerDutch_1 ~
+      keymotive_fulfillemt_1_cwc + competence_1_cwc + autonomy_1_cwc + relatedness_1_cwc,
+    random = ~ 1 + keymotive_fulfillemt_1_cwc + competence_1_cwc + autonomy_1_cwc + relatedness_1_cwc | PID,
+    control = lmeControl(opt = "optim"),
+    data = dtWorkerSupp$workerOutWithinBetween,
+    na.action = na.exclude
+  )
+
+# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
+summ(
+  mdlWorkerOut$Att$lmerSlopesCoreSdt <- lmer(
+    thermometerDutch_1 ~
+      keymotive_fulfillemt_1_cwc + competence_1_cwc + autonomy_1_cwc + relatedness_1_cwc +
+      (1 + keymotive_fulfillemt_1_cwc + competence_1_cwc + autonomy_1_cwc + relatedness_1_cwc | PID),
+    data = dtWorkerSupp$workerOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3
+)
+
+mdlWorkerOut$Att$lmerSlopesCoreSdtCI <- 
+  confint(mdlWorkerOut$Att$lmerSlopesCoreSdt)
+
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(model.ran0,
+#               method="boot",nsim=1000,
+#               parallel = "multicore", ncpus = 4, seed = 42),
+#          "output/tables/ML-RandomSlopes-CI.csv")
+
+# Compare new model to previous step
+anova(mdlWorkerOut$Att$lmeInterceptSdt,
+      mdlWorkerOut$Att$lmeInterceptCoreSdt, 
+      mdlWorkerOut$Att$lmeSlopesCoreSdt) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Worker: Model Comparison",
+    format = "latex",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# model with SDT only
+# Create and save Model (optimizer needed to reach convergence)
+mdlWorkerOut$Att$lmeSlopesSdt <-
+  lme(
+    thermometerDutch_1 ~
+      competence_1_cwc + autonomy_1_cwc + relatedness_1_cwc,
+    random = ~ 1 + competence_1_cwc + autonomy_1_cwc + relatedness_1_cwc | PID,
+    control = lmeControl(opt = "optim"),
+    data = dtWorkerSupp$workerOutWithinBetween,
+    na.action = na.exclude
+  )
+
+# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
+summ(
+  mdlWorkerOut$Att$lmerSlopesSdt <- lmer(
+    thermometerDutch_1 ~
+      competence_1_cwc + autonomy_1_cwc + relatedness_1_cwc +
+      (1 + competence_1_cwc + autonomy_1_cwc + relatedness_1_cwc | PID),
+    data = dtWorkerSupp$workerOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3
+)
+
+# Compare new model to previous step
+anova(mdlWorkerOut$Att$lmeInterceptSdt,
+      mdlWorkerOut$Att$lmeSlopesSdt, 
+      mdlWorkerOut$Att$lmeSlopesCoreSdt) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Worker: Model Comparison",
+    format = "latex",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+
+# Save variances
+mdlWorkerOut$Att$varSlopesCoreSdt <- 
+  lme4::VarCorr(mdlWorkerOut$Att$lmeSlopesCoreSdt)
+
+# Assumption Checks:
+mdlWorkerOut$Att$diagSlopesCoreSdt <- 
+  sjPlot::plot_model(mdlWorkerOut$Att$lmerSlopesCoreSdt, type = "diag")
+grid.arrange(
+  mdlWorkerOut$Att$diagSlopesCoreSdt[[1]],
+  mdlWorkerOut$Att$diagSlopesCoreSdt[[2]]$`PID`,
+  mdlWorkerOut$Att$diagSlopesCoreSdt[[3]],
+  mdlWorkerOut$Att$diagSlopesCoreSdt[[4]]
+)
+
+# Plot prediction model
+mdlWorkerOut$Att$predSlopesCoreSdt <- 
+  dtWorkerSupp$workerOutWithinBetween %>%
+  filter(!is.na(autonomy_1)) %>%
+  select(thermometerDutch_1, session, PID, autonomy_1) %>% 
+  mutate(measure = predict(mdlWorkerOut$Att$lmeSlopesCoreSdt,
+                           dtWorkerSupp$workerOutWithinBetween %>% filter(!is.na(autonomy_1)),
+                           re.form = NA
+                           )
+         )
+
+(
+  mdlWorkerOut$Att$predPltSlopesCoreSdt <-
+    ggplot(data = mdlWorkerOut$Att$predSlopesCoreSdt, aes(x = session, y = measure)) +
+    geom_line(alpha = 1, color = "blue") +
+    geom_line(aes(y = thermometerDutch_1), alpha = 1) +
+    facet_wrap( ~ PID, ncol = 6) +
+    xlab("Time") +
+    ylab("Outgroup Attitudes") +
+    theme_Publication()
+)
+ggsave(
+  filename = "Figures/WorkerOut_PredictionPlot_SlopesAttCoreStd.png",
+  mdlWorkerOut$Att$predPltSlopesCoreSdt,
+  width = 18,
+  height = 12,
+  dpi = 800,
+  units = "cm",
+  device = "png"
+)
+
+# Model comparison
+SdtComp <-
+  anova(
+    mdlWorkerOut$Att$lmerSlopesSdt, 
+    mdlWorkerOut$Att$lmerSlopesCoreSdt
+  ) %>%
+  as.data.frame()
+SdtCompDf <- SdtComp["mdlWorkerOut$Att$lmerSlopesCoreSdt", "Df"]
+SdtCompN <- sapply(ranef(mdlWorkerOut$Att$lmerSlopesCoreSdt), nrow)
+SdtCompP <-
+  ifelse(SdtComp["mdlWorkerOut$Att$lmerSlopesCoreSdt", "Pr(>Chisq)"] < .001,
+         "< .001",
+         paste0("= ", SdtComp["mdlWorkerOut$Att$lmerSlopesCoreSdt", "Pr(>Chisq)"] %>% round(3) %>% format(nsmall = 3)))
+
+SdtCompChiSq <- paste0("$\\chi^2$(", SdtCompDf, "\\textit{N} = ", SdtCompN, ") ", SdtCompP)
+```
+
+In a final step we check whether during the interaction the core situational need is a meaningful predictor even when taking other fundamental psychological needs into account. We focus on the three commonly considered self determination needs: competence, autonomy, and relatedness. We find that the core need adds significantly above a model with only the self determination theory needs (random slopes models; `r SdtCompChiSq`). We find that next to relatedness (`r MlCoeffLatex(lmeMdl = mdlWorkerOut$Att$lmeSlopesCoreSdt, lmerCI = mdlWorkerOut$Att$lmerSlopesCoreSdtCI, varName = "relatedness_1_cwc")`), the core need explains the most variance in outgroup attitudes after an outgroup contact (`r MlCoeffLatex(lmeMdl = mdlWorkerOut$Att$lmeSlopesCoreSdt, lmerCI = mdlWorkerOut$Att$lmerSlopesCoreSdtCI, varName = "keymotive_fulfillemt_1_cwc")`). When compared to the model with only the SDT needs, the core need fulfillment flexibly takes on some of the explained variance of all of the three fundamental needs and competence and autonomy needs are non-significant (all \textit{b} < `r coef(summary(mdlWorkerOut$Att$lmeSlopesCoreSdt))[c("competence_1_cwc", "autonomy_1_cwc"),"Value"] %>% max %>% round(2) %>% format(nsmall=2)`, all \textit{p} > `r coef(summary(mdlWorkerOut$Att$lmeSlopesCoreSdt))[c("competence_1_cwc", "autonomy_1_cwc"),"p-value"] %>% min %>% round(3) %>% format(nsmall=3)`). For full results see Online Supplementary Information B.
 
 \section{Study 2}
 
