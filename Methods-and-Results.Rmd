@@ -1383,23 +1383,24 @@ ggsave(
 )
 
 # Model comparison
-SdtComp <-
+workerSdtComp <-
   anova(
     mdlWorkerOut$Att$lmerSlopesSdt, 
     mdlWorkerOut$Att$lmerSlopesCoreSdt
   ) %>%
   as.data.frame()
-SdtCompDf <- SdtComp["mdlWorkerOut$Att$lmerSlopesCoreSdt", "Df"]
-SdtCompN <- sapply(ranef(mdlWorkerOut$Att$lmerSlopesCoreSdt), nrow)
-SdtCompP <-
-  ifelse(SdtComp["mdlWorkerOut$Att$lmerSlopesCoreSdt", "Pr(>Chisq)"] < .001,
+workerSdtCompDf <- workerSdtComp["mdlWorkerOut$Att$lmerSlopesCoreSdt", "Df"]
+workerSdtCompN <- sapply(ranef(mdlWorkerOut$Att$lmerSlopesCoreSdt), nrow)
+workerSdtCompChi <- workerSdtComp["mdlWorkerOut$Att$lmerSlopesCoreSdt", "Chisq"] %>% round(2) %>% format(nsmall=2)
+workerSdtCompP <-
+  ifelse(workerSdtComp["mdlWorkerOut$Att$lmerSlopesCoreSdt", "Pr(>Chisq)"] < .001,
          "< .001",
-         paste0("= ", SdtComp["mdlWorkerOut$Att$lmerSlopesCoreSdt", "Pr(>Chisq)"] %>% round(3) %>% format(nsmall = 3)))
+         paste0("= ", workerSdtComp["mdlWorkerOut$Att$lmerSlopesCoreSdt", "Pr(>Chisq)"] %>% round(3) %>% format(nsmall = 3)))
 
-SdtCompChiSq <- paste0("$\\chi^2$(", SdtCompDf, ", \\textit{N} = ", SdtCompN, "), \\textit{p} ", SdtCompP)
+workerSdtCompChiSq <- paste0("$\\chi^2$(", workerSdtCompDf, ", \\textit{N} = ", workerSdtCompN, ") = ", workerSdtCompChi, ", \\textit{p} ", workerSdtCompP)
 ```
 
-In a final step we check whether during the interaction the core situational need is a meaningful predictor even when taking other fundamental psychological needs into account. We focus on the three commonly considered self determination needs: competence, autonomy, and relatedness. We find that the core need adds significantly above a model with only the self determination theory needs (random slopes models; `r SdtCompChiSq`). We find that next to relatedness (`r MlCoeffLatex(lmeMdl = mdlWorkerOut$Att$lmeSlopesCoreSdt, lmerCI = mdlWorkerOut$Att$lmerSlopesCoreSdtCI, varName = "relatedness_1_cwc")`), the core need explains the most variance in outgroup attitudes after an outgroup contact (`r MlCoeffLatex(lmeMdl = mdlWorkerOut$Att$lmeSlopesCoreSdt, lmerCI = mdlWorkerOut$Att$lmerSlopesCoreSdtCI, varName = "keymotive_fulfillemt_1_cwc")`). When compared to the model with only the SDT needs, the core need fulfillment flexibly takes on some of the explained variance of all of the three fundamental needs and competence and autonomy needs are non-significant (all \textit{b} < `r coef(summary(mdlWorkerOut$Att$lmeSlopesCoreSdt))[c("competence_1_cwc", "autonomy_1_cwc"),"Value"] %>% max %>% round(2) %>% format(nsmall=2)`, all \textit{p} > `r coef(summary(mdlWorkerOut$Att$lmeSlopesCoreSdt))[c("competence_1_cwc", "autonomy_1_cwc"),"p-value"] %>% min %>% round(3) %>% format(nsmall=3)`). For full results see Online Supplementary Information B.
+In a final step we check whether during the interaction the core situational need is a meaningful predictor even when taking other fundamental psychological needs into account. We focus on the three commonly considered self determination needs: competence, autonomy, and relatedness. We find that the core need adds significantly above a model with only the self determination theory needs (random slopes models; `r workerSdtCompChiSq`). We find that next to relatedness (`r MlCoeffLatex(lmeMdl = mdlWorkerOut$Att$lmeSlopesCoreSdt, lmerCI = mdlWorkerOut$Att$lmerSlopesCoreSdtCI, varName = "relatedness_1_cwc")`), the core need explains the most variance in outgroup attitudes after an outgroup contact (`r MlCoeffLatex(lmeMdl = mdlWorkerOut$Att$lmeSlopesCoreSdt, lmerCI = mdlWorkerOut$Att$lmerSlopesCoreSdtCI, varName = "keymotive_fulfillemt_1_cwc")`). When compared to the model with only the SDT needs, the core need fulfillment flexibly takes on some of the explained variance of all of the three fundamental needs and competence and autonomy needs are non-significant (all \textit{b} < `r coef(summary(mdlWorkerOut$Att$lmeSlopesCoreSdt))[c("competence_1_cwc", "autonomy_1_cwc"),"Value"] %>% max %>% round(2) %>% format(nsmall=2)`, all \textit{p} > `r coef(summary(mdlWorkerOut$Att$lmeSlopesCoreSdt))[c("competence_1_cwc", "autonomy_1_cwc"),"p-value"] %>% min %>% round(3) %>% format(nsmall=3)`). For full results see Online Supplementary Information B.
 
 \section{Study 2}
 
@@ -2419,10 +2420,402 @@ We again sequentially tested whether the fulfillment of the core need during an 
 \faQuestionCircle\ Are we sure that we don't want some sort of bootstrapped indirect effect? 
 
 \subsubsection{Robustness}
+```{r studentModelInterceptAttCoreInt, include=FALSE}
+# Create and save Model
+mdlStudent$lmeInterceptAttCoreInt <-
+  lme(
+    AttitudesDutch ~ KeyNeedFullfillment_cwc * OutgroupInteraction,
+    random =  ~ 1 | PID,
+    data = dtStudentSupp$studentWithinBetween
+  )
 
-\paragraph{interaction type}
+# Get summary with p-values (Satterthwaite's method)
+summ(
+  mdlStudent$lmerInterceptAttCoreInt <- lmer(
+    AttitudesDutch ~ KeyNeedFullfillment_cwc * OutgroupInteraction + (1 | PID),
+    data = dtStudentSupp$studentWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3
+)
 
-\paragraph{other needs}
+mdlStudent$lmerInterceptAttCoreIntCI <- 
+  confint(mdlStudent$lmerInterceptAttCoreInt)
+
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(lmer(AttitudesDutch ~ Contact_dum + inNonDutch + (1|PID),data=dtStudent$full),
+#                  method="boot",nsim=1000, parallel = "multicore",
+#                  ncpus = 4, seed = 42),
+#          "output/tables/ML-Inter-CI.csv")
+
+# Compare new model to previous step
+anova(mdlStudent$lmeAttNull, 
+      mdlStudent$lmeInterceptAttCoreInt) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  add_rownames(., var = "Description") %>%
+  mutate(Description = gsub(".*\\$", "", Description)) %>%
+  kbl(
+    .,
+    caption = "Student: Model Comparison",
+    format = "latex",
+    linesep = "",
+    booktabs = T,
+    align = c("l", rep("c", ncol(.)-1)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlStudent$varInterceptAttCoreInt <- 
+  lme4::VarCorr(mdlStudent$lmeInterceptAttCoreInt)
+```
+```{r studentModelSlopesAttCoreIntX, include=FALSE}
+# Create and save Model (optimizer needed to reach convergence)
+mdlStudent$lmeSlopesAttCoreInt <- lme(
+  AttitudesDutch ~
+    KeyNeedFullfillment_cwc * OutgroupInteraction,
+  random = ~ 1 + KeyNeedFullfillment_cwc + OutgroupInteraction | PID,
+  control = lmeControl(opt = "optim"),
+  data = dtStudentSupp$studentWithinBetween
+)
+
+# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
+summ(
+  mdlStudent$lmerSlopesAttCoreInt <- lmer(
+    AttitudesDutch ~
+      KeyNeedFullfillment_cwc * OutgroupInteraction +
+      (1 + KeyNeedFullfillment_cwc + OutgroupInteraction | PID),
+    data = dtStudentSupp$studentWithinBetween
+  ), 
+  confint = TRUE,
+  digits = 3
+)
+
+mdlStudent$lmerSlopesAttCoreIntCI <- 
+  confint(mdlStudent$lmerSlopesAttCoreInt)
+
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(model.ran0,
+#               method="boot",nsim=1000,
+#               parallel = "multicore", ncpus = 4, seed = 42),
+#          "output/tables/ML-RandomSlopes-CI.csv")
+
+# Compare new model to previous step
+anova(mdlStudent$lmeAttNull, 
+      mdlStudent$lmeInterceptAttCoreInt,
+      mdlStudent$lmeSlopesAttCoreInt) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  add_rownames(., var = "Description") %>%
+  mutate(Description = gsub(".*\\$", "", Description)) %>%
+  kbl(
+    .,
+    caption = "Student: Model Comparison",
+    format = "latex",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlStudent$varSlopesAttCoreInt <- 
+  lme4::VarCorr(mdlStudent$lmeSlopesAttCoreInt)
+
+# Assumption Checks:
+mdlStudent$diagSlopesAttCoreInt <-
+  sjPlot::plot_model(mdlStudent$lmerSlopesAttCoreInt, type = "diag")
+grid.arrange(
+  mdlStudent$diagSlopesAttCoreInt[[1]],
+  mdlStudent$diagSlopesAttCoreInt[[2]]$`PID`,
+  mdlStudent$diagSlopesAttCoreInt[[3]],
+  mdlStudent$diagSlopesAttCoreInt[[4]]
+)
+
+# Plot prediction model
+mdlStudent$predSlopesAttCoreInt <- 
+  dtStudentSupp$studentWithinBetween %>%
+  filter(PID %in% dtStudentSupp$studentPltIDs) %>%
+  select(AttitudesDutch, TIDnum, PID) %>% 
+  mutate(measure = predict(mdlStudent$lmeSlopesAttCoreInt,
+                           dtStudentSupp$studentWithinBetween %>% filter(PID %in% dtStudentSupp$studentPltIDs),
+                           re.form = NA
+                           )
+         )
+
+(
+  mdlStudent$predPltSlopesAttCoreInt <-
+    ggplot(data = mdlStudent$predSlopesAttCoreInt, aes(x = TIDnum, y = measure)) +
+    geom_line(alpha = 1, color = "blue") +
+    geom_line(aes(y = AttitudesDutch), alpha = 1) +
+    facet_wrap(~ PID, ncol = 6) +
+    xlab("Time") +
+    ylab("Outgroup Attitudes") +
+    theme_Publication()
+)
+ggsave(
+  filename = "Figures/Student_PredictionPlot_SlopesAttCoreInt.png",
+  mdlStudent$predPltSlopesAttCoreInt,
+  width = 18,
+  height = 12,
+  dpi = 800,
+  units = "cm",
+  device = "png"
+)
+```
+
+We again checked for alternative models. First, when considering generalized situational core need fulfillment together with whether an intergroup contact took place, we find that there is only a minuscule main effect of core need fulfillment (random slopes model; `r MlCoeffLatex(lmeMdl = mdlStudent$lmeSlopesAttCoreInt, lmerCI = mdlStudent$lmerSlopesAttCoreIntCI, varName = "KeyNeedFullfillment_cwc")`) but a stronger interaction effect of core need fulfillment and outgroup contact (`r MlCoeffLatex(lmeMdl = mdlStudent$lmeSlopesAttCoreInt, lmerCI = mdlStudent$lmerSlopesAttCoreIntCI, varName = "KeyNeedFullfillment_cwc:OutgroupInteractionYes")`). Together with a significant main effect of having an outgroup contact (`r MlCoeffLatex(lmeMdl = mdlStudent$lmeSlopesAttCoreInt, lmerCI = mdlStudent$lmerSlopesAttCoreIntCI, varName = "OutgroupInteractionYes")`), this indicates that it is not key need fulfillment in general --- but key need fulfillment during an outgroup contact that predicts more positive outgroup attitudes. This finding is consistent with the results of the previous study, albeit with slightly weaker effect (likely because of the large number of measurements that did not include an outgroup interaction).
+
+```{r studentOutModelInterceptAttCoreSdt, include=FALSE}
+# Create and save Model
+mdlStudentOut$Att$lmeInterceptCoreSdt <-
+  lme(
+    AttitudesDutch ~ KeyNeedFullfillment_cwc + Competence_cwc + Autonomy_cwc + Relatedness_cwc,
+    random = ~ 1 | PID,
+    data = dtStudentSupp$studentOutWithinBetween,
+    na.action = na.exclude
+  )
+
+# Get summary with p-values (Satterthwaite's method)
+summ(
+  mdlStudentOut$Att$lmerInterceptCoreSdt <- lmer(
+    AttitudesDutch ~ KeyNeedFullfillment_cwc + Competence_cwc + Autonomy_cwc + Relatedness_cwc + (1 | PID),
+    data = dtStudentSupp$studentOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3
+)
+
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(lmer(AttitudesDutch ~ Contact_dum + inNonDutch + (1|PID),data=studentOutgroupInteraction),
+#                  method="boot",nsim=1000, parallel = "multicore",
+#                  ncpus = 4, seed = 42),
+#          "output/tables/ML-Inter-CI.csv")
+
+# To be compared against a model with only the self determination theory needs
+mdlStudentOut$Att$lmeInterceptSdt <-
+  lme(
+    AttitudesDutch ~ Competence_cwc + Autonomy_cwc + Relatedness_cwc,
+    random = ~ 1 | PID,
+    data = dtStudentSupp$studentOutWithinBetween,
+    na.action = na.exclude
+  )
+
+summ(
+  mdlStudentOut$Att$lmerInterceptSdt <- lmer(
+    AttitudesDutch ~ Competence_cwc + Autonomy_cwc + Relatedness_cwc + (1 | PID),
+    data = dtStudentSupp$studentOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3
+)
+
+# Compare new model to previous steps
+anova(
+  mdlStudentOut$Att$lmeInterceptSdt,
+  mdlStudentOut$Att$lmeInterceptCoreSdt
+  ) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Student: Model Comparison",
+    format = "latex",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+rm(lmeInterceptCoreRed)
+
+# Save variances
+mdlStudentOut$Att$varInterceptCoreSdt <-
+  lme4::VarCorr(mdlStudentOut$Att$lmeInterceptCoreSdt)
+```
+```{r studentOutModelSlopesAttCoreSdt, include=FALSE}
+# Create and save Model (optimizer needed to reach convergence)
+mdlStudentOut$Att$lmeSlopesCoreSdt <-
+  lme(
+    AttitudesDutch ~
+      KeyNeedFullfillment_cwc + Competence_cwc + Autonomy_cwc + Relatedness_cwc,
+    random = ~ 1 + KeyNeedFullfillment_cwc + Competence_cwc + Relatedness_cwc | PID,
+    control = lmeControl(opt = "optim", maxIter = 100, msMaxIter = 100),
+    data = dtStudentSupp$studentOutWithinBetween,
+    na.action = na.exclude
+  )
+
+# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
+summ(
+  mdlStudentOut$Att$lmerSlopesCoreSdt <- lmer(
+    AttitudesDutch ~
+      KeyNeedFullfillment_cwc + Competence_cwc + Autonomy_cwc + Relatedness_cwc +
+      (1 + KeyNeedFullfillment_cwc + Competence_cwc + Autonomy_cwc + Relatedness_cwc | PID),
+    data = dtStudentSupp$studentOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3
+)
+
+mdlStudentOut$Att$lmerSlopesCoreSdtCI <- 
+  confint(mdlStudentOut$Att$lmerSlopesCoreSdt)
+
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(model.ran0,
+#               method="boot",nsim=1000,
+#               parallel = "multicore", ncpus = 4, seed = 42),
+#          "output/tables/ML-RandomSlopes-CI.csv")
+
+# Compare new model to previous step
+anova(mdlStudentOut$Att$lmeInterceptSdt,
+      mdlStudentOut$Att$lmeInterceptCoreSdt, 
+      mdlStudentOut$Att$lmeSlopesCoreSdt) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Student: Model Comparison",
+    format = "latex",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# model with SDT only
+# Create and save Model (optimizer needed to reach convergence)
+mdlStudentOut$Att$lmeSlopesSdt <-
+  lme(
+    AttitudesDutch ~
+      Competence_cwc + Autonomy_cwc + Relatedness_cwc,
+    random = ~ 1 + Competence_cwc + Autonomy_cwc + Relatedness_cwc | PID,
+    control = lmeControl(opt = "optim"),
+    data = dtStudentSupp$studentOutWithinBetween,
+    na.action = na.exclude
+  )
+
+# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
+summ(
+  mdlStudentOut$Att$lmerSlopesSdt <- lmer(
+    AttitudesDutch ~
+      Competence_cwc + Autonomy_cwc + Relatedness_cwc +
+      (1 + Competence_cwc + Autonomy_cwc + Relatedness_cwc | PID),
+    data = dtStudentSupp$studentOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3
+)
+
+# Compare new model to previous step
+anova(mdlStudentOut$Att$lmeInterceptSdt,
+      mdlStudentOut$Att$lmeSlopesSdt, 
+      mdlStudentOut$Att$lmeSlopesCoreSdt) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Student: Model Comparison",
+    format = "latex",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+
+# Save variances
+mdlStudentOut$Att$varSlopesCoreSdt <- 
+  lme4::VarCorr(mdlStudentOut$Att$lmeSlopesCoreSdt)
+
+# Assumption Checks:
+mdlStudentOut$Att$diagSlopesCoreSdt <- 
+  sjPlot::plot_model(mdlStudentOut$Att$lmerSlopesCoreSdt, type = "diag")
+grid.arrange(
+  mdlStudentOut$Att$diagSlopesCoreSdt[[1]],
+  mdlStudentOut$Att$diagSlopesCoreSdt[[2]]$`PID`,
+  mdlStudentOut$Att$diagSlopesCoreSdt[[3]],
+  mdlStudentOut$Att$diagSlopesCoreSdt[[4]]
+)
+
+# Plot prediction model
+mdlStudentOut$Att$predSlopesCoreSdt <- 
+  dtStudentSupp$studentOutWithinBetween %>%
+  filter(PID %in% dtStudentSupp$studentOutPltIDs) %>%
+  select(AttitudesDutch, TIDnum, PID, Autonomy) %>% 
+  mutate(measure = predict(mdlStudentOut$Att$lmeSlopesCoreSdt,
+                           dtStudentSupp$studentOutWithinBetween %>% filter(PID %in% dtStudentSupp$studentOutPltIDs),
+                           re.form = NA
+                           )
+         )
+
+(
+  mdlStudentOut$Att$predPltSlopesCoreSdt <-
+    ggplot(data = mdlStudentOut$Att$predSlopesCoreSdt, aes(x = TIDnum, y = measure)) +
+    geom_line(alpha = 1, color = "blue") +
+    geom_line(aes(y = AttitudesDutch), alpha = 1) +
+    facet_wrap( ~ PID, ncol = 6) +
+    xlab("Time") +
+    ylab("Outgroup Attitudes") +
+    theme_Publication()
+)
+ggsave(
+  filename = "Figures/StudentOut_PredictionPlot_SlopesAttCoreStd.png",
+  mdlStudentOut$Att$predPltSlopesCoreSdt,
+  width = 18,
+  height = 12,
+  dpi = 800,
+  units = "cm",
+  device = "png"
+)
+
+# Model comparison
+studentSdtComp <-
+  anova(
+    mdlStudentOut$Att$lmerSlopesSdt, 
+    mdlStudentOut$Att$lmerSlopesCoreSdt
+  ) %>%
+  as.data.frame()
+studentSdtCompDf <- studentSdtComp["mdlStudentOut$Att$lmerSlopesCoreSdt", "Df"]
+studentSdtCompN <- sapply(ranef(mdlStudentOut$Att$lmerSlopesCoreSdt), nrow)
+studentSdtCompChi <- studentSdtComp["mdlStudentOut$Att$lmerSlopesCoreSdt", "Chisq"] %>% round(2) %>% format(nsmall=2)
+studentSdtCompP <-
+  ifelse(studentSdtComp["mdlStudentOut$Att$lmerSlopesCoreSdt", "Pr(>Chisq)"] < .001,
+         "< .001",
+         paste0("= ", studentSdtComp["mdlStudentOut$Att$lmerSlopesCoreSdt", "Pr(>Chisq)"] %>% round(3) %>% format(nsmall = 3)))
+
+studentSdtCompChiSq <- paste0("$\\chi^2$(", studentSdtCompDf, ", \\textit{N} = ", studentSdtCompN, ") = ", studentSdtCompChi, ", \\textit{p} ", studentSdtCompP)
+```
+
+In a final step we again checked whether during the interaction the core situational need remains a meaningful predictor even when taking other fundamental psychological needs into account. We find that the core need adds significantly above a model with only the self determination theory needs (random slopes models; `r studentSdtCompChiSq`). We find that the core need explains the most variance in outgroup attitudes after an outgroup contact (`r MlCoeffLatex(lmeMdl = mdlStudentOut$Att$lmeSlopesCoreSdt, lmerCI = mdlStudentOut$Att$lmerSlopesCoreSdtCI, varName = "KeyNeedFullfillment_cwc")`). When compared to the model with only the SDT needs, the core need fulfillment flexibly takes on some of the explained variance of all of the three fundamental needs. However, different from the first study, in this larger study relatedness (`r MlCoeffLatex(lmeMdl = mdlStudentOut$Att$lmeSlopesCoreSdt, lmerCI = mdlStudentOut$Att$lmerSlopesCoreSdtCI, varName = "Relatedness_cwc")`) and autonomy (`r MlCoeffLatex(lmeMdl = mdlStudentOut$Att$lmeSlopesCoreSdt, lmerCI = mdlStudentOut$Att$lmerSlopesCoreSdtCI, varName = "Autonomy_cwc")`) predicted positive outgroup attitudes. For full results see Online Supplementary Information B.
 
 \section{Study 3}
 
