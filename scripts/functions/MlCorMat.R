@@ -271,8 +271,8 @@ MlCoeffLatex <- function(lmeMdl = NULL, lmerCI = NULL, varName = NULL) {
   if (is.null(lmerCI)) {
     paste0(
       "\\textit{b} = ", b, 
-      ", t(", df, ") = ", t,
-      ", \\textit{p} = ", p
+      ", \\textit{t}(", df, ") = ", t,
+      ", \\textit{p} ", p
     )
   } else {
     CIlwr <- lmerCI[varName, "2.5 %"] %>% round(2) %>% format(nsmall=2)
@@ -280,7 +280,7 @@ MlCoeffLatex <- function(lmeMdl = NULL, lmerCI = NULL, varName = NULL) {
     
     paste0(
       "\\textit{b} = ", b, 
-      ", t(", df, ") = ", t,
+      ", \\textit{t}(", df, ") = ", t,
       ", \\textit{p} ", p,
       ", \\textit{95\\%CI}[", CIlwr, ", ", CIupr, "]"
     )
