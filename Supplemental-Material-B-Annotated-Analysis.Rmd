@@ -153,6 +153,16 @@ knitr::opts_chunk$set(
 
 <br/>
 
+<i class="fas fa-exclamation-circle"></i> Note. Multilevel effect size could be: 
+\begin{equation}
+(\#eq:MlEffectSize)
+f_b^2 = \frac{R_{ab}^2 - R_a^2}{1 - R_{ab}^2} \\
+R^2 = \frac{V_{null} - V_{model}}{V_{null}} \\
+f_b^2 = \frac{\frac{V_{null} - V_{ab}}{V_{null}} - \frac{V_{null} - V_{a}}{V_{null}}}{1 - \frac{V_{null} - V_{ab}}{V_{null}}}
+\end{equation}
+
+<br/>
+
 # **Data Preparation**  
 
 In an initial preparatory step, we import the data into the R project environment and prepare the variables for further processing and later analyses.   
@@ -1011,11 +1021,11 @@ table(as.character(workerSampleInfo$nationality))
 seconds_to_period(median(dtWorker$clean$Duration__in_seconds_))
 seconds_to_period(round(mad(dtWorker$clean$Duration__in_seconds_)))
 
-workerOutIntPerc <- (sum(dtWorkerSupp$workerAvFreQual$SumContactNL) / nrow(dtWorkerSupp$workerInteractionType) * 100) %>% round(2) %>% format(nsmall=2)
-
+#workerOutIntPerc <- (sum(workerAvFreQual$SumContactNL) / nrow(workerInteractionType) * 100) %>% round(2) %>% format(nsmall=2)
+# To test the prerequisite effect of intergroup contact, every daily diary measurement started with the question “_Did you meet a Dutch person this morning [/afternoon]? (In person interaction for at least 10 minutes)_” (`r workerOutIntPerc`% of all `r nrow(workerInteractionType)` recorded Recaps included an interaction with Dutch majority members). This question is our main predictor to test whether having an intergroup contact indeed has an influence on one’s rating of the outgroup attitudes during the respective morning or afternoon (i.e., a longitudinal test of the contact hypothesis). Methodologically, this question also determined the following survey flow for the participants. If they had interactions with Dutch people, they were asked to report details on the duration, type, and quality of the interaction. If they did not have interactions with Dutch people, participants were asked to report on their desire to have an interaction – this was done to balance the duration of the two answer options to not make it more attractive for a participant to answer that they did not have an interaction.
 ```
 
-To test the prerequisite effect of intergroup contact, every daily diary measurement started with the question “_Did you meet a Dutch person this morning [/afternoon]? (In person interaction for at least 10 minutes)_” (`r workerOutIntPerc`% of all `r nrow(dtWorkerSupp$workerInteractionType)` recorded Recaps included an interaction with Dutch majority members). This question is our main predictor to test whether having an intergroup contact indeed has an influence on one’s rating of the outgroup attitudes during the respective morning or afternoon (i.e., a longitudinal test of the contact hypothesis). Methodologically, this question also determined the following survey flow for the participants. If they had interactions with Dutch people, they were asked to report details on the duration, type, and quality of the interaction. If they did not have interactions with Dutch people, participants were asked to report on their desire to have an interaction – this was done to balance the duration of the two answer options to not make it more attractive for a participant to answer that they did not have an interaction.
+
 
 ### Variable distributions  
 
@@ -1966,6 +1976,8 @@ The predictor again adds a significant amount of explained variances beyond the 
 
 As before, we check whether further letting the effect of core need fulfillment vary between participants explains additional variance in outgroup attitudes (i.e., random slope).   
 
+<!-- taken from: https://stats.idre.ucla.edu/stata/faq/how-can-i-estimate-effect-size-for-mixed/ -->
+<!-- also check: https://largescaleassessmentsineducation.springeropen.com/articles/10.1186/s40536-018-0061-2 -->
 \begin{equation}
 (\#eq:QualityNeedRandEq)
 InteractionQuality_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + u_{0i} + u_{1i} + e_{ti}  \\
