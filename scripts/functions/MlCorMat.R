@@ -168,7 +168,8 @@ MlCorMat <-
             cluster = dataRed %>% select(id),
             fun = "var",
             expand = FALSE
-          )
+          ), 
+          na.rm = TRUE
         ) / nrow(unique(data %>% select(id))))
     }
     

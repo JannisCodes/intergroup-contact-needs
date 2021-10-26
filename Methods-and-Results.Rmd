@@ -256,7 +256,7 @@ workerOutMlCor %>%
 ```
 
 
-\subsubsection{Participants} After receiving ethical approval from the University of Groningen, we recruited `r nrow(workerSampleInfo)` migrants using the local paid participant pool and specifically targeted non-Dutch migrants to participate in our study. Participants reported on their interactions for at least 30 days with two daily measures (capturing the morning and afternoon). With this design, we aimed at getting 50-60 measurements per participant (\textit{M} = `r format(round(mean(workerSampleInfo$dailiesN),2), nsmall=2)`, \textit{M} = `r format(round(sd(workerSampleInfo$dailiesN),2), nsmall=2)`, \textit{total N} = `r sum(workerSampleInfo$dailiesN)`). This is a common number of measurements found in experience sampling studies and should offer sufficient power to model processes within and between participants \citep[e.g., for a systematic review see][]{AanhetRot2012}. Participants were compensated for their participation with up to 34 Euros – each two Euros for pre- and post-questionnaire as well as 50 Eurocents for every experience sampling measurement occasion. The sample consisted of relatively young, educated, and western migrants from the global north ($M_{age}$ = `r format(round(mean(workerSampleInfo$age),2), nsmall=2)`, $SD_{age}$ = `r format(round(sd(workerSampleInfo$age),2), nsmall=2)`, `r nrow(workerSampleInfo %>% filter(gender == "Female"))` women, `r nrow(workerSampleInfo %>% filter(occupation == "student"))` students). The sample accurately describes one of the largest groups of migrants in the region \citep[][]{GemeenteGroningen2015}.
+\subsubsection{Participants} After receiving ethical approval from the University of Groningen, we recruited `r nrow(workerSampleInfo)` migrants using the local paid participant pool and specifically targeted non-Dutch migrants to participate in our study. Participants reported on their interactions for at least 30 days with two daily measures (capturing the morning and afternoon). With this design, we aimed at getting 50-60 measurements per participant (\textit{M} = `r format(round(mean(workerSampleInfo$dailiesN),2), nsmall=2)`, \textit{SD} = `r format(round(sd(workerSampleInfo$dailiesN),2), nsmall=2)`, \textit{total N} = `r sum(workerSampleInfo$dailiesN)`). This is a common number of measurements found in experience sampling studies and should offer sufficient power to model processes within and between participants \citep[e.g., for a systematic review see][]{AanhetRot2012}. Participants were compensated for their participation with up to 34 Euros – each two Euros for pre- and post-questionnaire as well as 50 Eurocents for every experience sampling measurement occasion. The sample consisted of relatively young, educated, and western migrants from the global north ($M_{age}$ = `r format(round(mean(workerSampleInfo$age),2), nsmall=2)`, $SD_{age}$ = `r format(round(sd(workerSampleInfo$age),2), nsmall=2)`, `r nrow(workerSampleInfo %>% filter(gender == "Female"))` women, `r nrow(workerSampleInfo %>% filter(occupation == "student"))` students). The sample accurately describes one of the largest groups of migrants in the region \citep[][]{GemeenteGroningen2015}.
 
 \subsubsection{Procedure} The study itself consisted of three main parts, an introductory pre-measurement, and the daily experience sampling measurements, as well as a concluding post-measurement. After giving informed consent, participants started by filling in an online pre-questionnaire assessing demographics and general information about their immigration. Over the next thirty days, the participants then were invited twice a day (at 12 pm and 7pm) to reflect upon their interactions, psychological need fulfillments, and current attitudes towards the Dutch outgroup (\textit{median duration} = `r seconds_to_period(median(dtWorker$clean$Duration__in_seconds_))`, \textit{MAD duration} = `r seconds_to_period(round(mad(dtWorker$clean$Duration__in_seconds_)))`).  General compliance was high (`r format(round(sum(workerSampleInfo$dailiesN)/(nrow(workerSampleInfo)*62)*100,2), nsmall=2)`\% of all invited surveys were filled in)\footnote{Two participants completed only two days (among the others, participation was `r format(round(sum(workerSampleInfo$dailiesN[workerSampleInfo$dailiesN>3])/(nrow(workerSampleInfo[workerSampleInfo$dailiesN>3,])*62)*100,2), nsmall=2)`\%)}. The response rates were approximately equal during mornings (\textit{n} = `r sum(workerSampleInfo$morningN)`) and afternoons (\textit{n} = `r sum(workerSampleInfo$afternoonN)`) and most measurements were completed within four hours of the invitation. After the final day of daily diary measurements, participants were invited to fill in a longer post measurement survey that mirrored the pre-measurement. All key variables in for this study were part of the short daily diary surveys. 
 
@@ -304,7 +304,7 @@ pairs.panels.new(
 )
 ```
 
-\paragraph{Contact Hypothesis}We tested the most general contact hypothesis in two steps. First, we assessed whether more intergroup interactions were related to to more positive outgroup attitudes. Second, we tested whether a potential positive effect on outgroup attitudes depended on the interaction quality (jointly with the number of interactions). We find that neither the number of interactions nor the number of daily diary responses with an interaction were significantly related with the average outgroup attitudes. This is to say that within our data, participants with more outgroup interactions did not have significantly more positive outgroup attitudes. This might be due to the aggregation within the participants or the small sample size of between participant data. Nonetheless, the aggregated data does not support the notion that simply having more interactions with an outgroup results in more positive outgroup attitudes.
+\subsubsection{Contact Hypothesis}We tested the most general contact hypothesis in two steps. First, we assessed whether more intergroup interactions were related to to more positive outgroup attitudes. Second, we tested whether a potential positive effect on outgroup attitudes depended on the interaction quality (jointly with the number of interactions). We find that neither the number of interactions nor the number of daily diary responses with an interaction were significantly related with the average outgroup attitudes. This is to say that within our data, participants with more outgroup interactions did not have significantly more positive outgroup attitudes. This might be due to the aggregation within the participants or the small sample size of between participant data. Nonetheless, the aggregated data does not support the notion that simply having more interactions with an outgroup results in more positive outgroup attitudes.
 
 ```{r workerModelOlsAttFreqQual, include=FALSE}
 # create list to store Worker models
@@ -440,7 +440,7 @@ mdlWorker$varInterceptAttType <-
 
 We additionally used a multilevel regression to check whether having an interaction with an outgroup member had a situational (i.e., contemporaneous) effect within the participants. We find that having an outgroup interaction is indeed associated with significantly more positive outgroup attitudes within the participants (`r MlCoeffLatex(lmeMdl = mdlWorker$lmeInterceptAttType, lmerCI = mdlWorker$lmerInterceptAttTypeCI, varName = "OutgroupInteractionYes")`), even after controlling for having an interaction with a non-Dutch (which did not relate to outgroup attitudes independently; For full results see Online Supplementary Materials B)\footnote{Interestingly, adding random slopes to this model did not significantly add explained variance. This is unusual because this might indicate the the effect is very consistent across participants. However, this might also be the case due to a small number of participants, or other measurement issues.}. Thus, in our first data we find mixed results, where outgroup contacts show a positive effect on outgroup attitudes in the moment but these results do not translate into average differences between participants, keeping in mind that the between-participant analyses in the aggregated form are based in a small sample size.
 
-\paragraph{Core Need}The main proposal of our article is that the success of an outgroup interaction might be explained by whether or not the interaction fulfilled the person's core situational need. This should, in turn, be due to a higher perceived interaction quality. We will this sequentially test whether the fulfillment of the core need during an interaction is (1) related to more positive outgroup attitudes, (2) higher perceived interaction quality, and (3) whether the variance explained by the core need is assumed by the perceived interaction quality if considered jointly. 
+\subsubsection{Core Need}The main proposal of our article is that the success of an outgroup interaction might be explained by whether or not the interaction fulfilled the person's core situational need. This should, in turn, be due to a higher perceived interaction quality. We will this sequentially test whether the fulfillment of the core need during an interaction is (1) related to more positive outgroup attitudes, (2) higher perceived interaction quality, and (3) whether the variance explained by the core need is assumed by the perceived interaction quality if considered jointly. 
 
 ```{r workerOutModelMLAttNull, include=FALSE}
 # create empty list to organize models
@@ -1005,7 +1005,7 @@ We find that in the highest multilevel models, the fulfillment of core situation
 
 \faQuestionCircle\ Are we sure that we don't want some sort of bootstrapped indirect effect? 
 
-\paragraph{Robustness}
+\subsubsection{Robustness}
 ```{r workerModelInterceptAttCoreInt, include=FALSE}
 # Create and save Model
 mdlWorker$lmeInterceptAttCoreInt <-
@@ -1396,18 +1396,188 @@ SdtCompP <-
          "< .001",
          paste0("= ", SdtComp["mdlWorkerOut$Att$lmerSlopesCoreSdt", "Pr(>Chisq)"] %>% round(3) %>% format(nsmall = 3)))
 
-SdtCompChiSq <- paste0("$\\chi^2$(", SdtCompDf, ", \\textit{N} = ", SdtCompN, ") \\textit{p} ", SdtCompP)
+SdtCompChiSq <- paste0("$\\chi^2$(", SdtCompDf, ", \\textit{N} = ", SdtCompN, "), \\textit{p} ", SdtCompP)
 ```
 
 In a final step we check whether during the interaction the core situational need is a meaningful predictor even when taking other fundamental psychological needs into account. We focus on the three commonly considered self determination needs: competence, autonomy, and relatedness. We find that the core need adds significantly above a model with only the self determination theory needs (random slopes models; `r SdtCompChiSq`). We find that next to relatedness (`r MlCoeffLatex(lmeMdl = mdlWorkerOut$Att$lmeSlopesCoreSdt, lmerCI = mdlWorkerOut$Att$lmerSlopesCoreSdtCI, varName = "relatedness_1_cwc")`), the core need explains the most variance in outgroup attitudes after an outgroup contact (`r MlCoeffLatex(lmeMdl = mdlWorkerOut$Att$lmeSlopesCoreSdt, lmerCI = mdlWorkerOut$Att$lmerSlopesCoreSdtCI, varName = "keymotive_fulfillemt_1_cwc")`). When compared to the model with only the SDT needs, the core need fulfillment flexibly takes on some of the explained variance of all of the three fundamental needs and competence and autonomy needs are non-significant (all \textit{b} < `r coef(summary(mdlWorkerOut$Att$lmeSlopesCoreSdt))[c("competence_1_cwc", "autonomy_1_cwc"),"Value"] %>% max %>% round(2) %>% format(nsmall=2)`, all \textit{p} > `r coef(summary(mdlWorkerOut$Att$lmeSlopesCoreSdt))[c("competence_1_cwc", "autonomy_1_cwc"),"p-value"] %>% min %>% round(3) %>% format(nsmall=3)`). For full results see Online Supplementary Information B.
 
 \section{Study 2}
 
+The aim of our study is similar to to that of the first study, as we again test the general contact hypothesis, the influence of core need fulfillment, and perceived interaction quality during intergroup contacts. However, in this second study we collected a substantially larger intensive longitudinal survey study with recently arrived international students in the Netherlands. The survey method again offers a large body of ecologically valid data on need satisfaction in real-life intergroup contact situations as these students will likely interact with the Dutch majority outgroup on a daily basis. Data was collected from November 19th, 2018 through January 6th, 2019.
+
+The full surveys are available in our Online Supplementary Material A and the full data description is available in Online Supplementary Materials B. Correlations and descriptive statistics of the included variables are available in Table \ref{tab:studentVarDescr} and Table \ref{tab:studentOutVarDescr}.
+
 \subsection{Methods}
+
+```{r studentSampleInfo, include=FALSE}
+# summarize participant characteristics
+studentSampleInfo <- 
+  dtStudents$full %>%
+  mutate(gender = as.factor(ifelse(.$Gender == 1, "women", ifelse(.$Gender == 2, "man", ifelse(.$Gender == 3, "other", NA))))) %>%
+  group_by(PID) %>%
+  summarise(
+    dailiesN = n(), 
+    morningN = sum(periodMA=="morning"),
+    afternoonN = sum(periodMA=="afternoon"),
+    age = age,
+    gender = gender,
+    nationality = nationality
+  ) %>%
+  distinct
+
+# look at frequencies of characteristics 
+table(studentSampleInfo$gender)
+table(as.character(studentSampleInfo$nationality))
+
+# categorical variables:
+# - outgroup contact
+# - non-outgroup contact
+
+# continuous variables:
+# - Core Need fulfillment
+# - SDT Competence
+# - SDT Autonomy
+# - SDT Relatedness
+# - Interaction Quality
+# - Outgroup Attitudes
+######
+# within cor
+# between cor
+# ---
+# Grand mean
+# SD between
+# SD within
+# Proportion of variance
+# __ __ __
+# Note:
+# N within ppt.s 
+######
+
+# divide into trait and state
+dtStudentSupp$studentWithinBetween <-
+  MlTraitState(
+    data = dtStudentSupp$studentInteractionType,
+    id = "PID",
+    selection =
+      c(
+        "KeyNeedFullfillment",
+        "Competence",
+        "Autonomy",
+        "Relatedness",
+        "AttitudesDutch",
+        "quality_overall"
+      )
+  )
+dtStudentSupp$studentOutWithinBetween <-
+  MlTraitState(
+    data = dtStudentSupp$studentInteractionType %>% filter(OutgroupInteraction == "Yes"),
+    id = "PID",
+    selection =
+      c(
+        "KeyNeedFullfillment",
+        "Competence",
+        "Autonomy",
+        "Relatedness",
+        "AttitudesDutch",
+        "quality_overall"
+      )
+  )
+```
+
+```{r studentVarDescr, include=FALSE}
+studentMlCor <-
+  MlCorMat(
+    data = dtStudentSupp$studentInteractionType,
+    id = "PID",
+    selection = c("KeyNeedFullfillment", "Competence", "Autonomy", "Relatedness", "AttitudesDutch") ,
+    labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Attitudes NL")
+  ) 
+
+studentMlCor %>%
+  kable(
+    .,
+    caption = "Student: Multilevel Core Variable Descriptives",
+    format = "latex",
+    booktabs = TRUE,
+    align = c("l", rep("c", ncol(.) - 1))
+  ) %>%
+  footnote(
+    general = c(
+      "Upper triangle: Between-person correlations;",
+      "Lower triangle: Within-person coorelations;",
+      "*** p < .001, ** p < .01,  * p < .05"
+    )
+  ) %>%
+  gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
+  gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
+  save_kable("Tables/studentVarDescr.tex")
+```
+
+```{r studentOutVarDescr, include=FALSE}
+studentOutMlCor <-
+  MlCorMat(
+    data = dtStudentSupp$studentInteractionType %>% filter(OutgroupInteraction == "Yes"),
+    id = "PID",
+    selection = c("KeyNeedFullfillment", "Competence", "Autonomy", "Relatedness", "AttitudesDutch"),
+    labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Attitudes NL")
+  )
+
+studentOutMlCor %>%
+  kable(
+    .,
+    caption = "Student: Multilevel Core Variable Descriptives (Outgroup Contact Only)",
+    format = "latex",
+    booktabs = TRUE,
+    align = c("l", rep("c", ncol(.) - 1))
+  ) %>%
+  footnote(
+    general = c(
+      "Upper triangle: Between-person correlations;",
+      "Lower triangle: Within-person coorelations;",
+      "*** p < .001, ** p < .01,  * p < .05"
+    )
+  ) %>%
+  gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
+  gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
+  save_kable("Tables/studentOutVarDescr.tex")
+
+# misty::multilevel.descript(dtStudentsSupp$studentWithinBetween$keyMotiveFulfilled, cluster = dtStudentsSupp$studentWithinBetween$PID)
+```
+
+\subsubsection{Participants} After receiving ethical approval from the University of Groningen, we recruited `r nrow(studentSampleInfo)` international students using a local participant pool and specifically targeted non-Dutch students, who had recently arrived in the Netherlands. Participants reported on their interactions for at least 30 days with two daily measures (capturing the morning and afternoon). With this design, we aimed at getting 50-60 measurements per participant (\textit{M} = `r format(round(mean(studentSampleInfo$dailiesN),2), nsmall=2)`, \textit{SD} = `r format(round(sd(studentSampleInfo$dailiesN),2), nsmall=2)`, \textit{total N} = `r sum(studentSampleInfo$dailiesN)`). As with the previous study this should offer sufficient power to model processes within participants and will lend stronger weight to between-participant results. Participants were compensated for their participation with partial course credits --- depending on their participation. The sample consisted of relatively young migrants, who were mostly from the global north ($M_{age}$ = `r format(round(mean(studentSampleInfo$age),2), nsmall=2)`, $SD_{age}$ = `r format(round(sd(studentSampleInfo$age),2), nsmall=2)`, `r nrow(studentSampleInfo %>% filter(gender == "women"))` women). The sample fairly accurately describes the local population of international students.
+
+\subsubsection{Procedure} The study procedure mirrored the setup of study one and consisted of pre-, daily diary-, and post-measurement. The participants were invited for daily diary measurements twice a day (at 12 pm and 7pm) for 30 days (\textit{median duration} = `r seconds_to_period(median(difftime(dtStudents$clean$ended.daily, dtStudents$clean$created.daily)))`, \textit{MAD duration} = `r seconds_to_period(round(mad(difftime(dtStudents$clean$ended.daily, dtStudents$clean$created.daily))))`).  General compliance was high (`r format(round(sum(studentSampleInfo$dailiesN)/(nrow(studentSampleInfo)*62)*100,2), nsmall=2)`\% of all invited surveys were filled in). The response rates were approximately equal during mornings (\textit{n} = `r sum(studentSampleInfo$morningN)`) and afternoons (\textit{n} = `r sum(studentSampleInfo$afternoonN)`). All key variables in for this study were part of the short daily diary surveys. 
+
+\subsubsection{Materials}
+
+\paragraph{Intergroup Contact}To measure intergroup contacts, every experience sampling measurement started with the question “\textit{Did you meet a Dutch person this morning [/afternoon]? (in-person interaction for at least 10 minutes)}”. Participants were additionally offered a pop-up explanation: "With in-person interaction, we mean a continued interaction with another person (potentially in a group) that lasted at least 10 minutes. This interaction should be offline and face-to-face. It should include some form of verbal communication and should be uninterrupted to still count as the same interaction. Any individual interaction can last minutes or hours. If there were multiple interaction partners, we would like you to focus on the person that was most important to you during the interaction.". The participants recorded between `r dtStudentSupp$studentContactFreq$SumContactNL[dtStudentSupp$studentContactFreq$SumContactNL > 0] %>% min`--`r dtStudentSupp$studentContactFreq$SumContactNL %>% max`
+(`r dtStudentSupp$studentContactFreq$PercContactNL[dtStudentSupp$studentContactFreq$PercContactNL > 0] %>% min %>% round(2) %>% format(nsmall=2)`--`r dtStudentSupp$studentContactFreq$PercContactNL %>% max %>% round(2) %>% format(nsmall=2)`\% of individual daily diary measurements; `r (sum(dtStudentSupp$studentContactFreq$SumContactNL) / nrow(dtStudentSupp$studentInteractionType) * 100) %>% round(2) %>% format(nsmall=2)`\% of all `r nrow(dtStudentSupp$studentInteractionType)` daily diary responses). 
+
+\paragraph{Psychological Needs}For the core situational need, we asked participants in an open ended text field: “\textit{What was your main goal [during the interaction with X / this morning / this afternoon]?}”. Participants could additionally click on a pop-up explanation: "Your main goal during an interaction can vary depending on the interaction. It could be to connect with friends, to find or provide help, to achieve academic ambitions, work on your fitness, work for a job, or simply to get a coffee, just as well as many many other concrete or abstract goals that are import to you in the moment. It really depends on your subjective experience of the interaction.". Then, with reference to the text entry, we asked how much this core need was fulfilled during the interaction or the past daytime period: “\textit{During your interaction with X [this morning / this evening] your goal (-previous text entry-) was fulfilled.}” on a continuous slider scale ranging from strongly disagree (1) to strongly agree (100).
+
+The measurement of the self determination needs was identical to study 1. 
+
+\paragraph{Perceived Interaction Quality}The ratings of the perceived interaction quality was identical to study one..
+
+\paragraph{Outgroup Attitudes}Attitudes towards the Dutch majority outgroup was again measured using the feeling thermometer, as in study one. All survey details are also available in Online Supplemental Materials A and B. 
+
+\input{Tables/studentVarDescr}
+\input{Tables/studentOutVarDescr}
+
 
 \subsection{Results}
 
-\section{Study 2}
+\subsubsection{Contact Hypothesis}
+
+\subsubsection{Core Need}
+
+\subsubsection{Robustness}
+
+\paragraph{interaction type}
+
+\paragraph{other needs}
+
+\section{Study 3}
 
 \subsection{Methods}
 
