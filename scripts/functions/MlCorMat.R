@@ -211,6 +211,7 @@ MlTraitState <-
       mutate_at(selection, list(gmc = ~.-mean(., na.rm=TRUE))) %>% # grand mean centered
       group_by_at(vars(matches(id))) %>%
       mutate_at(selection, list(cm = ~mean(., na.rm=TRUE))) %>% # cluster mean
+      mutate_at(selection, list(csd = ~sd(., na.rm=TRUE))) %>% # cluster sd
       ungroup 
     
     # center within cluster
@@ -220,6 +221,15 @@ MlTraitState <-
                 transmute(
                   !!str_c(.x, '_cwc') :=
                     !!rlang::sym(.x)-!!rlang::sym(str_c(.x, "_cm"))
+                )) %>%
+      bind_cols(data, .)
+    
+    data <-
+      map_dfc(selection,
+              ~ data %>%
+                transmute(
+                  !!str_c(.x, '_zwc') :=
+                    (!!rlang::sym(.x)-!!rlang::sym(str_c(.x, "_cm")))/!!rlang::sym(str_c(.x, "_csd"))
                 )) %>%
       bind_cols(data, .)
     
@@ -241,4 +251,38 @@ var_reduction = function(m0, m1){
                 as.data.frame %>% 
                 select(grp, var_m1 = vcov)) %>% 
     mutate(var_red = 1 - var_m1 / var_m0) 
+}
+
+stdCoef.merMod <- function(object) {
+  sdy <- sd(getME(object, "y"))
+  sdx <- apply(getME(object, "X"), 2, sd)
+  sc <- fixef(object) * sdx / sdy
+  se.fixef <- coef(summary(object))[, "Std. Error"]
+  se <- se.fixef * sdx / sdy
+  return(data.frame(stdcoef = sc, stdse = se))
+}
+
+MlCoeffLatex <- function(lmeMdl = NULL, lmerCI = NULL, varName = NULL) {
+  b <- coef(summary(lmeMdl))[varName,"Value"] %>% round(2) %>% format(nsmall=2)
+  df <- lmeMdl$fixDF$X[varName] %>% as.numeric
+  t <- coef(summary(lmeMdl))[varName,"t-value"] %>% round(2) %>% format(nsmall=2)
+  p <- ifelse(coef(summary(lmeMdl))[varName,"p-value"]<.001, "< .001", paste0("= ", coef(summary(lmeMdl))[varName,"p-value"] %>% round(3) %>% format(nsmall=3)))
+  
+  if (is.null(lmerCI)) {
+    paste0(
+      "\textit{b} = ", b, 
+      ", t(", df, ") = ", t,
+      ", \textit{p} = ", p
+    )
+  } else {
+    CIlwr <- lmerCI[varName, "2.5 %"] %>% round(2) %>% format(nsmall=2)
+    CIupr <- lmerCI[varName, "97.5 %"] %>% round(2) %>% format(nsmall=2)
+    
+    paste0(
+      "\textit{b} = ", b, 
+      ", t(", df, ") = ", t,
+      ", \textit{p} = ", p,
+      ", \textit{95%CI[", CIlwr, ", ", CIupr, "]"
+    )
+  }
 }
