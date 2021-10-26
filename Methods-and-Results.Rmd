@@ -1832,6 +1832,591 @@ ggsave(
 We additionally used a multilevel regression to check whether having an interaction with an outgroup member had a situational (i.e., contemporaneous) effect within the participants. We find that having an outgroup interaction is indeed associated with significantly more positive outgroup attitudes within the participants (random slopes model; `r MlCoeffLatex(lmeMdl = mdlStudent$lmeSlopesAttType, lmerCI = mdlStudent$lmerSlopesAttTypeCI, varName = "OutgroupInteractionYes")`), even after controlling for having an interaction with a non-Dutch (which did not relate to outgroup attitudes independently; For full results see Online Supplementary Materials B). Thus, in our second dataset we find mixed results, outgroup contacts show a positive effect on outgroup attitudes in the moment and on average between participants. However, we find that this effect does not depend on the average perceived interaction quality. However, this might be due to the aggregation process and the following analyses will focus in on the role of the perceived interaction quality during an outgroup interaction. 
 
 \subsubsection{Core Need}
+```{r studentOutModelMLAttNull, include=FALSE}
+# create empty list to organize models
+mdlStudentOut <- 
+  list(
+    Att = list(),
+    Qlt = list()
+  )
+
+# Create and save Model
+mdlStudentOut$Att$lmerNull <-
+  lme4::lmer(AttitudesDutch ~ 1 + (1 | PID), 
+             data = dtStudentSupp$studentOutgroupInteraction) # use optim if it does not converge
+mdlStudentOut$Att$lmeNull <-
+  lme(
+    AttitudesDutch ~ 1,
+    random = ~ 1 | PID,
+    data = dtStudentSupp$studentOutgroupInteraction,
+    control = list(opt = "nlmimb")
+  ) # use optim if it does not converge
+
+# Get summary with p-values (Satterthwaite's method)
+# summary(Null.Out.ML.r) #or with the lme function
+summ(mdlStudentOut$Att$lmerNull, digits = 3, center = TRUE)
+
+# generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(lmer(AttitudesDutch~1 + (1|PID),data=dtStudent$full),
+#                  method="boot",nsim=1000,
+#                  parallel = "multicore", ncpus = 4, seed = 42),
+#          "output/tables/ML-Null-CI.csv")
+
+# Save variances
+mdlStudentOut$Att$varNull <- 
+  VarCorr(mdlStudentOut$Att$lmeNull) # save variances
+# The estimate of (between-group or Intercept variance, tau_{00}^2):
+mdlStudentOut$Att$tauNull <- 
+  as.numeric(mdlStudentOut$Att$varNull[1])
+# and the estimate of (within-group or residual variance, sigma^2) is:
+mdlStudentOut$Att$sigmaNull <- 
+  as.numeric(mdlStudentOut$Att$varNull[2])
+# The ICC estimate (between/between+within) is:
+mdlStudentOut$Att$IccNull <-
+  (as.numeric(mdlStudentOut$Att$varNull[1]) / (as.numeric(mdlStudentOut$Att$varNull[1]) + as.numeric(mdlStudentOut$Att$varNull[2])))
+mdlStudentOut$Att$IccPercNull <-
+  ((as.numeric(mdlStudentOut$Att$varNull[1]) / (as.numeric(mdlStudentOut$Att$varNull[1]) + as.numeric(mdlStudentOut$Att$varNull[2])))) * 100
+```
+```{r studentOutModelInterceptAttCore, include=FALSE}
+# Create and save Model
+mdlStudentOut$Att$lmeInterceptCore <-
+  lme(
+    AttitudesDutch ~ KeyNeedFullfillment_cwc,
+    random = ~ 1 | PID,
+    data = dtStudentSupp$studentOutWithinBetween
+  )
+
+# Get summary with p-values (Satterthwaite's method)
+summ(
+  mdlStudentOut$Att$lmerInterceptCore <-
+    lmer(
+      AttitudesDutch ~ KeyNeedFullfillment_cwc + (1 | PID),
+      data = dtStudentSupp$studentOutWithinBetween
+    ),
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+
+mdlStudentOut$Att$lmerInterceptCoreCI <- 
+  confint(mdlStudentOut$Att$lmerInterceptCore)
+
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(lmer(AttitudesDutch ~ Contact_dum + inNonDutch + (1|PID),data=studentOutgroupInteraction),
+#                  method="boot",nsim=1000, parallel = "multicore",
+#                  ncpus = 4, seed = 42),
+#          "output/tables/ML-Inter-CI.csv")
+
+# Compare new model to previous step
+anova(mdlStudentOut$Att$lmeNull, 
+      mdlStudentOut$Att$lmeInterceptCore) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Student: Model Comparison",
+    format = "latex",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlStudentOut$Att$varInterceptCore <-
+  lme4::VarCorr(mdlStudentOut$Att$lmeInterceptCore)
+```
+```{r studentOutModelSlopesAttCore, include=FALSE}
+# Create and save Model (optimizer needed to reach convergence)
+mdlStudentOut$Att$lmeSlopesCore <-
+  lme(
+    AttitudesDutch ~
+      KeyNeedFullfillment_cwc,
+    random = ~ 1 + KeyNeedFullfillment_cwc | PID,
+    control = lmeControl(opt = "optim"),
+    data = dtStudentSupp$studentOutWithinBetween
+  )
+
+# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
+summ(
+  mdlStudentOut$Att$lmerSlopesCore <- lmer(
+    AttitudesDutch ~
+      KeyNeedFullfillment_cwc +
+      (1 + KeyNeedFullfillment_cwc | PID),
+    data = dtStudentSupp$studentOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+
+# all variables standardized within PPT
+summ(
+  mdlStudentOut$Att$lmerSlopesCoreZ <- lmer(
+    AttitudesDutch_zwc ~
+      KeyNeedFullfillment_zwc +
+      (1 + KeyNeedFullfillment_zwc | PID),
+    data = dtStudentSupp$studentOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+
+# standardized coefficients
+stdCoef.merMod(mdlStudentOut$Att$lmerSlopesCore)
+
+# 95%CIs
+mdlStudentOut$Att$lmerSlopesCoreCI <- confint(mdlStudentOut$Att$lmerSlopesCore)
+
+# Attempts at R^2
+r2mlm::r2mlm(mdlStudentOut$Att$lmerSlopesCore, bargraph = TRUE)
+mitml::multilevelR2(mdlStudentOut$Att$lmerSlopesCore)
+performance::r2(mdlStudentOut$Att$lmerSlopesCore)
+performance::model_performance(mdlStudentOut$Att$lmerSlopesCore)
+performance::compare_performance(mdlStudentOut$Att$lmerNull, 
+                                 mdlStudentOut$Att$lmerInterceptCore, 
+                                 mdlStudentOut$Att$lmerSlopesCore)
+
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(model.ran0,
+#               method="boot",nsim=1000,
+#               parallel = "multicore", ncpus = 4, seed = 42),
+#          "output/tables/ML-RandomSlopes-CI.csv")
+
+# Compare new model to previous step
+anova(mdlStudentOut$Att$lmeNull, 
+      mdlStudentOut$Att$lmeInterceptCore, 
+      mdlStudentOut$Att$lmeSlopesCore) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Student: Model Comparison",
+    format = "latex",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlStudentOut$Att$varSlopesCore <- 
+  lme4::VarCorr(mdlStudentOut$Att$lmeSlopesCore)
+
+# Assumption Checks:
+mdlStudentOut$Att$diagSlopesCore <- 
+  sjPlot::plot_model(mdlStudentOut$Att$lmerSlopesCore, type = "diag")
+grid.arrange(
+  mdlStudentOut$Att$diagSlopesCore[[1]],
+  mdlStudentOut$Att$diagSlopesCore[[2]]$`PID`,
+  mdlStudentOut$Att$diagSlopesCore[[3]],
+  mdlStudentOut$Att$diagSlopesCore[[4]]
+)
+
+# Plot prediction model
+mdlStudentOut$Att$predSlopesCore <- 
+  dtStudentSupp$studentOutWithinBetween %>% 
+  filter(PID %in% dtStudentSupp$studentOutPltIDs) %>%
+  select(AttitudesDutch, TIDnum, PID) %>% 
+  mutate(measure = predict(mdlStudentOut$Att$lmeSlopesCore,
+                           dtStudentSupp$studentOutWithinBetween %>% filter(PID %in% dtStudentSupp$studentOutPltIDs),
+                           re.form = NA
+                           )
+         )
+
+(
+  mdlStudentOut$Att$predPltSlopesCore <-
+    ggplot(data = mdlStudentOut$Att$predSlopesCore, 
+           aes(x = TIDnum, y = measure)) +
+    geom_line(alpha = 1, color = "blue") +
+    geom_line(aes(y = AttitudesDutch), alpha = 1) +
+    facet_wrap( ~ PID, ncol = 6) +
+    xlab("Time") +
+    ylab("Outgroup Attitudes") +
+    theme_Publication()
+)
+ggsave(
+  filename = "Figures/StudentOut_PredictionPlot_SlopesAttCore.png",
+  mdlStudentOut$Att$predPltSlopesCore,
+  width = 18,
+  height = 12,
+  dpi = 800,
+  units = "cm",
+  device = "png"
+)
+```
+
+```{r studentOutModelMLQltNull, include=FALSE}
+# Create and save Model
+mdlStudentOut$Qlt$lmerNull <-
+  lme4::lmer(quality_overall ~ 1 + (1 | PID), 
+             data = dtStudentSupp$studentOutWithinBetween) # use optim if it does not converge
+mdlStudentOut$Qlt$lmeNull <-
+  mdlStudentOut$Qlt$lmeNull <-lme(
+    quality_overall ~ 1,
+    random = ~ 1 | PID,
+    data = dtStudentSupp$studentOutWithinBetween,
+    control = list(opt = "nlmimb")
+  ) # use optim if it does not converge
+
+# Get summary with p-values (Satterthwaite's method)
+# summary(Null.Out.Qual.ML.r) #or with the lme function
+summ(mdlStudentOut$Qlt$lmerNull, digits = 3)
+
+# generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(lmer(AttitudesDutch~1 + (1|PID),data=studentOutgroupInteraction),
+#                  method="boot",nsim=1000,
+#                  parallel = "multicore", ncpus = 4, seed = 42),
+#          "output/tables/ML-Null-CI.csv")
+
+# Save variances
+mdlStudentOut$Qlt$varNull <- 
+  VarCorr(mdlStudentOut$Qlt$lmeNull) # save variances
+# The estimate of (between-group or Intercept variance, tau_{00}^2):
+mdlStudentOut$Qlt$tauNull <- 
+  as.numeric(mdlStudentOut$Qlt$varNull[1])
+# and the estimate of (within-group or residual variance, sigma^2) is:
+mdlStudentOut$Qlt$sigmaNull <- 
+  as.numeric(mdlStudentOut$Qlt$varNull[2])
+# The ICC estimate (between/between+within) is:
+mdlStudentOut$Qlt$IccNull <-
+  (as.numeric(mdlStudentOut$Qlt$varNull[1]) / (as.numeric(mdlStudentOut$Qlt$varNull[1]) + as.numeric(mdlStudentOut$Qlt$varNull[2])))
+mdlStudentOut$Qlt$IccPercNull <-
+  ((as.numeric(mdlStudentOut$Qlt$varNull[1]) / (as.numeric(mdlStudentOut$Qlt$varNull[1]) + as.numeric(mdlStudentOut$Qlt$varNull[2])))) * 100
+```
+```{r studentOutModelInterceptQltCore, include=FALSE}
+# Create and save Model
+mdlStudentOut$Qlt$lmeInterceptCore <-
+  lme(
+    quality_overall ~ KeyNeedFullfillment_cwc,
+    random = ~ 1 | PID,
+    data = dtStudentSupp$studentOutWithinBetween
+  )
+
+# Get summary with p-values (Satterthwaite's method)
+summ(
+  mdlStudentOut$Qlt$lmerInterceptCore <-
+    lmer(
+      quality_overall ~ KeyNeedFullfillment_cwc + (1 | PID),
+      data = dtStudentSupp$studentOutWithinBetween
+    ),
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+
+mdlStudentOut$Qlt$lmerInterceptCoreCI <- 
+  confint(mdlStudentOut$Qlt$lmerInterceptCore)
+
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(lmer(quality_overall ~ Contact_dum + inNonDutch + (1|PID),data=studentOutgroupInteraction),
+#                  method="boot",nsim=1000, parallel = "multicore",
+#                  ncpus = 4, seed = 42),
+#          "output/tables/ML-Inter-CI.csv")
+
+# Compare new model to previous step
+anova(mdlStudentOut$Qlt$lmeNull, 
+      mdlStudentOut$Qlt$lmeInterceptCore) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Student: Model Comparison",
+    format = "latex",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlStudentOut$Qlt$varInterceptCore <-
+  lme4::VarCorr(mdlStudentOut$Qlt$lmeInterceptCore)
+```
+```{r studentOutModelSlopesQltCore, include=FALSE}
+# Create and save Model (optimizer needed to reach convergence)
+mdlStudentOut$Qlt$lmeSlopesCore <-
+  lme(
+    quality_overall ~
+      KeyNeedFullfillment_cwc,
+    random = ~ 1 + KeyNeedFullfillment_cwc | PID,
+    control = lmeControl(opt = "optim"),
+    data = dtStudentSupp$studentOutWithinBetween
+  )
+
+# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
+summ(
+  mdlStudentOut$Qlt$lmerSlopesCore <-
+    lmer(
+      quality_overall ~
+        KeyNeedFullfillment_cwc +
+        (1 + KeyNeedFullfillment_cwc | PID),
+      data = dtStudentSupp$studentOutWithinBetween
+    ),
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+
+mdlStudentOut$Qlt$lmerSlopesCoreCI <- 
+  confint(mdlStudentOut$Qlt$lmerSlopesCore)
+
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(mdlStudentOut$Qlt$lmerSlopesCore,
+#               method="boot",nsim=1000,
+#               parallel = "multicore", ncpus = 4, seed = 42),
+#          "output/tables/ML-RandomSlopes-CI.csv")
+
+# Compare new model to previous step
+anova(mdlStudentOut$Qlt$lmeNull, 
+      mdlStudentOut$Qlt$lmeInterceptCore, 
+      mdlStudentOut$Qlt$lmeSlopesCore) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Student: Model Comparison",
+    format = "latex",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlStudentOut$Qlt$varSlopesCore <- 
+  lme4::VarCorr(mdlStudentOut$Qlt$lmeSlopesCore)
+
+# Assumption Checks:
+mdlStudentOut$Qlt$diagSlopesCore <-
+  sjPlot::plot_model(mdlStudentOut$Qlt$lmerSlopesCore, type = "diag")
+grid.arrange(
+  mdlStudentOut$Qlt$diagSlopesCore[[1]],
+  mdlStudentOut$Qlt$diagSlopesCore[[2]]$`PID`,
+  mdlStudentOut$Qlt$diagSlopesCore[[3]],
+  mdlStudentOut$Qlt$diagSlopesCore[[4]]
+)
+
+# Plot prediction model
+mdlStudentOut$Qlt$predSlopesCore <- 
+  dtStudentSupp$studentOutWithinBetween %>%
+  filter(PID %in% dtStudentSupp$studentOutPltIDs) %>%
+  select(AttitudesDutch, TIDnum, PID) %>% 
+  mutate(measure = predict(mdlStudentOut$Qlt$lmeSlopesCore,
+                           dtStudentSupp$studentOutWithinBetween %>% filter(PID %in% dtStudentSupp$studentOutPltIDs),
+                           re.form = NA
+                           )
+         )
+
+(
+  mdlStudentOut$Qlt$predPltSlopesCore <-
+    ggplot(data = mdlStudentOut$Qlt$predSlopesCore %>% filter(PID %in% dtStudentSupp$studentOutPltIDs), 
+           aes(x = TIDnum, y = measure)) +
+    geom_line(alpha = 1, color = "blue") +
+    geom_line(aes(y = AttitudesDutch), alpha = 1) +
+    facet_wrap(~ PID, ncol = 6) +
+    xlab("Time") +
+    ylab("Outgroup Attitudes") +
+    theme_Publication()
+)
+ggsave(
+  filename = "Figures/StudentOut_PredictionPlot_SlopesCore.png",
+  mdlStudentOut$Qlt$predPltSlopesCore,
+  width = 18,
+  height = 12,
+  dpi = 800,
+  units = "cm",
+  device = "png"
+)
+
+```
+```{r studentOutModelInterceptAttCoreQlt, include=FALSE}
+# Create and save Model
+mdlStudentOut$Att$lmeInterceptCoreQlt <-
+  lme(
+    AttitudesDutch ~ KeyNeedFullfillment_cwc + quality_overall_cwc,
+    random = ~ 1 | PID,
+    data = dtStudentSupp$studentOutWithinBetween
+  )
+
+# Get summary with p-values (Satterthwaite's method)
+summ(
+  mdlStudentOut$Att$lmerInterceptCoreQlt <-
+    lmer(
+      AttitudesDutch ~ KeyNeedFullfillment_cwc + quality_overall_cwc + (1 | PID),
+      data = dtStudentSupp$studentOutWithinBetween
+    ),
+  confint = TRUE,
+  digits = 3
+)
+
+mdlStudentOut$Att$lmerInterceptCoreQltCI <- 
+  confint(mdlStudentOut$Att$lmerInterceptCoreQlt)
+
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(lmer(AttitudesDutch ~ Contact_dum + inNonDutch + (1|PID),data=studentOutgroupInteraction),
+#                  method="boot",nsim=1000, parallel = "multicore",
+#                  ncpus = 4, seed = 42),
+#          "output/tables/ML-Inter-CI.csv")
+
+# Compare new model to previous step
+anova(
+  mdlStudentOut$Att$lmeNull, 
+  mdlStudentOut$Att$lmeInterceptCoreQlt
+  ) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Student: Model Comparison",
+    format = "latex",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlStudentOut$Att$varInterceptCoreQlt <-
+  lme4::VarCorr(mdlStudentOut$Att$lmeInterceptCoreQlt)
+```
+```{r studentOutModelSlopesAttCoreQlt, include=FALSE}
+# Create and save Model (optimizer needed to reach convergence)
+mdlStudentOut$Att$lmeSlopesCoreQlt <-
+  lme(
+    AttitudesDutch ~
+      KeyNeedFullfillment_cwc + quality_overall_cwc,
+    random = ~ 1 + KeyNeedFullfillment_cwc + quality_overall_cwc | PID,
+    control = lmeControl(opt = "optim"),
+    data = dtStudentSupp$studentOutWithinBetween
+  )
+
+# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
+summ(
+  mdlStudentOut$Att$lmerSlopesCoreQlt <- lmer(
+    AttitudesDutch ~
+      KeyNeedFullfillment_cwc + quality_overall_cwc +
+      (1 + KeyNeedFullfillment_cwc + quality_overall_cwc | PID),
+    data = dtStudentSupp$studentOutWithinBetween,
+    control = lmerControl(optimizer="bobyqa", optCtrl=list(maxfun=2e5))
+  ),
+  confint = TRUE,
+  digits = 3
+)
+
+mdlStudentOut$Att$lmerSlopesCoreQltCI <- 
+  confint(mdlStudentOut$Att$lmerSlopesCoreQlt)
+
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(model.ran0,
+#               method="boot",nsim=1000,
+#               parallel = "multicore", ncpus = 4, seed = 42),
+#          "output/tables/ML-RandomSlopes-CI.csv")
+
+# Compare new model to previous step
+anova(
+  mdlStudentOut$Att$lmeNull,
+  mdlStudentOut$Att$lmeInterceptCoreQlt,
+  mdlStudentOut$Att$lmeSlopesCoreQlt
+) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Student: Model Comparison",
+    format = "latex",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlStudentOut$Att$varSlopesCoreQlt <- 
+  lme4::VarCorr(mdlStudentOut$Att$lmeSlopesCoreQlt)
+
+# Assumption Checks:
+mdlStudentOut$Att$diagSlopesCoreQlt <- 
+  sjPlot::plot_model(mdlStudentOut$Att$lmerSlopesCoreQlt, type = "diag")
+grid.arrange(
+  mdlStudentOut$Att$diagSlopesCoreQlt[[1]],
+  mdlStudentOut$Att$diagSlopesCoreQlt[[2]]$`PID`,
+  mdlStudentOut$Att$diagSlopesCoreQlt[[3]],
+  mdlStudentOut$Att$diagSlopesCoreQlt[[4]]
+)
+
+# Plot prediction model
+mdlStudentOut$Att$predSlopesCoreQlt <- 
+  dtStudentSupp$studentOutWithinBetween %>% 
+  filter(PID %in% dtStudentSupp$studentOutPltIDs) %>%
+  select(AttitudesDutch, TIDnum, PID) %>% 
+  mutate(measure = predict(mdlStudentOut$Att$lmeSlopesCoreQlt,
+                           dtStudentSupp$studentOutWithinBetween %>% filter(PID %in% dtStudentSupp$studentOutPltIDs),
+                           re.form = NA
+                           )
+         )
+
+(
+  mdlStudentOut$Att$predPltSlopesCoreQlt <-
+    ggplot(data = mdlStudentOut$Att$predSlopesCoreQlt, aes(x = TIDnum, y = measure)) +
+    geom_line(alpha = 1, color = "blue") +
+    geom_line(aes(y = AttitudesDutch), alpha = 1) +
+    facet_wrap( ~ PID, ncol = 6) +
+    xlab("Time") +
+    ylab("Outgroup Attitudes") +
+    theme_Publication()
+)
+ggsave(
+  filename = "Figures/StudentOut_PredictionPlot_SlopesAttCoreQlt.png",
+  mdlStudentOut$Att$predPltSlopesCoreQlt,
+  width = 18,
+  height = 12,
+  dpi = 800,
+  units = "cm",
+  device = "png"
+)
+```
+
+We again sequentially tested whether the fulfillment of the core need during an interaction was (1) related to more positive outgroup attitudes, (2) higher perceived interaction quality, and (3) whether the variance explained by the core need is assumed by the perceived interaction quality if considered jointly. We find that in the multilevel models, the fulfillment of core situational needs during outgroup contacts was associated with more positive outgroup attitudes (random slopes model; `r MlCoeffLatex(lmeMdl = mdlStudentOut$Att$lmeSlopesCore, lmerCI = mdlStudentOut$Att$lmerSlopesCoreCI, varName = "KeyNeedFullfillment_cwc")`) and also predicted higher perceived interaction quality (random slopes model; `r MlCoeffLatex(lmeMdl = mdlStudentOut$Qlt$lmeSlopesCore, lmerCI = mdlStudentOut$Qlt$lmerSlopesCoreCI, varName = "KeyNeedFullfillment_cwc")`). However, if we consider the influences of core need fulfillment and interaction quality on outgroup attitudes jointly, we find that virtually all variance is explained by perceived interaction quality (random slopes mode; `r MlCoeffLatex(lmeMdl = mdlStudentOut$Att$lmeSlopesCoreQlt, lmerCI = mdlStudentOut$Att$lmerSlopesCoreQltCI, varName = "quality_overall_cwc")`) and only little unique variance is still explained by core need fulfillment (`r MlCoeffLatex(lmeMdl = mdlStudentOut$Att$lmeSlopesCoreQlt, lmerCI = mdlStudentOut$Att$lmerSlopesCoreQltCI, varName = "KeyNeedFullfillment_cwc")`). These results are consistent with the results in study one and we thus find support for our hypotheses and can conclude that in this data set the fulfillment of core situational needs had a significant influence on outgroup attitudes and that this effect is likely explained by its effect through perceived interaction quality. 
+
+\faQuestionCircle\ Are we sure that we don't want some sort of bootstrapped indirect effect? 
 
 \subsubsection{Robustness}
 
