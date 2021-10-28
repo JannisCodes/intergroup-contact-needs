@@ -178,6 +178,7 @@ dtWorkerSupp$workerWithinBetween <-
         "quality_overall_1"
       )
   )
+
 dtWorkerSupp$workerOutWithinBetween <-
   MlTraitState(
     data = dtWorkerSupp$workerInteractionType %>% filter(OutgroupInteraction == "Yes"),
