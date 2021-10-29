@@ -81,7 +81,7 @@ Example: If taste affects preference, then mean preference indices will be highe
 
 1. \label{hyp:contact}Based on the most general understanding of the contact hypothesis, an increase in frequency and quality of contact should jointly account for changes in more favorable outgroup attitudes.
     a. \label{hyp:contactFreq}Participants with more intergroup interactions should have a more favorable outgroup attitudes.
-    b. \label{hyp:contactDummy}Outgroup attitudes should be higher after an intergroup interaction compared to a non-outgroup interaction.
+    b. \label{hyp:contactDummy}Outgroup attitudes should be more positive after an intergroup interaction compared to a non-outgroup interaction.
     c. \label{hyp:contactFreqQual}Participants with more intergroup interactions should have a more favorable outgroup attitudes depending on the average interaction quality.
 2. \label{hyp:AllportsConditions}Based on Allport's optimal contact conditions, intergroup interactions with equal status, common goals, collaboration, and structural support should predict more favorable outgroup attitudes due to more positive interaction quality perceptions.
     a. \label{hyp:AllportsPred}Based on Allport's optimal contact conditions, outgroup attitudes should be more favorable after intergroup interactions with equal status, common goals, collaboration, and structural support.
@@ -90,7 +90,7 @@ Example: If taste affects preference, then mean preference indices will be highe
 3. \label{hyp:keyNeed}Based on our proposal, intergroup interactions with higher situational core need fulfillment should predict more favorable outgroup attitudes due to more positive interaction quality perceptions.
     a. \label{hyp:keyNeedPred}Outgroup attitudes should be more favorable after intergroup interactions with high key need fulfillment.
     b. \label{hyp:keyNeedQual}Interaction Quality should be perceived as more positive after intergroup interactions with higher key need fulfillment.
-    c. \label{hyp:keyNeedMediation}The variance explained in outgroup attitudes by key need fulfillment should to a large extend be assumed by interaction quality.
+    c. \label{hyp:keyNeedMediation}The variance explained in outgroup attitudes by key need fulfillment should to a large extend be explained by interaction quality.
     d. \label{hyp:keyNeedContactType}The effect of key need fulfillment on outgroup attitudes should be specific to intergroup interactions and not be due to need fulfillment in general. Thus, the effect of key need fulfillment on outgroup attitudes should stronger for intergroup interact than for ingroup interactions.
     e. \label{hyp:keyNeedSDT}The effect of key need fulfillment on outgroup attitudes should be persist even when taking other fundamental psychological needs into account. Thus, the effect of key need fulfillment on outgroup attitudes should remain strong even after controlling for autonomy, competence, and relatedness fulfillment during the interaction (cf., self-determination theory). 
 4. \label{hyp:comparison}Based on our proposal, intergroup interactions with higher situational core need fulfillment should predict outgroup attitudes at least as well as Allport's conditions.
@@ -373,7 +373,7 @@ No checks will be performed to determine eligibility for inclusion besides verif
 
 Example: If a subject does not complete any of the three indices of tastiness, that subject will not be included in the analysis. -->
 
-Given the (expectedly) large sample size of contemporaneous measurements, we will remove all instances during which a participant did not respond to any of the relevant variables.
+Given the (expectedly) large sample size of contemporaneous measurements, we will remove all instances during which a participant did not respond to any of the relevant variables. Given that we are not necessarily interested in individual trajectories in our analyses, we will use all available data (i.e., will not remove entire participants but rather individual incomplete daily diary measurements). 
 
 
 ## Exploratory analyses (optional)
@@ -382,7 +382,7 @@ Given the (expectedly) large sample size of contemporaneous measurements, we wil
 Example: We expect that certain demographic traits may be related to taste preferences. Therefore, we will look for relationships between demographic variables (age, gender, income, and marital status) and the primary outcome measures of taste preferences. -->
 
 
-@Brown2005 proposed in their integrative theory of intergroup contact that "group salience" should moderate the positive effect of intergroup contact on outgroup attitudes. They argue that especially when the outgroup membership is salient, the positive attitudes should generalize from the outgroup individual to the general outgroup. We have data to test this hypothesis within a large intensive longitudinal dataset of daily intergroup interactions. We do this by seperately assessing attitudes towards the outgroup interaction partner and the outgroup generally. And by assessing whether perceiving the interaction as representative of the outgroup moderates the positive contact effects.
+@Brown2005 proposed in their integrative theory of intergroup contact that "group salience" should moderate the positive effect of intergroup contact on outgroup attitudes. They argue that especially when the outgroup membership is salient, the positive attitudes should generalize from the outgroup individual to the general outgroup. We have data to test this hypothesis within a large intensive longitudinal dataset of daily intergroup interactions. We do this by separately assessing attitudes towards the outgroup interaction partner and the outgroup generally. And by assessing whether perceiving the interaction as representative of the outgroup moderates the positive contact effects.
 
 To build confidence in our conclusions about the role of contact quality we calculate an alternative measure of interaction quality that includes perceived pleasantness, meaning, effectiveness, and importance of the interaction.
 
