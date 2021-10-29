@@ -24,8 +24,9 @@ output:
     citation_package: natbib
 editor_options: 
   chunk_output_type: console
+header-includes:
+   - \usepackage{amsmath}
 ---
-
 
 ```{r setup, include=FALSE}
 # R Studio Clean-Up
@@ -324,10 +325,34 @@ We will use a sequential analysis strategy in line with our proposed hypotheses.
     a. T-test: $\mu_{i,0utgroupInteraction} > \mu_{i,IngroupInteraction}$ (to build confidence in the persistence of the contact effect, we additionally compare the attitudes after an outgroup interaction to attitudes after no outgroup interaction (i.e., including instances where participants had no interaction at all).)
     a. Regression: $Attitude = ContactFreq \times AverageContactQual$
 1. Allport's Conditions
-    a. Regression: $Attitude_{ti} = \gamma_{00} + \gamma_{10}AllportConditions_{ti} + u_{0i} + u_{1i} + e_{ti}$
-    a. Regression: $Attitude_{ti} = \gamma_{00} + \gamma_{10}AllportConditions_{ti} + \gamma_{20}InteractionQuality_{ti} + u_{0i} + u_{1i} + e_{ti}$
-    
-        with $\begin{bmatrix} u_{0i}\\ u_{1i}\end{bmatrix} \sim \mathcal{N}(0,\Omega_u): \Omega_u=\begin{bmatrix} \tau_{0}^2 & \\ \tau_{01} & \tau_{1}^2 \end{bmatrix}$ and $e_{ti} \sim \mathcal{N}(0,\sigma^2)$
+    a. Regression: 
+    $Attitude_{ti} = \gamma_{00} + \gamma_{10}AllportConditions_{ti} + u_{0i} + u_{1i} + e_{ti}$
+    a. Regression:
+    \begin{equation} \label{eq:SlopesAttAllportQual}
+      \begin{split}
+        \textrm{Level 1:} &\ Attitude_{ti} = \beta_{0i} + \beta_{1i}AllportConditions_{ti} + \beta_{2i}InteractionQuality_{ti} + e_{ti}\\
+        \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+        &\ \beta_{1i} = \gamma_{10} + u_{1i}\\
+        &\ \beta_{2i} = \gamma_{20} + u_{2i}
+      \end{split}
+    \end{equation}
+    \begin{flalign}
+      &\textrm{Level 1 Variance:}\ e_{ti} \sim \mathcal{N}(0,\sigma^2) && \\
+      &\textrm{Level 2 Variance:}\ \begin{bmatrix} u_{0i}\\ u_{1i}\\ u_{2i}\end{bmatrix} 
+      \sim \mathcal{N}
+      \begin{pmatrix}
+        \begin{bmatrix} 
+          0 \\ 
+          0 \\
+          0
+        \end{bmatrix}, 
+        \begin{bmatrix} 
+          \tau_{00}^2 &  & \\ 
+          \tau_{01} & \tau_{11}^2 & \\
+          \tau_{20} & \tau_{21} & \tau_{22}^2
+        \end{bmatrix}
+      \end{pmatrix} &&
+    \end{flalign}
 1. Key Need Fulfillment
     a. Regression: $Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + u_{0i} + u_{1i} + e_{ti}$
     a. Regression: $InteractionQuality_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + u_{0i} + u_{1i} + e_{ti}$
