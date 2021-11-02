@@ -1,0 +1,243 @@
+---
+title           : "Psychological Needs During Intergroup Contact — An Extensive Longitudinal Study (Young Medical Professionals Sample)"
+shorttitle      : "Preregistration — Statistical Models"
+date            : "`r Sys.setlocale('LC_TIME', 'C'); format(Sys.time(), '%d\\\\. %B %Y')`"
+author: 
+  - name        : Jannis Kreienkamp
+    affiliation : "1"
+  - name        : Maximilian Agostini
+    affiliation : "1"
+  - name        : Laura Bringmann
+    affiliation : "1"
+  - name        : Peter de Jonge
+    affiliation : "1"
+  - name        : Kai Epstude
+    affiliation : "1"
+affiliation:
+  - id          : 1
+    institution : University of Groningen, Department of Psychology
+bibliography: "../references.bib"
+csl: apa.csl
+biblio-style: "apalike" 
+output: 
+  prereg::cos_prereg:
+    citation_package: natbib
+editor_options: 
+  chunk_output_type: console
+header-includes:
+   - \usepackage{amsmath, nccmath}
+---
+
+# Analysis Plan
+<!-- You may describe one or more confirmatory analysis in this preregistration. Please remember that all analyses specified below must be reported in the final article, and any additional analyses must be noted as exploratory or hypothesis generating.
+
+A confirmatory analysis plan must state up front which variables are predictors (independent) and which are the outcomes (dependent), otherwise it is an exploratory analysis. You are allowed to describe any exploratory work here, but a clear confirmatory analysis is required. -->
+
+
+## Statistical models
+<!-- What statistical model will you use to test each hypothesis? Please include the type of model (e.g. ANOVA, multiple regression, SEM, etc) and the specification of the model (this includes each variable that will be included as predictors, outcomes, or covariates). Please specify any interactions, subgroup analyses, pairwise or complex contrasts, or follow-up tests from omnibus tests. If you plan on using any positive controls, negative controls, or manipulation checks you may mention that here. Remember that any test not included here must be noted as an exploratory test in your final article.
+
+This is perhaps the most important and most complicated question within the preregistration. As with all of the other questions, the key is to provide a specific recipe for analyzing the collected data. Ask yourself: is enough detail provided to run the same analysis again with the information provided by the user? Be aware for instances where the statistical models appear specific, but actually leave openings for the precise test. See the following examples:
+
+- If someone specifies a 2x3 ANOVA with both factors within subjects, there is still flexibility with the various types of ANOVAs that could be run. Either a repeated measures ANOVA (RMANOVA) or a multivariate ANOVA (MANOVA) could be used for that design, which are two different tests. 
+- If you are going to perform a sequential analysis and check after 50, 100, and 150 samples, you must also specify the p-values you’ll test against at those three points.
+
+Example:  We will use a one-way between subjects ANOVA to analyze our results. The manipulated, categorical independent variable is 'sugar' whereas the dependent variable is our taste index. -->
+
+We will use a sequential analysis strategy in line with our proposed hypotheses. Given the nested structure of much of our data we test many of our hypotheses using a multilevel approach, where $y_{ti}$ denotes the response at measurement occasion $t$ ($t = 1, ...,T_i$; level 1) for individual $i$ ($i = 1, ..., n$; level 2). It should be noted that we will follow a hierarchical modeling approach. We follow the common four-step procedure [e.g., @Bliese2013]: (1) Test whether enough variation exists within and between participants to justify a multilevel structure, (2) (sequentially) add key predictors, (3) check whether a random slope explains an adequate amount of variance, and (4) check for autocorrelations and heteroscedasticity. For brevity we will only present the full multilevel regression formulas below.
+
+\setlength{\abovedisplayskip}{0pt}
+\setlength{\belowdisplayskip}{0pt}
+\setlength{\abovedisplayshortskip}{0pt}
+\setlength{\belowdisplayshortskip}{0pt}
+
+1. Contact Hypothesis (partially using between participant aggregates to meaningfully include interaction frequency)
+    a. Correlation:
+      \begin{fleqn}[\parindent] 
+        \begin{equation}
+          r_{ContactFreq, Attitude} \neq 0
+        \end{equation}
+      \end{fleqn}
+    a. Regression:
+        <!-- 
+          Explanation: 
+          - 'fleqn' aligns whole math left 
+          - 'equation' adds number
+          - 'split' aligns after level header
+          - 'aligned[t]' aligns after equal sign
+        -->
+        \begin{fleqn}[\parindent] 
+        \begin{equation}
+          \begin{split}
+            \textrm{Level 1:} &
+              \begin{aligned}[t]
+                \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}OutgroupInteraction_{ti} + \\
+                                   &\ \beta_{2i}NonOutgroupInteraction_{ti} + e_{ti}
+              \end{aligned} \\
+            \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                              &\ \beta_{1i} = \gamma_{10} + u_{1i} \\
+                              &\ \beta_{2i} = \gamma_{20} + u_{2i}
+          \end{split} 
+        \end{equation}
+        \end{fleqn}
+    a. Regression: 
+      \begin{fleqn}[\parindent] 
+        \begin{equation}
+          Attitude = ContactFreq \times AverageQual
+        \end{equation}
+      \end{fleqn}
+1. Allport's Conditions
+    a. Regression:
+        \begin{fleqn}[\parindent]
+          \begin{equation} \label{eq:SlopesAttAllport}
+            \begin{split}
+                \textrm{Level 1:} &\ Attitude_{ti} = \beta_{0i} + \beta_{1i}AllportConditions_{ti} + e_{ti}\\
+                \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                                  &\ \beta_{1i} = \gamma_{10} + u_{1i}
+            \end{split}
+          \end{equation}
+        \end{fleqn}
+    a. Regression:
+        \begin{fleqn}[\parindent]
+          \begin{equation} \label{eq:SlopesQualAllport}
+            \begin{split}
+                \textrm{Level 1:} &\ InteractionQuality_{ti} = \beta_{0i} + \beta_{1i}AllportConditions_{ti} + e_{ti}\\
+                \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                                  &\ \beta_{1i} = \gamma_{10} + u_{1i}
+            \end{split}
+          \end{equation}
+        \end{fleqn}
+    a. Regression:
+        \begin{fleqn}[\parindent]
+          \begin{equation} \label{eq:SlopesAttAllportQual}
+            \begin{split}
+              \textrm{Level 1:} &
+                \begin{aligned}[t]
+                  \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}AllportConditions_{ti} + \\
+                                     &\ \beta_{2i}InteractionQuality_{ti} + e_{ti}
+                \end{aligned} \\
+              \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                                &\ \beta_{1i} = \gamma_{10} + u_{1i} \\
+                                &\ \beta_{2i} = \gamma_{20} + u_{2i}
+            \end{split} 
+          \end{equation}
+        \end{fleqn}  
+1. Key Need fulfillment
+    a. Regression: 
+        \begin{fleqn}[\parindent]
+          \begin{equation} \label{eq:SlopesAttCore}
+            \begin{split}
+                \textrm{Level 1:} &\ Attitude_{ti} = \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + e_{ti}\\
+                \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                                  &\ \beta_{1i} = \gamma_{10} + u_{1i}
+            \end{split}
+          \end{equation}
+        \end{fleqn}
+    a. Regression:
+        \begin{fleqn}[\parindent]
+          \begin{equation} \label{eq:SlopesQltCore}
+            \begin{split}
+                \textrm{Level 1:} &\ InteractionQuality_{ti} = \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + e_{ti}\\
+                \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                                  &\ \beta_{1i} = \gamma_{10} + u_{1i}
+            \end{split}
+          \end{equation}
+        \end{fleqn}
+    a. Regression:
+        \begin{fleqn}[\parindent]
+          \begin{equation} \label{eq:SlopesAttCoreQual}
+            \begin{split}
+              \textrm{Level 1:} &
+                \begin{aligned}[t]
+                  \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+                                     &\ \beta_{2i}InteractionQuality_{ti} + e_{ti}
+                \end{aligned} \\
+              \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                                &\ \beta_{1i} = \gamma_{10} + u_{1i} \\
+                                &\ \beta_{2i} = \gamma_{20} + u_{2i}
+            \end{split} 
+          \end{equation}
+        \end{fleqn}
+    a. Regression: 
+        \begin{fleqn}[\parindent]
+          \begin{equation} \label{eq:SlopesAttCoreQualX}
+            \begin{split}
+              \textrm{Level 1:} &
+                \begin{aligned}[t]
+                  \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+                                     &\ \beta_{2i}InteractionQuality_{ti} + \\
+                                     &\ \beta_{3i}KeyNeedFulfill*InteractionQuality_{ti} + e_{ti}
+                \end{aligned} \\
+              \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                                &\ \beta_{1i} = \gamma_{10} + u_{1i} \\
+                                &\ \beta_{2i} = \gamma_{20} + u_{2i} \\
+                                &\ \beta_{3i} = \gamma_{30} + u_{3i}
+            \end{split} 
+          \end{equation}
+        \end{fleqn}
+    a. Regression: 
+        \begin{fleqn}[\parindent]
+          \begin{equation} \label{eq:SlopesAttCoreSdt}
+            \begin{split}
+              \textrm{Level 1:} &
+                \begin{aligned}[t]
+                  \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \beta_{2i}Autonomy_{ti} + \\
+                                     &\ \beta_{3i}Competence_{ti} + \beta_{4i}Relatedness_{ti} + e_{ti}
+                \end{aligned} \\
+              \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                                &\ \beta_{1i} = \gamma_{10} + u_{1i} \\
+                                &\ \beta_{2i} = \gamma_{20} + u_{2i} \\
+                                &\ \beta_{3i} = \gamma_{30} + u_{3i} \\
+                                &\ \beta_{4i} = \gamma_{40} + u_{4i}
+            \end{split} 
+          \end{equation}
+        \end{fleqn}
+1. Comparison with Allport's Conditions
+    a. Model Comparison:
+      \begin{fleqn}[\parindent] 
+        \begin{equation}
+          AIC_{KeyNeedModel} < AIC_{AllportModel}
+        \end{equation}
+      \end{fleqn}
+    a. Regression: 
+        \begin{fleqn}[\parindent]
+          \begin{equation} \label{eq:SlopesAttCoreAllport}
+            \begin{split}
+              \textrm{Level 1:} &
+                \begin{aligned}[t]
+                  \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+                                     &\ \beta_{2i}AllportConditions_{ti} + e_{ti}
+                \end{aligned} \\
+              \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                                &\ \beta_{1i} = \gamma_{10} + u_{1i} \\
+                                &\ \beta_{2i} = \gamma_{20} + u_{2i}
+            \end{split} 
+          \end{equation}
+        \end{fleqn}
+        
+All multilevel assumptions are tested as usual including (e.g., for random slopes model with _j_ within person predictors):
+
+\begin{flalign}
+  &\textrm{Level 1 Variance:}\ e_{ti} \sim \mathcal{N}(0,\sigma^2) \\
+  &\textrm{Level 2 Variance:}\ \begin{bmatrix} u_{0i}\\ \vdots\\ u_{ji}\end{bmatrix} 
+  \sim \mathcal{N}
+  \begin{pmatrix}
+    \begin{bmatrix} 
+      0 \\ 
+      \vdots \\
+      0
+    \end{bmatrix}, 
+    \begin{bmatrix} 
+      \tau_{00}^2 &  & \\ 
+      \vdots & \ddots & \\
+      \tau_{j0} & \ldots & \tau_{jj}^2
+    \end{bmatrix}
+  \end{pmatrix}
+\end{flalign}
+
+## 
+\vspace{-2pc}
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{-1in}
+\setlength{\parskip}{8pt}
+\noindent

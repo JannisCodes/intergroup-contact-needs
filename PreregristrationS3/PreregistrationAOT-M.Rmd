@@ -81,22 +81,22 @@ We propose that Allport's optimal contact conditions are effective in creating p
 Example: If taste affects preference, then mean preference indices will be higher with higher concentrations of sugar. -->
 
 1. \label{hyp:contact}Based on the most general understanding of the contact hypothesis, an increase in frequency and quality of contact should jointly account for changes in more favorable outgroup attitudes.
-    a. \label{hyp:contactFreq}Participants with more intergroup interactions should have a more favorable outgroup attitudes.
+    a. \label{hyp:contactFreq}Participants with more intergroup interactions should have more favorable outgroup attitudes.
     b. \label{hyp:contactDummy}Outgroup attitudes should be more positive after an intergroup interaction compared to a non-outgroup interaction.
-    c. \label{hyp:contactFreqQual}Participants with more intergroup interactions should have a more favorable outgroup attitudes depending on the average interaction quality.
+    c. \label{hyp:contactFreqQual}Participants with more intergroup interactions should have more favorable outgroup attitudes depending on the average interaction quality.
 2. \label{hyp:AllportsConditions}Based on Allport's optimal contact conditions, intergroup interactions with equal status, common goals, collaboration, and structural support should predict more favorable outgroup attitudes due to more positive interaction quality perceptions.
     a. \label{hyp:AllportsPred}Based on Allport's optimal contact conditions, outgroup attitudes should be more favorable after intergroup interactions with equal status, common goals, collaboration, and structural support.
-    b. \label{hyp:AllportsQuality}Based on past research on the role of interaction quality, interaction quality should be more perceived as more favorable after intergroup interactions with equal status, common goals, collaboration, and structural support.
-    c. \label{hyp:AllportsQualityMediation}Based on past research on the role of interaction quality, the variance explained in outgroup attitudes by Allport's optimal contact should to a large extend be assumed by interaction quality.
+    b. \label{hyp:AllportsQuality}Based on past research on the role of interaction quality, interaction quality should be perceived as more positive after intergroup interactions with equal status, common goals, collaboration, and structural support.
+    c. \label{hyp:AllportsQualityMediation}Taken together, the variance explained in outgroup attitudes by Allport's optimal contact should to a large extend be explained by interaction quality.
 3. \label{hyp:keyNeed}Based on our proposal, intergroup interactions with higher situational core need fulfillment should predict more favorable outgroup attitudes due to more positive interaction quality perceptions.
     a. \label{hyp:keyNeedPred}Outgroup attitudes should be more favorable after intergroup interactions with high key need fulfillment.
     b. \label{hyp:keyNeedQual}Interaction Quality should be perceived as more positive after intergroup interactions with higher key need fulfillment.
     c. \label{hyp:keyNeedMediation}The variance explained in outgroup attitudes by key need fulfillment should to a large extend be explained by interaction quality.
-    d. \label{hyp:keyNeedContactType}The effect of key need fulfillment on outgroup attitudes should be specific to intergroup interactions and not be due to need fulfillment in general. Thus, the effect of key need fulfillment on outgroup attitudes should stronger for intergroup interact than for ingroup interactions.
-    e. \label{hyp:keyNeedSDT}The effect of key need fulfillment on outgroup attitudes should be persist even when taking other fundamental psychological needs into account. Thus, the effect of key need fulfillment on outgroup attitudes should remain strong even after controlling for autonomy, competence, and relatedness fulfillment during the interaction (cf., self-determination theory). 
+    d. \label{hyp:keyNeedContactType}The effect of key need fulfillment on outgroup attitudes should be specific to intergroup interactions and not be due to need fulfillment in general. Thus, the effect of key need fulfillment on outgroup attitudes should be stronger for intergroup interact than for non-outgroup interactions (or need fulfillment during a time of no interaction).
+    e. \label{hyp:keyNeedSDT}The effect of key need fulfillment on outgroup attitudes should persist even when taking other fundamental psychological needs into account. Thus, the effect of key need fulfillment on outgroup attitudes should remain strong even after controlling for autonomy, competence, and relatedness fulfillment during the interaction (cf., self-determination theory). 
 4. \label{hyp:comparison}Based on our proposal, intergroup interactions with higher situational core need fulfillment should predict outgroup attitudes at least as well as Allport's conditions.
     a. \label{hyp:compModel}The need model (H\ref{hyp:keyNeedPred}) should predict more variance in outgroup attitudes than the model based on Allport's conditions (H\ref{hyp:AllportsPred}).
-    b. \label{hyp:compTogether}The  effect of key need fulfillment on outgroup attitudes should  persist even when taking other Allport's conditions into account. Thus, the effect of key need fulfillment on outgroup attitudes should remain strong even after controlling for equal status, common goals, collaboration, and structural support.
+    b. \label{hyp:compTogether}The  effect of key need fulfillment on outgroup attitudes should  persist even when taking Allport's conditions into account. Thus, the effect of key need fulfillment on outgroup attitudes should remain strong even after controlling for equal status, common goals, collaboration, and structural support.
 
 # Design Plan
 <!-- In this section, you will be asked to describe the overall design of your study. Remember that this research plan is designed to register a single study, so if you have multiple experimental designs, please complete a separate preregistration. -->
@@ -158,11 +158,11 @@ Example: Participants will be recruited through advertisements at local pastry s
 
 The data was collected in a three step procedure:
 
-1. Entry Survey: A pre-measurement questionnaire (appr. 25 minutes) including demographic information, and relations to the Dutch majority. (payment: 2 Euros)
-2. Experience Recaps: At least 30 days of short reflection surveys (appr. 3—5 minutes) on intergroup interactions twice a day. (payment: 1 Euro per Recap; up to 2 Euros per day)
-3. Conclusion Survey: On the last day, we conclude with a post-measurement questionnaire (appr. 25 minutes) with some questions on habits and reflections on the study. (payment: 2 Euros)
+1. Entry Survey: A pre-measurement questionnaire (appr. 25 minutes) including demographic information, and relations to the Dutch majority (payment: 2 Euros).
+2. Experience Recaps: At least 30 days of short reflection surveys (appr. 3—5 minutes) on intergroup interactions twice a day (payment: 1 Euro per Recap; up to 2 Euros per day).
+3. Conclusion Survey: On the last day, we conclude with a post-measurement questionnaire (appr. 25 minutes) with some questions on habits and reflections on the study (payment: 2 Euros).
 
-After the initial 30 day duration, participants are offered the possibility to continue participating in the study either with payment if daily diary measures were missed during the initial study phase or without payment after a total of 60 daily diary measurements were completed. After the initial 30-day period, participants receive automated feedback visualizing the development of their own well-being, attitudes, and motive responses as an additional initiative to give participants access to their own data and to compensate study participation.
+After the initial 30 day duration, participants are offered the possibility to continue participating in the study either with payment if daily diary measures were missed during the initial study phase or without payment after a total of 60 daily diary measurements were completed. After the initial 30-day period, participants receive automated feedback visualizing the development of their own well-being, attitudes, and motive responses as an additional initiative and to give participants access to their own data and to compensate study participation.
 
 ## Sample size
 <!-- Describe the sample size of your study. How many units will be analyzed in the study? This could be the number of people, birds, classrooms, plots, interactions, or countries included. If the units are not individuals, then describe the size requirements for each unit. If you are using a clustered or multilevel design, how many units are you collecting at each level of the analysis? For some studies, this will simply be the number of samples or the number of clusters. For others, this could be an expected range, minimum, or maximum number.
@@ -180,7 +180,7 @@ The targeted sample size depended on a combination of different factors. Differe
 
 Power considerations of mixed effects model such as with extensive longitudinal data are difficult to estimate because of the complex covariance structures. Simulation studies based on the first two samples within this project indicated that with well-distributed scales, and small to medium effect sizes, 70-80 participants with at least seven daily diary measurements and a simple pre--post survey were sufficiently powerful (power = .8, alpha = .05) to answer most of the key research questions of the collaboration.
 
-The ultimate sampling procedure decision was made as a practical balancing of the number of participants and the number of measurements provided by each participants. Given that this study primarily focuses on the contemporaneous effects within the daily diary measurements, power should thus be high enough. 
+The ultimate sampling procedure decision was made as a practical balancing of the number of participants and the number of measurements provided by each participants. Given that this study primarily focuses on the contemporaneous effects within the daily diary measurements, power should be high enough. 
 
 ## Stopping rule
 <!-- If your data collection procedures do not give you full control over your exact sample size, specify how you will decide when to terminate your data collection. 
@@ -396,7 +396,7 @@ We will use a sequential analysis strategy in line with our proposed hypotheses.
             \end{split} 
           \end{equation}
         \end{fleqn}  
-1. Key Need Fulfillment
+1. Key Need fulfillment
     a. Regression: 
         \begin{fleqn}[\parindent]
           \begin{equation} \label{eq:SlopesAttCore}
@@ -563,8 +563,6 @@ We expect that certain contextual characteristics may be related to the positive
 
 Not applicable.
 
-
-# References
 ## 
 \vspace{-2pc}
 \setlength{\parindent}{-0.5in}
