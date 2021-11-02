@@ -25,7 +25,7 @@ output:
 editor_options: 
   chunk_output_type: console
 header-includes:
-   - \usepackage{amsmath}
+   - \usepackage{amsmath, nccmath}
 ---
 
 ```{r setup, include=FALSE}
@@ -320,52 +320,194 @@ Example:  We will use a one-way between subjects ANOVA to analyze our results. T
 
 We will use a sequential analysis strategy in line with our proposed hypotheses. Given the nested structure of much of our data we test many of our hypotheses using a multilevel approach, where $y_{ti}$ denotes the response at measurement occasion $t$ ($t = 1, ...,T_i$; level 1) for individual $i$ ($i = 1, ..., n$; level 2). It should be noted that we will follow a hierarchical modeling approach. We follow the common four-step procedure [e.g., @Bliese2013]: (1) Test whether enough variation exists within and between participants to justify a multilevel structure, (2) (sequentially) add key predictors, (3) check whether a random slope explains an adequate amount of variance, and (4) check for autocorrelations and heteroscedasticity. For brevity we will only present the full multilevel regression formulas below.
 
-1. Contact Hypothesis (using between participant aggregates only to meaningfully include interaction frequency)
-    a. Correlation: $r_{InteractionFrequency, OutgroupAttitudes} \neq 0$
-    a. T-test: $\mu_{i,0utgroupInteraction} > \mu_{i,IngroupInteraction}$ (to build confidence in the persistence of the contact effect, we additionally compare the attitudes after an outgroup interaction to attitudes after no outgroup interaction (i.e., including instances where participants had no interaction at all).)
-    a. Regression: $Attitude = ContactFreq \times AverageContactQual$
-1. Allport's Conditions
-    a. Regression: 
-    $Attitude_{ti} = \gamma_{00} + \gamma_{10}AllportConditions_{ti} + u_{0i} + u_{1i} + e_{ti}$
+\setlength{\abovedisplayskip}{0pt}
+\setlength{\belowdisplayskip}{0pt}
+\setlength{\abovedisplayshortskip}{0pt}
+\setlength{\belowdisplayshortskip}{0pt}
+
+1. Contact Hypothesis (partially using between participant aggregates to meaningfully include interaction frequency)
+    a. Correlation:
+      \begin{fleqn}[\parindent] 
+        \begin{equation}
+          r_{ContactFreq, Attitude} \neq 0
+        \end{equation}
+      \end{fleqn}
     a. Regression:
-    \begin{equation} \label{eq:SlopesAttAllportQual}
-      \begin{split}
-        \textrm{Level 1:} &\ Attitude_{ti} = \beta_{0i} + \beta_{1i}AllportConditions_{ti} + \beta_{2i}InteractionQuality_{ti} + e_{ti}\\
-        \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
-        &\ \beta_{1i} = \gamma_{10} + u_{1i}\\
-        &\ \beta_{2i} = \gamma_{20} + u_{2i}
-      \end{split}
-    \end{equation}
-    \begin{flalign}
-      &\textrm{Level 1 Variance:}\ e_{ti} \sim \mathcal{N}(0,\sigma^2) && \\
-      &\textrm{Level 2 Variance:}\ \begin{bmatrix} u_{0i}\\ u_{1i}\\ u_{2i}\end{bmatrix} 
-      \sim \mathcal{N}
-      \begin{pmatrix}
-        \begin{bmatrix} 
-          0 \\ 
-          0 \\
-          0
-        \end{bmatrix}, 
-        \begin{bmatrix} 
-          \tau_{00}^2 &  & \\ 
-          \tau_{01} & \tau_{11}^2 & \\
-          \tau_{20} & \tau_{21} & \tau_{22}^2
-        \end{bmatrix}
-      \end{pmatrix} &&
-    \end{flalign}
+        <!-- 
+          Explanation: 
+          - 'fleqn' aligns whole math left 
+          - 'equation' adds number
+          - 'split' aligns after level header
+          - 'aligned[t]' aligns after equal sign
+        -->
+        \begin{fleqn}[\parindent] 
+        \begin{equation}
+          \begin{split}
+            \textrm{Level 1:} &
+              \begin{aligned}[t]
+                \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}OutgroupInteraction_{ti} + \\
+                                   &\ \beta_{2i}NonOutgroupInteraction_{ti} + e_{ti}
+              \end{aligned} \\
+            \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                              &\ \beta_{1i} = \gamma_{10} + u_{1i} \\
+                              &\ \beta_{2i} = \gamma_{20} + u_{2i}
+          \end{split} 
+        \end{equation}
+        \end{fleqn}
+    a. Regression: 
+      \begin{fleqn}[\parindent] 
+        \begin{equation}
+          Attitude = ContactFreq \times AverageQual
+        \end{equation}
+      \end{fleqn}
+1. Allport's Conditions
+    a. Regression:
+        \begin{fleqn}[\parindent]
+          \begin{equation} \label{eq:SlopesAttAllport}
+            \begin{split}
+                \textrm{Level 1:} &\ Attitude_{ti} = \beta_{0i} + \beta_{1i}AllportConditions_{ti} + e_{ti}\\
+                \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                                  &\ \beta_{1i} = \gamma_{10} + u_{1i}
+            \end{split}
+          \end{equation}
+        \end{fleqn}
+    a. Regression:
+        \begin{fleqn}[\parindent]
+          \begin{equation} \label{eq:SlopesQualAllport}
+            \begin{split}
+                \textrm{Level 1:} &\ InteractionQuality_{ti} = \beta_{0i} + \beta_{1i}AllportConditions_{ti} + e_{ti}\\
+                \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                                  &\ \beta_{1i} = \gamma_{10} + u_{1i}
+            \end{split}
+          \end{equation}
+        \end{fleqn}
+    a. Regression:
+        \begin{fleqn}[\parindent]
+          \begin{equation} \label{eq:SlopesAttAllportQual}
+            \begin{split}
+              \textrm{Level 1:} &
+                \begin{aligned}[t]
+                  \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}AllportConditions_{ti} + \\
+                                     &\ \beta_{2i}InteractionQuality_{ti} + e_{ti}
+                \end{aligned} \\
+              \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                                &\ \beta_{1i} = \gamma_{10} + u_{1i} \\
+                                &\ \beta_{2i} = \gamma_{20} + u_{2i}
+            \end{split} 
+          \end{equation}
+        \end{fleqn}  
 1. Key Need Fulfillment
-    a. Regression: $Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + u_{0i} + u_{1i} + e_{ti}$
-    a. Regression: $InteractionQuality_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + u_{0i} + u_{1i} + e_{ti}$
-    a. Regression: $Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + \gamma_{20}InteractionQuality_{ti} + u_{0i} + u_{1i} + e_{ti}$
-    a. Regression: $Attitude_{ti} = KeyNeedFulfill_{ti} \times OutgroupInteraction_{ti} + u_{0i} + u_{1i} + e_{ti}$
-    a. Regression: $Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + \gamma_{20}Autonomy_{ti} + \gamma_{30}Competence_{ti} + \gamma_{40}Relatedness_{ti} + u_{0i} + u_{1i} + e_{ti}$
-    
-        with $\begin{bmatrix} u_{0i}\\ u_{1i}\end{bmatrix} \sim \mathcal{N}(0,\Omega_u): \Omega_u=\begin{bmatrix} \tau_{0}^2 & \\ \tau_{01} & \tau_{1}^2 \end{bmatrix}$ and $e_{ti} \sim \mathcal{N}(0,\sigma^2)$
+    a. Regression: 
+        \begin{fleqn}[\parindent]
+          \begin{equation} \label{eq:SlopesAttCore}
+            \begin{split}
+                \textrm{Level 1:} &\ Attitude_{ti} = \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + e_{ti}\\
+                \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                                  &\ \beta_{1i} = \gamma_{10} + u_{1i}
+            \end{split}
+          \end{equation}
+        \end{fleqn}
+    a. Regression:
+        \begin{fleqn}[\parindent]
+          \begin{equation} \label{eq:SlopesQltCore}
+            \begin{split}
+                \textrm{Level 1:} &\ InteractionQuality_{ti} = \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + e_{ti}\\
+                \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                                  &\ \beta_{1i} = \gamma_{10} + u_{1i}
+            \end{split}
+          \end{equation}
+        \end{fleqn}
+    a. Regression:
+        \begin{fleqn}[\parindent]
+          \begin{equation} \label{eq:SlopesAttCoreQual}
+            \begin{split}
+              \textrm{Level 1:} &
+                \begin{aligned}[t]
+                  \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+                                     &\ \beta_{2i}InteractionQuality_{ti} + e_{ti}
+                \end{aligned} \\
+              \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                                &\ \beta_{1i} = \gamma_{10} + u_{1i} \\
+                                &\ \beta_{2i} = \gamma_{20} + u_{2i}
+            \end{split} 
+          \end{equation}
+        \end{fleqn}
+    a. Regression: 
+        \begin{fleqn}[\parindent]
+          \begin{equation} \label{eq:SlopesAttCoreQualX}
+            \begin{split}
+              \textrm{Level 1:} &
+                \begin{aligned}[t]
+                  \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+                                     &\ \beta_{2i}InteractionQuality_{ti} + \\
+                                     &\ \beta_{3i}KeyNeedFulfill*InteractionQuality_{ti} + e_{ti}
+                \end{aligned} \\
+              \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                                &\ \beta_{1i} = \gamma_{10} + u_{1i} \\
+                                &\ \beta_{2i} = \gamma_{20} + u_{2i} \\
+                                &\ \beta_{3i} = \gamma_{30} + u_{3i}
+            \end{split} 
+          \end{equation}
+        \end{fleqn}
+    a. Regression: 
+        \begin{fleqn}[\parindent]
+          \begin{equation} \label{eq:SlopesAttCoreSdt}
+            \begin{split}
+              \textrm{Level 1:} &
+                \begin{aligned}[t]
+                  \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \beta_{2i}Autonomy_{ti} + \\
+                                     &\ \beta_{3i}Competence_{ti} + \beta_{4i}Relatedness_{ti} + e_{ti}
+                \end{aligned} \\
+              \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                                &\ \beta_{1i} = \gamma_{10} + u_{1i} \\
+                                &\ \beta_{2i} = \gamma_{20} + u_{2i} \\
+                                &\ \beta_{3i} = \gamma_{30} + u_{3i} \\
+                                &\ \beta_{4i} = \gamma_{40} + u_{4i}
+            \end{split} 
+          \end{equation}
+        \end{fleqn}
 1. Comparison with Allport's Conditions
-    a. Model Comparison: $AIC_{KeyNeedModel} > AIC_{AllportModel}$
-    a. Regression: $Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + \gamma_{20}AllportConditions_{ti} + u_{0i} + u_{1i} + e_{ti}$
-    
-        with $\begin{bmatrix} u_{0i}\\ u_{1i}\end{bmatrix} \sim \mathcal{N}(0,\Omega_u): \Omega_u=\begin{bmatrix} \tau_{0}^2 & \\ \tau_{01} & \tau_{1}^2 \end{bmatrix}$ and $e_{ti} \sim \mathcal{N}(0,\sigma^2)$
+    a. Model Comparison:
+      \begin{fleqn}[\parindent] 
+        \begin{equation}
+          AIC_{KeyNeedModel} < AIC_{AllportModel}
+        \end{equation}
+      \end{fleqn}
+    a. Regression: 
+        \begin{fleqn}[\parindent]
+          \begin{equation} \label{eq:SlopesAttCoreAllport}
+            \begin{split}
+              \textrm{Level 1:} &
+                \begin{aligned}[t]
+                  \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+                                     &\ \beta_{2i}AllportConditions_{ti} + e_{ti}
+                \end{aligned} \\
+              \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                                &\ \beta_{1i} = \gamma_{10} + u_{1i} \\
+                                &\ \beta_{2i} = \gamma_{20} + u_{2i}
+            \end{split} 
+          \end{equation}
+        \end{fleqn}
+        
+All multilevel assumptions are tested as usual including (e.g., for random slopes model with _j_ within person predictors):
+
+\begin{flalign}
+  &\textrm{Level 1 Variance:}\ e_{ti} \sim \mathcal{N}(0,\sigma^2) \\
+  &\textrm{Level 2 Variance:}\ \begin{bmatrix} u_{0i}\\ \vdots\\ u_{ji}\end{bmatrix} 
+  \sim \mathcal{N}
+  \begin{pmatrix}
+    \begin{bmatrix} 
+      0 \\ 
+      \vdots \\
+      0
+    \end{bmatrix}, 
+    \begin{bmatrix} 
+      \tau_{00}^2 &  & \\ 
+      \vdots & \ddots & \\
+      \tau_{j0} & \ldots & \tau_{jj}^2
+    \end{bmatrix}
+  \end{pmatrix}
+\end{flalign}
     
 
 ## Transformations
