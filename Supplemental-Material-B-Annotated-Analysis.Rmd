@@ -91,7 +91,8 @@ lib <- c(
   "stringr",
   "stringi",
   "reshape2",
-  "lubridate"
+  "lubridate",
+  "purrr"
 )
 invisible(lapply(lib, library, character.only = TRUE))
 rm(lib)
@@ -1042,6 +1043,26 @@ df$interaction.f <-
 df$intNL <- ifelse(df$Interaction == "Dutch", 1, 0)
 df$intNonNL <- ifelse(df$Interaction == "Non-Dutch", 1, 0)
 
+df <- df %>%
+  mutate(
+    NonDutchContact = replace_na(NonDutchNum, 0), # make second non-Dutch countable
+    NonDutchContact = ifelse(NonDutchContact > 1, 1, 0) # recode (yes = 1 -> 1, no = 2 -> 0)
+  ) %>%
+  mutate(
+    OutgroupInteraction = factor(
+      InteractionDumDutch,
+      levels = c(0, 1),
+      labels = c("No", "Yes")
+    ),
+    NonOutgroupInteraction = factor(
+      rowSums(select(., c(InteractionDumNonDutch, NonDutchContact)), na.rm = TRUE), # combine the two non-Dutch Q.,
+      levels = c(0, 1),
+      labels = c("No", "Yes")
+    )
+  )
+
+
+
 # -------------------------------------------------------------------------------------------------------------
 #                                       Combine Variables
 # -------------------------------------------------------------------------------------------------------------
@@ -1068,6 +1089,99 @@ df$ProSo <-
 df$AntiSo <-
   rowMeans(df[, c("AntiSo1", "AntiSo2", "AntiSo3", "AntiSo4")], na.rm = T)
 
+# Allport's Conditions
+df %>%
+  #filter(OutgroupInteraction == "Yes") %>%
+  select(
+    InteractionContextEqualStatus,
+    KeyNeedShared,
+    InteractionContextCooperative,
+    InteractionContextvoluntary
+  ) %>%
+  pairs.panels.new
+
+df %>%
+  #filter(OutgroupInteraction == "Yes") %>%
+  select(
+    InteractionContextEqualStatus,
+    KeyNeedShared,
+    InteractionContextCooperative,
+    InteractionContextvoluntary
+  ) %>%
+  psych::describe(., skew=F,ranges=T) %>%
+  as.data.frame() %>%
+  select(-vars) %>%
+  kable(., caption = "Descriptives of Allport's Condition items") %>% 
+  kable_styling("hover", full_width = F, latex_options = "hold_position")
+
+
+
+iaWorkerAllport <- 
+  df %>%
+  #filter(OutgroupInteraction == "Yes") %>%
+  select(
+    InteractionContextEqualStatus,
+    KeyNeedShared,
+    InteractionContextCooperative,
+    InteractionContextvoluntary
+  )
+
+sjPlot::tab_itemscale(iaWorkerAllport)
+
+pca <- parameters::principal_components(iaWorkerAllport)
+factor.groups <- parameters::closest_component(pca)
+
+sjPlot::tab_itemscale(iaWorkerAllport, factor.groups)
+
+ltm::cronbach.alpha(na.omit(iaWorkerAllport), CI = TRUE)
+
+data <- 
+  df %>%
+  select(
+    PID,
+    TIDnum,
+    InteractionContextEqualStatus,
+    KeyNeedShared,
+    InteractionContextCooperative,
+    InteractionContextvoluntary
+  ) %>%
+  drop_na %>%
+  melt(
+    ., 
+    id.vars = c("PID", "TIDnum")
+  )
+
+
+horst::nestedAlpha(item.level.1 = "value",
+                   level.2      = "TIDnum",
+                   level.3      = "PID",
+                   data         = data)
+rm(data)
+
+iaWorkerAllportScale <- 
+  iaWorkerAllport %>%
+  Scale::Scale() %>%
+  Scale::ItemAnalysis()
+
+df$AllportsCondition <-
+  scoreItems(
+    keys = c(1, 1, 1, 1),
+    items = df %>% select(
+      InteractionContextEqualStatus,
+      KeyNeedShared,
+      InteractionContextCooperative,
+      InteractionContextvoluntary
+    ),
+    min = 0,
+    max = 100
+  )$scores
+
+as.data.frame(psych::describe(df$AllportsCondition, skew=T)) %>%
+  mutate(vars = "Allport's Conditions Index") %>%
+  kable(., caption = "Allport's Conditions: Scale Descriptives", row.names = FALSE) %>% 
+  kable_styling("hover", full_width = F, latex_options = "hold_position")
+
+histogram(df$AllportsCondition)
 
 # -------------------------------------------------------------------------------------------------------------
 #                                 Add Variables related to interaction partner
@@ -1136,69 +1250,67 @@ colnames(remergePP) <-
 df <- cbind(df, remergePP)
 rm(remergePP, PP)
 
-```
-
-
-```{r newVarsStudents}
-
 # -------------------------------------------------------------------------------------------------------------
 #                                 Center Relevant Variables
 # -------------------------------------------------------------------------------------------------------------
+# divide into trait and state
+medicalOutWithinBetween <-
+  MlTraitState(
+    data = df %>% filter(OutgroupInteraction == "Yes"),
+    id = "PID",
+    selection =
+      c(
+        "KeyNeedFulfillment",
+        "Competence",
+        "Autonomy",
+        "Relatedness",
+        "AllportsCondition",
+        "AttitudesDutch",
+        "qualityOverall"
+      )
+  )
 
-df <- df %>%
-  group_by(PID) %>%
-  mutate(
-    KeyNeedFullfillment.cm = mean(KeyNeedFullfillment, na.rm = TRUE),
-    # cluster mean (mean of PP)
-    KeyNeedFullfillment.cwc = KeyNeedFullfillment - KeyNeedFullfillment.cm,
-    # cluster mean centered (within PP centered)
-    closeness.cm = mean(closeness_Calc, na.rm = TRUE),
-    closeness.cwc = closeness_Calc - closeness.cm
-  ) %>%
-  ungroup()
+df <-
+  MlTraitState(
+    data = df,
+    id = "PID",
+    selection =
+      c(
+        "KeyNeedFulfillment",
+        "Competence",
+        "Autonomy",
+        "Relatedness",
+        "AllportsCondition",
+        "AttitudesDutch",
+        "qualityOverall"
+      )
+  )
 
 # store
-dtStudents$full <- df
+dtMedical$full <- df
 rm(df)
 
+
 # Between participants contact frequency
-studentContactFreq <- dtStudents$full %>%
+medicalContactFreq <- 
+  dtMedical$full %>%
   group_by(PID) %>%
   summarise(
     n = n(),
-    SumContactNL = sum(InteractionDumDutch),
+    SumContactNL = sum(InteractionDumDutch, na.rm = TRUE),
     PercContactNL = SumContactNL / n * 100,
     SumContactNLAll = sum(ContactNum[InteractionDumDutch == 1], na.rm = TRUE),
     AvAttitude = mean(AttitudesDutch, na.rm = TRUE),
-    AvQuality = mean(quality_overall, na.rm = TRUE)
+    AvQuality = mean(qualityOverall, na.rm = TRUE)
   ) %>%
   mutate(
     WinSumContactNL = DescTools::Winsorize(SumContactNL),
     WinSumContactNLAll = DescTools::Winsorize(SumContactNLAll)
   )
 
-# dataframe where interaction types are recoded
-studentInteractionType <- dtStudents$full %>%
-  mutate(
-    NonDutchContact = replace_na(NonDutchContact, 2), # make second non-Dutch countable
-    NonDutchContact = NonDutchContact*-1+2 # recode (yes = 1 -> 1, no = 2 -> 0)
-  ) %>%
-  mutate(
-    OutgroupInteraction = factor(
-      InteractionDumDutch,
-      levels = c(0, 1),
-      labels = c("No", "Yes")
-    ),
-    NonOutgroupInteraction = factor(
-      rowSums(select(., c(InteractionDumNonDutch, NonDutchContact))), # combine the two non-Dutch Q.,
-      levels = c(0, 1),
-      labels = c("No", "Yes")
-    )
-  )
-
 # select a subset of IDs to display in plots
-studentPltIDs <-
-  studentInteractionType %>%
+medicalPltIDs <-
+  dtMedical$full %>%
   group_by(PID) %>%
   summarise(n = n()) %>%
   slice_max(n, n = 20) %>% # chose the 20 with the most number of measurements
@@ -1207,8 +1319,8 @@ studentPltIDs <-
   as.vector
 
 # select a subset of IDs to display in plots (only outgroup interactions)
-studentOutPltIDs <-
-  studentInteractionType %>%
+medicalOutPltIDs <-
+  dtMedical$full %>%
   filter(OutgroupInteraction == "Yes") %>%
   group_by(PID) %>%
   summarise(n = n()) %>%
