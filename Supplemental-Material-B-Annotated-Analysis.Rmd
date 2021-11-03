@@ -190,9 +190,10 @@ dtStudents <- list(
 
 # young medical professionals
 dtMedical <- list(
-  raw.pre = c(),
-  raw.post = c(),
-  raw.daily = c()
+  raw.eligibility = read.csv("data/S3_Medical/raw/AOTM_Eligibility.csv"),
+  raw.pre = read.csv("data/S3_Medical/raw/AOTM_Pre.csv"),
+  raw.post = read.csv("data/S3_Medical/raw/AOTM_Post.csv"),
+  raw.daily = read.csv("data/S3_Medical/raw/AOTM_Daily.csv")
 )
 ```
 
@@ -617,11 +618,70 @@ rm(df.pre, df.daily, df.post, dfPreDaily, dfCombined, ownIDs)
 
 ### Medical
 
-To be done after preregistration.
+For the medical professionals sample data was, again, collected in three separate surveys: (1) the pre-measurement, (2) the daily survey sent out at lunch and dinner time, and (3) a post-measurement. We combine the three individual surveys into one large dataframe. We exclude our own test data. We also reformat missing values and format core ID variables.  
+<i class="fas fa-info-circle"></i> _Note:_ All data preparation steps are saved in the '_dtMedical_' list. 
 
 ```{r cleanMedical}
-# TBD
+# our own test IDs
+ownIDs <- c(
+  "test_LeonieXXXSklxecPLW0-FBPM4796o3pUwUhAY5jb9KGw8jQsKxWmGpa1Jiy", 
+  "test_MaxXXXtOp_5dTNefIq0yKXtXt2IN6eEKxeHoPY9mlyvdsqPpLp1B0NGg4UL",
+  "test_JannisXXXBsNqk62fOpX6chbd2tMWPptUdjjnhAqnQ3uBqckZ7gLIEoPlfZ",
+  "quaintLeopardCatXXXAJ9cfSj-_SZLwNwMDxv_xv_iyr1Bg5YFLTlYdrjW0UXZY",
+  "blue-eyedIndianElephantXXXLf5zPMpQCDGS3umFzIj-YVky7ivTItvvozW49m"
+)
+
+# Prepare dfs for Cleaning
+df.pre <- dtMedical$raw.pre %>%
+  mutate_all(na_if, "") %>%
+  mutate_all(na_if, "NA") %>%
+  filter(!is.na(ended)) %>% # remove all who did not finish
+  filter(!session %in% ownIDs) %>% # remove our own test
+  mutate(session = as.character(session)) # turn factor into character strings (probably just precaution)
+
+df.post <- dtMedical$raw.post %>%
+  mutate_all(na_if, "") %>%
+  mutate_all(na_if, "NA") %>% 
+  filter(!is.na(session)) %>% # remove own test runs
+  filter(!session %in% ownIDs) %>% # remove our own test
+  filter(session %in% df.pre$session) %>% # remove anyone who wasn't in the pre
+  #filter(!is.na(ended)) %>% # remove all who never finished [disabled because only relevant if data is missing]
+  filter(!session %in% .$session[duplicated(.$session)]) %>% # remove all duplicate sessions
+  mutate(session = as.character(session)) # turn factor into character strings (probably just precaution)
+
+df.daily <- dtMedical$raw.daily %>%
+  mutate_all(na_if, "") %>%
+  mutate_all(na_if, "NA") %>%
+  filter(!session %in% ownIDs) %>% # remove our own test
+  filter(session %in% df.pre$session) %>% # remove anyone who wasn't in the pre
+  #filter(!is.na(ended)) %>% # remove all who never finished [disabled because only relevant if data is missing]
+  mutate(session = as.character(session)) # turn factor into character strings (probably just precaution)
+
+# merge daily with pre
+dfPreDaily <- merge(
+  x = df.daily,
+  y = df.pre,
+  by = "session",
+  suffixes = c(".daily", ".pre"),
+  all = F
+)
+
+# merge daily with post
+dfCombined <- merge(
+  x = dfPreDaily,
+  y = df.post,
+  by = "session",
+  suffixes = c(".pre", ".post"),
+  all = F
+)
+
+# add to list
+dtMedical$clean <- dfCombined
+
+# clean up workspace
+rm(df.pre, df.daily, df.post, dfPreDaily, dfCombined, ownIDs)
 ```
+
 
 ## Calculate needed transformations  
 
@@ -744,7 +804,7 @@ workerInteractionType <- dtWorker$full %>%
 
 ### Student
 
-For the worker sample, the data transformation stage had three main aims: 
+For the student sample, the data transformation stage had five main aims: 
 
 1. We first create person, survey type, and measurement ID variables.   
 2. We then created indices of scales. Some indices were multi-item scales while some indices combine equivalent measurement for different situational circumstances (e.g., competence perceptions after interactions and at measurement occasions without interactions).   
@@ -951,10 +1011,211 @@ studentOutPltIDs <-
 
 ### Medical
 
-To be done after preregistration.   
+For the medical professional sample, the data transformation stage had five main aims: 
+
+1. We first create person, survey type, and measurement ID variables.   
+2. We then created indices of scales. Some indices were multi-item scales while some indices combine equivalent measurement for different situational circumstances (e.g., competence perceptions after interactions and at measurement occasions without interactions).   
+3. We cluster mean-center key variables within participants.   
+4. Finally, we calculated several basic participant summaries (averages across all measurement occasions).   
 
 ```{r newVarsMedical}
-# TBD
+df <- dtMedical$clean
+
+# Add ID variables
+df$PID <- as.numeric(factor(df$session)) # participant ID
+
+# order time
+df$TID <-
+  factor(df$date_period, levels = unique(dtMedical$raw.daily$date_period))
+df$TIDnum <- as.numeric(df$TID) # get numeric TID
+
+# check whether time ordering worked
+df <- df %>%
+  arrange(PID, TID) # %>%
+# View()
+
+# Interaction as Factor
+df$interaction.f <-
+  factor(df$Interaction,
+    levels = c("no interaction", "Dutch", "Non-Dutch")
+  )
+df$intNL <- ifelse(df$Interaction == "Dutch", 1, 0)
+df$intNonNL <- ifelse(df$Interaction == "Non-Dutch", 1, 0)
+
+# -------------------------------------------------------------------------------------------------------------
+#                                       Combine Variables
+# -------------------------------------------------------------------------------------------------------------
+# Relatedness
+pairs.panels.new(
+  df[c("RelatednessSelf", "RelatednessOther")],
+  labels = c(
+    "I shared information about myself.",
+    "X shared information about themselves."
+  )
+)
+df$RelatednessInteraction <-
+  rowMeans(df[c("RelatednessSelf", "RelatednessOther")], na.rm = T)
+df$RelatednessInteraction[df$RelatednessInteraction == "NaN"] <-
+  NA
+# Relatedness Overall (JANNIS NOT SURE THESE ARE CORRECT, CHANGE ROWS?; J: Changed "NaN" in df$RelatednessInteraction to NA() should work now)
+df$Relatedness <-
+  rowMeans(df[, c("RelatednessInteraction", "RelatednessNoInteraction")],
+           na.rm = TRUE)
+# Pro-Sociality
+df$ProSo <-
+  rowMeans(df[, c("ProSo1", "ProSo2", "ProSo3", "ProSo4")], na.rm = T)
+# Anti-Sociality
+df$AntiSo <-
+  rowMeans(df[, c("AntiSo1", "AntiSo2", "AntiSo3", "AntiSo4")], na.rm = T)
+
+
+# -------------------------------------------------------------------------------------------------------------
+#                                 Add Variables related to interaction partner
+# -------------------------------------------------------------------------------------------------------------
+# create function for later lapply
+createIntPartDf <- function(inp) {
+  # prepare the dataframe so that we can forloop over it later
+  tmp <- data.frame(
+    CC = as.character(inp$CC),
+    NewCC = as.character(inp$NewCC),
+    NewName = as.character(inp$NewName),
+    NewCloseness = inp$NewCloseness,
+    NewGender = inp$NewGender,
+    NewEthnicity = as.character(inp$NewEthnicity),
+    NewRelationship = as.character(inp$NewRelationship)
+  )
+
+  tmp$CC2 <- recode(tmp$CC, "SOMEONE ELSE" = "NA")
+  tmp$CC2 <-
+    ifelse(
+      tmp$CC == 1 |
+        tmp$CC == "SOMEONE ELSE",
+      as.character(tmp$NewName),
+      as.character(tmp$CC2)
+    )
+  # maybe add [[:space:]]\b to remove space before word boundary or ^[[:space:]] to remove space in the beginning of a string
+  tmp$CC2 <- gsub("^[[:space:]]", "", tmp$CC2)
+  tmp$NewName <- gsub("^[[:space:]]", "", tmp$NewName)
+
+  # open the variables that will be filled up in the foor-loop
+  tmp$closeness <- rep(NA, nrow(tmp))
+  tmp$gender <- rep(NA, nrow(tmp))
+  tmp$ethnicity <- rep(NA, nrow(tmp))
+  tmp$relationship <- rep(NA, nrow(tmp))
+
+  # Run the for-loop. It finds the variables related to the name of the interaction partner. If there is a repeating interaction
+  # partner (i.e. CC2) it takes the value (i.e. NewCloseness) from the first interaction (i.e. NewName)
+  for (i in 1:nrow(tmp)) {
+    if (is.na(tmp$CC2[i])) {
+      next
+    } else {
+      tmp$closeness[i] <-
+        na.omit(tmp$NewCloseness[as.character(tmp$CC2[i]) == as.character(tmp$NewName)])[1] # find closeness where CC2 matches NewName (na.omit + [1] to get the number)
+      tmp$gender[i] <-
+        na.omit(tmp$NewGender[as.character(tmp$CC2[i]) == as.character(tmp$NewName)])[1] # (na.omit + [1] to get the number and not the rest of the na.omit list)
+      tmp$ethnicity[i] <-
+        na.omit(as.character(tmp$NewEthnicity[as.character(tmp$CC2[i]) == as.character(tmp$NewName)]))[1] # PROBLEM IS THAT THERE ARE TOO MANY NA's: Difficult to deal with
+      tmp$relationship[i] <-
+        na.omit(as.character(tmp$NewRelationship[as.character(tmp$CC2[i]) == as.character(tmp$NewName)]))[1]
+    }
+  }
+
+  out <- tmp
+  out
+}
+
+# split df per participants and run function
+PP <- split(df, df$PID)
+PP <- lapply(PP, createIntPartDf)
+rm(createIntPartDf)
+
+# add variables back to df
+remergePP <- do.call(rbind.data.frame, PP)
+colnames(remergePP) <-
+  paste(colnames(remergePP), "_Calc", sep = "")
+df <- cbind(df, remergePP)
+rm(remergePP, PP)
+
+```
+
+
+```{r newVarsStudents}
+
+# -------------------------------------------------------------------------------------------------------------
+#                                 Center Relevant Variables
+# -------------------------------------------------------------------------------------------------------------
+
+df <- df %>%
+  group_by(PID) %>%
+  mutate(
+    KeyNeedFullfillment.cm = mean(KeyNeedFullfillment, na.rm = TRUE),
+    # cluster mean (mean of PP)
+    KeyNeedFullfillment.cwc = KeyNeedFullfillment - KeyNeedFullfillment.cm,
+    # cluster mean centered (within PP centered)
+    closeness.cm = mean(closeness_Calc, na.rm = TRUE),
+    closeness.cwc = closeness_Calc - closeness.cm
+  ) %>%
+  ungroup()
+
+# store
+dtStudents$full <- df
+rm(df)
+
+# Between participants contact frequency
+studentContactFreq <- dtStudents$full %>%
+  group_by(PID) %>%
+  summarise(
+    n = n(),
+    SumContactNL = sum(InteractionDumDutch),
+    PercContactNL = SumContactNL / n * 100,
+    SumContactNLAll = sum(ContactNum[InteractionDumDutch == 1], na.rm = TRUE),
+    AvAttitude = mean(AttitudesDutch, na.rm = TRUE),
+    AvQuality = mean(quality_overall, na.rm = TRUE)
+  ) %>%
+  mutate(
+    WinSumContactNL = DescTools::Winsorize(SumContactNL),
+    WinSumContactNLAll = DescTools::Winsorize(SumContactNLAll)
+  )
+
+# dataframe where interaction types are recoded
+studentInteractionType <- dtStudents$full %>%
+  mutate(
+    NonDutchContact = replace_na(NonDutchContact, 2), # make second non-Dutch countable
+    NonDutchContact = NonDutchContact*-1+2 # recode (yes = 1 -> 1, no = 2 -> 0)
+  ) %>%
+  mutate(
+    OutgroupInteraction = factor(
+      InteractionDumDutch,
+      levels = c(0, 1),
+      labels = c("No", "Yes")
+    ),
+    NonOutgroupInteraction = factor(
+      rowSums(select(., c(InteractionDumNonDutch, NonDutchContact))), # combine the two non-Dutch Q.,
+      levels = c(0, 1),
+      labels = c("No", "Yes")
+    )
+  )
+
+# select a subset of IDs to display in plots
+studentPltIDs <-
+  studentInteractionType %>%
+  group_by(PID) %>%
+  summarise(n = n()) %>%
+  slice_max(n, n = 20) %>% # chose the 20 with the most number of measurements
+  select(PID) %>%
+  as.matrix %>%
+  as.vector
+
+# select a subset of IDs to display in plots (only outgroup interactions)
+studentOutPltIDs <-
+  studentInteractionType %>%
+  filter(OutgroupInteraction == "Yes") %>%
+  group_by(PID) %>%
+  summarise(n = n()) %>%
+  slice_max(n, n = 20) %>% # chose the 20 with the most number of measurements
+  select(PID) %>%
+  as.matrix %>%
+  as.vector
 ```
 
 # **Worker Sample**

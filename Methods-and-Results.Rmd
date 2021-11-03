@@ -2822,6 +2822,22 @@ In a final step we again checked whether during the interaction the core situati
 
 \subsection{Methods}
 
+\subsubsection{Participants}
+
+\subsubsection{Procedure}
+
+\subsubsection{Materials}
+
+\paragraph{Intergroup Contact}
+
+\paragraph{Psychological Needs}
+
+\paragraph{Allport's Conditions}
+
+\paragraph{Perceived Interaction Quality}
+
+\paragraph{Outgroup Attitudes}
+
 \subsection{Results}
 
 <!-- \begin{figure}[h] -->
