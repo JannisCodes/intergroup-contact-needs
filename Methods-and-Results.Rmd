@@ -1405,7 +1405,7 @@ In a final step we check whether during the interaction the core situational nee
 
 \section{Study 2}
 
-The aim of our study is similar to to that of the first study, as we again test the general contact hypothesis, the influence of core need fulfillment, and perceived interaction quality during intergroup contacts. However, in this second study we collected a substantially larger intensive longitudinal survey study with recently arrived international students in the Netherlands. The survey method again offers a large body of ecologically valid data on need satisfaction in real-life intergroup contact situations as these students will likely interact with the Dutch majority outgroup on a daily basis. Data was collected from November 19th, 2018 through January 6th, 2019.
+The aim of our study is similar to that of the first study, as we again test the general contact hypothesis, the influence of core need fulfillment, and perceived interaction quality during intergroup contacts. However, in this second study we collected a substantially larger intensive longitudinal survey study with recently arrived international students in the Netherlands. The survey method again offers a large body of ecologically valid data on need satisfaction in real-life intergroup contact situations as these students will likely interact with the Dutch majority outgroup on a daily basis. Data was collected from November 19th, 2018 through January 6th, 2019.
 
 The full surveys are available in our Online Supplementary Material A and the full data description is available in Online Supplementary Materials B. Correlations and descriptive statistics of the included variables are available in Table \ref{tab:studentVarDescr} and Table \ref{tab:studentOutVarDescr}.
 
@@ -2820,10 +2820,16 @@ In a final step we again checked whether during the interaction the core situati
 
 \section{Study 3}
 
+The aim of this final study is to extend the previous studies by additionally testing Allport's conditions in an extensive longitudinal design and to compare the predictive powers of Allport's conditions and the core situational need fulfillment. We will, thus, again test the general contact hypothesis, the influence of core need fulfillment, and perceived interaction quality during intergroup contacts. However, we additionally have the opportunity to also assess the role of Allport's conditions in this and to compare the two approaches (Allport's conditions and core need fulfillment) directly. 
+
+For this study we specifically recruited international medical students, because they represent a particular group of migrants who face structural requirements to integrate and interact with Dutch majority outgroup members on a daily basis. As part of their educational program, the migrants are required to take language courses and interact with patients as part of their medical internships and medical residency. The extensive longitudinal survey method again offers a large body of ecologically valid data on need satisfaction in real-life intergroup contact situations. Data were collected from November 8th, 2019 to January 10th, 2020.
+
+The full surveys are available in our Online Supplementary Material A and the full data description is available in Online Supplementary Materials B. Correlations and descriptive statistics of the included variables are available in Table \ref{tab:medicalVarDescr} and Table \ref{tab:medicalOutVarDescr}.
+
 \subsection{Methods}
 
 ```{r medicalSampleInfo, include=FALSE}
-
+# extract demographic information from eligibility questionnaire
 medicalDemographicSupp <- 
   dtMedical$raw.eligibility %>%
   filter(session %in% dtMedical$full$session) %>%
@@ -2850,7 +2856,7 @@ table(medicalSampleInfo$gender)
 table(as.character(medicalSampleInfo$nationality))
 ```
 
-```{r studentVarDescr, include=FALSE}
+```{r medicalVarDescr, include=FALSE}
 medicalMlCor <-
   MlCorMat(
     data = dtMedical$full,
@@ -2879,7 +2885,7 @@ medicalMlCor %>%
   save_kable("Tables/medicalVarDescr.tex")
 ```
 
-```{r studentOutVarDescr, include=FALSE}
+```{r medicalOutVarDescr, include=FALSE}
 medicalOutMlCor <-
   MlCorMat(
     data = dtMedical$full %>% filter(OutgroupInteraction == "Yes"),
@@ -2916,15 +2922,19 @@ medicalOutMlCor %>%
 
 \subsubsection{Materials}
 
-\paragraph{Intergroup Contact}
+\paragraph{Intergroup Contact}The measurement of intergroup contacts was identical to study two. The participants recorded between `r dtMedicalSupp$medicalContactFreq$SumContactNL[dtMedicalSupp$medicalContactFreq$SumContactNL > 0] %>% min`--`r dtMedicalSupp$medicalContactFreq$SumContactNL %>% max`
+(`r dtMedicalSupp$medicalContactFreq$PercContactNL[dtMedicalSupp$medicalContactFreq$PercContactNL > 0] %>% min %>% round(2) %>% format(nsmall=2)`--`r dtMedicalSupp$medicalContactFreq$PercContactNL %>% max %>% round(2) %>% format(nsmall=2)`\% of individual daily diary measurements; `r (sum(dtMedicalSupp$medicalContactFreq$SumContactNL) / nrow(dtMedical$full) * 100) %>% round(2) %>% format(nsmall=2)`\% of all `r nrow(dtMedical$full)` daily diary responses). 
 
-\paragraph{Psychological Needs}
+\paragraph{Psychological Needs}The measurement of the core situational need and its fulfillment was identical to study two. Similarly, the measurement of the self determination needs was identical to studies one and two. 
 
-\paragraph{Allport's Conditions}
+\paragraph{Allport's Conditions}To measure how much each of the interactions fulfilled Allport's conditions of optimal contact we asked participants to rate how much the interaction had equal status ("\textit{The interaction with [name interaction partner] was on equal footing (same status)}"), a common goal ("\textit{[name interaction partner] shared your goal ([free-text entry interaction key need])}"), support of authorities ("\textit{The interaction with [name interaction partner] was voluntary}"), and intergroup cooperation ("\textit{The interaction with [name interaction partner] was cooperative}"). 
 
-\paragraph{Perceived Interaction Quality}
+\paragraph{Perceived Interaction Quality}The ratings of the perceived interaction quality was identical to study one.
 
-\paragraph{Outgroup Attitudes}
+\paragraph{Outgroup Attitudes}Attitudes towards the Dutch majority outgroup was again measured using the feeling thermometer, as in studies one and two. All survey details are also available in Online Supplemental Materials A and B. 
+
+\input{Tables/medicalVarDescr}
+\input{Tables/medicalOutVarDescr}
 
 \subsection{Results}
 
