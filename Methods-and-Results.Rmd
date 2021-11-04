@@ -211,6 +211,7 @@ workerMlCor %>%
     caption = "Worker: Multilevel Core Variable Descriptives",
     format = "latex",
     booktabs = TRUE,
+    linesep = linesep(c(ncol(.))),
     align = c("l", rep("c", ncol(.) - 1))
   ) %>%
   footnote(
@@ -240,6 +241,7 @@ workerOutMlCor %>%
     caption = "Worker: Multilevel Core Variable Descriptives (Outgroup Contact Only)",
     format = "latex",
     booktabs = TRUE,
+    linesep = linesep(c(ncol(.))),
     align = c("l", rep("c", ncol(.) - 1))
   ) %>%
   footnote(
@@ -1501,6 +1503,7 @@ studentMlCor %>%
     caption = "Student: Multilevel Core Variable Descriptives",
     format = "latex",
     booktabs = TRUE,
+    linesep = linesep(c(ncol(.))),
     align = c("l", rep("c", ncol(.) - 1))
   ) %>%
   footnote(
@@ -1530,6 +1533,7 @@ studentOutMlCor %>%
     caption = "Student: Multilevel Core Variable Descriptives (Outgroup Contact Only)",
     format = "latex",
     booktabs = TRUE,
+    linesep = linesep(c(ncol(.))),
     align = c("l", rep("c", ncol(.) - 1))
   ) %>%
   footnote(
@@ -2861,7 +2865,7 @@ medicalMlCor <-
   MlCorMat(
     data = dtMedical$full,
     id = "PID",
-    selection = c("KeyNeedFulfillment", "Competence", "Autonomy", "Relatedness", "AllportsCondition", "qualityOverall", "AttitudesDutch") ,
+    selection = c("KeyNeedFulfillment", "Competence", "Autonomy", "Relatedness", "AllportsCondition", "qualityOverall", "AttitudesDutch"),
     labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Allport's Conditions", "Interaction Quality", "Attitudes NL")
   ) 
 
@@ -2871,6 +2875,7 @@ medicalMlCor %>%
     caption = "Medical: Multilevel Core Variable Descriptives",
     format = "latex",
     booktabs = TRUE,
+    linesep = linesep(c(ncol(.))),
     align = c("l", rep("c", ncol(.) - 1))
   ) %>%
   footnote(
@@ -2891,7 +2896,7 @@ medicalOutMlCor <-
   MlCorMat(
     data = dtMedical$full %>% filter(OutgroupInteraction == "Yes"),
     id = "PID",
-    selection = c("KeyNeedFulfillment", "Competence", "Autonomy", "Relatedness", "AllportsCondition", "qualityOverall", "AttitudesDutch") ,
+    selection = c("KeyNeedFulfillment", "Competence", "Autonomy", "Relatedness", "AllportsCondition", "qualityOverall", "AttitudesDutch"),
     labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Allport's Conditions", "Interaction Quality", "Attitudes NL")
   )
 
@@ -2901,6 +2906,7 @@ medicalOutMlCor %>%
     caption = "Medical: Multilevel Core Variable Descriptives (Outgroup Contact Only)",
     format = "latex",
     booktabs = TRUE,
+    linesep = linesep(c(ncol(.))),
     align = c("l", rep("c", ncol(.) - 1))
   ) %>%
   footnote(
@@ -2910,7 +2916,7 @@ medicalOutMlCor %>%
       "*** p < .001, ** p < .01,  * p < .05"
     )
   ) %>%
-  kableExtra::landscape() %>%
+  landscape() %>%
   gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
   gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
   save_kable("Tables/medicalOutVarDescr.tex")
