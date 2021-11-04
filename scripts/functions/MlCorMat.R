@@ -287,3 +287,9 @@ MlCoeffLatex <- function(lmeMdl = NULL, lmerCI = NULL, varName = NULL) {
     )
   }
 }
+
+linesep<-function(x,y=character()){
+  if(!length(x))
+    return(y)
+  linesep(x[-length(x)], c(rep('',x[length(x)]-1),'\\addlinespace',y))  
+}

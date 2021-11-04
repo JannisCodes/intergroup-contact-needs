@@ -201,7 +201,7 @@ workerMlCor <-
   MlCorMat(
     data = dtWorkerSupp$workerInteractionType,
     id = "PID",
-    selection = c("keyMotiveFulfilled", "competence.daily.all", "autonomy.daily.all", "relatedness.daily.all", "thermometerDutch_1") ,
+    selection = c("keyMotiveFulfilled", "competence.daily.all", "autonomy.daily.all", "relatedness.daily.all", "thermometerDutch_1"),
     labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Attitudes NL")
   ) 
 
@@ -231,7 +231,7 @@ workerOutMlCor <-
   MlCorMat(
     data = dtWorkerSupp$workerInteractionType %>% filter(OutgroupInteraction == "Yes"),
     id = "PID",
-    selection = c("keymotive_fulfillemt_1", "competence_1", "autonomy_1", "relatedness_1", "thermometerDutch_1") ,
+    selection = c("keymotive_fulfillemt_1", "competence_1", "autonomy_1", "relatedness_1", "thermometerDutch_1"),
     labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Attitudes NL")
   )
 
@@ -2865,7 +2865,7 @@ medicalMlCor <-
   MlCorMat(
     data = dtMedical$full,
     id = "PID",
-    selection = c("KeyNeedFulfillment", "Competence", "Autonomy", "Relatedness", "AllportsCondition", "qualityOverall", "AttitudesDutch"),
+    selection = c("KeyNeedFulfillment", "Competence", "Autonomy", "Relatedness", "AllportsCondition", "qualityOverall", "AttitudesDutch") ,
     labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Allport's Conditions", "Interaction Quality", "Attitudes NL")
   ) 
 
@@ -2896,7 +2896,7 @@ medicalOutMlCor <-
   MlCorMat(
     data = dtMedical$full %>% filter(OutgroupInteraction == "Yes"),
     id = "PID",
-    selection = c("KeyNeedFulfillment", "Competence", "Autonomy", "Relatedness", "AllportsCondition", "qualityOverall", "AttitudesDutch"),
+    selection = c("KeyNeedFulfillment", "Competence", "Autonomy", "Relatedness", "AllportsCondition", "qualityOverall", "AttitudesDutch") ,
     labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Allport's Conditions", "Interaction Quality", "Attitudes NL")
   )
 
@@ -2916,7 +2916,7 @@ medicalOutMlCor %>%
       "*** p < .001, ** p < .01,  * p < .05"
     )
   ) %>%
-  landscape() %>%
+  kableExtra::landscape() %>%
   gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
   gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
   save_kable("Tables/medicalOutVarDescr.tex")
