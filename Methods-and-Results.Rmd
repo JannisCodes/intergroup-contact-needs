@@ -201,8 +201,8 @@ workerMlCor <-
   MlCorMat(
     data = dtWorkerSupp$workerInteractionType,
     id = "PID",
-    selection = c("keyMotiveFulfilled", "competence.daily.all", "autonomy.daily.all", "relatedness.daily.all", "thermometerDutch_1"),
-    labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Attitudes NL")
+    selection = c("keyMotiveFulfilled", "competence.daily.all", "autonomy.daily.all", "relatedness.daily.all", "quality_overall_1", "thermometerDutch_1"),
+    labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Quality", "Attitudes NL")
   ) 
 
 workerMlCor %>%
@@ -231,8 +231,8 @@ workerOutMlCor <-
   MlCorMat(
     data = dtWorkerSupp$workerInteractionType %>% filter(OutgroupInteraction == "Yes"),
     id = "PID",
-    selection = c("keymotive_fulfillemt_1", "competence_1", "autonomy_1", "relatedness_1", "thermometerDutch_1"),
-    labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Attitudes NL")
+    selection = c("keymotive_fulfillemt_1", "competence_1", "autonomy_1", "relatedness_1", "quality_overall_1", "thermometerDutch_1"),
+    labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Quality", "Attitudes NL")
   )
 
 workerOutMlCor %>%
@@ -1493,8 +1493,8 @@ studentMlCor <-
   MlCorMat(
     data = dtStudentSupp$studentInteractionType,
     id = "PID",
-    selection = c("KeyNeedFullfillment", "Competence", "Autonomy", "Relatedness", "AttitudesDutch") ,
-    labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Attitudes NL")
+    selection = c("KeyNeedFullfillment", "Competence", "Autonomy", "Relatedness", "quality_overall", "AttitudesDutch"),
+    labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Quality", "Attitudes NL")
   ) 
 
 studentMlCor %>%
@@ -1523,8 +1523,8 @@ studentOutMlCor <-
   MlCorMat(
     data = dtStudentSupp$studentInteractionType %>% filter(OutgroupInteraction == "Yes"),
     id = "PID",
-    selection = c("KeyNeedFullfillment", "Competence", "Autonomy", "Relatedness", "AttitudesDutch"),
-    labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Attitudes NL")
+    selection = c("KeyNeedFullfillment", "Competence", "Autonomy", "Relatedness", "quality_overall", "AttitudesDutch"),
+    labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Quality", "Attitudes NL")
   )
 
 studentOutMlCor %>%
@@ -2865,8 +2865,8 @@ medicalMlCor <-
   MlCorMat(
     data = dtMedical$full,
     id = "PID",
-    selection = c("KeyNeedFulfillment", "Competence", "Autonomy", "Relatedness", "AllportsCondition", "qualityOverall", "AttitudesDutch") ,
-    labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Allport's Conditions", "Interaction Quality", "Attitudes NL")
+    selection = c("KeyNeedFulfillment", "Competence", "Autonomy", "Relatedness", "AllportsCondition", "qualityOverall", "AttitudesDutch"),
+    labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Allport", "Quality", "Attitudes NL")
   ) 
 
 medicalMlCor %>%
@@ -2896,8 +2896,8 @@ medicalOutMlCor <-
   MlCorMat(
     data = dtMedical$full %>% filter(OutgroupInteraction == "Yes"),
     id = "PID",
-    selection = c("KeyNeedFulfillment", "Competence", "Autonomy", "Relatedness", "AllportsCondition", "qualityOverall", "AttitudesDutch") ,
-    labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Allport's Conditions", "Interaction Quality", "Attitudes NL")
+    selection = c("KeyNeedFulfillment", "Competence", "Autonomy", "Relatedness", "AllportsCondition", "qualityOverall", "AttitudesDutch"),
+    labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Allport", "Quality", "Attitudes NL")
   )
 
 medicalOutMlCor %>%
