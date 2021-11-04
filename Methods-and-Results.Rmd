@@ -2909,6 +2909,7 @@ medicalOutMlCor %>%
       "*** p < .001, ** p < .01,  * p < .05"
     )
   ) %>%
+  kableExtra::landscape() %>%
   gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
   gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
   save_kable("Tables/medicalOutVarDescr.tex")
@@ -2945,6 +2946,8 @@ medicalOutMlCor %>%
 \subsubsection{Core Need}
 
 \subsubsection{Robustness}
+
+
 
 <!-- \begin{figure}[h] -->
 
