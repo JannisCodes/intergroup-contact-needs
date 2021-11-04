@@ -2880,6 +2880,7 @@ medicalMlCor %>%
       "*** p < .001, ** p < .01,  * p < .05"
     )
   ) %>%
+  kable_styling(latex_options = "scale_down") %>%
   gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
   gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
   save_kable("Tables/medicalVarDescr.tex")
