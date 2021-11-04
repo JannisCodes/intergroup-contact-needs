@@ -1,1 +1,0 @@
-This folder includes the jekyll theme. We comment some elements out for blind peer review.
