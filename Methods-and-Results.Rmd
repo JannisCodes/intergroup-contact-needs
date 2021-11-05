@@ -221,6 +221,7 @@ workerMlCor %>%
       "*** p < .001, ** p < .01,  * p < .05"
     )
   ) %>%
+  kable_styling(latex_options = "scale_down") %>%
   gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
   gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
   save_kable("Tables/workerVarDescr.tex")
@@ -251,6 +252,7 @@ workerOutMlCor %>%
       "*** p < .001, ** p < .01,  * p < .05"
     )
   ) %>%
+  kable_styling(latex_options = "scale_down") %>%
   gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
   gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
   save_kable("Tables/workerOutVarDescr.tex")
@@ -1513,6 +1515,7 @@ studentMlCor %>%
       "*** p < .001, ** p < .01,  * p < .05"
     )
   ) %>%
+  kable_styling(latex_options = "scale_down") %>%
   gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
   gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
   save_kable("Tables/studentVarDescr.tex")
@@ -1543,6 +1546,7 @@ studentOutMlCor %>%
       "*** p < .001, ** p < .01,  * p < .05"
     )
   ) %>%
+  kable_styling(latex_options = "scale_down") %>%
   gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
   gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
   save_kable("Tables/studentOutVarDescr.tex")
@@ -2916,7 +2920,7 @@ medicalOutMlCor %>%
       "*** p < .001, ** p < .01,  * p < .05"
     )
   ) %>%
-  kableExtra::landscape() %>%
+  kable_styling(latex_options = "scale_down") %>%
   gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
   gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
   save_kable("Tables/medicalOutVarDescr.tex")
