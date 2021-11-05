@@ -359,6 +359,7 @@ mdlWorker$lmeAttNull <-
     thermometerDutch_1 ~ 1,
     random = ~ 1 | PID,
     data = dtWorker$full,
+    na.action=na.omit,
     control = list(opt = "nlmimb")
   ) # use optim if it does not converge
 
@@ -393,6 +394,7 @@ mdlWorker$lmeInterceptAttType <-
   lme(
     thermometerDutch_1 ~ OutgroupInteraction + NonOutgroupInteraction,
     random =  ~ 1 | PID,
+    na.action=na.omit,
     data = dtWorkerSupp$workerInteractionType
   )
 
@@ -464,6 +466,7 @@ mdlWorkerOut$Att$lmeNull <-
     thermometerDutch_1 ~ 1,
     random = ~ 1 | PID,
     data = dtWorkerSupp$workerOutgroupInteraction,
+    na.action=na.omit,
     control = list(opt = "nlmimb")
   ) # use optim if it does not converge
 
@@ -498,6 +501,7 @@ mdlWorkerOut$Att$lmeInterceptCore <-
   lme(
     thermometerDutch_1 ~ keymotive_fulfillemt_1_cwc,
     random = ~ 1 | PID,
+    na.action=na.omit,
     data = dtWorkerSupp$workerOutWithinBetween
   )
 
@@ -567,6 +571,7 @@ mdlWorkerOut$Att$lmeSlopesCore <-
       keymotive_fulfillemt_1_cwc,
     random = ~ 1 + keymotive_fulfillemt_1_cwc | PID,
     control = lmeControl(opt = "optim"),
+    na.action=na.omit,
     data = dtWorkerSupp$workerOutWithinBetween
   )
 
@@ -706,6 +711,7 @@ mdlWorkerOut$Qlt$lmeNull <-
     quality_overall_1 ~ 1,
     random = ~ 1 | PID,
     data = dtWorkerSupp$workerOutWithinBetween,
+    na.action=na.omit,
     control = list(opt = "nlmimb")
   ) # use optim if it does not converge
 
@@ -740,6 +746,7 @@ mdlWorkerOut$Qlt$lmeInterceptCore <-
   lme(
     quality_overall_1 ~ keymotive_fulfillemt_1_cwc,
     random = ~ 1 | PID,
+    na.action=na.omit,
     data = dtWorkerSupp$workerOutWithinBetween
   )
 
@@ -797,6 +804,7 @@ mdlWorkerOut$Qlt$lmeSlopesCore <-
       keymotive_fulfillemt_1_cwc,
     random = ~ 1 + keymotive_fulfillemt_1_cwc | PID,
     control = lmeControl(opt = "optim"),
+    na.action=na.omit,
     data = dtWorkerSupp$workerOutWithinBetween
   )
 
@@ -855,6 +863,7 @@ mdlWorkerOut$Att$lmeInterceptCoreQlt <-
   lme(
     thermometerDutch_1 ~ keymotive_fulfillemt_1_cwc + quality_overall_1_cwc,
     random = ~ 1 | PID,
+    na.action=na.omit,
     data = dtWorkerSupp$workerOutWithinBetween
   )
 
@@ -913,6 +922,7 @@ mdlWorkerOut$Att$lmeSlopesCoreQlt <-
       keymotive_fulfillemt_1_cwc + quality_overall_1_cwc,
     random = ~ 1 + keymotive_fulfillemt_1_cwc + quality_overall_1_cwc | PID,
     control = lmeControl(opt = "optim"),
+    na.action=na.omit,
     data = dtWorkerSupp$workerOutWithinBetween
   )
 
@@ -1017,6 +1027,7 @@ mdlWorker$lmeInterceptAttCoreInt <-
   lme(
     thermometerDutch_1 ~ keyMotiveFulfilled_cwc * OutgroupInteraction,
     random =  ~ 1 | PID,
+    na.action=na.omit,
     data = dtWorkerSupp$workerWithinBetween
   )
 
@@ -1073,6 +1084,7 @@ mdlWorker$lmeSlopesAttCoreInt <- lme(
     keyMotiveFulfilled_cwc * OutgroupInteraction,
   random = ~ 1 + keyMotiveFulfilled_cwc + OutgroupInteraction | PID,
   control = lmeControl(opt = "optim"),
+  na.action=na.omit,
   data = dtWorkerSupp$workerWithinBetween
 )
 
@@ -2950,7 +2962,281 @@ medicalOutMlCor %>%
 
 \subsection{Results}
 
-\subsubsection{Contact Hypothesis}
+```{r medicalFreqAttCor, include=FALSE}
+dtMedicalSupp$medicalContactFreq <-
+  dtMedicalSupp$medicalContactFreq %>%
+  mutate(
+    SumContactNL_c = SumContactNL - mean(SumContactNL, na.rm = TRUE),
+    SumContactNLAll_c = SumContactNLAll - mean(SumContactNLAll, na.rm = TRUE),
+    AvAttitude_c = AvAttitude - mean(AvAttitude, na.rm = TRUE),
+    AvQuality_c = AvQuality - mean(AvQuality, na.rm = TRUE)
+  )
+
+# correlation panel
+pairs.panels.new(
+  dtMedicalSupp$medicalContactFreq %>% select(SumContactNL, SumContactNLAll, AvQuality, AvAttitude),
+  labels = c(
+    "Sum:\nNumer of beeps with Outgroup Contact (NL)",
+    "Sum:\nNumber of Outgroup Contacts (NL)",
+    "Mean:\nInteraction Quality",
+    "Mean:\nOutgroup Attitudes (NL)"
+  )
+)
+
+# correlation panel with interaction sums winsorized
+pairs.panels.new(
+  dtMedicalSupp$medicalContactFreq %>% select(WinSumContactNL, WinSumContactNLAll, AvQuality, AvAttitude),
+  labels = c(
+    "Sum:\nNumer of beeps with Outgroup Contact (NL)\n[Winsorized]",
+    "Sum:\nNumber of Outgroup Contacts (NL)\n[Winsorized]",
+    "Mean:\nInteraction Quality",
+    "Mean:\nOutgroup Attitudes (NL)"
+  )
+)
+```
+
+\subsubsection{Contact Hypothesis}We tested the most general contact hypothesis in two steps. First, we assessed whether more intergroup interactions were related to to more positive outgroup attitudes. Second, we tested whether a potential positive effect on outgroup attitudes depended on the interaction quality (jointly with the number of interactions). We find no significant correlation between intergroup contact and average outgroup attitudes --- for neither the total number of outgroup interactions (\textit{r} = `r cor(dtMedicalSupp$medicalContactFreq$SumContactNLAll, dtMedicalSupp$medicalContactFreq$AvAttitude) %>% round(2) %>% format(nsmall=2)`, \textit{p} = `r cor.test(dtMedicalSupp$medicalContactFreq$SumContactNLAll, dtMedicalSupp$medicalContactFreq$AvAttitude)$p.value %>% round(3) %>% format(nsmall=3)`) and the number of measurement beeps with an interaction (\textit{r} = `r cor(dtMedicalSupp$medicalContactFreq$SumContactNL, dtMedicalSupp$medicalContactFreq$AvAttitude) %>% round(2) %>% format(nsmall=2)`, \textit{p} = `r cor.test(dtMedicalSupp$medicalContactFreq$SumContactNL, dtMedicalSupp$medicalContactFreq$AvAttitude)$p.value %>% round(3) %>% format(nsmall=3)`). This is to say that within our data, participants with more outgroup interactions did not have significantly more positive or negative outgroup attitudes. This is again consistent with the results we found in the first study but inconsitent with the significant relationship we find in the second study. 
+
+```{r medicalModelOlsAttFreqQual, include=FALSE}
+# create list to store Worker models
+mdlMedical <- list()
+
+# regression
+mdlMedical$lmAttFreqQualX <-
+  lm(AvAttitude ~ SumContactNL_c * AvQuality_c, data = dtMedicalSupp$medicalContactFreq)
+
+summ(
+  mdlMedical$lmAttFreqQualX,
+  confint = TRUE,
+  digits = 3
+)
+
+mdlMedical$lmAttFreqQualXEta <-
+  effectsize::eta_squared(mdlMedical$lmAttFreqQualX, partial = TRUE)
+
+interactions::interact_plot(
+  mdlMedical$lmAttFreqQualX,
+  pred = SumContactNL_c,
+  modx = AvQuality_c,
+  interval = TRUE,
+  partial.residuals = TRUE
+)
+
+interactions::johnson_neyman(mdlMedical$lmAttFreqQualX,
+                             pred = SumContactNL_c,
+                             modx = AvQuality_c,
+                             alpha = .05)
+```
+
+However, we do find a significant correlation between the participants' Average Interaction Quality and their Average Outgroup Attitudes (\textit{r} = `r cor(dtMedicalSupp$medicalContactFreq$AvQuality, dtMedicalSupp$medicalContactFreq$AvAttitude) %>% round(2) %>% format(nsmall=2)`, \textit{p} = `r cor.test(dtMedicalSupp$medicalContactFreq$AvQuality, dtMedicalSupp$medicalContactFreq$AvAttitude)$p.value %>% round(3) %>% format(nsmall=3)`). Thus, when considering the number of interactions and average interaction quality jointly in a linear regression, we only find a main effect of average perceived interaction quality on predict outgroup attitudes (\textit{b} = `r coef(summary(mdlMedical$lmAttFreqQualX))["AvQuality_c","Estimate"] %>% round(2) %>% format(nsmall=2)`, \textit{t}(`r mdlMedical$lmAttFreqQualX$df.residual`) = `r coef(summary(mdlMedical$lmAttFreqQualX))["AvQuality_c","t value"] %>% round(2) %>% format(nsmall=2)`, \textit{p} = `r coef(summary(mdlMedical$lmAttFreqQualX))["AvQuality_c","Pr(>|t|)"] %>% round(3) %>% format(nsmall=3)`, $\eta_p^2$ = `r mdlMedical$lmAttFreqQualXEta %>% filter(Parameter == "AvQuality_c") %>% select(Eta2_partial) %>% as.numeric %>% round(2) %>% format(nsmall=2)`). Given the missing aggregate relationship between number of interactions and outgroup attitudes, we find no significant effect of interactions themselves nor do we find a significant interaction effect. This result mirrors that of study one but is inconsistent with the second study. But again this inconsistency is not necessarily surprising given that the variables aggregate all within person variation and there were substantially more measurements where participants did not have an interaction (but reported their outgroup attitudes) than measurements that followed an outgroup contact.  
+
+```{r medicalModelMLAttNull, include=FALSE}
+# Create and save Model
+mdlMedical$lmerAttNullType <-
+  lme4::lmer(AttitudesDutch ~ 1 + (1 | PID),
+             data = dtMedical$full %>%
+               filter(complete.cases(
+                 OutgroupInteraction, NonOutgroupInteraction
+               ))) # use optim if it does not converge
+
+mdlMedical$lmeAttNullType <-
+  lme(
+    AttitudesDutch ~ 1,
+    random = ~ 1 | PID,
+    data = dtMedical$full %>%
+      filter(complete.cases(
+        OutgroupInteraction, NonOutgroupInteraction
+      )),
+    na.action = na.omit,
+    control = list(opt = "nlmimb")
+  ) # use optim if it does not converge
+
+# Get summary with p-values (Satterthwaite's method)
+# summary(mdlMedical$lmerAttNull) #or with the lme function
+summ(mdlMedical$lmerAttNullType, digits = 3)
+
+# generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(lmer(AttitudesDutch~1 + (1|PID),data=dtStudent$full),
+#                  method="boot",nsim=1000,
+#                  parallel = "multicore", ncpus = 4, seed = 42),
+#          "output/tables/ML-Null-CI.csv")
+
+# Save variances
+mdlMedical$varAttNullType <- 
+  VarCorr(mdlMedical$lmeAttNullType) # save variances
+# The estimate of (between-group or Intercept variance, tau_{00}^2):
+mdlMedical$tauAttNullType <- 
+  as.numeric(mdlMedical$varAttNullType[1])
+# and the estimate of (within-group or residual variance, sigma^2) is:
+mdlMedical$sigmaAttNullType <- 
+  as.numeric(mdlMedical$varAttNullType[2])
+# The ICC estimate (between/between+within) is:
+mdlMedical$IccAttNullType <-
+  (as.numeric(mdlMedical$varAttNullType[1]) / (as.numeric(mdlMedical$varAttNullType[1]) + as.numeric(mdlMedical$varAttNullType[2])))
+mdlMedical$IccPercAttNull <-
+  ((as.numeric(mdlMedical$varAttNullType[1]) / (as.numeric(mdlMedical$varAttNullType[1]) + as.numeric(mdlMedical$varAttNullType[2])))) * 100
+```
+```{r medicalModelInterceptAttType, include = FALSE}
+# Create and save Model
+mdlMedical$lmeInterceptAttType <-
+  lme(
+    AttitudesDutch ~ OutgroupInteraction + NonOutgroupInteraction,
+    random =  ~ 1 | PID,
+    na.action=na.omit,
+    data = dtMedical$full
+  )
+
+# Get summary with p-values (Satterthwaite's method)
+summ(
+  mdlMedical$lmerInterceptAttType <- lmer(
+    AttitudesDutch ~ OutgroupInteraction + NonOutgroupInteraction + (1 | PID),
+    data = dtMedical$full
+  ),
+  confint = TRUE,
+  digits = 3
+)
+
+mdlMedical$lmerInterceptAttTypeCI <- confint(mdlMedical$lmerInterceptAttType)
+
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(lmer(AttitudesDutch ~ Contact_dum + inNonDutch + (1|PID),data=studentInteractionType),
+#                  method="boot",nsim=1000, parallel = "multicore",
+#                  ncpus = 4, seed = 42),
+#          "output/tables/ML-Inter-CI.csv")
+
+# Compare new model to previous step
+anova(mdlMedical$lmeAttNullType, 
+      mdlMedical$lmeInterceptAttType) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  add_rownames(., var = "Description") %>%
+  mutate(Description = gsub(".*\\$", "", Description)) %>%
+  kbl(
+    .,
+    caption = "Student: Model Comparison",
+    format = "latex",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlMedical$varInterceptAttType <- 
+  lme4::VarCorr(mdlMedical$lmeInterceptAttType)
+```
+```{r medicalModelSlopesInteractionType, include=FALSE}
+# Create and save Model (optimizer needed to reach convergence)
+mdlMedical$lmeSlopesAttType <- lme(
+  AttitudesDutch ~
+    OutgroupInteraction + NonOutgroupInteraction,
+  random = ~ 1 + OutgroupInteraction + NonOutgroupInteraction | PID,
+  control = lmeControl(opt = "optim"),
+  na.action=na.omit,
+  data = dtMedical$full
+)
+
+# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
+summ(
+  mdlMedical$lmerSlopesAttType <- lmer(
+    AttitudesDutch ~
+      OutgroupInteraction + NonOutgroupInteraction +
+      (1 + OutgroupInteraction + NonOutgroupInteraction | PID),
+    data = dtMedical$full
+  ), 
+  confint = TRUE,
+  digits = 3
+)
+
+mdlMedical$lmerSlopesAttTypeCI <- confint(mdlMedical$lmerSlopesAttType)
+
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(model.ran0,
+#               method="boot",nsim=1000,
+#               parallel = "multicore", ncpus = 4, seed = 42),
+#          "output/tables/ML-RandomSlopes-CI.csv")
+
+# Compare new model to previous step
+anova(mdlMedical$lmeAttNullType,
+      mdlMedical$lmeInterceptAttType, 
+      mdlMedical$lmeSlopesAttType) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  add_rownames(., var = "Description") %>%
+  mutate(Description = gsub(".*\\$", "", Description)) %>%
+  kbl(
+    .,
+    caption = "Student: Model Comparison",
+    format = "latex",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlMedical$varSlopesAttType <- 
+  lme4::VarCorr(mdlMedical$lmeSlopesAttType)
+
+# Assumption Checks:
+mdlMedical$diagSlopesAttType <-
+  sjPlot::plot_model(mdlMedical$lmerSlopesAttType, type = "diag")
+grid.arrange(
+  mdlMedical$diagSlopesAttType[[1]],
+  mdlMedical$diagSlopesAttType[[2]]$`PID`,
+  mdlMedical$diagSlopesAttType[[3]],
+  mdlMedical$diagSlopesAttType[[4]]
+)
+
+# Plot prediction model
+mdlMedical$predSlopesAttType <-
+  dtMedical$full %>%
+  filter(complete.cases(OutgroupInteraction, NonOutgroupInteraction)) %>%
+  select(AttitudesDutch, TIDnum, PID) %>%
+  mutate(measure = predict(
+    mdlMedical$lmeSlopesAttType,
+    dtMedical$full %>%
+      filter(complete.cases(
+        OutgroupInteraction, NonOutgroupInteraction
+      )),
+    re.form = NA
+  ))
+
+(
+  mdlMedical$predPltSlopesAttType <-
+    ggplot(data = mdlMedical$predSlopesAttType %>% filter(PID %in% dtMedicalSupp$medicalPltIDs), 
+           aes(x = TIDnum, y = measure)) +
+    geom_line(alpha = 1, color = "blue") +
+    geom_line(aes(y = AttitudesDutch), alpha = 1) +
+    facet_wrap(~ PID, ncol = 6) +
+    xlab("Time") +
+    ylab("Outgroup Attitudes") +
+    theme_Publication()
+)
+ggsave(
+  filename = "Figures/Medical_PredictionPlot_SlopesAttType.png",
+  mdlMedical$predPltSlopesAttType,
+  width = 18,
+  height = 12,
+  dpi = 800,
+  units = "cm",
+  device = "png"
+)
+```
+
+We additionally used a multilevel regression to check whether having an interaction with an outgroup member had a situational (i.e., contemporaneous) effect within the participants. We find that having an outgroup interaction is indeed associated with significantly more positive outgroup attitudes within the participants (random slopes model; `r MlCoeffLatex(lmeMdl = mdlMedical$lmeSlopesAttType, lmerCI = mdlMedical$lmerSlopesAttTypeCI, varName = "OutgroupInteractionYes")`), even after controlling for having an interaction with a non-Dutch (which did not relate to outgroup attitudes independently; For full results see Online Supplementary Materials B). Thus, in our third dataset we find some mixed results, outgroup contacts are not significantly related to outgroup attitudes on aggregate between participants and this effect is also not suppressed by a average interaction quality (i.e., no interaction effect). However, while the aggregate data is partly inconsistent with the first two studies, the within person contemoranous effect of intergroup contact is consistent across all three studies.  
 
 \subsubsection{Allport's Conditions}
 
