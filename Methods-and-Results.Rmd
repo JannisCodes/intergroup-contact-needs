@@ -3387,7 +3387,7 @@ stdCoef.merMod(mdlMedicalOut$Att$lmerSlopesAllport)
 mdlMedicalOut$Att$lmerSlopesAllportCI <- confint(mdlMedicalOut$Att$lmerSlopesAllport)
 
 # Attempts at R^2
-r2mlm::r2mlm(mdlMedicalOut$Att$lmerSlopesAllport, bargraph = TRUE)
+#r2mlm::r2mlm(mdlMedicalOut$Att$lmerSlopesAllport, bargraph = TRUE)
 mitml::multilevelR2(mdlMedicalOut$Att$lmerSlopesAllport)
 performance::r2(mdlMedicalOut$Att$lmerSlopesAllport)
 performance::model_performance(mdlMedicalOut$Att$lmerSlopesAllport)
@@ -3840,45 +3840,45 @@ We sequentially tested whether the fulfillment of Allport's Contact Conditions w
 \subsubsection{Core Need}
 
 
-```{r medicalOutModelMLAttNull, include=FALSE}
-# Create and save Model
-mdlMedicalOut$Att$lmerNull <-
-  lme4::lmer(AttitudesDutch ~ 1 + (1 | PID),
-             data = dtMedicalSupp$medicalOutWithinBetween) # use optim if it does not converge
-mdlMedicalOut$Att$lmeNull <-
-  lme(
-    AttitudesDutch ~ 1,
-    random = ~ 1 | PID,
-    data = dtMedicalSupp$medicalOutWithinBetween,
-    na.action = na.omit,
-    control = list(opt = "nlmimb")
-  ) # use optim if it does not converge
+<!-- ```{r medicalOutModelMLAttNull, include=FALSE} -->
+<!-- # Create and save Model -->
+<!-- mdlMedicalOut$Att$lmerNull <- -->
+<!--   lme4::lmer(AttitudesDutch ~ 1 + (1 | PID), -->
+<!--              data = dtMedicalSupp$medicalOutWithinBetween) # use optim if it does not converge -->
+<!-- mdlMedicalOut$Att$lmeNull <- -->
+<!--   lme( -->
+<!--     AttitudesDutch ~ 1, -->
+<!--     random = ~ 1 | PID, -->
+<!--     data = dtMedicalSupp$medicalOutWithinBetween, -->
+<!--     na.action = na.omit, -->
+<!--     control = list(opt = "nlmimb") -->
+<!--   ) # use optim if it does not converge -->
 
-# Get summary with p-values (Satterthwaite's method)
-# summary(Null.Out.ML.r) #or with the lme function
-summ(mdlMedicalOut$Att$lmerNull, digits = 3, center = TRUE)
+<!-- # Get summary with p-values (Satterthwaite's method) -->
+<!-- # summary(Null.Out.ML.r) #or with the lme function -->
+<!-- summ(mdlMedicalOut$Att$lmerNull, digits = 3, center = TRUE) -->
 
-# generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(AttitudesDutch~1 + (1|PID),data=dtStudent$full),
-#                  method="boot",nsim=1000,
-#                  parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-Null-CI.csv")
+<!-- # generate 95% parametric bootstrap CIs (and save them as a csv-file): -->
+<!-- # write.csv(confint(lmer(AttitudesDutch~1 + (1|PID),data=dtStudent$full), -->
+<!-- #                  method="boot",nsim=1000, -->
+<!-- #                  parallel = "multicore", ncpus = 4, seed = 42), -->
+<!-- #          "output/tables/ML-Null-CI.csv") -->
 
-# Save variances
-mdlMedicalOut$Att$varNull <- 
-  VarCorr(mdlMedicalOut$Att$lmeNull) # save variances
-# The estimate of (between-group or Intercept variance, tau_{00}^2):
-mdlMedicalOut$Att$tauNull <- 
-  as.numeric(mdlMedicalOut$Att$varNull[1])
-# and the estimate of (within-group or residual variance, sigma^2) is:
-mdlMedicalOut$Att$sigmaNull <- 
-  as.numeric(mdlMedicalOut$Att$varNull[2])
-# The ICC estimate (between/between+within) is:
-mdlMedicalOut$Att$IccNull <-
-  (as.numeric(mdlMedicalOut$Att$varNull[1]) / (as.numeric(mdlMedicalOut$Att$varNull[1]) + as.numeric(mdlMedicalOut$Att$varNull[2])))
-mdlMedicalOut$Att$IccPercNull <-
-  ((as.numeric(mdlMedicalOut$Att$varNull[1]) / (as.numeric(mdlMedicalOut$Att$varNull[1]) + as.numeric(mdlMedicalOut$Att$varNull[2])))) * 100
-```
+<!-- # Save variances -->
+<!-- mdlMedicalOut$Att$varNull <-  -->
+<!--   VarCorr(mdlMedicalOut$Att$lmeNull) # save variances -->
+<!-- # The estimate of (between-group or Intercept variance, tau_{00}^2): -->
+<!-- mdlMedicalOut$Att$tauNull <-  -->
+<!--   as.numeric(mdlMedicalOut$Att$varNull[1]) -->
+<!-- # and the estimate of (within-group or residual variance, sigma^2) is: -->
+<!-- mdlMedicalOut$Att$sigmaNull <-  -->
+<!--   as.numeric(mdlMedicalOut$Att$varNull[2]) -->
+<!-- # The ICC estimate (between/between+within) is: -->
+<!-- mdlMedicalOut$Att$IccNull <- -->
+<!--   (as.numeric(mdlMedicalOut$Att$varNull[1]) / (as.numeric(mdlMedicalOut$Att$varNull[1]) + as.numeric(mdlMedicalOut$Att$varNull[2]))) -->
+<!-- mdlMedicalOut$Att$IccPercNull <- -->
+<!--   ((as.numeric(mdlMedicalOut$Att$varNull[1]) / (as.numeric(mdlMedicalOut$Att$varNull[1]) + as.numeric(mdlMedicalOut$Att$varNull[2])))) * 100 -->
+<!-- ``` -->
 ```{r medicalOutModelInterceptAttCore, include=FALSE}
 # Create and save Model
 mdlMedicalOut$Att$lmeInterceptCore <-
@@ -3901,7 +3901,7 @@ summ(
   center = FALSE
 )
 
-mdlMedicalOut$Att$lmerInterceptCoreCI <- 
+mdlMedicalOut$Att$lmerInterceptCoreCI <-
   confint(mdlMedicalOut$Att$lmerInterceptCore)
 
 # Generate 95% parametric bootstrap CIs (and save them as a csv-file):
@@ -3911,7 +3911,7 @@ mdlMedicalOut$Att$lmerInterceptCoreCI <-
 #          "output/tables/ML-Inter-CI.csv")
 
 # Compare new model to previous step
-anova(mdlMedicalOut$Att$lmeNull, 
+anova(mdlMedicalOut$Att$lmeNull,
       mdlMedicalOut$Att$lmeInterceptCore) %>%
   as.data.frame() %>%
   select(-call) %>%
@@ -4066,45 +4066,46 @@ ggsave(
 )
 ```
 
-```{r medicalOutModelMLQltNull, include=FALSE}
-# Create and save Model
-mdlMedicalOut$Qlt$lmerNull <-
-  lme4::lmer(qualityOverall ~ 1 + (1 | PID), 
-             data = dtMedicalSupp$medicalOutWithinBetween) # use optim if it does not converge
-mdlMedicalOut$Qlt$lmeNull <-
-  mdlMedicalOut$Qlt$lmeNull <-lme(
-    qualityOverall ~ 1,
-    random = ~ 1 | PID,
-    na.action = na.omit,
-    data = dtMedicalSupp$medicalOutWithinBetween,
-    control = list(opt = "nlmimb")
-  ) # use optim if it does not converge
+<!-- ```{r medicalOutModelMLQltNull, include=FALSE} -->
+<!-- # Create and save Model -->
+<!-- mdlMedicalOut$Qlt$lmerNull <- -->
+<!--   lme4::lmer(qualityOverall ~ 1 + (1 | PID),  -->
+<!--              data = dtMedicalSupp$medicalOutWithinBetween) # use optim if it does not converge -->
+<!-- mdlMedicalOut$Qlt$lmeNull <- -->
+<!--   mdlMedicalOut$Qlt$lmeNull <-lme( -->
+<!--     qualityOverall ~ 1, -->
+<!--     random = ~ 1 | PID, -->
+<!--     na.action = na.omit, -->
+<!--     data = dtMedicalSupp$medicalOutWithinBetween, -->
+<!--     control = list(opt = "nlmimb") -->
+<!--   ) # use optim if it does not converge -->
 
-# Get summary with p-values (Satterthwaite's method)
-# summary(Null.Out.Qual.ML.r) #or with the lme function
-summ(mdlMedicalOut$Qlt$lmerNull, digits = 3)
+<!-- # Get summary with p-values (Satterthwaite's method) -->
+<!-- # summary(Null.Out.Qual.ML.r) #or with the lme function -->
+<!-- summ(mdlMedicalOut$Qlt$lmerNull, digits = 3) -->
 
-# generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(AttitudesDutch~1 + (1|PID),data=medicalOutgroupInteraction),
-#                  method="boot",nsim=1000,
-#                  parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-Null-CI.csv")
+<!-- # generate 95% parametric bootstrap CIs (and save them as a csv-file): -->
+<!-- # write.csv(confint(lmer(AttitudesDutch~1 + (1|PID),data=medicalOutgroupInteraction), -->
+<!-- #                  method="boot",nsim=1000, -->
+<!-- #                  parallel = "multicore", ncpus = 4, seed = 42), -->
+<!-- #          "output/tables/ML-Null-CI.csv") -->
 
-# Save variances
-mdlMedicalOut$Qlt$varNull <- 
-  VarCorr(mdlMedicalOut$Qlt$lmeNull) # save variances
-# The estimate of (between-group or Intercept variance, tau_{00}^2):
-mdlMedicalOut$Qlt$tauNull <- 
-  as.numeric(mdlMedicalOut$Qlt$varNull[1])
-# and the estimate of (within-group or residual variance, sigma^2) is:
-mdlMedicalOut$Qlt$sigmaNull <- 
-  as.numeric(mdlMedicalOut$Qlt$varNull[2])
-# The ICC estimate (between/between+within) is:
-mdlMedicalOut$Qlt$IccNull <-
-  (as.numeric(mdlMedicalOut$Qlt$varNull[1]) / (as.numeric(mdlMedicalOut$Qlt$varNull[1]) + as.numeric(mdlMedicalOut$Qlt$varNull[2])))
-mdlMedicalOut$Qlt$IccPercNull <-
-  ((as.numeric(mdlMedicalOut$Qlt$varNull[1]) / (as.numeric(mdlMedicalOut$Qlt$varNull[1]) + as.numeric(mdlMedicalOut$Qlt$varNull[2])))) * 100
-```
+<!-- # Save variances -->
+<!-- mdlMedicalOut$Qlt$varNull <-  -->
+<!--   VarCorr(mdlMedicalOut$Qlt$lmeNull) # save variances -->
+<!-- # The estimate of (between-group or Intercept variance, tau_{00}^2): -->
+<!-- mdlMedicalOut$Qlt$tauNull <-  -->
+<!--   as.numeric(mdlMedicalOut$Qlt$varNull[1]) -->
+<!-- # and the estimate of (within-group or residual variance, sigma^2) is: -->
+<!-- mdlMedicalOut$Qlt$sigmaNull <-  -->
+<!--   as.numeric(mdlMedicalOut$Qlt$varNull[2]) -->
+<!-- # The ICC estimate (between/between+within) is: -->
+<!-- mdlMedicalOut$Qlt$IccNull <- -->
+<!--   (as.numeric(mdlMedicalOut$Qlt$varNull[1]) / (as.numeric(mdlMedicalOut$Qlt$varNull[1]) + as.numeric(mdlMedicalOut$Qlt$varNull[2]))) -->
+<!-- mdlMedicalOut$Qlt$IccPercNull <- -->
+<!--   ((as.numeric(mdlMedicalOut$Qlt$varNull[1]) / (as.numeric(mdlMedicalOut$Qlt$varNull[1]) + as.numeric(mdlMedicalOut$Qlt$varNull[2])))) * 100 -->
+<!-- ``` -->
+
 ```{r medicalOutModelInterceptQltCore, include=FALSE}
 # Create and save Model
 mdlMedicalOut$Qlt$lmeInterceptCore <-
