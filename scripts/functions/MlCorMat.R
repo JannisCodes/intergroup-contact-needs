@@ -243,15 +243,15 @@ MlTraitState <-
   }
 
 
-var_reduction = function(m0, m1){
+var_reduction = function(m0, m1) {
   library(tidyverse)
-  lme4::VarCorr(m0) %>% 
-    as.data.frame %>% 
-    select(grp, var_m0 = vcov) %>% 
-    left_join(lme4::VarCorr(m1) %>% 
-                as.data.frame %>% 
-                select(grp, var_m1 = vcov)) %>% 
-    mutate(var_red = 1 - var_m1 / var_m0) 
+  lme4::VarCorr(m0) %>%
+    as.data.frame %>%
+    select(grp, var_m0 = vcov) %>%
+    left_join(lme4::VarCorr(m1) %>%
+                as.data.frame %>%
+                select(grp, var_m1 = vcov)) %>%
+    mutate(var_red = 1 - var_m1 / var_m0)
 }
 
 stdCoef.merMod <- function(object) {
