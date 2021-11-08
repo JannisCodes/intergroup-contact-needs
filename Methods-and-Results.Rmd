@@ -3076,6 +3076,7 @@ mdlMedical$IccAttNullType <-
 mdlMedical$IccPercAttNull <-
   ((as.numeric(mdlMedical$varAttNullType[1]) / (as.numeric(mdlMedical$varAttNullType[1]) + as.numeric(mdlMedical$varAttNullType[2])))) * 100
 ```
+
 ```{r medicalModelInterceptAttType, include = FALSE}
 # Create and save Model
 mdlMedical$lmeInterceptAttType <-
@@ -3131,6 +3132,7 @@ anova(mdlMedical$lmeAttNullType,
 mdlMedical$varInterceptAttType <- 
   lme4::VarCorr(mdlMedical$lmeInterceptAttType)
 ```
+
 ```{r medicalModelSlopesInteractionType, include=FALSE}
 # Create and save Model (optimizer needed to reach convergence)
 mdlMedical$lmeSlopesAttType <- lme(
@@ -3286,6 +3288,7 @@ mdlMedicalOut$Att$IccNull <-
 mdlMedicalOut$Att$IccPercNull <-
   ((as.numeric(mdlMedicalOut$Att$varNull[1]) / (as.numeric(mdlMedicalOut$Att$varNull[1]) + as.numeric(mdlMedicalOut$Att$varNull[2])))) * 100
 ```
+
 ```{r medicalOutModelInterceptAttAllport, include=FALSE}
 # Create and save Model
 mdlMedicalOut$Att$lmeInterceptAllport <-
@@ -3342,6 +3345,7 @@ anova(mdlMedicalOut$Att$lmeNull,
 mdlMedicalOut$Att$varInterceptAllport <-
   lme4::VarCorr(mdlMedicalOut$Att$lmeInterceptAllport)
 ```
+
 ```{r medicalOutModelSlopesAttAllport, include=FALSE}
 # Create and save Model (optimizer needed to reach convergence)
 mdlMedicalOut$Att$lmeSlopesAllport <-
@@ -3509,6 +3513,7 @@ mdlMedicalOut$Qlt$IccNull <-
 mdlMedicalOut$Qlt$IccPercNull <-
   ((as.numeric(mdlMedicalOut$Qlt$varNull[1]) / (as.numeric(mdlMedicalOut$Qlt$varNull[1]) + as.numeric(mdlMedicalOut$Qlt$varNull[2])))) * 100
 ```
+
 ```{r medicalOutModelInterceptQltAllport, include=FALSE}
 # Create and save Model
 mdlMedicalOut$Qlt$lmeInterceptAllport <-
@@ -3565,6 +3570,7 @@ anova(mdlMedicalOut$Qlt$lmeNull,
 mdlMedicalOut$Qlt$varInterceptAllport <-
   lme4::VarCorr(mdlMedicalOut$Qlt$lmeInterceptAllport)
 ```
+
 ```{r medicalOutModelSlopesQltAllport, include=FALSE}
 # Create and save Model (optimizer needed to reach convergence)
 mdlMedicalOut$Qlt$lmeSlopesAllport <-
@@ -3669,6 +3675,7 @@ ggsave(
 )
 
 ```
+
 ```{r medicalOutModelInterceptAttAllportQlt, include=FALSE}
 # Create and save Model
 mdlMedicalOut$Att$lmeInterceptAllportQlt <-
@@ -3726,6 +3733,7 @@ anova(
 mdlMedicalOut$Att$varInterceptAllportQlt <-
   lme4::VarCorr(mdlMedicalOut$Att$lmeInterceptAllportQlt)
 ```
+
 ```{r medicalOutModelSlopesAttAllportQlt, include=FALSE}
 # Create and save Model (optimizer needed to reach convergence)
 mdlMedicalOut$Att$lmeSlopesAllportQlt <-
@@ -3935,6 +3943,7 @@ anova(mdlMedicalOut$Att$lmeNull,
 mdlMedicalOut$Att$varInterceptCore <-
   lme4::VarCorr(mdlMedicalOut$Att$lmeInterceptCore)
 ```
+
 ```{r medicalOutModelSlopesAttCore, include=FALSE}
 # Create and save Model (optimizer needed to reach convergence)
 mdlMedicalOut$Att$lmeSlopesCore <-
@@ -4162,6 +4171,7 @@ anova(mdlMedicalOut$Qlt$lmeNull,
 mdlMedicalOut$Qlt$varInterceptCore <-
   lme4::VarCorr(mdlMedicalOut$Qlt$lmeInterceptCore)
 ```
+
 ```{r medicalOutModelSlopesQltCore, include=FALSE}
 # Create and save Model (optimizer needed to reach convergence)
 mdlMedicalOut$Qlt$lmeSlopesCore <-
@@ -4269,6 +4279,7 @@ ggsave(
 )
 
 ```
+
 ```{r medicalOutModelInterceptAttCoreQlt, include=FALSE}
 # Create and save Model
 mdlMedicalOut$Att$lmeInterceptCoreQlt <-
@@ -4326,6 +4337,7 @@ anova(
 mdlMedicalOut$Att$varInterceptCoreQlt <-
   lme4::VarCorr(mdlMedicalOut$Att$lmeInterceptCoreQlt)
 ```
+
 ```{r medicalOutModelSlopesAttCoreQlt, include=FALSE}
 # Create and save Model (optimizer needed to reach convergence)
 mdlMedicalOut$Att$lmeSlopesCoreQlt <-
@@ -4438,6 +4450,201 @@ We again sequentially tested whether the fulfillment of the core need during an 
 \faQuestionCircle\ Are we sure that we don't want some sort of bootstrapped indirect effect? 
 
 \subsubsection{Compare Fulfillment of Core Need and Allport's Conditions}
+
+```{r AllportVsCore, include=FALSE}
+
+# Compare new model to previous step
+anova(mdlMedicalOut$Att$lmeSlopesAllport, 
+      mdlMedicalOut$Att$lmeSlopesCore) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  kbl(
+    .,
+    caption = "Medical: Comparison of Allport's Conditions to Core Situational Need",
+    format = "latex",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+AIC(
+  
+)
+
+performance::compare_performance(
+  mdlMedicalOut$Att$lmerSlopesAllport,
+  mdlMedicalOut$Att$lmerSlopesCore
+)
+```
+
+```{r medicalOutModelInterceptAttCoreAllport, include=FALSE}
+# Create and save Model
+mdlMedicalOut$Att$lmeInterceptCoreAllport <-
+  lme(
+    AttitudesDutch ~ KeyNeedFulfillment_cwc + AllportsCondition_cwc,
+    random = ~ 1 | PID,
+    na.action = na.omit,
+    data = dtMedicalSupp$medicalOutWithinBetween
+  )
+
+# Get summary with p-values (Satterthwaite's method)
+summ(
+  mdlMedicalOut$Att$lmerInterceptCoreAllport <-
+    lmer(
+      AttitudesDutch ~ KeyNeedFulfillment_cwc + AllportsCondition_cwc + (1 | PID),
+      data = dtMedicalSupp$medicalOutWithinBetween
+    ),
+  confint = TRUE,
+  digits = 3
+)
+
+mdlMedicalOut$Att$lmerInterceptCoreAllportCI <- 
+  confint(mdlMedicalOut$Att$lmerInterceptCoreAllport)
+
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(lmer(AttitudesDutch ~ Contact_dum + inNonDutch + (1|PID),data=medicalOutgroupInteraction),
+#                  method="boot",nsim=1000, parallel = "multicore",
+#                  ncpus = 4, seed = 42),
+#          "output/tables/ML-Inter-CI.csv")
+
+# Compare new model to previous step
+anova(
+  mdlMedicalOut$Att$lmeNull, 
+  mdlMedicalOut$Att$lmeInterceptAllport,
+  mdlMedicalOut$Att$lmeInterceptCoreAllport
+  ) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Medical: Model Comparison",
+    format = "latex",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlMedicalOut$Att$varInterceptCoreAllport <-
+  lme4::VarCorr(mdlMedicalOut$Att$lmeInterceptCoreAllport)
+```
+
+```{r medicalOutModelSlopesAttCoreAllport, include=FALSE}
+# Create and save Model (optimizer needed to reach convergence)
+mdlMedicalOut$Att$lmeSlopesCoreAllport <-
+  lme(
+    AttitudesDutch ~
+      KeyNeedFulfillment_cwc + AllportsCondition_cwc,
+    random = ~ 1 + KeyNeedFulfillment_cwc + AllportsCondition_cwc | PID,
+    na.action = na.omit,
+    control = lmeControl(opt = "optim"),
+    data = dtMedicalSupp$medicalOutWithinBetween
+  )
+
+# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
+summ(
+  mdlMedicalOut$Att$lmerSlopesCoreAllport <- lmer(
+    AttitudesDutch ~
+      KeyNeedFulfillment_cwc + AllportsCondition_cwc +
+      (1 + KeyNeedFulfillment_cwc + AllportsCondition_cwc | PID),
+    data = dtMedicalSupp$medicalOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3
+)
+
+mdlMedicalOut$Att$lmerSlopesCoreAllportCI <- 
+  confint(mdlMedicalOut$Att$lmerSlopesCoreAllport, method = "Wald")
+
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(model.ran0,
+#               method="boot",nsim=1000,
+#               parallel = "multicore", ncpus = 4, seed = 42),
+#          "output/tables/ML-RandomSlopes-CI.csv")
+
+# Compare new model to previous step
+anova(
+  mdlMedicalOut$Att$lmeNull,
+  mdlMedicalOut$Att$lmeInterceptCoreAllport,
+  mdlMedicalOut$Att$lmeSlopesCoreAllport
+) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Medical: Model Comparison",
+    format = "latex",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlMedicalOut$Att$varSlopesCoreAllport <- 
+  lme4::VarCorr(mdlMedicalOut$Att$lmeSlopesCoreAllport)
+
+# Assumption Checks:
+mdlMedicalOut$Att$diagSlopesCoreAllport <- 
+  sjPlot::plot_model(mdlMedicalOut$Att$lmerSlopesCoreAllport, type = "diag")
+grid.arrange(
+  mdlMedicalOut$Att$diagSlopesCoreQlt[[1]],
+  mdlMedicalOut$Att$diagSlopesCoreQlt[[2]]$`PID`,
+  mdlMedicalOut$Att$diagSlopesCoreQlt[[3]],
+  mdlMedicalOut$Att$diagSlopesCoreQlt[[4]]
+)
+
+# Plot prediction model
+mdlMedicalOut$Att$predSlopesCoreAllport <- 
+  dtMedicalSupp$medicalOutWithinBetween %>% 
+  filter(complete.cases(KeyNeedFulfillment, AllportsCondition)) %>%
+  filter(PID %in% dtMedicalSupp$medicalOutPltIDs) %>%
+  select(AttitudesDutch, TIDnum, PID) %>% 
+  mutate(measure = predict(mdlMedicalOut$Att$lmeSlopesCoreAllport,
+                           dtMedicalSupp$medicalOutWithinBetween %>% 
+                             filter(complete.cases(KeyNeedFulfillment, AllportsCondition)) %>%
+                             filter(PID %in% dtMedicalSupp$medicalOutPltIDs),
+                           re.form = NA
+                           )
+         )
+
+(
+  mdlMedicalOut$Att$predPltSlopesCoreAllport <-
+    ggplot(data = mdlMedicalOut$Att$predSlopesCoreQlt, aes(x = TIDnum, y = measure)) +
+    geom_line(alpha = 1, color = "blue") +
+    geom_line(aes(y = AttitudesDutch), alpha = 1) +
+    facet_wrap( ~ PID, ncol = 6) +
+    xlab("Time") +
+    ylab("Outgroup Attitudes") +
+    theme_Publication()
+)
+ggsave(
+  filename = "Figures/MedicalOut_PredictionPlot_SlopesAttCoreAllport.png",
+  mdlMedicalOut$Att$predPltSlopesCoreAllport,
+  width = 18,
+  height = 12,
+  dpi = 800,
+  units = "cm",
+  device = "png"
+)
+```
+
+When comparing the 
 
 \subsubsection{Robustness}
 
