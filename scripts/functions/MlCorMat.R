@@ -288,6 +288,31 @@ MlCoeffLatex <- function(lmeMdl = NULL, lmerCI = NULL, varName = NULL) {
   }
 }
 
+MlCoeffHtml <- function(lmeMdl = NULL, lmerCI = NULL, varName = NULL) {
+  b <- coef(summary(lmeMdl))[varName,"Value"] %>% round(2) %>% format(nsmall=2)
+  df <- lmeMdl$fixDF$X[varName] %>% as.numeric
+  t <- coef(summary(lmeMdl))[varName,"t-value"] %>% round(2) %>% format(nsmall=2)
+  p <- ifelse(coef(summary(lmeMdl))[varName,"p-value"]<.001, "< .001", paste0("= ", coef(summary(lmeMdl))[varName,"p-value"] %>% round(3) %>% format(nsmall=3)))
+  
+  if (is.null(lmerCI)) {
+    paste0(
+      "<i>b</i> = ", b, 
+      ", <i>t</i>(", df, ") = ", t,
+      ", <i>p</i> ", p
+    )
+  } else {
+    CIlwr <- lmerCI[varName, "2.5 %"] %>% round(2) %>% format(nsmall=2)
+    CIupr <- lmerCI[varName, "97.5 %"] %>% round(2) %>% format(nsmall=2)
+    
+    paste0(
+      "<i>b</i> = ", b, 
+      ", <i>t</i>(", df, ") = ", t,
+      ", <i>p</i> ", p,
+      ", <i>95%CI</i>[", CIlwr, ", ", CIupr, "]"
+    )
+  }
+}
+
 linesep<-function(x,y=character()){
   if(!length(x))
     return(y)
