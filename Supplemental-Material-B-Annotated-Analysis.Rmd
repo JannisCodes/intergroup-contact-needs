@@ -5122,11 +5122,2007 @@ We find that adding the random slopes does add significantly beyond the random i
 
 # **Young Medical Professional Sample**
 
+```{r medicalSampleInfo}
+# extract demographic information from eligibility questionnaire
+medicalDemographicSupp <- 
+  dtMedical$raw.eligibility %>%
+  filter(session %in% dtMedical$full$session) %>%
+  select(session, nationality, studentBachMa)
+# summarize participant characteristics
+
+medicalSampleInfo <-
+  merge(dtMedical$full, medicalDemographicSupp, by = "session") %>%
+  mutate(gender = as.factor(ifelse(.$Gender == 1, "women", ifelse(.$Gender == 2, "man", ifelse(.$Gender == 3, "other", NA))))) %>%
+  group_by(PID) %>%
+  summarise(
+    dailiesN = n(), 
+    morningN = sum(periodMA=="morning"),
+    afternoonN = sum(periodMA=="afternoon"),
+    age = age,
+    gender = gender,
+    nationality = nationality
+  ) %>%
+  distinct
+
+# look at frequencies of characteristics 
+table(medicalSampleInfo$age)
+table(medicalSampleInfo$gender)
+table(as.character(medicalSampleInfo$nationality))
+```
+
+```{r medicalVarDescr}
+medicalMlCor <-
+  MlCorMat(
+    data = dtMedical$full,
+    id = "PID",
+    selection = c("KeyNeedFulfillment", "Competence", "Autonomy", "Relatedness", "AllportsCondition", "qualityOverall", "AttitudesDutch"),
+    labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Allport", "Quality", "Attitudes NL")
+  ) 
+
+medicalMlCor %>%
+  kable(
+    .,
+    caption = "Medical: Multilevel Core Variable Descriptives",
+    format = "html",
+    booktabs = TRUE,
+    linesep = linesep(c(ncol(.))),
+    align = c("l", rep("c", ncol(.) - 1))
+  ) %>%
+  footnote(
+    general = c(
+      "Upper triangle: Between-person correlations;",
+      "Lower triangle: Within-person coorelations;",
+      "*** p < .001, ** p < .01,  * p < .05"
+    )
+  )
+```
+
+```{r medicalOutVarDescr}
+medicalOutMlCor <-
+  MlCorMat(
+    data = dtMedical$full %>% filter(OutgroupInteraction == "Yes"),
+    id = "PID",
+    selection = c("KeyNeedFulfillment", "Competence", "Autonomy", "Relatedness", "AllportsCondition", "qualityOverall", "AttitudesDutch"),
+    labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Allport", "Quality", "Attitudes NL")
+  )
+
+medicalOutMlCor %>%
+  kable(
+    .,
+    caption = "Medical: Multilevel Core Variable Descriptives (Outgroup Contact Only)",
+    format = "html",
+    booktabs = TRUE,
+    linesep = linesep(c(ncol(.))),
+    align = c("l", rep("c", ncol(.) - 1))
+  ) %>%
+  footnote(
+    general = c(
+      "Upper triangle: Between-person correlations;",
+      "Lower triangle: Within-person coorelations;",
+      "*** p < .001, ** p < .01,  * p < .05"
+    )
+  ) 
+
+# misty::multilevel.descript(dtStudentsSupp$studentWithinBetween$keyMotiveFulfilled, cluster = dtStudentsSupp$studentWithinBetween$PID)
+```
+
+After receiving ethical approval from the University of Groningen, we recruited `r nrow(medicalSampleInfo)` international medical students using a contacts within the University Medical Department and specifically targeted non-Dutch students, who had recently arrived in the Netherlands. Participants reported on their interactions for at least 30 days with two daily measures (capturing the morning and afternoon). With this design, we aimed at getting 50-60 measurements per participant (*M* = `r format(round(mean(medicalSampleInfo$dailiesN),2), nsmall=2)`, *SD* = `r format(round(sd(medicalSampleInfo$dailiesN),2), nsmall=2)`, *total N* = `r sum(medicalSampleInfo$dailiesN)`). As with the previous study this should offer sufficient power to model processes within participants and will lend stronger weight to between-participant results. Participants were compensated for their participation with partial course credits --- depending on their participation. The sample consisted of relatively young migrants, who were mostly from the global north ($M_{age}$ = `r format(round(mean(medicalSampleInfo$age),2), nsmall=2)`, $SD_{age}$ = `r format(round(sd(medicalSampleInfo$age),2), nsmall=2)`, `r nrow(medicalSampleInfo %>% filter(gender == "women"))` women). The sample fairly accurately describes the local population of international students.
+
+The study procedure mirrored the setup of studies one and two, in that it consisted of pre-, daily diary-, and post-measurement. The participants were invited for daily diary measurements twice a day (at 12 pm and 7pm) for 30 days (*median duration* = `r seconds_to_period(median(difftime(dtMedical$clean$ended.daily, dtMedical$clean$created.daily, units = "secs"), na.rm=TRUE)) %>% as.character`, *MAD duration* = `r seconds_to_period(round(mad(difftime(dtMedical$clean$ended.daily, dtMedical$clean$created.daily, units = "secs"), na.rm=TRUE))) %>% as.character`).  General compliance was high (`r format(round(sum(medicalSampleInfo$dailiesN)/(nrow(medicalSampleInfo)*62)*100,2), nsmall=2)`% filled daily diary surveys for 31 days or more NEED TO RE-CHECK THIS). The response rates were approximately equal during mornings (*n* = `r sum(medicalSampleInfo$morningN)`) and afternoons (*n* = `r sum(medicalSampleInfo$afternoonN)`). All key variables in for this study were part of the short daily diary surveys. 
+The measurement of intergroup contacts was identical to study two. The participants recorded between `r dtMedicalSupp$medicalContactFreq$SumContactNL[dtMedicalSupp$medicalContactFreq$SumContactNL > 0] %>% min`--`r dtMedicalSupp$medicalContactFreq$SumContactNL %>% max` interactions with Dutch outgroup members
+(`r dtMedicalSupp$medicalContactFreq$PercContactNL[dtMedicalSupp$medicalContactFreq$PercContactNL > 0] %>% min %>% round(2) %>% format(nsmall=2)`--`r dtMedicalSupp$medicalContactFreq$PercContactNL %>% max %>% round(2) %>% format(nsmall=2)`% of individual daily diary measurements; `r (sum(dtMedicalSupp$medicalContactFreq$SumContactNL) / nrow(dtMedical$full) * 100) %>% round(2) %>% format(nsmall=2)`% of all `r nrow(dtMedical$full)` daily diary responses). 
+
+```{r medicalFreqAttCor}
+dtMedicalSupp$medicalContactFreq <-
+  dtMedicalSupp$medicalContactFreq %>%
+  mutate(
+    SumContactNL_c = SumContactNL - mean(SumContactNL, na.rm = TRUE),
+    SumContactNLAll_c = SumContactNLAll - mean(SumContactNLAll, na.rm = TRUE),
+    AvAttitude_c = AvAttitude - mean(AvAttitude, na.rm = TRUE),
+    AvQuality_c = AvQuality - mean(AvQuality, na.rm = TRUE)
+  )
+
+# correlation panel
+pairs.panels.new(
+  dtMedicalSupp$medicalContactFreq %>% select(SumContactNL, SumContactNLAll, AvQuality, AvAttitude),
+  labels = c(
+    "Sum:\nNumer of beeps with Outgroup Contact (NL)",
+    "Sum:\nNumber of Outgroup Contacts (NL)",
+    "Mean:\nInteraction Quality",
+    "Mean:\nOutgroup Attitudes (NL)"
+  )
+)
+
+# correlation panel with interaction sums winsorized
+pairs.panels.new(
+  dtMedicalSupp$medicalContactFreq %>% select(WinSumContactNL, WinSumContactNLAll, AvQuality, AvAttitude),
+  labels = c(
+    "Sum:\nNumer of beeps with Outgroup Contact (NL)\n[Winsorized]",
+    "Sum:\nNumber of Outgroup Contacts (NL)\n[Winsorized]",
+    "Mean:\nInteraction Quality",
+    "Mean:\nOutgroup Attitudes (NL)"
+  )
+)
+```
+
 ## Contact Hypothesis
+
+We tested the most general contact hypothesis in two steps. First, we assessed whether more intergroup interactions were related to to more positive outgroup attitudes. Second, we tested whether a potential positive effect on outgroup attitudes depended on the interaction quality (jointly with the number of interactions). We find no significant correlation between intergroup contact and average outgroup attitudes --- for neither the total number of outgroup interactions (*r* = `r cor(dtMedicalSupp$medicalContactFreq$SumContactNLAll, dtMedicalSupp$medicalContactFreq$AvAttitude) %>% round(2) %>% format(nsmall=2)`, *p* = `r cor.test(dtMedicalSupp$medicalContactFreq$SumContactNLAll, dtMedicalSupp$medicalContactFreq$AvAttitude)$p.value %>% round(3) %>% format(nsmall=3)`) and the number of measurement beeps with an interaction (*r* = `r cor(dtMedicalSupp$medicalContactFreq$SumContactNL, dtMedicalSupp$medicalContactFreq$AvAttitude) %>% round(2) %>% format(nsmall=2)`, *p* = `r cor.test(dtMedicalSupp$medicalContactFreq$SumContactNL, dtMedicalSupp$medicalContactFreq$AvAttitude)$p.value %>% round(3) %>% format(nsmall=3)`). This is to say that within our data, participants with more outgroup interactions did not have significantly more positive or negative outgroup attitudes. This is again consistent with the results we found in the first study but inconsitent with the significant relationship we find in the second study. 
+
+```{r medicalModelOlsAttFreqQual}
+# create list to store Worker models
+mdlMedical <- list()
+
+# regression
+mdlMedical$lmAttFreqQualX <-
+  lm(AvAttitude ~ SumContactNL_c * AvQuality_c, data = dtMedicalSupp$medicalContactFreq)
+
+summ(
+  mdlMedical$lmAttFreqQualX,
+  confint = TRUE,
+  digits = 3
+)
+
+mdlMedical$lmAttFreqQualXEta <-
+  effectsize::eta_squared(mdlMedical$lmAttFreqQualX, partial = TRUE)
+
+interactions::interact_plot(
+  mdlMedical$lmAttFreqQualX,
+  pred = SumContactNL_c,
+  modx = AvQuality_c,
+  interval = TRUE,
+  partial.residuals = TRUE
+)
+
+interactions::johnson_neyman(mdlMedical$lmAttFreqQualX,
+                             pred = SumContactNL_c,
+                             modx = AvQuality_c,
+                             alpha = .05)
+```
+
+However, we do find a significant correlation between the participants' Average Interaction Quality and their Average Outgroup Attitudes (*r* = `r cor(dtMedicalSupp$medicalContactFreq$AvQuality, dtMedicalSupp$medicalContactFreq$AvAttitude) %>% round(2) %>% format(nsmall=2)`, *p* = `r cor.test(dtMedicalSupp$medicalContactFreq$AvQuality, dtMedicalSupp$medicalContactFreq$AvAttitude)$p.value %>% round(3) %>% format(nsmall=3)`). Thus, when considering the number of interactions and average interaction quality jointly in a linear regression, we only find a main effect of average perceived interaction quality on predict outgroup attitudes (*b* = `r coef(summary(mdlMedical$lmAttFreqQualX))["AvQuality_c","Estimate"] %>% round(2) %>% format(nsmall=2)`, *t*(`r mdlMedical$lmAttFreqQualX$df.residual`) = `r coef(summary(mdlMedical$lmAttFreqQualX))["AvQuality_c","t value"] %>% round(2) %>% format(nsmall=2)`, *p* = `r coef(summary(mdlMedical$lmAttFreqQualX))["AvQuality_c","Pr(>|t|)"] %>% round(3) %>% format(nsmall=3)`, $\eta_p^2$ = `r mdlMedical$lmAttFreqQualXEta %>% filter(Parameter == "AvQuality_c") %>% select(Eta2_partial) %>% as.numeric %>% round(2) %>% format(nsmall=2)`). Given the missing aggregate relationship between number of interactions and outgroup attitudes, we find no significant effect of interactions themselves nor do we find a significant interaction effect. This result mirrors that of study one but is inconsistent with the second study. But again this inconsistency is not necessarily surprising given that the variables aggregate all within person variation and there were substantially more measurements where participants did not have an interaction (but reported their outgroup attitudes) than measurements that followed an outgroup contact.  
+
+```{r medicalModelMLAttNull}
+# Create and save Model
+mdlMedical$lmerAttNullType <-
+  lme4::lmer(AttitudesDutch ~ 1 + (1 | PID),
+             data = dtMedical$full %>%
+               filter(complete.cases(
+                 OutgroupInteraction, NonOutgroupInteraction
+               ))) # use optim if it does not converge
+
+mdlMedical$lmeAttNullType <-
+  lme(
+    AttitudesDutch ~ 1,
+    random = ~ 1 | PID,
+    data = dtMedical$full %>%
+      filter(complete.cases(
+        OutgroupInteraction, NonOutgroupInteraction
+      )),
+    na.action = na.omit,
+    control = list(opt = "nlmimb")
+  ) # use optim if it does not converge
+
+# Get summary with p-values (Satterthwaite's method)
+# summary(mdlMedical$lmerAttNull) #or with the lme function
+summ(mdlMedical$lmerAttNullType, digits = 3)
+
+# Save variances
+mdlMedical$varAttNullType <- 
+  VarCorr(mdlMedical$lmeAttNullType) # save variances
+# The estimate of (between-group or Intercept variance, tau_{00}^2):
+mdlMedical$tauAttNullType <- 
+  as.numeric(mdlMedical$varAttNullType[1])
+# and the estimate of (within-group or residual variance, sigma^2) is:
+mdlMedical$sigmaAttNullType <- 
+  as.numeric(mdlMedical$varAttNullType[2])
+# The ICC estimate (between/between+within) is:
+mdlMedical$IccAttNullType <-
+  (as.numeric(mdlMedical$varAttNullType[1]) / (as.numeric(mdlMedical$varAttNullType[1]) + as.numeric(mdlMedical$varAttNullType[2])))
+mdlMedical$IccPercAttNull <-
+  ((as.numeric(mdlMedical$varAttNullType[1]) / (as.numeric(mdlMedical$varAttNullType[1]) + as.numeric(mdlMedical$varAttNullType[2])))) * 100
+```
+
+```{r medicalModelInterceptAttType, include = FALSE}
+# Create and save Model
+mdlMedical$lmeInterceptAttType <-
+  lme(
+    AttitudesDutch ~ OutgroupInteraction + NonOutgroupInteraction,
+    random =  ~ 1 | PID,
+    na.action=na.omit,
+    data = dtMedical$full
+  )
+
+# Get summary with p-values (Satterthwaite's method)
+summ(
+  mdlMedical$lmerInterceptAttType <- lmer(
+    AttitudesDutch ~ OutgroupInteraction + NonOutgroupInteraction + (1 | PID),
+    data = dtMedical$full
+  ),
+  confint = TRUE,
+  digits = 3
+)
+
+mdlMedical$lmerInterceptAttTypeCI <- 
+  confint(method = "Wald", mdlMedical$lmerInterceptAttType)
+
+# Compare new model to previous step
+anova(mdlMedical$lmeAttNullType, 
+      mdlMedical$lmeInterceptAttType) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  add_rownames(., var = "Description") %>%
+  mutate(Description = gsub(".*\\$", "", Description)) %>%
+  kbl(
+    .,
+    caption = "Student: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlMedical$varInterceptAttType <- 
+  lme4::VarCorr(mdlMedical$lmeInterceptAttType)
+```
+
+```{r medicalModelSlopesInteractionType}
+# Create and save Model (optimizer needed to reach convergence)
+mdlMedical$lmeSlopesAttType <- lme(
+  AttitudesDutch ~
+    OutgroupInteraction + NonOutgroupInteraction,
+  random = ~ 1 + OutgroupInteraction + NonOutgroupInteraction | PID,
+  control = lmeControl(opt = "optim"),
+  na.action = na.omit,
+  data = dtMedical$full
+)
+
+# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
+summ(
+  mdlMedical$lmerSlopesAttType <- lmer(
+    AttitudesDutch ~
+      OutgroupInteraction + NonOutgroupInteraction +
+      (1 + OutgroupInteraction + NonOutgroupInteraction | PID),
+    data = dtMedical$full
+  ), 
+  confint = TRUE,
+  digits = 3
+)
+
+mdlMedical$lmerSlopesAttTypeCI <- 
+  confint(method = "Wald", mdlMedical$lmerSlopesAttType)
+
+# Compare new model to previous step
+anova(mdlMedical$lmeAttNullType,
+      mdlMedical$lmeInterceptAttType, 
+      mdlMedical$lmeSlopesAttType) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  add_rownames(., var = "Description") %>%
+  mutate(Description = gsub(".*\\$", "", Description)) %>%
+  kbl(
+    .,
+    caption = "Student: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlMedical$varSlopesAttType <- 
+  lme4::VarCorr(mdlMedical$lmeSlopesAttType)
+
+# Assumption Checks:
+mdlMedical$diagSlopesAttType <-
+  sjPlot::plot_model(mdlMedical$lmerSlopesAttType, type = "diag")
+grid.arrange(
+  mdlMedical$diagSlopesAttType[[1]],
+  mdlMedical$diagSlopesAttType[[2]]$`PID`,
+  mdlMedical$diagSlopesAttType[[3]],
+  mdlMedical$diagSlopesAttType[[4]]
+)
+
+# Plot prediction model
+mdlMedical$predSlopesAttType <-
+  dtMedical$full %>%
+  filter(complete.cases(OutgroupInteraction, NonOutgroupInteraction)) %>%
+  select(AttitudesDutch, TIDnum, PID) %>%
+  mutate(measure = predict(
+    mdlMedical$lmeSlopesAttType,
+    dtMedical$full %>%
+      filter(complete.cases(
+        OutgroupInteraction, NonOutgroupInteraction
+      )),
+    re.form = NA
+  ))
+
+(
+  mdlMedical$predPltSlopesAttType <-
+    ggplot(data = mdlMedical$predSlopesAttType %>% filter(PID %in% dtMedicalSupp$medicalPltIDs), 
+           aes(x = TIDnum, y = measure)) +
+    geom_line(alpha = 1, color = "blue") +
+    geom_line(aes(y = AttitudesDutch), alpha = 1) +
+    facet_wrap(~ PID, ncol = 6) +
+    xlab("Time") +
+    ylab("Outgroup Attitudes") +
+    theme_Publication()
+)
+ggsave(
+  filename = "Figures/Medical_PredictionPlot_SlopesAttType.png",
+  mdlMedical$predPltSlopesAttType,
+  width = 18,
+  height = 12,
+  dpi = 800,
+  units = "cm",
+  device = "png"
+)
+```
+
+We additionally used a multilevel regression to check whether having an interaction with an outgroup member had a situational (i.e., contemporaneous) effect within the participants. We find that having an outgroup interaction is indeed associated with significantly more positive outgroup attitudes within the participants (random slopes model; `r MlCoeffHtml(lmeMdl = mdlMedical$lmeSlopesAttType, lmerCI = mdlMedical$lmerSlopesAttTypeCI, varName = "OutgroupInteractionYes")`), even after controlling for having an interaction with a non-Dutch (which did not relate to outgroup attitudes independently). Thus, in our third dataset we find some mixed results, outgroup contacts are not significantly related to outgroup attitudes on aggregate between participants and this effect is also not suppressed by a average interaction quality (i.e., no interaction effect). However, while the aggregate data is partly inconsistent with the first two studies, the within person contemoranous effect of intergroup contact is consistent across all three studies.  
 
 ## Allport's Conditions
 
+```{r medicalOutModelMLAttNull}
+# create empty list to organize models
+mdlMedicalOut <- 
+  list(
+    Att = list(),
+    Qlt = list()
+  )
+
+# Create and save Model
+mdlMedicalOut$Att$lmerNull <-
+  lme4::lmer(AttitudesDutch ~ 1 + (1 | PID),
+             data = dtMedicalSupp$medicalOutWithinBetween) # use optim if it does not converge
+mdlMedicalOut$Att$lmeNull <-
+  lme(
+    AttitudesDutch ~ 1,
+    random = ~ 1 | PID,
+    data = dtMedicalSupp$medicalOutWithinBetween,
+    na.action = na.omit,
+    control = list(opt = "nlmimb")
+  ) # use optim if it does not converge
+
+# Get summary with p-values (Satterthwaite's method)
+# summary(Null.Out.ML.r) #or with the lme function
+summ(mdlMedicalOut$Att$lmerNull, digits = 3, center = TRUE)
+
+# Save variances
+mdlMedicalOut$Att$varNull <- 
+  VarCorr(mdlMedicalOut$Att$lmeNull) # save variances
+# The estimate of (between-group or Intercept variance, tau_{00}^2):
+mdlMedicalOut$Att$tauNull <- 
+  as.numeric(mdlMedicalOut$Att$varNull[1])
+# and the estimate of (within-group or residual variance, sigma^2) is:
+mdlMedicalOut$Att$sigmaNull <- 
+  as.numeric(mdlMedicalOut$Att$varNull[2])
+# The ICC estimate (between/between+within) is:
+mdlMedicalOut$Att$IccNull <-
+  (as.numeric(mdlMedicalOut$Att$varNull[1]) / (as.numeric(mdlMedicalOut$Att$varNull[1]) + as.numeric(mdlMedicalOut$Att$varNull[2])))
+mdlMedicalOut$Att$IccPercNull <-
+  ((as.numeric(mdlMedicalOut$Att$varNull[1]) / (as.numeric(mdlMedicalOut$Att$varNull[1]) + as.numeric(mdlMedicalOut$Att$varNull[2])))) * 100
+```
+
+```{r medicalOutModelInterceptAttAllport}
+# Create and save Model
+mdlMedicalOut$Att$lmeInterceptAllport <-
+  lme(
+    AttitudesDutch ~ AllportsCondition_cwc,
+    random = ~ 1 | PID,
+    na.action = na.omit,
+    data = dtMedicalSupp$medicalOutWithinBetween
+  )
+
+# Get summary with p-values (Satterthwaite's method)
+summ(
+  mdlMedicalOut$Att$lmerInterceptAllport <-
+    lmer(
+      AttitudesDutch ~ AllportsCondition_cwc + (1 | PID),
+      data = dtMedicalSupp$medicalOutWithinBetween
+    ),
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+
+mdlMedicalOut$Att$lmerInterceptAllportCI <- 
+  confint(method = "Wald", mdlMedicalOut$Att$lmerInterceptAllport)
+
+# Compare new model to previous step
+anova(mdlMedicalOut$Att$lmeNull, 
+      mdlMedicalOut$Att$lmeInterceptAllport) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Student: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlMedicalOut$Att$varInterceptAllport <-
+  lme4::VarCorr(mdlMedicalOut$Att$lmeInterceptAllport)
+```
+
+```{r medicalOutModelSlopesAttAllport}
+# Create and save Model (optimizer needed to reach convergence)
+mdlMedicalOut$Att$lmeSlopesAllport <-
+  lme(
+    AttitudesDutch ~
+      AllportsCondition_cwc,
+    random = ~ 1 + AllportsCondition_cwc | PID,
+    na.action = na.omit,
+    control = lmeControl(opt = "optim"),
+    data = dtMedicalSupp$medicalOutWithinBetween
+  )
+
+# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
+summ(
+  mdlMedicalOut$Att$lmerSlopesAllport <- lmer(
+    AttitudesDutch ~
+      AllportsCondition_cwc +
+      (1 + AllportsCondition_cwc | PID),
+    data = dtMedicalSupp$medicalOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+
+# all variables standardized within PPT
+summ(
+  mdlMedicalOut$Att$lmerSlopesAllportZ <- lmer(
+    AttitudesDutch_zwc ~
+      AllportsCondition_zwc +
+      (1 + AllportsCondition_zwc | PID),
+    data = dtMedicalSupp$medicalOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+
+# standardized coefficients
+stdCoef.merMod(mdlMedicalOut$Att$lmerSlopesAllport)
+
+# 95%CIs
+mdlMedicalOut$Att$lmerSlopesAllportCI <- 
+  confint(method = "Wald", mdlMedicalOut$Att$lmerSlopesAllport)
+
+# Attempts at R^2
+#r2mlm::r2mlm(mdlMedicalOut$Att$lmerSlopesAllport, bargraph = TRUE)
+mitml::multilevelR2(mdlMedicalOut$Att$lmerSlopesAllport)
+performance::r2(mdlMedicalOut$Att$lmerSlopesAllport)
+performance::model_performance(mdlMedicalOut$Att$lmerSlopesAllport)
+performance::compare_performance(mdlMedicalOut$Att$lmerNull, 
+                                 mdlMedicalOut$Att$lmerInterceptAllport, 
+                                 mdlMedicalOut$Att$lmerSlopesAllport)
+
+# Compare new model to previous step
+anova(mdlMedicalOut$Att$lmeNull, 
+      mdlMedicalOut$Att$lmeInterceptAllport, 
+      mdlMedicalOut$Att$lmeSlopesAllport) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Student: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlMedicalOut$Att$varSlopesAllport <- 
+  lme4::VarCorr(mdlMedicalOut$Att$lmeSlopesAllport)
+
+# Assumption Checks:
+mdlMedicalOut$Att$diagSlopesAllport <- 
+  sjPlot::plot_model(mdlMedicalOut$Att$lmerSlopesAllport, type = "diag")
+grid.arrange(
+  mdlMedicalOut$Att$diagSlopesAllport[[1]],
+  mdlMedicalOut$Att$diagSlopesAllport[[2]]$`PID`,
+  mdlMedicalOut$Att$diagSlopesAllport[[3]],
+  mdlMedicalOut$Att$diagSlopesAllport[[4]]
+)
+
+# Plot prediction model
+mdlMedicalOut$Att$predSlopesAllport <- 
+  dtMedicalSupp$medicalOutWithinBetween %>% 
+  filter(PID %in% dtMedicalSupp$medicalOutPltIDs) %>%
+  select(AttitudesDutch, TIDnum, PID) %>% 
+  mutate(measure = predict(mdlMedicalOut$Att$lmeSlopesAllport,
+                           dtMedicalSupp$medicalOutWithinBetween %>% filter(PID %in% dtMedicalSupp$medicalOutPltIDs),
+                           re.form = NA
+                           )
+         )
+
+(
+  mdlMedicalOut$Att$predPltSlopesAllport <-
+    ggplot(data = mdlMedicalOut$Att$predSlopesAllport, 
+           aes(x = TIDnum, y = measure)) +
+    geom_line(alpha = 1, color = "blue") +
+    geom_line(aes(y = AttitudesDutch), alpha = 1) +
+    facet_wrap( ~ PID, ncol = 6) +
+    xlab("Time") +
+    ylab("Outgroup Attitudes") +
+    theme_Publication()
+)
+ggsave(
+  filename = "Figures/MedicalOut_PredictionPlot_SlopesAttAllport.png",
+  mdlMedicalOut$Att$predPltSlopesAllport,
+  width = 18,
+  height = 12,
+  dpi = 800,
+  units = "cm",
+  device = "png"
+)
+```
+
+```{r medicalOutModelMLQltNull}
+# Create and save Model
+mdlMedicalOut$Qlt$lmerNull <-
+  lme4::lmer(qualityOverall ~ 1 + (1 | PID), 
+             data = dtMedicalSupp$medicalOutWithinBetween) # use optim if it does not converge
+mdlMedicalOut$Qlt$lmeNull <-
+  mdlMedicalOut$Qlt$lmeNull <-lme(
+    qualityOverall ~ 1,
+    random = ~ 1 | PID,
+    na.action = na.omit,
+    data = dtMedicalSupp$medicalOutWithinBetween,
+    control = list(opt = "nlmimb")
+  ) # use optim if it does not converge
+
+# Get summary with p-values (Satterthwaite's method)
+# summary(Null.Out.Qual.ML.r) #or with the lme function
+summ(mdlMedicalOut$Qlt$lmerNull, digits = 3)
+
+# Save variances
+mdlMedicalOut$Qlt$varNull <- 
+  VarCorr(mdlMedicalOut$Qlt$lmeNull) # save variances
+# The estimate of (between-group or Intercept variance, tau_{00}^2):
+mdlMedicalOut$Qlt$tauNull <- 
+  as.numeric(mdlMedicalOut$Qlt$varNull[1])
+# and the estimate of (within-group or residual variance, sigma^2) is:
+mdlMedicalOut$Qlt$sigmaNull <- 
+  as.numeric(mdlMedicalOut$Qlt$varNull[2])
+# The ICC estimate (between/between+within) is:
+mdlMedicalOut$Qlt$IccNull <-
+  (as.numeric(mdlMedicalOut$Qlt$varNull[1]) / (as.numeric(mdlMedicalOut$Qlt$varNull[1]) + as.numeric(mdlMedicalOut$Qlt$varNull[2])))
+mdlMedicalOut$Qlt$IccPercNull <-
+  ((as.numeric(mdlMedicalOut$Qlt$varNull[1]) / (as.numeric(mdlMedicalOut$Qlt$varNull[1]) + as.numeric(mdlMedicalOut$Qlt$varNull[2])))) * 100
+```
+
+```{r medicalOutModelInterceptQltAllport}
+# Create and save Model
+mdlMedicalOut$Qlt$lmeInterceptAllport <-
+  lme(
+    qualityOverall ~ AllportsCondition_cwc,
+    random = ~ 1 | PID,
+    na.action = na.omit,
+    data = dtMedicalSupp$medicalOutWithinBetween
+  )
+
+# Get summary with p-values (Satterthwaite's method)
+summ(
+  mdlMedicalOut$Qlt$lmerInterceptAllport <-
+    lmer(
+      qualityOverall ~ AllportsCondition_cwc + (1 | PID),
+      data = dtMedicalSupp$medicalOutWithinBetween
+    ),
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+
+mdlMedicalOut$Qlt$lmerInterceptAllportCI <- 
+  confint(method = "Wald", mdlMedicalOut$Qlt$lmerInterceptAllport)
+
+# Compare new model to previous step
+anova(mdlMedicalOut$Qlt$lmeNull, 
+      mdlMedicalOut$Qlt$lmeInterceptAllport) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Medical: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlMedicalOut$Qlt$varInterceptAllport <-
+  lme4::VarCorr(mdlMedicalOut$Qlt$lmeInterceptAllport)
+```
+
+```{r medicalOutModelSlopesQltAllport}
+# Create and save Model (optimizer needed to reach convergence)
+mdlMedicalOut$Qlt$lmeSlopesAllport <-
+  lme(
+    qualityOverall ~
+      AllportsCondition_cwc,
+    random = ~ 1 + AllportsCondition_cwc | PID,
+    na.action = na.omit,
+    control = lmeControl(opt = "optim"),
+    data = dtMedicalSupp$medicalOutWithinBetween
+  )
+
+# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
+summ(
+  mdlMedicalOut$Qlt$lmerSlopesAllport <-
+    lmer(
+      qualityOverall ~
+        AllportsCondition_cwc +
+        (1 + AllportsCondition_cwc | PID),
+      data = dtMedicalSupp$medicalOutWithinBetween
+    ),
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+
+mdlMedicalOut$Qlt$lmerSlopesAllportCI <- 
+  confint(method = "Wald", mdlMedicalOut$Qlt$lmerSlopesAllport)
+
+# Compare new model to previous step
+anova(mdlMedicalOut$Qlt$lmeNull, 
+      mdlMedicalOut$Qlt$lmeInterceptAllport, 
+      mdlMedicalOut$Qlt$lmeSlopesAllport) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Medical: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlMedicalOut$Qlt$varSlopesAllport <- 
+  lme4::VarCorr(mdlMedicalOut$Qlt$lmeSlopesAllport)
+
+# Assumption Checks:
+mdlMedicalOut$Qlt$diagSlopesAllport <-
+  sjPlot::plot_model(mdlMedicalOut$Qlt$lmerSlopesAllport, type = "diag")
+grid.arrange(
+  mdlMedicalOut$Qlt$diagSlopesAllport[[1]],
+  mdlMedicalOut$Qlt$diagSlopesAllport[[2]]$`PID`,
+  mdlMedicalOut$Qlt$diagSlopesAllport[[3]],
+  mdlMedicalOut$Qlt$diagSlopesAllport[[4]]
+)
+
+# Plot prediction model
+mdlMedicalOut$Qlt$predSlopesAllport <- 
+  dtMedicalSupp$medicalOutWithinBetween %>%
+  filter(PID %in% dtMedicalSupp$medicalOutPltIDs) %>%
+  select(AttitudesDutch, TIDnum, PID) %>% 
+  mutate(measure = predict(mdlMedicalOut$Qlt$lmeSlopesAllport,
+                           dtMedicalSupp$medicalOutWithinBetween %>% filter(PID %in% dtMedicalSupp$medicalOutPltIDs),
+                           re.form = NA
+                           )
+         )
+
+(
+  mdlMedicalOut$Qlt$predPltSlopesAllport <-
+    ggplot(data = mdlMedicalOut$Qlt$predSlopesAllport %>% filter(PID %in% dtMedicalSupp$medicalOutPltIDs), 
+           aes(x = TIDnum, y = measure)) +
+    geom_line(alpha = 1, color = "blue") +
+    geom_line(aes(y = AttitudesDutch), alpha = 1) +
+    facet_wrap(~ PID, ncol = 6) +
+    xlab("Time") +
+    ylab("Outgroup Attitudes") +
+    theme_Publication()
+)
+ggsave(
+  filename = "Figures/MedicalOut_PredictionPlot_SlopesAllport.png",
+  mdlMedicalOut$Qlt$predPltSlopesAllport,
+  width = 18,
+  height = 12,
+  dpi = 800,
+  units = "cm",
+  device = "png"
+)
+
+```
+
+```{r medicalOutModelInterceptAttAllportQlt}
+# Create and save Model
+mdlMedicalOut$Att$lmeInterceptAllportQlt <-
+  lme(
+    AttitudesDutch ~ AllportsCondition_cwc + qualityOverall_cwc,
+    random = ~ 1 | PID,
+    na.action = na.omit,
+    data = dtMedicalSupp$medicalOutWithinBetween
+  )
+
+# Get summary with p-values (Satterthwaite's method)
+summ(
+  mdlMedicalOut$Att$lmerInterceptAllportQlt <-
+    lmer(
+      AttitudesDutch ~ AllportsCondition_cwc + qualityOverall_cwc + (1 | PID),
+      data = dtMedicalSupp$medicalOutWithinBetween
+    ),
+  confint = TRUE,
+  digits = 3
+)
+
+mdlMedicalOut$Att$lmerInterceptAllportQltCI <- 
+  confint(method = "Wald", mdlMedicalOut$Att$lmerInterceptAllportQlt)
+
+# Compare new model to previous step
+anova(
+  mdlMedicalOut$Att$lmeNull, 
+  mdlMedicalOut$Att$lmeInterceptAllportQlt
+  ) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Medical: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlMedicalOut$Att$varInterceptAllportQlt <-
+  lme4::VarCorr(mdlMedicalOut$Att$lmeInterceptAllportQlt)
+```
+
+```{r medicalOutModelSlopesAttAllportQlt}
+# Create and save Model (optimizer needed to reach convergence)
+mdlMedicalOut$Att$lmeSlopesAllportQlt <-
+  lme(
+    AttitudesDutch ~
+      AllportsCondition_cwc + qualityOverall_cwc,
+    random = ~ 1 + AllportsCondition_cwc + qualityOverall_cwc | PID,
+    na.action = na.omit,
+    control = lmeControl(opt = "optim"),
+    data = dtMedicalSupp$medicalOutWithinBetween
+  )
+
+# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
+summ(
+  mdlMedicalOut$Att$lmerSlopesAllportQlt <- lmer(
+    AttitudesDutch ~
+      AllportsCondition_cwc + qualityOverall_cwc +
+      (1 + AllportsCondition_cwc + qualityOverall_cwc | PID),
+    data = dtMedicalSupp$medicalOutWithinBetween,
+    control = lmerControl(optimizer="bobyqa", optCtrl=list(maxfun=2e5))
+  ),
+  confint = TRUE,
+  digits = 3
+)
+
+mdlMedicalOut$Att$lmerSlopesAllportQltCI <- 
+  confint(method = "Wald", mdlMedicalOut$Att$lmerSlopesAllportQlt)
+
+# Compare new model to previous step
+anova(
+  mdlMedicalOut$Att$lmeNull,
+  mdlMedicalOut$Att$lmeInterceptAllportQlt,
+  mdlMedicalOut$Att$lmeSlopesAllportQlt
+) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Medical: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlMedicalOut$Att$varSlopesAllportQlt <- 
+  lme4::VarCorr(mdlMedicalOut$Att$lmeSlopesAllportQlt)
+
+# Assumption Checks:
+mdlMedicalOut$Att$diagSlopesAllportQlt <- 
+  sjPlot::plot_model(mdlMedicalOut$Att$lmerSlopesAllportQlt, type = "diag")
+grid.arrange(
+  mdlMedicalOut$Att$diagSlopesAllportQlt[[1]],
+  mdlMedicalOut$Att$diagSlopesAllportQlt[[2]]$`PID`,
+  mdlMedicalOut$Att$diagSlopesAllportQlt[[3]],
+  mdlMedicalOut$Att$diagSlopesAllportQlt[[4]]
+)
+
+# Plot prediction model
+mdlMedicalOut$Att$predSlopesAllportQlt <- 
+  dtMedicalSupp$medicalOutWithinBetween %>% 
+  filter(complete.cases(AllportsCondition, qualityOverall)) %>%
+  filter(PID %in% dtMedicalSupp$medicalOutPltIDs) %>%
+  select(AttitudesDutch, TIDnum, PID) %>% 
+  mutate(measure = predict(mdlMedicalOut$Att$lmeSlopesAllportQlt,
+                           dtMedicalSupp$medicalOutWithinBetween %>% 
+                             filter(complete.cases(AllportsCondition, qualityOverall)) %>%
+                             filter(PID %in% dtMedicalSupp$medicalOutPltIDs),
+                           re.form = NA
+                           )
+         )
+
+(
+  mdlMedicalOut$Att$predPltSlopesAllportQlt <-
+    ggplot(data = mdlMedicalOut$Att$predSlopesAllportQlt, aes(x = TIDnum, y = measure)) +
+    geom_line(alpha = 1, color = "blue") +
+    geom_line(aes(y = AttitudesDutch), alpha = 1) +
+    facet_wrap( ~ PID, ncol = 6) +
+    xlab("Time") +
+    ylab("Outgroup Attitudes") +
+    theme_Publication()
+)
+ggsave(
+  filename = "Figures/MedicalOut_PredictionPlot_SlopesAttAllportQlt.png",
+  mdlMedicalOut$Att$predPltSlopesAllportQlt,
+  width = 18,
+  height = 12,
+  dpi = 800,
+  units = "cm",
+  device = "png"
+)
+```
+
+We sequentially tested whether the fulfillment of Allport's Contact Conditions was (1) related to more positive outgroup attitudes, (2) higher perceived interaction quality, and (3) whether the variance explained by Allport's Conditions is assumed by the perceived interaction quality if considered jointly. We find that in the multilevel models, the fulfillment of Allport's Conditions during outgroup contacts was associated with more positive outgroup attitudes (random slopes model; `r MlCoeffHtml(lmeMdl = mdlMedicalOut$Att$lmeSlopesAllport, lmerCI = mdlMedicalOut$Att$lmerSlopesAllportCI, varName = "AllportsCondition_cwc")`) and also predicted higher perceived interaction quality (random slopes model; `r MlCoeffHtml(lmeMdl = mdlMedicalOut$Qlt$lmeSlopesAllport, lmerCI = mdlMedicalOut$Qlt$lmerSlopesAllportCI, varName = "AllportsCondition_cwc")`). However, if we consider the influences of Allport's Conditions and interaction quality on outgroup attitudes jointly, we find that perceived interaction quality is a substantially stronger predictor (random slopes mode; `r MlCoeffHtml(lmeMdl = mdlMedicalOut$Att$lmeSlopesAllportQlt, lmerCI = mdlMedicalOut$Att$lmerSlopesAllportQltCI, varName = "qualityOverall_cwc")`) and the unique variance explained by Allport's Conditions was less than half of its original effect size (`r MlCoeffHtml(lmeMdl = mdlMedicalOut$Att$lmeSlopesAllportQlt, lmerCI = mdlMedicalOut$Att$lmerSlopesAllportQltCI, varName = "AllportsCondition_cwc")`). These results indicate that in this dataset the the fulfillment of Allport's conditions had a significant influence on outgroup attitudes and this effect is likely in parts explained by its effect through perceived interaction quality. 
+
 ## Need Fulfillment
+
+```{r medicalOutModelInterceptAttCore}
+# Create and save Model
+mdlMedicalOut$Att$lmeInterceptCore <-
+  lme(
+    AttitudesDutch ~ KeyNeedFulfillment_cwc,
+    random = ~ 1 | PID,
+    na.action = na.omit,
+    data = dtMedicalSupp$medicalOutWithinBetween
+  )
+
+# Get summary with p-values (Satterthwaite's method)
+summ(
+  mdlMedicalOut$Att$lmerInterceptCore <-
+    lmer(
+      AttitudesDutch ~ KeyNeedFulfillment_cwc + (1 | PID),
+      data = dtMedicalSupp$medicalOutWithinBetween
+    ),
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+
+mdlMedicalOut$Att$lmerInterceptCoreCI <-
+  confint(method = "Wald", mdlMedicalOut$Att$lmerInterceptCore)
+
+# Compare new model to previous step
+anova(mdlMedicalOut$Att$lmeNull,
+      mdlMedicalOut$Att$lmeInterceptCore) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Student: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlMedicalOut$Att$varInterceptCore <-
+  lme4::VarCorr(mdlMedicalOut$Att$lmeInterceptCore)
+```
+
+```{r medicalOutModelSlopesAttCore}
+# Create and save Model (optimizer needed to reach convergence)
+mdlMedicalOut$Att$lmeSlopesCore <-
+  lme(
+    AttitudesDutch ~
+      KeyNeedFulfillment_cwc,
+    random = ~ 1 + KeyNeedFulfillment_cwc | PID,
+    na.action = na.omit,
+    control = lmeControl(opt = "optim"),
+    data = dtMedicalSupp$medicalOutWithinBetween
+  )
+
+# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
+summ(
+  mdlMedicalOut$Att$lmerSlopesCore <- lmer(
+    AttitudesDutch ~
+      KeyNeedFulfillment_cwc +
+      (1 + KeyNeedFulfillment_cwc | PID),
+    data = dtMedicalSupp$medicalOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+
+# all variables standardized within PPT
+summ(
+  mdlMedicalOut$Att$lmerSlopesCoreZ <- lmer(
+    AttitudesDutch_zwc ~
+      KeyNeedFulfillment_zwc +
+      (1 + KeyNeedFulfillment_zwc | PID),
+    data = dtMedicalSupp$medicalOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+
+# standardized coefficients
+stdCoef.merMod(mdlMedicalOut$Att$lmerSlopesCore)
+
+# 95%CIs
+mdlMedicalOut$Att$lmerSlopesCoreCI <- 
+  confint(method = "Wald", mdlMedicalOut$Att$lmerSlopesCore)
+
+# Attempts at R^2
+r2mlm::r2mlm(mdlMedicalOut$Att$lmerSlopesCore, bargraph = TRUE)
+mitml::multilevelR2(mdlMedicalOut$Att$lmerSlopesCore)
+performance::r2(mdlMedicalOut$Att$lmerSlopesCore)
+performance::model_performance(mdlMedicalOut$Att$lmerSlopesCore)
+performance::compare_performance(mdlMedicalOut$Att$lmerNull, 
+                                 mdlMedicalOut$Att$lmerInterceptCore, 
+                                 mdlMedicalOut$Att$lmerSlopesCore)
+
+# Compare new model to previous step
+anova(mdlMedicalOut$Att$lmeNull, 
+      mdlMedicalOut$Att$lmeInterceptCore, 
+      mdlMedicalOut$Att$lmeSlopesCore) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Student: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlMedicalOut$Att$varSlopesCore <- 
+  lme4::VarCorr(mdlMedicalOut$Att$lmeSlopesCore)
+
+# Assumption Checks:
+mdlMedicalOut$Att$diagSlopesCore <- 
+  sjPlot::plot_model(mdlMedicalOut$Att$lmerSlopesCore, type = "diag")
+grid.arrange(
+  mdlMedicalOut$Att$diagSlopesCore[[1]],
+  mdlMedicalOut$Att$diagSlopesCore[[2]]$`PID`,
+  mdlMedicalOut$Att$diagSlopesCore[[3]],
+  mdlMedicalOut$Att$diagSlopesCore[[4]]
+)
+
+# Plot prediction model
+mdlMedicalOut$Att$predSlopesCore <- 
+  dtMedicalSupp$medicalOutWithinBetween %>% 
+  filter(complete.cases(KeyNeedFulfillment)) %>%
+  filter(PID %in% dtMedicalSupp$medicalOutPltIDs) %>%
+  select(AttitudesDutch, TIDnum, PID) %>% 
+  mutate(measure = predict(mdlMedicalOut$Att$lmeSlopesCore,
+                           dtMedicalSupp$medicalOutWithinBetween %>% 
+                             filter(complete.cases(KeyNeedFulfillment)) %>% 
+                             filter(PID %in% dtMedicalSupp$medicalOutPltIDs),
+                           re.form = NA
+                           )
+         )
+
+(
+  mdlMedicalOut$Att$predPltSlopesCore <-
+    ggplot(data = mdlMedicalOut$Att$predSlopesCore, 
+           aes(x = TIDnum, y = measure)) +
+    geom_line(alpha = 1, color = "blue") +
+    geom_line(aes(y = AttitudesDutch), alpha = 1) +
+    facet_wrap( ~ PID, ncol = 6) +
+    xlab("Time") +
+    ylab("Outgroup Attitudes") +
+    theme_Publication()
+)
+ggsave(
+  filename = "Figures/MedicalOut_PredictionPlot_SlopesAttCore.png",
+  mdlMedicalOut$Att$predPltSlopesCore,
+  width = 18,
+  height = 12,
+  dpi = 800,
+  units = "cm",
+  device = "png"
+)
+```
+
+```{r medicalOutModelInterceptQltCore}
+# Create and save Model
+mdlMedicalOut$Qlt$lmeInterceptCore <-
+  lme(
+    qualityOverall ~ KeyNeedFulfillment_cwc,
+    random = ~ 1 | PID,
+    na.action = na.omit,
+    data = dtMedicalSupp$medicalOutWithinBetween
+  )
+
+# Get summary with p-values (Satterthwaite's method)
+summ(
+  mdlMedicalOut$Qlt$lmerInterceptCore <-
+    lmer(
+      qualityOverall ~ KeyNeedFulfillment_cwc + (1 | PID),
+      data = dtMedicalSupp$medicalOutWithinBetween
+    ),
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+
+mdlMedicalOut$Qlt$lmerInterceptCoreCI <- 
+  confint(method = "Wald", mdlMedicalOut$Qlt$lmerInterceptCore)
+
+# Compare new model to previous step
+anova(mdlMedicalOut$Qlt$lmeNull, 
+      mdlMedicalOut$Qlt$lmeInterceptCore) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Medical: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlMedicalOut$Qlt$varInterceptCore <-
+  lme4::VarCorr(mdlMedicalOut$Qlt$lmeInterceptCore)
+```
+
+```{r medicalOutModelSlopesQltCore}
+# Create and save Model (optimizer needed to reach convergence)
+mdlMedicalOut$Qlt$lmeSlopesCore <-
+  lme(
+    qualityOverall ~
+      KeyNeedFulfillment_cwc,
+    random = ~ 1 + KeyNeedFulfillment_cwc | PID,
+    na.action = na.omit,
+    control = lmeControl(opt = "optim"),
+    data = dtMedicalSupp$medicalOutWithinBetween
+  )
+
+# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
+summ(
+  mdlMedicalOut$Qlt$lmerSlopesCore <-
+    lmer(
+      qualityOverall ~
+        KeyNeedFulfillment_cwc +
+        (1 + KeyNeedFulfillment_cwc | PID),
+      data = dtMedicalSupp$medicalOutWithinBetween
+    ),
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+
+mdlMedicalOut$Qlt$lmerSlopesCoreCI <- 
+  confint(method = "Wald", mdlMedicalOut$Qlt$lmerSlopesCore)
+
+# Compare new model to previous step
+anova(mdlMedicalOut$Qlt$lmeNull, 
+      mdlMedicalOut$Qlt$lmeInterceptCore, 
+      mdlMedicalOut$Qlt$lmeSlopesCore) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Medical: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlMedicalOut$Qlt$varSlopesCore <- 
+  lme4::VarCorr(mdlMedicalOut$Qlt$lmeSlopesCore)
+
+# Assumption Checks:
+mdlMedicalOut$Qlt$diagSlopesCore <-
+  sjPlot::plot_model(mdlMedicalOut$Qlt$lmerSlopesCore, type = "diag")
+grid.arrange(
+  mdlMedicalOut$Qlt$diagSlopesCore[[1]],
+  mdlMedicalOut$Qlt$diagSlopesCore[[2]]$`PID`,
+  mdlMedicalOut$Qlt$diagSlopesCore[[3]],
+  mdlMedicalOut$Qlt$diagSlopesCore[[4]]
+)
+
+# Plot prediction model
+mdlMedicalOut$Qlt$predSlopesCore <- 
+  dtMedicalSupp$medicalOutWithinBetween %>%
+  filter(complete.cases(KeyNeedFulfillment)) %>% 
+  filter(PID %in% dtMedicalSupp$medicalOutPltIDs) %>%
+  select(AttitudesDutch, TIDnum, PID) %>% 
+  mutate(measure = predict(mdlMedicalOut$Qlt$lmeSlopesCore,
+                           dtMedicalSupp$medicalOutWithinBetween %>% 
+                             filter(complete.cases(KeyNeedFulfillment)) %>% 
+                             filter(PID %in% dtMedicalSupp$medicalOutPltIDs),
+                           re.form = NA
+                           )
+         )
+
+(
+  mdlMedicalOut$Qlt$predPltSlopesCore <-
+    ggplot(data = mdlMedicalOut$Qlt$predSlopesCore %>% filter(PID %in% dtMedicalSupp$medicalOutPltIDs), 
+           aes(x = TIDnum, y = measure)) +
+    geom_line(alpha = 1, color = "blue") +
+    geom_line(aes(y = AttitudesDutch), alpha = 1) +
+    facet_wrap(~ PID, ncol = 6) +
+    xlab("Time") +
+    ylab("Outgroup Attitudes") +
+    theme_Publication()
+)
+ggsave(
+  filename = "Figures/MedicalOut_PredictionPlot_SlopesCore.png",
+  mdlMedicalOut$Qlt$predPltSlopesCore,
+  width = 18,
+  height = 12,
+  dpi = 800,
+  units = "cm",
+  device = "png"
+)
+```
+
+```{r medicalOutModelInterceptAttCoreQlt}
+# Create and save Model
+mdlMedicalOut$Att$lmeInterceptCoreQlt <-
+  lme(
+    AttitudesDutch ~ KeyNeedFulfillment_cwc + qualityOverall_cwc,
+    random = ~ 1 | PID,
+    na.action = na.omit,
+    data = dtMedicalSupp$medicalOutWithinBetween
+  )
+
+# Get summary with p-values (Satterthwaite's method)
+summ(
+  mdlMedicalOut$Att$lmerInterceptCoreQlt <-
+    lmer(
+      AttitudesDutch ~ KeyNeedFulfillment_cwc + qualityOverall_cwc + (1 | PID),
+      data = dtMedicalSupp$medicalOutWithinBetween
+    ),
+  confint = TRUE,
+  digits = 3
+)
+
+mdlMedicalOut$Att$lmerInterceptCoreQltCI <- 
+  confint(method = "Wald", mdlMedicalOut$Att$lmerInterceptCoreQlt)
+
+# Compare new model to previous step
+anova(
+  mdlMedicalOut$Att$lmeNull, 
+  mdlMedicalOut$Att$lmeInterceptCoreQlt
+  ) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Medical: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlMedicalOut$Att$varInterceptCoreQlt <-
+  lme4::VarCorr(mdlMedicalOut$Att$lmeInterceptCoreQlt)
+```
+
+```{r medicalOutModelSlopesAttCoreQlt}
+# Create and save Model (optimizer needed to reach convergence)
+mdlMedicalOut$Att$lmeSlopesCoreQlt <-
+  lme(
+    AttitudesDutch ~
+      KeyNeedFulfillment_cwc + qualityOverall_cwc,
+    random = ~ 1 + KeyNeedFulfillment_cwc + qualityOverall_cwc | PID,
+    na.action = na.omit,
+    control = lmeControl(opt = "optim"),
+    data = dtMedicalSupp$medicalOutWithinBetween
+  )
+
+# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
+summ(
+  mdlMedicalOut$Att$lmerSlopesCoreQlt <- lmer(
+    AttitudesDutch ~
+      KeyNeedFulfillment_cwc + qualityOverall_cwc +
+      (1 + KeyNeedFulfillment_cwc + qualityOverall_cwc | PID),
+    data = dtMedicalSupp$medicalOutWithinBetween,
+    control = lmerControl(optimizer="bobyqa", optCtrl=list(maxfun=2e5))
+  ),
+  confint = TRUE,
+  digits = 3
+)
+
+mdlMedicalOut$Att$lmerSlopesCoreQltCI <- 
+  confint(method = "Wald", mdlMedicalOut$Att$lmerSlopesCoreQlt)
+
+# Compare new model to previous step
+anova(
+  mdlMedicalOut$Att$lmeNull,
+  mdlMedicalOut$Att$lmeInterceptCoreQlt,
+  mdlMedicalOut$Att$lmeSlopesCoreQlt
+) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Medical: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlMedicalOut$Att$varSlopesCoreQlt <- 
+  lme4::VarCorr(mdlMedicalOut$Att$lmeSlopesCoreQlt)
+
+# Assumption Checks:
+mdlMedicalOut$Att$diagSlopesCoreQlt <- 
+  sjPlot::plot_model(mdlMedicalOut$Att$lmerSlopesCoreQlt, type = "diag")
+grid.arrange(
+  mdlMedicalOut$Att$diagSlopesCoreQlt[[1]],
+  mdlMedicalOut$Att$diagSlopesCoreQlt[[2]]$`PID`,
+  mdlMedicalOut$Att$diagSlopesCoreQlt[[3]],
+  mdlMedicalOut$Att$diagSlopesCoreQlt[[4]]
+)
+
+# Plot prediction model
+mdlMedicalOut$Att$predSlopesCoreQlt <- 
+  dtMedicalSupp$medicalOutWithinBetween %>% 
+  filter(complete.cases(KeyNeedFulfillment, qualityOverall)) %>%
+  filter(PID %in% dtMedicalSupp$medicalOutPltIDs) %>%
+  select(AttitudesDutch, TIDnum, PID) %>% 
+  mutate(measure = predict(mdlMedicalOut$Att$lmeSlopesCoreQlt,
+                           dtMedicalSupp$medicalOutWithinBetween %>% 
+                             filter(complete.cases(KeyNeedFulfillment, qualityOverall)) %>%
+                             filter(PID %in% dtMedicalSupp$medicalOutPltIDs),
+                           re.form = NA
+                           )
+         )
+
+(
+  mdlMedicalOut$Att$predPltSlopesCoreQlt <-
+    ggplot(data = mdlMedicalOut$Att$predSlopesCoreQlt, aes(x = TIDnum, y = measure)) +
+    geom_line(alpha = 1, color = "blue") +
+    geom_line(aes(y = AttitudesDutch), alpha = 1) +
+    facet_wrap( ~ PID, ncol = 6) +
+    xlab("Time") +
+    ylab("Outgroup Attitudes") +
+    theme_Publication()
+)
+ggsave(
+  filename = "Figures/MedicalOut_PredictionPlot_SlopesAttCoreQlt.png",
+  mdlMedicalOut$Att$predPltSlopesCoreQlt,
+  width = 18,
+  height = 12,
+  dpi = 800,
+  units = "cm",
+  device = "png"
+)
+```
+
+We again sequentially tested whether the fulfillment of the core need during an interaction was (1) related to more positive outgroup attitudes, (2) higher perceived interaction quality, and (3) whether the variance explained by the core need is assumed by the perceived interaction quality if considered jointly. We find that in the multilevel models, the fulfillment of core need fulfillment during outgroup contacts was associated with more positive outgroup attitudes (random slopes model; `r MlCoeffHtml(lmeMdl = mdlMedicalOut$Att$lmeSlopesCore, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreCI, varName = "KeyNeedFulfillment_cwc")`) and also predicted higher perceived interaction quality (random slopes model; `r MlCoeffHtml(lmeMdl = mdlMedicalOut$Qlt$lmeSlopesCore, lmerCI = mdlMedicalOut$Qlt$lmerSlopesCoreCI, varName = "KeyNeedFulfillment_cwc")`). However, if we consider the influences of core need fulfillment and interaction quality on outgroup attitudes jointly, we find that perceived interaction quality is a substantially stronger predictor (random slopes mode; `r MlCoeffHtml(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreQlt, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreQltCI, varName = "qualityOverall_cwc")`) and the unique variance explained by core need fulfillment was roughly half of its original effect size (`r MlCoeffHtml(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreQlt, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreQltCI, varName = "KeyNeedFulfillment_cwc")`). These results indicate that in this dataset the the fulfillment of core situational needs had a significant influence on outgroup attitudes and this effect is likely in parts explained by its effect through perceived interaction quality. 
+
+## Compare Fulfillment of Core Need and Allport's Conditions
+
+```{r AllportVsCore}
+# Compare new model to previous step
+anova(mdlMedicalOut$Att$lmeSlopesAllport, 
+      mdlMedicalOut$Att$lmeSlopesCore) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  kbl(
+    .,
+    caption = "Medical: Comparison of Allport's Conditions to Core Situational Need",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+AIC(
+  mdlMedicalOut$Att$lmerSlopesAllport,
+  mdlMedicalOut$Att$lmerSlopesCore
+)
+
+BIC(
+  mdlMedicalOut$Att$lmerSlopesAllport,
+  mdlMedicalOut$Att$lmerSlopesCore
+)
+
+performance::compare_performance(
+  mdlMedicalOut$Att$lmerSlopesAllport,
+  mdlMedicalOut$Att$lmerSlopesCore
+)
+```
+
+```{r medicalOutModelInterceptAttCoreAllport}
+# Create and save Model
+mdlMedicalOut$Att$lmeInterceptCoreAllport <-
+  lme(
+    AttitudesDutch ~ KeyNeedFulfillment_cwc + AllportsCondition_cwc,
+    random = ~ 1 | PID,
+    na.action = na.omit,
+    data = dtMedicalSupp$medicalOutWithinBetween
+  )
+
+# Get summary with p-values (Satterthwaite's method)
+summ(
+  mdlMedicalOut$Att$lmerInterceptCoreAllport <-
+    lmer(
+      AttitudesDutch ~ KeyNeedFulfillment_cwc + AllportsCondition_cwc + (1 | PID),
+      data = dtMedicalSupp$medicalOutWithinBetween
+    ),
+  confint = TRUE,
+  digits = 3
+)
+
+mdlMedicalOut$Att$lmerInterceptCoreAllportCI <- 
+  confint(method = "Wald", mdlMedicalOut$Att$lmerInterceptCoreAllport)
+
+# Compare new model to previous step
+anova(
+  mdlMedicalOut$Att$lmeNull, 
+  mdlMedicalOut$Att$lmeInterceptAllport,
+  mdlMedicalOut$Att$lmeInterceptCoreAllport
+  ) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Medical: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlMedicalOut$Att$varInterceptCoreAllport <-
+  lme4::VarCorr(mdlMedicalOut$Att$lmeInterceptCoreAllport)
+```
+
+```{r medicalOutModelSlopesAttCoreAllport}
+# Create and save Model (optimizer needed to reach convergence)
+mdlMedicalOut$Att$lmeSlopesCoreAllport <-
+  lme(
+    AttitudesDutch ~
+      KeyNeedFulfillment_cwc + AllportsCondition_cwc,
+    random = ~ 1 + KeyNeedFulfillment_cwc + AllportsCondition_cwc | PID,
+    na.action = na.omit,
+    control = lmeControl(opt = "optim"),
+    data = dtMedicalSupp$medicalOutWithinBetween
+  )
+
+# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
+summ(
+  mdlMedicalOut$Att$lmerSlopesCoreAllport <- lmer(
+    AttitudesDutch ~
+      KeyNeedFulfillment_cwc + AllportsCondition_cwc +
+      (1 + KeyNeedFulfillment_cwc + AllportsCondition_cwc | PID),
+    data = dtMedicalSupp$medicalOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3
+)
+
+mdlMedicalOut$Att$lmerSlopesCoreAllportCI <- 
+  confint(method = "Wald", mdlMedicalOut$Att$lmerSlopesCoreAllport)
+
+# Compare new model to previous step
+anova(
+  mdlMedicalOut$Att$lmeNull,
+  mdlMedicalOut$Att$lmeInterceptCoreAllport,
+  mdlMedicalOut$Att$lmeSlopesCoreAllport
+) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Medical: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlMedicalOut$Att$varSlopesCoreAllport <- 
+  lme4::VarCorr(mdlMedicalOut$Att$lmeSlopesCoreAllport)
+
+# Assumption Checks:
+mdlMedicalOut$Att$diagSlopesCoreAllport <- 
+  sjPlot::plot_model(mdlMedicalOut$Att$lmerSlopesCoreAllport, type = "diag")
+grid.arrange(
+  mdlMedicalOut$Att$diagSlopesCoreQlt[[1]],
+  mdlMedicalOut$Att$diagSlopesCoreQlt[[2]]$`PID`,
+  mdlMedicalOut$Att$diagSlopesCoreQlt[[3]],
+  mdlMedicalOut$Att$diagSlopesCoreQlt[[4]]
+)
+
+# Plot prediction model
+mdlMedicalOut$Att$predSlopesCoreAllport <- 
+  dtMedicalSupp$medicalOutWithinBetween %>% 
+  filter(complete.cases(KeyNeedFulfillment, AllportsCondition)) %>%
+  filter(PID %in% dtMedicalSupp$medicalOutPltIDs) %>%
+  select(AttitudesDutch, TIDnum, PID) %>% 
+  mutate(measure = predict(mdlMedicalOut$Att$lmeSlopesCoreAllport,
+                           dtMedicalSupp$medicalOutWithinBetween %>% 
+                             filter(complete.cases(KeyNeedFulfillment, AllportsCondition)) %>%
+                             filter(PID %in% dtMedicalSupp$medicalOutPltIDs),
+                           re.form = NA
+                           )
+         )
+
+(
+  mdlMedicalOut$Att$predPltSlopesCoreAllport <-
+    ggplot(data = mdlMedicalOut$Att$predSlopesCoreQlt, aes(x = TIDnum, y = measure)) +
+    geom_line(alpha = 1, color = "blue") +
+    geom_line(aes(y = AttitudesDutch), alpha = 1) +
+    facet_wrap( ~ PID, ncol = 6) +
+    xlab("Time") +
+    ylab("Outgroup Attitudes") +
+    theme_Publication()
+)
+ggsave(
+  filename = "Figures/MedicalOut_PredictionPlot_SlopesAttCoreAllport.png",
+  mdlMedicalOut$Att$predPltSlopesCoreAllport,
+  width = 18,
+  height = 12,
+  dpi = 800,
+  units = "cm",
+  device = "png"
+)
+```
+
+To compare the models using either Allport's conditions or the core need fulfillment to predict outgroup attitudes, we first assess relative model performance indices (i.e., Akaike information criterion, and Bayesian information criterion), and then consider the two predictors in a joint model to see whether the two approaches predict the same variance in outgroup attitudes. When comparing the model selection indices we find that the fulfillment of the situation core need, indeed performs slightly better than the model using Allport's conditions ($AIC_{CoreNeed}$ `r AIC(mdlMedicalOut$Att$lmerSlopesCore)` < `r AIC(mdlMedicalOut$Att$lmerSlopesAllport)` $AIC_{Allport}$, and $BIC_{CoreNeed}$ `r BIC(mdlMedicalOut$Att$lmerSlopesCore)` < `r BIC(mdlMedicalOut$Att$lmerSlopesAllport)` $BIC_{Allport}$). Additionally, when considering the predictors jointly, we find that both significantly predict outgroup attitudes with similar sized regression parameters (random slopes model; Allport's Conditions: `r MlCoeffHtml(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreAllport, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreAllportCI, varName = "AllportsCondition_cwc")`, Core Need: `r MlCoeffHtml(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreAllport, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreAllportCI, varName = "KeyNeedFulfillment_cwc")`). This indicates that, although both Allport's conditions and the core need fulfillment seem to (in part) work through perceived interaction quality, they explain different aspects of the variance in outgroup attitudes and do not constitute one another.  
+
+## Robustness
+
+```{r medicalModelAttNullInt}
+# Create and save Model
+mdlMedical$lmerAttNullInt <-
+  lme4::lmer(AttitudesDutch ~ 1 + (1 | PID),
+             data = dtMedical$full %>%
+               filter(complete.cases(
+                 OutgroupInteraction
+               ))) # use optim if it does not converge
+
+mdlMedical$lmeAttNullInt <-
+  lme(
+    AttitudesDutch ~ 1,
+    random = ~ 1 | PID,
+    data = dtMedical$full %>%
+      filter(complete.cases(
+        OutgroupInteraction
+      )),
+    na.action = na.omit,
+    control = list(opt = "nlmimb")
+  ) # use optim if it does not converge
+
+# Get summary with p-values (Satterthwaite's method)
+# summary(mdlMedical$lmerAttNull) #or with the lme function
+summ(mdlMedical$lmerAttNullInt, digits = 3)
+```
+
+```{r medicalModelInterceptAttCoreInt}
+# Create and save Model
+mdlMedical$lmeInterceptAttCoreInt <-
+  lme(
+    AttitudesDutch ~ KeyNeedFulfillment_cwc * OutgroupInteraction,
+    random =  ~ 1 | PID,
+    na.action = na.omit,
+    data = dtMedical$full
+  )
+
+# Get summary with p-values (Satterthwaite's method)
+summ(
+  mdlMedical$lmerInterceptAttCoreInt <- lmer(
+    AttitudesDutch ~ KeyNeedFulfillment_cwc * OutgroupInteraction + (1 | PID),
+    data = dtMedical$full
+  ),
+  confint = TRUE,
+  digits = 3
+)
+
+mdlMedical$lmerInterceptAttCoreIntCI <- 
+  confint(method = "Wald", mdlMedical$lmerInterceptAttCoreInt)
+
+# Compare new model to previous step
+anova(mdlMedical$lmeAttNullInt, 
+      mdlMedical$lmeInterceptAttCoreInt) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  add_rownames(., var = "Description") %>%
+  mutate(Description = gsub(".*\\$", "", Description)) %>%
+  kbl(
+    .,
+    caption = "Medical: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = c("l", rep("c", ncol(.)-1)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlMedical$varInterceptAttCoreInt <- 
+  lme4::VarCorr(mdlMedical$lmeInterceptAttCoreInt)
+```
+
+```{r medicalModelSlopesAttCoreIntX}
+# Create and save Model (optimizer needed to reach convergence)
+mdlMedical$lmeSlopesAttCoreInt <- lme(
+  AttitudesDutch ~
+    KeyNeedFulfillment_cwc * OutgroupInteraction,
+  random = ~ 1 + KeyNeedFulfillment_cwc + OutgroupInteraction | PID,
+  control = lmeControl(opt = "optim"),
+  na.action = na.omit,
+  data = dtMedical$full
+)
+
+# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
+summ(
+  mdlMedical$lmerSlopesAttCoreInt <- lmer(
+    AttitudesDutch ~
+      KeyNeedFulfillment_cwc * OutgroupInteraction +
+      (1 + KeyNeedFulfillment_cwc + OutgroupInteraction | PID),
+    data = dtMedical$full
+  ), 
+  confint = TRUE,
+  digits = 3
+)
+
+mdlMedical$lmerSlopesAttCoreIntCI <- 
+  confint(method = "Wald", mdlMedical$lmerSlopesAttCoreInt)
+
+# Compare new model to previous step
+anova(mdlMedical$lmeAttNullInt, 
+      mdlMedical$lmeInterceptAttCoreInt,
+      mdlMedical$lmeSlopesAttCoreInt) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  add_rownames(., var = "Description") %>%
+  mutate(Description = gsub(".*\\$", "", Description)) %>%
+  kbl(
+    .,
+    caption = "Medical: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlMedical$varSlopesAttCoreInt <- 
+  lme4::VarCorr(mdlMedical$lmeSlopesAttCoreInt)
+
+# Assumption Checks:
+mdlMedical$diagSlopesAttCoreInt <-
+  sjPlot::plot_model(mdlMedical$lmerSlopesAttCoreInt, type = "diag")
+grid.arrange(
+  mdlMedical$diagSlopesAttCoreInt[[1]],
+  mdlMedical$diagSlopesAttCoreInt[[2]]$`PID`,
+  mdlMedical$diagSlopesAttCoreInt[[3]],
+  mdlMedical$diagSlopesAttCoreInt[[4]]
+)
+
+# Plot prediction model
+mdlMedical$predSlopesAttCoreInt <- 
+  dtMedical$full %>%
+  filter(complete.cases(KeyNeedFulfillment, OutgroupInteraction)) %>%
+  filter(PID %in% dtMedicalSupp$medicalPltIDs) %>%
+  select(AttitudesDutch, TIDnum, PID) %>% 
+  mutate(measure = predict(mdlMedical$lmeSlopesAttCoreInt,
+                           dtMedical$full %>% 
+                             filter(complete.cases(KeyNeedFulfillment, OutgroupInteraction)) %>%
+                             filter(PID %in% dtMedicalSupp$medicalPltIDs),
+                           re.form = NA
+                           )
+         )
+
+(
+  mdlMedical$predPltSlopesAttCoreInt <-
+    ggplot(data = mdlMedical$predSlopesAttCoreInt, aes(x = TIDnum, y = measure)) +
+    geom_line(alpha = 1, color = "blue") +
+    geom_line(aes(y = AttitudesDutch), alpha = 1) +
+    facet_wrap(~ PID, ncol = 6) +
+    xlab("Time") +
+    ylab("Outgroup Attitudes") +
+    theme_Publication()
+)
+ggsave(
+  filename = "Figures/Medical_PredictionPlot_SlopesAttCoreInt.png",
+  mdlMedical$predPltSlopesAttCoreInt,
+  width = 18,
+  height = 12,
+  dpi = 800,
+  units = "cm",
+  device = "png"
+)
+```
+
+We again checked for alternative models to the core need fulfillment. First, when considering generalized situational core need fulfillment together with whether an intergroup contact took place, we find that there is no significant main effect of core need fulfillment (random slopes model; `r MlCoeffHtml(lmeMdl = mdlMedical$lmeSlopesAttCoreInt, lmerCI = mdlMedical$lmerSlopesAttCoreIntCI, varName = "KeyNeedFulfillment_cwc")`) but a stronger interaction effect of core need fulfillment and outgroup contact (`r MlCoeffHtml(lmeMdl = mdlMedical$lmeSlopesAttCoreInt, lmerCI = mdlMedical$lmerSlopesAttCoreIntCI, varName = "KeyNeedFulfillment_cwc:OutgroupInteractionYes")`). Together with a significant main effect of having an outgroup contact (`r MlCoeffHtml(lmeMdl = mdlMedical$lmeSlopesAttCoreInt, lmerCI = mdlMedical$lmerSlopesAttCoreIntCI, varName = "OutgroupInteractionYes")`), this indicates that it is not key need fulfillment in general --- but key need fulfillment during an outgroup contact that predicts more positive outgroup attitudes. This finding is consistent with the results of the previous studies.
+
+```{r medicalOutModelInterceptAttCoreSdt}
+# Create and save Model
+mdlMedicalOut$Att$lmeInterceptCoreSdt <-
+  lme(
+    AttitudesDutch ~ KeyNeedFulfillment_cwc + Competence_cwc + Autonomy_cwc + Relatedness_cwc,
+    random = ~ 1 | PID,
+    data = dtMedicalSupp$medicalOutWithinBetween,
+    na.action = na.exclude
+  )
+
+# Get summary with p-values (Satterthwaite's method)
+summ(
+  mdlMedicalOut$Att$lmerInterceptCoreSdt <- lmer(
+    AttitudesDutch ~ KeyNeedFulfillment_cwc + Competence_cwc + Autonomy_cwc + Relatedness_cwc + (1 | PID),
+    data = dtMedicalSupp$medicalOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3
+)
+
+# To be compared against a model with only the self determination theory needs
+mdlMedicalOut$Att$lmeInterceptSdt <-
+  lme(
+    AttitudesDutch ~ Competence_cwc + Autonomy_cwc + Relatedness_cwc,
+    random = ~ 1 | PID,
+    data = dtMedicalSupp$medicalOutWithinBetween,
+    na.action = na.exclude
+  )
+
+summ(
+  mdlMedicalOut$Att$lmerInterceptSdt <- lmer(
+    AttitudesDutch ~ Competence_cwc + Autonomy_cwc + Relatedness_cwc + (1 | PID),
+    data = dtMedicalSupp$medicalOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3
+)
+
+# Compare new model to previous steps
+anova(
+  mdlMedicalOut$Att$lmeInterceptSdt,
+  mdlMedicalOut$Att$lmeInterceptCoreSdt
+  ) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Medical: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlMedicalOut$Att$varInterceptCoreSdt <-
+  lme4::VarCorr(mdlMedicalOut$Att$lmeInterceptCoreSdt)
+```
+
+```{r medicalOutModelSlopesAttCoreSdt}
+# Create and save Model (optimizer needed to reach convergence)
+mdlMedicalOut$Att$lmeSlopesCoreSdt <-
+  lme(
+    AttitudesDutch ~
+      KeyNeedFulfillment_cwc + Competence_cwc + Autonomy_cwc + Relatedness_cwc,
+    random = ~ 1 + KeyNeedFulfillment_cwc + Competence_cwc + Relatedness_cwc | PID,
+    control = lmeControl(opt = "optim", maxIter = 100, msMaxIter = 100),
+    data = dtMedicalSupp$medicalOutWithinBetween,
+    na.action = na.exclude
+  )
+
+# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
+summ(
+  mdlMedicalOut$Att$lmerSlopesCoreSdt <- lmer(
+    AttitudesDutch ~
+      KeyNeedFulfillment_cwc + Competence_cwc + Autonomy_cwc + Relatedness_cwc +
+      (1 + KeyNeedFulfillment_cwc + Competence_cwc + Autonomy_cwc + Relatedness_cwc | PID),
+    data = dtMedicalSupp$medicalOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3
+)
+
+mdlMedicalOut$Att$lmerSlopesCoreSdtCI <- 
+  confint(method = "Wald", mdlMedicalOut$Att$lmerSlopesCoreSdt)
+
+# Compare new model to previous step
+anova(mdlMedicalOut$Att$lmeInterceptSdt,
+      mdlMedicalOut$Att$lmeInterceptCoreSdt, 
+      mdlMedicalOut$Att$lmeSlopesCoreSdt) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Medical: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# model with SDT only
+# Create and save Model (optimizer needed to reach convergence)
+mdlMedicalOut$Att$lmeSlopesSdt <-
+  lme(
+    AttitudesDutch ~
+      Competence_cwc + Autonomy_cwc + Relatedness_cwc,
+    random = ~ 1 + Competence_cwc + Autonomy_cwc + Relatedness_cwc | PID,
+    control = lmeControl(opt = "optim"),
+    data = dtMedicalSupp$medicalOutWithinBetween,
+    na.action = na.exclude
+  )
+
+# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
+summ(
+  mdlMedicalOut$Att$lmerSlopesSdt <- lmer(
+    AttitudesDutch ~
+      Competence_cwc + Autonomy_cwc + Relatedness_cwc +
+      (1 + Competence_cwc + Autonomy_cwc + Relatedness_cwc | PID),
+    data = dtMedicalSupp$medicalOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3
+)
+
+# Compare new model to previous step
+anova(mdlMedicalOut$Att$lmeInterceptSdt,
+      mdlMedicalOut$Att$lmeSlopesSdt, 
+      mdlMedicalOut$Att$lmeSlopesCoreSdt) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Medical: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+
+# Save variances
+mdlMedicalOut$Att$varSlopesCoreSdt <- 
+  lme4::VarCorr(mdlMedicalOut$Att$lmeSlopesCoreSdt)
+
+# Assumption Checks:
+mdlMedicalOut$Att$diagSlopesCoreSdt <- 
+  sjPlot::plot_model(mdlMedicalOut$Att$lmerSlopesCoreSdt, type = "diag")
+grid.arrange(
+  mdlMedicalOut$Att$diagSlopesCoreSdt[[1]],
+  mdlMedicalOut$Att$diagSlopesCoreSdt[[2]]$`PID`,
+  mdlMedicalOut$Att$diagSlopesCoreSdt[[3]],
+  mdlMedicalOut$Att$diagSlopesCoreSdt[[4]]
+)
+
+# Plot prediction model
+mdlMedicalOut$Att$predSlopesCoreSdt <- 
+  dtMedicalSupp$medicalOutWithinBetween %>%
+  filter(complete.cases(
+    KeyNeedFulfillment,
+    Autonomy, Competence, Relatedness
+    )) %>%
+  filter(PID %in% dtMedicalSupp$medicalOutPltIDs) %>%
+  select(AttitudesDutch, TIDnum, PID, Autonomy, Competence, Relatedness) %>% 
+  mutate(measure = predict(mdlMedicalOut$Att$lmeSlopesCoreSdt,
+                           dtMedicalSupp$medicalOutWithinBetween %>% 
+                             filter(complete.cases(
+                               KeyNeedFulfillment,
+                               Autonomy, Competence, Relatedness
+                             )) %>%
+                             filter(PID %in% dtMedicalSupp$medicalOutPltIDs),
+                           re.form = NA
+                           )
+         )
+
+(
+  mdlMedicalOut$Att$predPltSlopesCoreSdt <-
+    ggplot(data = mdlMedicalOut$Att$predSlopesCoreSdt, aes(x = TIDnum, y = measure)) +
+    geom_line(alpha = 1, color = "blue") +
+    geom_line(aes(y = AttitudesDutch), alpha = 1) +
+    facet_wrap( ~ PID, ncol = 6) +
+    xlab("Time") +
+    ylab("Outgroup Attitudes") +
+    theme_Publication()
+)
+ggsave(
+  filename = "Figures/MedicalOut_PredictionPlot_SlopesAttCoreStd.png",
+  mdlMedicalOut$Att$predPltSlopesCoreSdt,
+  width = 18,
+  height = 12,
+  dpi = 800,
+  units = "cm",
+  device = "png"
+)
+
+# Model comparison
+medicalSdtComp <-
+  anova(
+    mdlMedicalOut$Att$lmerSlopesSdt, 
+    mdlMedicalOut$Att$lmerSlopesCoreSdt
+  ) %>%
+  as.data.frame()
+medicalSdtCompDf <- medicalSdtComp["mdlMedicalOut$Att$lmerSlopesCoreSdt", "Df"]
+medicalSdtCompN <- sapply(ranef(mdlMedicalOut$Att$lmerSlopesCoreSdt), nrow)
+medicalSdtCompChi <- medicalSdtComp["mdlMedicalOut$Att$lmerSlopesCoreSdt", "Chisq"] %>% round(2) %>% format(nsmall=2)
+medicalSdtCompP <-
+  ifelse(medicalSdtComp["mdlMedicalOut$Att$lmerSlopesCoreSdt", "Pr(>Chisq)"] < .001,
+         "< .001",
+         paste0("= ", medicalSdtComp["mdlMedicalOut$Att$lmerSlopesCoreSdt", "Pr(>Chisq)"] %>% round(3) %>% format(nsmall = 3)))
+
+medicalSdtCompChiSq <- paste0("$chi^2$(", medicalSdtCompDf, ", <i>N</i> = ", medicalSdtCompN, ") = ", medicalSdtCompChi, ", <i>p</i> ", medicalSdtCompP)
+```
+
+In a final step we again checked whether during the interaction the core situational need remains a meaningful predictor even when taking other fundamental psychological needs into account. We find that the core need adds significantly above a model with only the self determination theory needs (random slopes models; `r medicalSdtCompChiSq`). We find that the core need explains the most variance in outgroup attitudes after an outgroup contact (`r MlCoeffHtml(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreSdt, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreSdtCI, varName = "KeyNeedFulfillment_cwc")`). When compared to the model with only the SDT needs, the core need fulfillment flexibly takes on some of the explained variance of all of the three fundamental needs. However, similar to the previous study, in this large sample relatedness (`r MlCoeffHtml(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreSdt, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreSdtCI, varName = "Relatedness_cwc")`), competence (`r MlCoeffHtml(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreSdt, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreSdtCI, varName = "Competence_cwc")`) and autonomy (`r MlCoeffHtml(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreSdt, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreSdtCI, varName = "Autonomy_cwc")`) each predicted positive outgroup attitudes independently. However, the regression coefficient is three times as large for the core need fulfillment (with all scaling being equal). 
 
 # **Export for Methods and Results**  
 
