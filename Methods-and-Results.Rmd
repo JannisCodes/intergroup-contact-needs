@@ -367,12 +367,6 @@ mdlWorker$lmeAttNull <-
 # summary(lmerWorkerAttNull) #or with the lme function
 summ(mdlWorker$lmerAttNull, digits = 3, center = TRUE)
 
-# generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(thermometerDutch_1~1 + (1|PID),data=dtWorker$full),
-#                  method="boot",nsim=1000,
-#                  parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-Null-CI.csv")
-
 # Save variances
 mdlWorker$varAttNull <- 
   VarCorr(mdlWorker$lmeAttNull) # save variances
@@ -409,13 +403,8 @@ summ(
   center = FALSE
 )
 
-mdlWorker$lmerInterceptAttTypeCI <- confint(mdlWorker$lmerInterceptAttType)
-
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(thermometerDutch_1 ~ Contact_dum + inNonDutch + (1|PID),data=dtWorker$full),
-#                  method="boot",nsim=1000, parallel = "multicore",
-#                  ncpus = 4, seed = 42),
-#          "output/tables/ML-Inter-CI.csv")
+mdlWorker$lmerInterceptAttTypeCI <- 
+  confint(method = "Wald", mdlWorker$lmerInterceptAttType)
 
 # Compare new model to previous step
 anova(mdlWorker$lmeAttNull, 
@@ -474,12 +463,6 @@ mdlWorkerOut$Att$lmeNull <-
 # summary(Null.Out.ML.r) #or with the lme function
 summ(mdlWorkerOut$Att$lmerNull, digits = 3, center = TRUE)
 
-# generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(thermometerDutch_1~1 + (1|PID),data=dtWorker$full),
-#                  method="boot",nsim=1000,
-#                  parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-Null-CI.csv")
-
 # Save variances
 mdlWorkerOut$Att$varNull <- 
   VarCorr(mdlWorkerOut$Att$lmeNull) # save variances
@@ -518,13 +501,7 @@ summ(
 )
 
 mdlWorkerOut$Att$lmerInterceptCoreCI <- 
-  confint(mdlWorkerOut$Att$lmerInterceptCore)
-
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(thermometerDutch_1 ~ Contact_dum + inNonDutch + (1|PID),data=workerOutgroupInteraction),
-#                  method="boot",nsim=1000, parallel = "multicore",
-#                  ncpus = 4, seed = 42),
-#          "output/tables/ML-Inter-CI.csv")
+  confint(method = "Wald", mdlWorkerOut$Att$lmerInterceptCore)
 
 # Compare new model to previous step
 anova(mdlWorkerOut$Att$lmeNull, 
@@ -605,7 +582,8 @@ summ(
 stdCoef.merMod(mdlWorkerOut$Att$lmerSlopesCore)
 
 # 95%CIs
-mdlWorkerOut$Att$lmerSlopesCoreCI <- confint(mdlWorkerOut$Att$lmerSlopesCore)
+mdlWorkerOut$Att$lmerSlopesCoreCI <- 
+  confint(method = "Wald", mdlWorkerOut$Att$lmerSlopesCore)
 
 # Attempts at R^2
 r2mlm::r2mlm(mdlWorkerOut$Att$lmerSlopesCore, bargraph = TRUE)
@@ -615,12 +593,6 @@ performance::model_performance(mdlWorkerOut$Att$lmerSlopesCore)
 performance::compare_performance(mdlWorkerOut$Att$lmerNull, 
                                  mdlWorkerOut$Att$lmerInterceptCore, 
                                  mdlWorkerOut$Att$lmerSlopesCore)
-
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(model.ran0,
-#               method="boot",nsim=1000,
-#               parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-RandomSlopes-CI.csv")
 
 # Compare new model to previous step
 anova(mdlWorkerOut$Att$lmeNull, 
@@ -719,12 +691,6 @@ mdlWorkerOut$Qlt$lmeNull <-
 # summary(Null.Out.Qual.ML.r) #or with the lme function
 summ(mdlWorkerOut$Qlt$lmerNull, digits = 3)
 
-# generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(thermometerDutch_1~1 + (1|PID),data=workerOutgroupInteraction),
-#                  method="boot",nsim=1000,
-#                  parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-Null-CI.csv")
-
 # Save variances
 mdlWorkerOut$Qlt$varNull <- 
   VarCorr(mdlWorkerOut$Qlt$lmeNull) # save variances
@@ -763,13 +729,7 @@ summ(
 )
 
 mdlWorkerOut$Qlt$lmerInterceptCoreCI <- 
-  confint(mdlWorkerOut$Qlt$lmerInterceptCore)
-
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(quality_overall_1 ~ Contact_dum + inNonDutch + (1|PID),data=workerOutgroupInteraction),
-#                  method="boot",nsim=1000, parallel = "multicore",
-#                  ncpus = 4, seed = 42),
-#          "output/tables/ML-Inter-CI.csv")
+  confint(method = "Wald", mdlWorkerOut$Qlt$lmerInterceptCore)
 
 # Compare new model to previous step
 anova(mdlWorkerOut$Qlt$lmeNull, 
@@ -823,13 +783,7 @@ summ(
 )
 
 mdlWorkerOut$Qlt$lmerSlopesCoreCI <- 
-  confint(mdlWorkerOut$Qlt$lmerSlopesCore)
-
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(mdlWorkerOut$Qlt$lmerSlopesCore,
-#               method="boot",nsim=1000,
-#               parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-RandomSlopes-CI.csv")
+  confint(method = "Wald", mdlWorkerOut$Qlt$lmerSlopesCore)
 
 # Compare new model to previous step
 anova(mdlWorkerOut$Qlt$lmeNull, 
@@ -879,13 +833,7 @@ summ(
 )
 
 mdlWorkerOut$Att$lmerInterceptCoreQltCI <- 
-  confint(mdlWorkerOut$Att$lmerInterceptCoreQlt)
-
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(thermometerDutch_1 ~ Contact_dum + inNonDutch + (1|PID),data=workerOutgroupInteraction),
-#                  method="boot",nsim=1000, parallel = "multicore",
-#                  ncpus = 4, seed = 42),
-#          "output/tables/ML-Inter-CI.csv")
+  confint(method = "Wald", mdlWorkerOut$Att$lmerInterceptCoreQlt)
 
 # Compare new model to previous step
 anova(
@@ -939,13 +887,7 @@ summ(
 )
 
 mdlWorkerOut$Att$lmerSlopesCoreQltCI <- 
-  confint(mdlWorkerOut$Att$lmerSlopesCoreQlt)
-
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(model.ran0,
-#               method="boot",nsim=1000,
-#               parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-RandomSlopes-CI.csv")
+  confint(method = "Wald", mdlWorkerOut$Att$lmerSlopesCoreQlt)
 
 # Compare new model to previous step
 anova(
@@ -1042,13 +984,7 @@ summ(
 )
 
 mdlWorker$lmerInterceptAttCoreIntCI <- 
-  confint(mdlWorker$lmerInterceptAttCoreInt)
-
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(thermometerDutch_1 ~ Contact_dum + inNonDutch + (1|PID),data=dtWorker$full),
-#                  method="boot",nsim=1000, parallel = "multicore",
-#                  ncpus = 4, seed = 42),
-#          "output/tables/ML-Inter-CI.csv")
+  confint(method = "Wald", mdlWorker$lmerInterceptAttCoreInt)
 
 # Compare new model to previous step
 anova(mdlWorker$lmeAttNull, 
@@ -1101,13 +1037,7 @@ summ(
 )
 
 mdlWorker$lmerSlopesAttCoreIntCI <- 
-  confint(mdlWorker$lmerSlopesAttCoreInt)
-
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(model.ran0,
-#               method="boot",nsim=1000,
-#               parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-RandomSlopes-CI.csv")
+  confint(method = "Wald", mdlWorker$lmerSlopesAttCoreInt)
 
 # Compare new model to previous step
 anova(mdlWorker$lmeAttNull, 
@@ -1200,12 +1130,6 @@ summ(
   digits = 3
 )
 
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(thermometerDutch_1 ~ Contact_dum + inNonDutch + (1|PID),data=workerOutgroupInteraction),
-#                  method="boot",nsim=1000, parallel = "multicore",
-#                  ncpus = 4, seed = 42),
-#          "output/tables/ML-Inter-CI.csv")
-
 # To be compared against a model with only the self determination theory needs
 mdlWorkerOut$Att$lmeInterceptSdt <-
   lme(
@@ -1277,13 +1201,7 @@ summ(
 )
 
 mdlWorkerOut$Att$lmerSlopesCoreSdtCI <- 
-  confint(mdlWorkerOut$Att$lmerSlopesCoreSdt)
-
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(model.ran0,
-#               method="boot",nsim=1000,
-#               parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-RandomSlopes-CI.csv")
+  confint(method = "Wald", mdlWorkerOut$Att$lmerSlopesCoreSdt)
 
 # Compare new model to previous step
 anova(mdlWorkerOut$Att$lmeInterceptSdt,
@@ -1676,12 +1594,6 @@ mdlStudent$lmeAttNull <-
 # summary(mdlStudent$lmerAttNull) #or with the lme function
 summ(mdlStudent$lmerAttNull, digits = 3)
 
-# generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(AttitudesDutch~1 + (1|PID),data=dtStudent$full),
-#                  method="boot",nsim=1000,
-#                  parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-Null-CI.csv")
-
 # Save variances
 mdlStudent$varAttNull <- 
   VarCorr(mdlStudent$lmeAttNull) # save variances
@@ -1716,13 +1628,8 @@ summ(
   digits = 3
 )
 
-mdlStudent$lmerInterceptAttTypeCI <- confint(mdlStudent$lmerInterceptAttType)
-
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(AttitudesDutch ~ Contact_dum + inNonDutch + (1|PID),data=studentInteractionType),
-#                  method="boot",nsim=1000, parallel = "multicore",
-#                  ncpus = 4, seed = 42),
-#          "output/tables/ML-Inter-CI.csv")
+mdlStudent$lmerInterceptAttTypeCI <- 
+  confint(method = "Wald", mdlStudent$lmerInterceptAttType)
 
 # Compare new model to previous step
 anova(mdlStudent$lmeAttNull, 
@@ -1773,13 +1680,8 @@ summ(
   digits = 3
 )
 
-mdlStudent$lmerSlopesAttTypeCI <- confint(mdlStudent$lmerSlopesAttType)
-
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(model.ran0,
-#               method="boot",nsim=1000,
-#               parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-RandomSlopes-CI.csv")
+mdlStudent$lmerSlopesAttTypeCI <- 
+  confint(method = "Wald", mdlStudent$lmerSlopesAttType)
 
 # Compare new model to previous step
 anova(mdlStudent$lmeAttNull,
@@ -1878,12 +1780,6 @@ mdlStudentOut$Att$lmeNull <-
 # summary(Null.Out.ML.r) #or with the lme function
 summ(mdlStudentOut$Att$lmerNull, digits = 3, center = TRUE)
 
-# generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(AttitudesDutch~1 + (1|PID),data=dtStudent$full),
-#                  method="boot",nsim=1000,
-#                  parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-Null-CI.csv")
-
 # Save variances
 mdlStudentOut$Att$varNull <- 
   VarCorr(mdlStudentOut$Att$lmeNull) # save variances
@@ -1921,13 +1817,7 @@ summ(
 )
 
 mdlStudentOut$Att$lmerInterceptCoreCI <- 
-  confint(mdlStudentOut$Att$lmerInterceptCore)
-
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(AttitudesDutch ~ Contact_dum + inNonDutch + (1|PID),data=studentOutgroupInteraction),
-#                  method="boot",nsim=1000, parallel = "multicore",
-#                  ncpus = 4, seed = 42),
-#          "output/tables/ML-Inter-CI.csv")
+  confint(method = "Wald", mdlStudentOut$Att$lmerInterceptCore)
 
 # Compare new model to previous step
 anova(mdlStudentOut$Att$lmeNull, 
@@ -1995,7 +1885,8 @@ summ(
 stdCoef.merMod(mdlStudentOut$Att$lmerSlopesCore)
 
 # 95%CIs
-mdlStudentOut$Att$lmerSlopesCoreCI <- confint(mdlStudentOut$Att$lmerSlopesCore)
+mdlStudentOut$Att$lmerSlopesCoreCI <- 
+  confint(method = "Wald", mdlStudentOut$Att$lmerSlopesCore)
 
 # Attempts at R^2
 r2mlm::r2mlm(mdlStudentOut$Att$lmerSlopesCore, bargraph = TRUE)
@@ -2005,12 +1896,6 @@ performance::model_performance(mdlStudentOut$Att$lmerSlopesCore)
 performance::compare_performance(mdlStudentOut$Att$lmerNull, 
                                  mdlStudentOut$Att$lmerInterceptCore, 
                                  mdlStudentOut$Att$lmerSlopesCore)
-
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(model.ran0,
-#               method="boot",nsim=1000,
-#               parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-RandomSlopes-CI.csv")
 
 # Compare new model to previous step
 anova(mdlStudentOut$Att$lmeNull, 
@@ -2098,12 +1983,6 @@ mdlStudentOut$Qlt$lmeNull <-
 # summary(Null.Out.Qual.ML.r) #or with the lme function
 summ(mdlStudentOut$Qlt$lmerNull, digits = 3)
 
-# generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(AttitudesDutch~1 + (1|PID),data=studentOutgroupInteraction),
-#                  method="boot",nsim=1000,
-#                  parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-Null-CI.csv")
-
 # Save variances
 mdlStudentOut$Qlt$varNull <- 
   VarCorr(mdlStudentOut$Qlt$lmeNull) # save variances
@@ -2141,13 +2020,7 @@ summ(
 )
 
 mdlStudentOut$Qlt$lmerInterceptCoreCI <- 
-  confint(mdlStudentOut$Qlt$lmerInterceptCore)
-
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(quality_overall ~ Contact_dum + inNonDutch + (1|PID),data=studentOutgroupInteraction),
-#                  method="boot",nsim=1000, parallel = "multicore",
-#                  ncpus = 4, seed = 42),
-#          "output/tables/ML-Inter-CI.csv")
+  confint(method = "Wald", mdlStudentOut$Qlt$lmerInterceptCore)
 
 # Compare new model to previous step
 anova(mdlStudentOut$Qlt$lmeNull, 
@@ -2200,13 +2073,7 @@ summ(
 )
 
 mdlStudentOut$Qlt$lmerSlopesCoreCI <- 
-  confint(mdlStudentOut$Qlt$lmerSlopesCore)
-
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(mdlStudentOut$Qlt$lmerSlopesCore,
-#               method="boot",nsim=1000,
-#               parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-RandomSlopes-CI.csv")
+  confint(method = "Wald", mdlStudentOut$Qlt$lmerSlopesCore)
 
 # Compare new model to previous step
 anova(mdlStudentOut$Qlt$lmeNull, 
@@ -2298,13 +2165,7 @@ summ(
 )
 
 mdlStudentOut$Att$lmerInterceptCoreQltCI <- 
-  confint(mdlStudentOut$Att$lmerInterceptCoreQlt)
-
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(AttitudesDutch ~ Contact_dum + inNonDutch + (1|PID),data=studentOutgroupInteraction),
-#                  method="boot",nsim=1000, parallel = "multicore",
-#                  ncpus = 4, seed = 42),
-#          "output/tables/ML-Inter-CI.csv")
+  confint(method = "Wald", mdlStudentOut$Att$lmerInterceptCoreQlt)
 
 # Compare new model to previous step
 anova(
@@ -2358,13 +2219,7 @@ summ(
 )
 
 mdlStudentOut$Att$lmerSlopesCoreQltCI <- 
-  confint(mdlStudentOut$Att$lmerSlopesCoreQlt)
-
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(model.ran0,
-#               method="boot",nsim=1000,
-#               parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-RandomSlopes-CI.csv")
+  confint(method = "Wald", mdlStudentOut$Att$lmerSlopesCoreQlt)
 
 # Compare new model to previous step
 anova(
@@ -2461,13 +2316,7 @@ summ(
 )
 
 mdlStudent$lmerInterceptAttCoreIntCI <- 
-  confint(mdlStudent$lmerInterceptAttCoreInt)
-
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(AttitudesDutch ~ Contact_dum + inNonDutch + (1|PID),data=dtStudent$full),
-#                  method="boot",nsim=1000, parallel = "multicore",
-#                  ncpus = 4, seed = 42),
-#          "output/tables/ML-Inter-CI.csv")
+  confint(method = "Wald", mdlStudent$lmerInterceptAttCoreInt)
 
 # Compare new model to previous step
 anova(mdlStudent$lmeAttNull, 
@@ -2519,13 +2368,7 @@ summ(
 )
 
 mdlStudent$lmerSlopesAttCoreIntCI <- 
-  confint(mdlStudent$lmerSlopesAttCoreInt)
-
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(model.ran0,
-#               method="boot",nsim=1000,
-#               parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-RandomSlopes-CI.csv")
+  confint(method = "Wald", mdlStudent$lmerSlopesAttCoreInt)
 
 # Compare new model to previous step
 anova(mdlStudent$lmeAttNull, 
@@ -2619,12 +2462,6 @@ summ(
   digits = 3
 )
 
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(AttitudesDutch ~ Contact_dum + inNonDutch + (1|PID),data=studentOutgroupInteraction),
-#                  method="boot",nsim=1000, parallel = "multicore",
-#                  ncpus = 4, seed = 42),
-#          "output/tables/ML-Inter-CI.csv")
-
 # To be compared against a model with only the self determination theory needs
 mdlStudentOut$Att$lmeInterceptSdt <-
   lme(
@@ -2696,13 +2533,7 @@ summ(
 )
 
 mdlStudentOut$Att$lmerSlopesCoreSdtCI <- 
-  confint(mdlStudentOut$Att$lmerSlopesCoreSdt)
-
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(model.ran0,
-#               method="boot",nsim=1000,
-#               parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-RandomSlopes-CI.csv")
+  confint(method = "Wald", mdlStudentOut$Att$lmerSlopesCoreSdt)
 
 # Compare new model to previous step
 anova(mdlStudentOut$Att$lmeInterceptSdt,
@@ -3055,12 +2886,6 @@ mdlMedical$lmeAttNullType <-
 # summary(mdlMedical$lmerAttNull) #or with the lme function
 summ(mdlMedical$lmerAttNullType, digits = 3)
 
-# generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(AttitudesDutch~1 + (1|PID),data=dtStudent$full),
-#                  method="boot",nsim=1000,
-#                  parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-Null-CI.csv")
-
 # Save variances
 mdlMedical$varAttNullType <- 
   VarCorr(mdlMedical$lmeAttNullType) # save variances
@@ -3097,13 +2922,8 @@ summ(
   digits = 3
 )
 
-mdlMedical$lmerInterceptAttTypeCI <- confint(mdlMedical$lmerInterceptAttType)
-
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(AttitudesDutch ~ Contact_dum + inNonDutch + (1|PID),data=studentInteractionType),
-#                  method="boot",nsim=1000, parallel = "multicore",
-#                  ncpus = 4, seed = 42),
-#          "output/tables/ML-Inter-CI.csv")
+mdlMedical$lmerInterceptAttTypeCI <- 
+  confint(method = "Wald", mdlMedical$lmerInterceptAttType)
 
 # Compare new model to previous step
 anova(mdlMedical$lmeAttNullType, 
@@ -3156,13 +2976,8 @@ summ(
   digits = 3
 )
 
-mdlMedical$lmerSlopesAttTypeCI <- confint(mdlMedical$lmerSlopesAttType)
-
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(model.ran0,
-#               method="boot",nsim=1000,
-#               parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-RandomSlopes-CI.csv")
+mdlMedical$lmerSlopesAttTypeCI <- 
+  confint(method = "Wald", mdlMedical$lmerSlopesAttType)
 
 # Compare new model to previous step
 anova(mdlMedical$lmeAttNullType,
@@ -3267,12 +3082,6 @@ mdlMedicalOut$Att$lmeNull <-
 # summary(Null.Out.ML.r) #or with the lme function
 summ(mdlMedicalOut$Att$lmerNull, digits = 3, center = TRUE)
 
-# generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(AttitudesDutch~1 + (1|PID),data=dtStudent$full),
-#                  method="boot",nsim=1000,
-#                  parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-Null-CI.csv")
-
 # Save variances
 mdlMedicalOut$Att$varNull <- 
   VarCorr(mdlMedicalOut$Att$lmeNull) # save variances
@@ -3312,13 +3121,7 @@ summ(
 )
 
 mdlMedicalOut$Att$lmerInterceptAllportCI <- 
-  confint(mdlMedicalOut$Att$lmerInterceptAllport)
-
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(AttitudesDutch ~ Contact_dum + inNonDutch + (1|PID),data=studentOutgroupInteraction),
-#                  method="boot",nsim=1000, parallel = "multicore",
-#                  ncpus = 4, seed = 42),
-#          "output/tables/ML-Inter-CI.csv")
+  confint(method = "Wald", mdlMedicalOut$Att$lmerInterceptAllport)
 
 # Compare new model to previous step
 anova(mdlMedicalOut$Att$lmeNull, 
@@ -3388,7 +3191,8 @@ summ(
 stdCoef.merMod(mdlMedicalOut$Att$lmerSlopesAllport)
 
 # 95%CIs
-mdlMedicalOut$Att$lmerSlopesAllportCI <- confint(mdlMedicalOut$Att$lmerSlopesAllport)
+mdlMedicalOut$Att$lmerSlopesAllportCI <- 
+  confint(method = "Wald", mdlMedicalOut$Att$lmerSlopesAllport)
 
 # Attempts at R^2
 #r2mlm::r2mlm(mdlMedicalOut$Att$lmerSlopesAllport, bargraph = TRUE)
@@ -3398,12 +3202,6 @@ performance::model_performance(mdlMedicalOut$Att$lmerSlopesAllport)
 performance::compare_performance(mdlMedicalOut$Att$lmerNull, 
                                  mdlMedicalOut$Att$lmerInterceptAllport, 
                                  mdlMedicalOut$Att$lmerSlopesAllport)
-
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(model.ran0,
-#               method="boot",nsim=1000,
-#               parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-RandomSlopes-CI.csv")
 
 # Compare new model to previous step
 anova(mdlMedicalOut$Att$lmeNull, 
@@ -3492,12 +3290,6 @@ mdlMedicalOut$Qlt$lmeNull <-
 # summary(Null.Out.Qual.ML.r) #or with the lme function
 summ(mdlMedicalOut$Qlt$lmerNull, digits = 3)
 
-# generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(AttitudesDutch~1 + (1|PID),data=medicalOutgroupInteraction),
-#                  method="boot",nsim=1000,
-#                  parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-Null-CI.csv")
-
 # Save variances
 mdlMedicalOut$Qlt$varNull <- 
   VarCorr(mdlMedicalOut$Qlt$lmeNull) # save variances
@@ -3537,13 +3329,7 @@ summ(
 )
 
 mdlMedicalOut$Qlt$lmerInterceptAllportCI <- 
-  confint(mdlMedicalOut$Qlt$lmerInterceptAllport)
-
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(qualityOverall ~ Contact_dum + inNonDutch + (1|PID),data=medicalOutgroupInteraction),
-#                  method="boot",nsim=1000, parallel = "multicore",
-#                  ncpus = 4, seed = 42),
-#          "output/tables/ML-Inter-CI.csv")
+  confint(method = "Wald", mdlMedicalOut$Qlt$lmerInterceptAllport)
 
 # Compare new model to previous step
 anova(mdlMedicalOut$Qlt$lmeNull, 
@@ -3598,13 +3384,7 @@ summ(
 )
 
 mdlMedicalOut$Qlt$lmerSlopesAllportCI <- 
-  confint(mdlMedicalOut$Qlt$lmerSlopesAllport)
-
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(mdlMedicalOut$Qlt$lmerSlopesAllport,
-#               method="boot",nsim=1000,
-#               parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-RandomSlopes-CI.csv")
+  confint(method = "Wald", mdlMedicalOut$Qlt$lmerSlopesAllport)
 
 # Compare new model to previous step
 anova(mdlMedicalOut$Qlt$lmeNull, 
@@ -3698,13 +3478,7 @@ summ(
 )
 
 mdlMedicalOut$Att$lmerInterceptAllportQltCI <- 
-  confint(mdlMedicalOut$Att$lmerInterceptAllportQlt)
-
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(AttitudesDutch ~ Contact_dum + inNonDutch + (1|PID),data=medicalOutgroupInteraction),
-#                  method="boot",nsim=1000, parallel = "multicore",
-#                  ncpus = 4, seed = 42),
-#          "output/tables/ML-Inter-CI.csv")
+  confint(method = "Wald", mdlMedicalOut$Att$lmerInterceptAllportQlt)
 
 # Compare new model to previous step
 anova(
@@ -3760,13 +3534,7 @@ summ(
 )
 
 mdlMedicalOut$Att$lmerSlopesAllportQltCI <- 
-  confint(mdlMedicalOut$Att$lmerSlopesAllportQlt)
-
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(model.ran0,
-#               method="boot",nsim=1000,
-#               parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-RandomSlopes-CI.csv")
+  confint(method = "Wald", mdlMedicalOut$Att$lmerSlopesAllportQlt)
 
 # Compare new model to previous step
 anova(
@@ -3847,46 +3615,6 @@ We sequentially tested whether the fulfillment of Allport's Contact Conditions w
 
 \subsubsection{Core Need}
 
-
-<!-- ```{r medicalOutModelMLAttNull, include=FALSE} -->
-<!-- # Create and save Model -->
-<!-- mdlMedicalOut$Att$lmerNull <- -->
-<!--   lme4::lmer(AttitudesDutch ~ 1 + (1 | PID), -->
-<!--              data = dtMedicalSupp$medicalOutWithinBetween) # use optim if it does not converge -->
-<!-- mdlMedicalOut$Att$lmeNull <- -->
-<!--   lme( -->
-<!--     AttitudesDutch ~ 1, -->
-<!--     random = ~ 1 | PID, -->
-<!--     data = dtMedicalSupp$medicalOutWithinBetween, -->
-<!--     na.action = na.omit, -->
-<!--     control = list(opt = "nlmimb") -->
-<!--   ) # use optim if it does not converge -->
-
-<!-- # Get summary with p-values (Satterthwaite's method) -->
-<!-- # summary(Null.Out.ML.r) #or with the lme function -->
-<!-- summ(mdlMedicalOut$Att$lmerNull, digits = 3, center = TRUE) -->
-
-<!-- # generate 95% parametric bootstrap CIs (and save them as a csv-file): -->
-<!-- # write.csv(confint(lmer(AttitudesDutch~1 + (1|PID),data=dtStudent$full), -->
-<!-- #                  method="boot",nsim=1000, -->
-<!-- #                  parallel = "multicore", ncpus = 4, seed = 42), -->
-<!-- #          "output/tables/ML-Null-CI.csv") -->
-
-<!-- # Save variances -->
-<!-- mdlMedicalOut$Att$varNull <-  -->
-<!--   VarCorr(mdlMedicalOut$Att$lmeNull) # save variances -->
-<!-- # The estimate of (between-group or Intercept variance, tau_{00}^2): -->
-<!-- mdlMedicalOut$Att$tauNull <-  -->
-<!--   as.numeric(mdlMedicalOut$Att$varNull[1]) -->
-<!-- # and the estimate of (within-group or residual variance, sigma^2) is: -->
-<!-- mdlMedicalOut$Att$sigmaNull <-  -->
-<!--   as.numeric(mdlMedicalOut$Att$varNull[2]) -->
-<!-- # The ICC estimate (between/between+within) is: -->
-<!-- mdlMedicalOut$Att$IccNull <- -->
-<!--   (as.numeric(mdlMedicalOut$Att$varNull[1]) / (as.numeric(mdlMedicalOut$Att$varNull[1]) + as.numeric(mdlMedicalOut$Att$varNull[2]))) -->
-<!-- mdlMedicalOut$Att$IccPercNull <- -->
-<!--   ((as.numeric(mdlMedicalOut$Att$varNull[1]) / (as.numeric(mdlMedicalOut$Att$varNull[1]) + as.numeric(mdlMedicalOut$Att$varNull[2])))) * 100 -->
-<!-- ``` -->
 ```{r medicalOutModelInterceptAttCore, include=FALSE}
 # Create and save Model
 mdlMedicalOut$Att$lmeInterceptCore <-
@@ -3910,13 +3638,7 @@ summ(
 )
 
 mdlMedicalOut$Att$lmerInterceptCoreCI <-
-  confint(mdlMedicalOut$Att$lmerInterceptCore)
-
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(AttitudesDutch ~ Contact_dum + inNonDutch + (1|PID),data=studentOutgroupInteraction),
-#                  method="boot",nsim=1000, parallel = "multicore",
-#                  ncpus = 4, seed = 42),
-#          "output/tables/ML-Inter-CI.csv")
+  confint(method = "Wald", mdlMedicalOut$Att$lmerInterceptCore)
 
 # Compare new model to previous step
 anova(mdlMedicalOut$Att$lmeNull,
@@ -3986,7 +3708,8 @@ summ(
 stdCoef.merMod(mdlMedicalOut$Att$lmerSlopesCore)
 
 # 95%CIs
-mdlMedicalOut$Att$lmerSlopesCoreCI <- confint(mdlMedicalOut$Att$lmerSlopesCore)
+mdlMedicalOut$Att$lmerSlopesCoreCI <- 
+  confint(method = "Wald", mdlMedicalOut$Att$lmerSlopesCore)
 
 # Attempts at R^2
 r2mlm::r2mlm(mdlMedicalOut$Att$lmerSlopesCore, bargraph = TRUE)
@@ -3996,12 +3719,6 @@ performance::model_performance(mdlMedicalOut$Att$lmerSlopesCore)
 performance::compare_performance(mdlMedicalOut$Att$lmerNull, 
                                  mdlMedicalOut$Att$lmerInterceptCore, 
                                  mdlMedicalOut$Att$lmerSlopesCore)
-
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(model.ran0,
-#               method="boot",nsim=1000,
-#               parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-RandomSlopes-CI.csv")
 
 # Compare new model to previous step
 anova(mdlMedicalOut$Att$lmeNull, 
@@ -4075,46 +3792,6 @@ ggsave(
 )
 ```
 
-<!-- ```{r medicalOutModelMLQltNull, include=FALSE} -->
-<!-- # Create and save Model -->
-<!-- mdlMedicalOut$Qlt$lmerNull <- -->
-<!--   lme4::lmer(qualityOverall ~ 1 + (1 | PID),  -->
-<!--              data = dtMedicalSupp$medicalOutWithinBetween) # use optim if it does not converge -->
-<!-- mdlMedicalOut$Qlt$lmeNull <- -->
-<!--   mdlMedicalOut$Qlt$lmeNull <-lme( -->
-<!--     qualityOverall ~ 1, -->
-<!--     random = ~ 1 | PID, -->
-<!--     na.action = na.omit, -->
-<!--     data = dtMedicalSupp$medicalOutWithinBetween, -->
-<!--     control = list(opt = "nlmimb") -->
-<!--   ) # use optim if it does not converge -->
-
-<!-- # Get summary with p-values (Satterthwaite's method) -->
-<!-- # summary(Null.Out.Qual.ML.r) #or with the lme function -->
-<!-- summ(mdlMedicalOut$Qlt$lmerNull, digits = 3) -->
-
-<!-- # generate 95% parametric bootstrap CIs (and save them as a csv-file): -->
-<!-- # write.csv(confint(lmer(AttitudesDutch~1 + (1|PID),data=medicalOutgroupInteraction), -->
-<!-- #                  method="boot",nsim=1000, -->
-<!-- #                  parallel = "multicore", ncpus = 4, seed = 42), -->
-<!-- #          "output/tables/ML-Null-CI.csv") -->
-
-<!-- # Save variances -->
-<!-- mdlMedicalOut$Qlt$varNull <-  -->
-<!--   VarCorr(mdlMedicalOut$Qlt$lmeNull) # save variances -->
-<!-- # The estimate of (between-group or Intercept variance, tau_{00}^2): -->
-<!-- mdlMedicalOut$Qlt$tauNull <-  -->
-<!--   as.numeric(mdlMedicalOut$Qlt$varNull[1]) -->
-<!-- # and the estimate of (within-group or residual variance, sigma^2) is: -->
-<!-- mdlMedicalOut$Qlt$sigmaNull <-  -->
-<!--   as.numeric(mdlMedicalOut$Qlt$varNull[2]) -->
-<!-- # The ICC estimate (between/between+within) is: -->
-<!-- mdlMedicalOut$Qlt$IccNull <- -->
-<!--   (as.numeric(mdlMedicalOut$Qlt$varNull[1]) / (as.numeric(mdlMedicalOut$Qlt$varNull[1]) + as.numeric(mdlMedicalOut$Qlt$varNull[2]))) -->
-<!-- mdlMedicalOut$Qlt$IccPercNull <- -->
-<!--   ((as.numeric(mdlMedicalOut$Qlt$varNull[1]) / (as.numeric(mdlMedicalOut$Qlt$varNull[1]) + as.numeric(mdlMedicalOut$Qlt$varNull[2])))) * 100 -->
-<!-- ``` -->
-
 ```{r medicalOutModelInterceptQltCore, include=FALSE}
 # Create and save Model
 mdlMedicalOut$Qlt$lmeInterceptCore <-
@@ -4138,13 +3815,7 @@ summ(
 )
 
 mdlMedicalOut$Qlt$lmerInterceptCoreCI <- 
-  confint(mdlMedicalOut$Qlt$lmerInterceptCore)
-
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(qualityOverall ~ Contact_dum + inNonDutch + (1|PID),data=medicalOutgroupInteraction),
-#                  method="boot",nsim=1000, parallel = "multicore",
-#                  ncpus = 4, seed = 42),
-#          "output/tables/ML-Inter-CI.csv")
+  confint(method = "Wald", mdlMedicalOut$Qlt$lmerInterceptCore)
 
 # Compare new model to previous step
 anova(mdlMedicalOut$Qlt$lmeNull, 
@@ -4199,13 +3870,7 @@ summ(
 )
 
 mdlMedicalOut$Qlt$lmerSlopesCoreCI <- 
-  confint(mdlMedicalOut$Qlt$lmerSlopesCore)
-
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(mdlMedicalOut$Qlt$lmerSlopesCore,
-#               method="boot",nsim=1000,
-#               parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-RandomSlopes-CI.csv")
+  confint(method = "Wald", mdlMedicalOut$Qlt$lmerSlopesCore)
 
 # Compare new model to previous step
 anova(mdlMedicalOut$Qlt$lmeNull, 
@@ -4302,13 +3967,7 @@ summ(
 )
 
 mdlMedicalOut$Att$lmerInterceptCoreQltCI <- 
-  confint(mdlMedicalOut$Att$lmerInterceptCoreQlt)
-
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(AttitudesDutch ~ Contact_dum + inNonDutch + (1|PID),data=medicalOutgroupInteraction),
-#                  method="boot",nsim=1000, parallel = "multicore",
-#                  ncpus = 4, seed = 42),
-#          "output/tables/ML-Inter-CI.csv")
+  confint(method = "Wald", mdlMedicalOut$Att$lmerInterceptCoreQlt)
 
 # Compare new model to previous step
 anova(
@@ -4364,13 +4023,7 @@ summ(
 )
 
 mdlMedicalOut$Att$lmerSlopesCoreQltCI <- 
-  confint(mdlMedicalOut$Att$lmerSlopesCoreQlt)
-
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(model.ran0,
-#               method="boot",nsim=1000,
-#               parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-RandomSlopes-CI.csv")
+  confint(method = "Wald", mdlMedicalOut$Att$lmerSlopesCoreQlt)
 
 # Compare new model to previous step
 anova(
@@ -4507,13 +4160,7 @@ summ(
 )
 
 mdlMedicalOut$Att$lmerInterceptCoreAllportCI <- 
-  confint(mdlMedicalOut$Att$lmerInterceptCoreAllport)
-
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(AttitudesDutch ~ Contact_dum + inNonDutch + (1|PID),data=medicalOutgroupInteraction),
-#                  method="boot",nsim=1000, parallel = "multicore",
-#                  ncpus = 4, seed = 42),
-#          "output/tables/ML-Inter-CI.csv")
+  confint(method = "Wald", mdlMedicalOut$Att$lmerInterceptCoreAllport)
 
 # Compare new model to previous step
 anova(
@@ -4569,13 +4216,7 @@ summ(
 )
 
 mdlMedicalOut$Att$lmerSlopesCoreAllportCI <- 
-  confint(mdlMedicalOut$Att$lmerSlopesCoreAllport, method = "Wald")
-
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(model.ran0,
-#               method="boot",nsim=1000,
-#               parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-RandomSlopes-CI.csv")
+  confint(method = "Wald", mdlMedicalOut$Att$lmerSlopesCoreAllport)
 
 # Compare new model to previous step
 anova(
@@ -4701,13 +4342,7 @@ summ(
 )
 
 mdlMedical$lmerInterceptAttCoreIntCI <- 
-  confint(mdlMedical$lmerInterceptAttCoreInt)
-
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(AttitudesDutch ~ Contact_dum + inNonDutch + (1|PID),data=dtMedical$full),
-#                  method="boot",nsim=1000, parallel = "multicore",
-#                  ncpus = 4, seed = 42),
-#          "output/tables/ML-Inter-CI.csv")
+  confint(method = "Wald", mdlMedical$lmerInterceptAttCoreInt)
 
 # Compare new model to previous step
 anova(mdlMedical$lmeAttNullInt, 
@@ -4760,13 +4395,7 @@ summ(
 )
 
 mdlMedical$lmerSlopesAttCoreIntCI <- 
-  confint(mdlMedical$lmerSlopesAttCoreInt)
-
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(model.ran0,
-#               method="boot",nsim=1000,
-#               parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-RandomSlopes-CI.csv")
+  confint(method = "Wald", mdlMedical$lmerSlopesAttCoreInt)
 
 # Compare new model to previous step
 anova(mdlMedical$lmeAttNullInt, 
@@ -4863,12 +4492,6 @@ summ(
   digits = 3
 )
 
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(AttitudesDutch ~ Contact_dum + inNonDutch + (1|PID),data=medicalOutgroupInteraction),
-#                  method="boot",nsim=1000, parallel = "multicore",
-#                  ncpus = 4, seed = 42),
-#          "output/tables/ML-Inter-CI.csv")
-
 # To be compared against a model with only the self determination theory needs
 mdlMedicalOut$Att$lmeInterceptSdt <-
   lme(
@@ -4940,13 +4563,7 @@ summ(
 )
 
 mdlMedicalOut$Att$lmerSlopesCoreSdtCI <- 
-  confint(mdlMedicalOut$Att$lmerSlopesCoreSdt)
-
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(model.ran0,
-#               method="boot",nsim=1000,
-#               parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-RandomSlopes-CI.csv")
+  confint(method = "Wald", mdlMedicalOut$Att$lmerSlopesCoreSdt)
 
 # Compare new model to previous step
 anova(mdlMedicalOut$Att$lmeInterceptSdt,
