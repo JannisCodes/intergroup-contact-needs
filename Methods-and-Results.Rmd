@@ -4644,11 +4644,447 @@ ggsave(
 )
 ```
 
-When comparing the 
+When we compare the model using the 
 
 \subsubsection{Robustness}
 
 
+```{r medicalModelAttNullInt, include=FALSE}
+# Create and save Model
+mdlMedical$lmerAttNullInt <-
+  lme4::lmer(AttitudesDutch ~ 1 + (1 | PID),
+             data = dtMedical$full %>%
+               filter(complete.cases(
+                 OutgroupInteraction
+               ))) # use optim if it does not converge
+
+mdlMedical$lmeAttNullInt <-
+  lme(
+    AttitudesDutch ~ 1,
+    random = ~ 1 | PID,
+    data = dtMedical$full %>%
+      filter(complete.cases(
+        OutgroupInteraction
+      )),
+    na.action = na.omit,
+    control = list(opt = "nlmimb")
+  ) # use optim if it does not converge
+
+# Get summary with p-values (Satterthwaite's method)
+# summary(mdlMedical$lmerAttNull) #or with the lme function
+summ(mdlMedical$lmerAttNullInt, digits = 3)
+```
+
+```{r medicalModelInterceptAttCoreInt, include=FALSE}
+# Create and save Model
+mdlMedical$lmeInterceptAttCoreInt <-
+  lme(
+    AttitudesDutch ~ KeyNeedFulfillment_cwc * OutgroupInteraction,
+    random =  ~ 1 | PID,
+    na.action = na.omit,
+    data = dtMedical$full
+  )
+
+# Get summary with p-values (Satterthwaite's method)
+summ(
+  mdlMedical$lmerInterceptAttCoreInt <- lmer(
+    AttitudesDutch ~ KeyNeedFulfillment_cwc * OutgroupInteraction + (1 | PID),
+    data = dtMedical$full
+  ),
+  confint = TRUE,
+  digits = 3
+)
+
+mdlMedical$lmerInterceptAttCoreIntCI <- 
+  confint(mdlMedical$lmerInterceptAttCoreInt)
+
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(lmer(AttitudesDutch ~ Contact_dum + inNonDutch + (1|PID),data=dtMedical$full),
+#                  method="boot",nsim=1000, parallel = "multicore",
+#                  ncpus = 4, seed = 42),
+#          "output/tables/ML-Inter-CI.csv")
+
+# Compare new model to previous step
+anova(mdlMedical$lmeAttNullInt, 
+      mdlMedical$lmeInterceptAttCoreInt) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  add_rownames(., var = "Description") %>%
+  mutate(Description = gsub(".*\\$", "", Description)) %>%
+  kbl(
+    .,
+    caption = "Medical: Model Comparison",
+    format = "latex",
+    linesep = "",
+    booktabs = T,
+    align = c("l", rep("c", ncol(.)-1)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlMedical$varInterceptAttCoreInt <- 
+  lme4::VarCorr(mdlMedical$lmeInterceptAttCoreInt)
+```
+```{r medicalModelSlopesAttCoreIntX, include=FALSE}
+# Create and save Model (optimizer needed to reach convergence)
+mdlMedical$lmeSlopesAttCoreInt <- lme(
+  AttitudesDutch ~
+    KeyNeedFulfillment_cwc * OutgroupInteraction,
+  random = ~ 1 + KeyNeedFulfillment_cwc + OutgroupInteraction | PID,
+  control = lmeControl(opt = "optim"),
+  na.action = na.omit,
+  data = dtMedical$full
+)
+
+# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
+summ(
+  mdlMedical$lmerSlopesAttCoreInt <- lmer(
+    AttitudesDutch ~
+      KeyNeedFulfillment_cwc * OutgroupInteraction +
+      (1 + KeyNeedFulfillment_cwc + OutgroupInteraction | PID),
+    data = dtMedical$full
+  ), 
+  confint = TRUE,
+  digits = 3
+)
+
+mdlMedical$lmerSlopesAttCoreIntCI <- 
+  confint(mdlMedical$lmerSlopesAttCoreInt)
+
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(model.ran0,
+#               method="boot",nsim=1000,
+#               parallel = "multicore", ncpus = 4, seed = 42),
+#          "output/tables/ML-RandomSlopes-CI.csv")
+
+# Compare new model to previous step
+anova(mdlMedical$lmeAttNullInt, 
+      mdlMedical$lmeInterceptAttCoreInt,
+      mdlMedical$lmeSlopesAttCoreInt) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  add_rownames(., var = "Description") %>%
+  mutate(Description = gsub(".*\\$", "", Description)) %>%
+  kbl(
+    .,
+    caption = "Medical: Model Comparison",
+    format = "latex",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlMedical$varSlopesAttCoreInt <- 
+  lme4::VarCorr(mdlMedical$lmeSlopesAttCoreInt)
+
+# Assumption Checks:
+mdlMedical$diagSlopesAttCoreInt <-
+  sjPlot::plot_model(mdlMedical$lmerSlopesAttCoreInt, type = "diag")
+grid.arrange(
+  mdlMedical$diagSlopesAttCoreInt[[1]],
+  mdlMedical$diagSlopesAttCoreInt[[2]]$`PID`,
+  mdlMedical$diagSlopesAttCoreInt[[3]],
+  mdlMedical$diagSlopesAttCoreInt[[4]]
+)
+
+# Plot prediction model
+mdlMedical$predSlopesAttCoreInt <- 
+  dtMedical$full %>%
+  filter(complete.cases(KeyNeedFulfillment, OutgroupInteraction)) %>%
+  filter(PID %in% dtMedicalSupp$medicalPltIDs) %>%
+  select(AttitudesDutch, TIDnum, PID) %>% 
+  mutate(measure = predict(mdlMedical$lmeSlopesAttCoreInt,
+                           dtMedical$full %>% 
+                             filter(complete.cases(KeyNeedFulfillment, OutgroupInteraction)) %>%
+                             filter(PID %in% dtMedicalSupp$medicalPltIDs),
+                           re.form = NA
+                           )
+         )
+
+(
+  mdlMedical$predPltSlopesAttCoreInt <-
+    ggplot(data = mdlMedical$predSlopesAttCoreInt, aes(x = TIDnum, y = measure)) +
+    geom_line(alpha = 1, color = "blue") +
+    geom_line(aes(y = AttitudesDutch), alpha = 1) +
+    facet_wrap(~ PID, ncol = 6) +
+    xlab("Time") +
+    ylab("Outgroup Attitudes") +
+    theme_Publication()
+)
+ggsave(
+  filename = "Figures/Medical_PredictionPlot_SlopesAttCoreInt.png",
+  mdlMedical$predPltSlopesAttCoreInt,
+  width = 18,
+  height = 12,
+  dpi = 800,
+  units = "cm",
+  device = "png"
+)
+```
+
+We again checked for alternative models to the core need fulfillment. First, when considering generalized situational core need fulfillment together with whether an intergroup contact took place, we find that there is no significant main effect of core need fulfillment (random slopes model; `r MlCoeffLatex(lmeMdl = mdlMedical$lmeSlopesAttCoreInt, lmerCI = mdlMedical$lmerSlopesAttCoreIntCI, varName = "KeyNeedFulfillment_cwc")`) but a stronger interaction effect of core need fulfillment and outgroup contact (`r MlCoeffLatex(lmeMdl = mdlMedical$lmeSlopesAttCoreInt, lmerCI = mdlMedical$lmerSlopesAttCoreIntCI, varName = "KeyNeedFulfillment_cwc:OutgroupInteractionYes")`). Together with a significant main effect of having an outgroup contact (`r MlCoeffLatex(lmeMdl = mdlMedical$lmeSlopesAttCoreInt, lmerCI = mdlMedical$lmerSlopesAttCoreIntCI, varName = "OutgroupInteractionYes")`), this indicates that it is not key need fulfillment in general --- but key need fulfillment during an outgroup contact that predicts more positive outgroup attitudes. This finding is consistent with the results of the previous studies.
+
+```{r medicalOutModelInterceptAttCoreSdt, include=FALSE}
+# Create and save Model
+mdlMedicalOut$Att$lmeInterceptCoreSdt <-
+  lme(
+    AttitudesDutch ~ KeyNeedFulfillment_cwc + Competence_cwc + Autonomy_cwc + Relatedness_cwc,
+    random = ~ 1 | PID,
+    data = dtMedicalSupp$medicalOutWithinBetween,
+    na.action = na.exclude
+  )
+
+# Get summary with p-values (Satterthwaite's method)
+summ(
+  mdlMedicalOut$Att$lmerInterceptCoreSdt <- lmer(
+    AttitudesDutch ~ KeyNeedFulfillment_cwc + Competence_cwc + Autonomy_cwc + Relatedness_cwc + (1 | PID),
+    data = dtMedicalSupp$medicalOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3
+)
+
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(lmer(AttitudesDutch ~ Contact_dum + inNonDutch + (1|PID),data=medicalOutgroupInteraction),
+#                  method="boot",nsim=1000, parallel = "multicore",
+#                  ncpus = 4, seed = 42),
+#          "output/tables/ML-Inter-CI.csv")
+
+# To be compared against a model with only the self determination theory needs
+mdlMedicalOut$Att$lmeInterceptSdt <-
+  lme(
+    AttitudesDutch ~ Competence_cwc + Autonomy_cwc + Relatedness_cwc,
+    random = ~ 1 | PID,
+    data = dtMedicalSupp$medicalOutWithinBetween,
+    na.action = na.exclude
+  )
+
+summ(
+  mdlMedicalOut$Att$lmerInterceptSdt <- lmer(
+    AttitudesDutch ~ Competence_cwc + Autonomy_cwc + Relatedness_cwc + (1 | PID),
+    data = dtMedicalSupp$medicalOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3
+)
+
+# Compare new model to previous steps
+anova(
+  mdlMedicalOut$Att$lmeInterceptSdt,
+  mdlMedicalOut$Att$lmeInterceptCoreSdt
+  ) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Medical: Model Comparison",
+    format = "latex",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlMedicalOut$Att$varInterceptCoreSdt <-
+  lme4::VarCorr(mdlMedicalOut$Att$lmeInterceptCoreSdt)
+```
+
+```{r medicalOutModelSlopesAttCoreSdt, include=FALSE}
+# Create and save Model (optimizer needed to reach convergence)
+mdlMedicalOut$Att$lmeSlopesCoreSdt <-
+  lme(
+    AttitudesDutch ~
+      KeyNeedFulfillment_cwc + Competence_cwc + Autonomy_cwc + Relatedness_cwc,
+    random = ~ 1 + KeyNeedFulfillment_cwc + Competence_cwc + Relatedness_cwc | PID,
+    control = lmeControl(opt = "optim", maxIter = 100, msMaxIter = 100),
+    data = dtMedicalSupp$medicalOutWithinBetween,
+    na.action = na.exclude
+  )
+
+# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
+summ(
+  mdlMedicalOut$Att$lmerSlopesCoreSdt <- lmer(
+    AttitudesDutch ~
+      KeyNeedFulfillment_cwc + Competence_cwc + Autonomy_cwc + Relatedness_cwc +
+      (1 + KeyNeedFulfillment_cwc + Competence_cwc + Autonomy_cwc + Relatedness_cwc | PID),
+    data = dtMedicalSupp$medicalOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3
+)
+
+mdlMedicalOut$Att$lmerSlopesCoreSdtCI <- 
+  confint(mdlMedicalOut$Att$lmerSlopesCoreSdt)
+
+# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
+# write.csv(confint(model.ran0,
+#               method="boot",nsim=1000,
+#               parallel = "multicore", ncpus = 4, seed = 42),
+#          "output/tables/ML-RandomSlopes-CI.csv")
+
+# Compare new model to previous step
+anova(mdlMedicalOut$Att$lmeInterceptSdt,
+      mdlMedicalOut$Att$lmeInterceptCoreSdt, 
+      mdlMedicalOut$Att$lmeSlopesCoreSdt) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Medical: Model Comparison",
+    format = "latex",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# model with SDT only
+# Create and save Model (optimizer needed to reach convergence)
+mdlMedicalOut$Att$lmeSlopesSdt <-
+  lme(
+    AttitudesDutch ~
+      Competence_cwc + Autonomy_cwc + Relatedness_cwc,
+    random = ~ 1 + Competence_cwc + Autonomy_cwc + Relatedness_cwc | PID,
+    control = lmeControl(opt = "optim"),
+    data = dtMedicalSupp$medicalOutWithinBetween,
+    na.action = na.exclude
+  )
+
+# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
+summ(
+  mdlMedicalOut$Att$lmerSlopesSdt <- lmer(
+    AttitudesDutch ~
+      Competence_cwc + Autonomy_cwc + Relatedness_cwc +
+      (1 + Competence_cwc + Autonomy_cwc + Relatedness_cwc | PID),
+    data = dtMedicalSupp$medicalOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3
+)
+
+# Compare new model to previous step
+anova(mdlMedicalOut$Att$lmeInterceptSdt,
+      mdlMedicalOut$Att$lmeSlopesSdt, 
+      mdlMedicalOut$Att$lmeSlopesCoreSdt) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Medical: Model Comparison",
+    format = "latex",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+
+# Save variances
+mdlMedicalOut$Att$varSlopesCoreSdt <- 
+  lme4::VarCorr(mdlMedicalOut$Att$lmeSlopesCoreSdt)
+
+# Assumption Checks:
+mdlMedicalOut$Att$diagSlopesCoreSdt <- 
+  sjPlot::plot_model(mdlMedicalOut$Att$lmerSlopesCoreSdt, type = "diag")
+grid.arrange(
+  mdlMedicalOut$Att$diagSlopesCoreSdt[[1]],
+  mdlMedicalOut$Att$diagSlopesCoreSdt[[2]]$`PID`,
+  mdlMedicalOut$Att$diagSlopesCoreSdt[[3]],
+  mdlMedicalOut$Att$diagSlopesCoreSdt[[4]]
+)
+
+# Plot prediction model
+mdlMedicalOut$Att$predSlopesCoreSdt <- 
+  dtMedicalSupp$medicalOutWithinBetween %>%
+  filter(complete.cases(
+    KeyNeedFulfillment,
+    Autonomy, Competence, Relatedness
+    )) %>%
+  filter(PID %in% dtMedicalSupp$medicalOutPltIDs) %>%
+  select(AttitudesDutch, TIDnum, PID, Autonomy, Competence, Relatedness) %>% 
+  mutate(measure = predict(mdlMedicalOut$Att$lmeSlopesCoreSdt,
+                           dtMedicalSupp$medicalOutWithinBetween %>% 
+                             filter(complete.cases(
+                               KeyNeedFulfillment,
+                               Autonomy, Competence, Relatedness
+                             )) %>%
+                             filter(PID %in% dtMedicalSupp$medicalOutPltIDs),
+                           re.form = NA
+                           )
+         )
+
+(
+  mdlMedicalOut$Att$predPltSlopesCoreSdt <-
+    ggplot(data = mdlMedicalOut$Att$predSlopesCoreSdt, aes(x = TIDnum, y = measure)) +
+    geom_line(alpha = 1, color = "blue") +
+    geom_line(aes(y = AttitudesDutch), alpha = 1) +
+    facet_wrap( ~ PID, ncol = 6) +
+    xlab("Time") +
+    ylab("Outgroup Attitudes") +
+    theme_Publication()
+)
+ggsave(
+  filename = "Figures/MedicalOut_PredictionPlot_SlopesAttCoreStd.png",
+  mdlMedicalOut$Att$predPltSlopesCoreSdt,
+  width = 18,
+  height = 12,
+  dpi = 800,
+  units = "cm",
+  device = "png"
+)
+
+# Model comparison
+medicalSdtComp <-
+  anova(
+    mdlMedicalOut$Att$lmerSlopesSdt, 
+    mdlMedicalOut$Att$lmerSlopesCoreSdt
+  ) %>%
+  as.data.frame()
+medicalSdtCompDf <- medicalSdtComp["mdlMedicalOut$Att$lmerSlopesCoreSdt", "Df"]
+medicalSdtCompN <- sapply(ranef(mdlMedicalOut$Att$lmerSlopesCoreSdt), nrow)
+medicalSdtCompChi <- medicalSdtComp["mdlMedicalOut$Att$lmerSlopesCoreSdt", "Chisq"] %>% round(2) %>% format(nsmall=2)
+medicalSdtCompP <-
+  ifelse(medicalSdtComp["mdlMedicalOut$Att$lmerSlopesCoreSdt", "Pr(>Chisq)"] < .001,
+         "< .001",
+         paste0("= ", medicalSdtComp["mdlMedicalOut$Att$lmerSlopesCoreSdt", "Pr(>Chisq)"] %>% round(3) %>% format(nsmall = 3)))
+
+medicalSdtCompChiSq <- paste0("$\\chi^2$(", medicalSdtCompDf, ", \\textit{N} = ", medicalSdtCompN, ") = ", medicalSdtCompChi, ", \\textit{p} ", medicalSdtCompP)
+```
+
+In a final step we again checked whether during the interaction the core situational need remains a meaningful predictor even when taking other fundamental psychological needs into account. We find that the core need adds significantly above a model with only the self determination theory needs (random slopes models; `r medicalSdtCompChiSq`). We find that the core need explains the most variance in outgroup attitudes after an outgroup contact (`r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreSdt, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreSdtCI, varName = "KeyNeedFulfillment_cwc")`). When compared to the model with only the SDT needs, the core need fulfillment flexibly takes on some of the explained variance of all of the three fundamental needs. However, similar to the previous study, in this large sample relatedness (`r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreSdt, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreSdtCI, varName = "Relatedness_cwc")`), competence (`r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreSdt, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreSdtCI, varName = "Competence_cwc")`) and autonomy (`r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreSdt, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreSdtCI, varName = "Autonomy_cwc")`) each predicted positive outgroup attitudes independently. However, the regression coefficient is three times as large for the core need fulfillment (with all scaling being equal). For full results see Online Supplementary Information B.
 
 <!-- \begin{figure}[h] -->
 
