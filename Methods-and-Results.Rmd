@@ -88,8 +88,6 @@ knitr::opts_chunk$set(
 load("data/wrangled.RData")
 ```
 
-\faQuestionCircle\ Unsure about order of study one and two. Currently chronological. But could also be: (1) main model works in larger student sample, (2) works in economic migrant sample, (3) test full thing in medical sample.
-
 \section{Study 1}
 
 Based on our main hypotheses, the aim of our first study is to specifically test the general contact hypothesis, the influence of core need fulfillment, and perceived interaction quality during intergroup contacts. To this aim, we conducted an intensive longitudinal survey study with recent migrants to the Netherlands, gathering a large body of ecologically valid data on need satisfaction in real-life intergroup contact situations. Data was collected from May 5th through June 6th, 2018 (and all participants started the study within the first two days).
