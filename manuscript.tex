@@ -38,6 +38,7 @@
 \usepackage{lscape}
 \usepackage{pdflscape}
 \usepackage{pdfpages}
+\usepackage{enumitem}
 
 % make warning with red triangle
 \newcommand\Warning[1][2ex]{%
@@ -242,34 +243,53 @@ Over the past two decades several reviewers of the field have advocated that to 
 In the past such data collections were often unfeasible because they were either physically impractical or too expensive. However, recent technological developments allow us to easily collect experience sampling data on mobile devices \citep[e.g.,][]{Keil2020} or using web-based applications \citep[e.g.,][]{Arslan2020}. At the same time, analytical methods for such more complex data have become more readily available, making the analyses more approachable \citep[see, e.g.,][]{ODonnell2021}. Given these, technological and methodological developments, we were able to collect a large amount of real-life data following the daily intergroup interactions of recent migrants with the majority group members.  
 
 \section{The Present Research}
-
-
-\begin{itemize}
-    \item aims
-    \item shortened hypotheses
-    \item analysis strategy
-    \item assumptions, materials, preregistration
-\end{itemize}
-
-
-Based on this we formulated four main hypotheses:
-\begin{enumerate}
-    \item Based on the most general understanding of the contact hypothesis, an increase in frequency and quality of contact should jointly account for changes in more favorable outgroup attitudes.
-    \item Based on Allport’s optimal contact conditions, intergroup interactions with equal status, common goals, collaboration, and structural support should predict more favorable outgroup attitudes due to more positive interaction quality perceptions.
-    \item Based on our proposal, intergroup interactions with higher situational core need fulfillment should predict more favorable outgroup attitudes due to more positive interaction quality perceptions.
-    \item Based on our proposal, intergroup interactions with higher situational core need fulfillment should predict outgroup attitudes at least as well as Allport’s conditions.
+The aim of this paper is essentially threefold. First, our study is among the first to test the fundamental tenets intergroup contact and Allport's conditions in real-life extensive longitudinal data. Second, we test whether the fulfillment situational psychological needs is meaningfully related to more positive outgroup attitudes following intergroup interactions. And third, we test the role of interaction quality in  the relationship of psychological need fulfillment and outgroup attitudes. Based on this we formulated three main hypotheses:
+\begin{enumerate}[label=H\arabic*:]
+    \item Based on the most general understanding of the contact hypothesis, an increase in frequency and quality of contact should jointly account for changes in more favorable outgroup attitudes across extensive longitudinal data.
+    \item Based on Allport’s optimal contact conditions, intergroup interactions with equal status, common goals, collaboration, and structural support should predict more favorable outgroup attitudes due to more positive interaction quality perceptions within the extensive longitudinal data.
+    \item Based on our proposal, intergroup interactions with higher situational core need fulfillment should predict more favorable outgroup attitudes due to more positive interaction quality perceptions within the extensive longitudinal data.
 \end{enumerate}
+Beyond these main hypotheses we have formulated several sub-hypotheses that form the basis for our analysis plan (these sub-hypotheses also include several robustness checks and are available in Appendix \ref{app:AppendixHypotheses}). Given the more complex data structure of the extensive longitudinal data, we opted to test our hypotheses using a multilevel regression model, where the measurement occasions (level 1) were nested within the participants (level 2). Given that more complex dynamic modeling procedures are not necessary to test these more basic hypotheses, we will focus on the contemporaneous effect of the data (e.g., need fulfillment during the intergroup interaction predicts outgroup attitudes following the interaction). Such an approach is also tolerant to missing data and uneven case numbers within participants.
+
+To test our main hypotheses, we collected three independent sets of extensive longitudinal data (Studies 1–3). The full surveys are available in Supplementary Materials A as well as in our open science repository (including a complete codebook, see OSF-REFERENCE). Our most comprehensive study (Study 3), was fully preregistered and is also available via our open science repository \citep[][]{Kreienkamp2021f}. The full annotated analysis is available in Supplementary Material B. As is common with multilevel analyses, we use a hierarchical modeling approach and always report the final model in-text (e.g., random slopes model; for the full modeling process see Supplementary Material B).
 
 \input{Methods-and-Results}
 
 \section{Discussion}
+In this paper we set out to (1) test the basic predictions of the intergroup contact hypothesis and Allport's optimal conditions in real-life extensive longitudinal data, (2) we proposed that the fulfillment situational psychological needs meaningfully predicts positive outgroup attitudes, and (3) that the fulfillment of psychological needs (and Allport's conditions) have their effect (partially) through perceived interaction quality. 
+
+When considering the results of the three studies jointly we find that for the basic intergroup contact hypothesis we find mixed results. The aggregated number of interactions with the outgroup across all measurements only had a significant effect on average outgroup attitudes in one of the three studies and in that study there was no significant effect of average interaction quality on outgroup attitudes (which was significant for the other two studies). This meant that only for our smallest study did we find the expected interaction between interaction frequency and interaction quality when looking at the aggregated data across all measurements. However, once we considered the effect of having an interaction with an outgroup member (vs. not having an outgroup interaction) within the participants, we find that intergroup contact is a strong predictor of outgroup attitudes across all three studies (even when taking other non-outgroup interactions into account). This finding is surprising because most past cross-sectional studies that have investigated the effect of interaction frequency have also considered an aggregate measurement (albeit not one from actual daily reports). Even though this inconsistency with past research might be a data artefact (e.g., because most people reported more substantially mode measurements during which they did not have an outgroup interaction), the absence of this aggregate effect could underline the fact that cross-sectional retrospective data might suffer from a recall bias (e.g., where times with no outgroup interactions are undervalued by participants during retrospective evaluations). However, coming to the rescue of the basic intergroup contact tenets are the results from the within-person data. Across all studies, we find that after intergroup contacts participants have substantially more positive outgroup attitudes then at times when they did not have an outgroup interaction. In summary, we thus find that when we aggregate interaction frequencies and interaction quality from our intensive longitudinal data we find inconsistent results from the past literature but within participants intergroup contacts are significantly related with positive outgroup attitudes.
+
+Using the data from our third study, we find that Allport's conditions are related to higher interaction quality perceptions and more positive outgroup attitudes. And when we consider interaction quality and Allport's conditions jointly, we find further evidence that part of the benefits of Allport's conditions are due to the case that such interactions are also perceived as more positive. We thus find first evidence that Allport's conditions of optimal contact are also relevant to the daily interactions recent migrants have in their interactions with majority group members. 
+
+Finally, when looking at the results for our main proposal about the importance of situational key needs we find highly consistent positive results across all three studies. We find that in all three extensive longitudinal datasets, the fulfillment of core needs during intergroup contacts predicts higher interaction quality perceptions and more positive outgroup attitudes. We find that in all three studies the effect of core needs on outgroup attitudes is either fully or partially through quality perceptions, and we find that this is the case even when taking other fundamental psychological needs or Allport's conditions into account. In fact we find that our core situational needs measure predicts outgroup attitudes slightly better than Allport's conditions and consistently explained more variance in outgroup attitudes than any of the other psychological needs. In most cases the core need even takes over the variances previously explained by the self-determination theory needs. We thus find strong evidence that within everyday life interactions of recent migrants with majority group members, the perception that one's interaction specific psychological needs are fulfilled offers a meaningful and flexible predictor of outgroup attitudes. As such the data offers a first test of the motivational basis of intergroup contact.
+
+\subsection{Limitations}
+\begin{enumerate}
+    \item minority perspective only
+    \item lagged effects left for future studies (potentially not relevant, time scale)
+    \item ESM: real-life data comes at the expense of having short/single item operationalizations
+\end{enumerate}
+
+\subsection{Implications}
+to be discussed, potentially:
+\begin{enumerate}
+    \item feasible to collect large amount of data on intergroup contact using ESM method
+    \item role of motivation in intergroup contact promising (potential for interventions, e.g., most immediate to the data: settlement practices). 
+    \item potential to identify context specific needs
+\end{enumerate}
+
+\subsection{Conclusion paragraph (not a real heading)}
+to be written after co-author meeting.
+
+
 
 \printbibliography
 
 \appendix
 
 \section{Appendix A: Hypotheses}
-\label{app:AppendixA}
+\label{app:AppendixHypotheses}
 
 \begin{hyp}[H\ref{hyp:contact}] \label{hyp:contact}
 Based on the most general understanding of the contact hypothesis, an increase in frequency and quality of contact should jointly account for changes in more favorable outgroup attitudes.
