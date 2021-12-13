@@ -52,7 +52,10 @@ lib <- c(
   "stringi",
   "reshape2",
   "lubridate",
-  "misty"
+  "misty",
+  "sjPlot",
+  "sjmisc",
+  "sjmisc"
 )
 invisible(lapply(lib, library, character.only = TRUE))
 rm(lib)
@@ -62,6 +65,7 @@ source("./scripts/functions/fun.panel.R")
 source("./scripts/functions/themes.R")
 source("./scripts/functions/binaryCor.R")
 source("./scripts/functions/MlCorMat.R")
+source("./scripts/functions/MlTbl.R")
 
 # Markdown Options
 knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file()) # set working directory
@@ -4705,6 +4709,249 @@ medicalSdtCompChiSq <- paste0("$\\chi^2$(", medicalSdtCompDf, ", \\textit{N} = "
 ```
 
 In a final step we again checked whether during the interaction the core situational need remains a meaningful predictor even when taking other fundamental psychological needs into account. We find that the core need adds significantly above a model with only the self determination theory needs (random slopes models; `r medicalSdtCompChiSq`). We find that the core need explains the most variance in outgroup attitudes after an outgroup contact (`r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreSdt, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreSdtCI, varName = "KeyNeedFulfillment_cwc")`). When compared to the model with only the SDT needs, the core need fulfillment flexibly takes on some of the explained variance of all of the three fundamental needs. However, similar to the previous study, in this large sample relatedness (`r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreSdt, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreSdtCI, varName = "Relatedness_cwc")`), competence (`r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreSdt, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreSdtCI, varName = "Competence_cwc")`) and autonomy (`r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreSdt, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreSdtCI, varName = "Autonomy_cwc")`) each also predicted positive outgroup attitudes independently. However, the regression coefficient is three times as large for the core need fulfillment (with all scaling being equal). For full results see Online Supplementary Information B.
+
+```{r intergroupGeneralTbl, include=FALSE}
+# Table of intergroup contact in ESM data:
+# lm
+#    #Contact
+#     AvQual
+#     #Contact*AvQual
+# lme
+#     OutgroupInteraction
+#     NonOutgroupInteraction
+
+
+```
+
+```{r intergroupNeedsTbl, include=FALSE}
+# Table of core need and Allports Conditions (potentially two tables — e.g., needs + allport)
+# all lmer models :-)
+# make different options
+
+# collect relevant models
+# Study 1:
+# Rename variables for consistency
+tblDtS1Needs <- dtWorkerSupp$workerOutWithinBetween %>%
+  select(
+    Attitude = thermometerDutch_1,
+    AttitudeZ = thermometerDutch_1_zwc,
+    CoreNeed = keymotive_fulfillemt_1_cwc,
+    CoreNeedZ = keymotive_fulfillemt_1_zwc,
+    QualityRaw = quality_overall_1,
+    Quality = quality_overall_1_cwc,
+    QualityZ = quality_overall_1_zwc,
+    PID = PID
+  )
+# Quality ~ CoreNeed
+tblLmerS1QltInterceptCore <- lmer(
+  QualityRaw ~ CoreNeed + (1 | PID),
+  data = tblDtS1Needs
+)
+tblLmerS1QltInterceptCoreZ <- lmer(
+  QualityZ ~ CoreNeedZ + (1 | PID),
+  data = tblDtS1Needs
+)
+# Attitude ~ CoreNeed
+tblLmerS1AttSlopeCore <- lmer(
+  Attitude ~ CoreNeed + (1 + CoreNeed | PID),
+  data = tblDtS1Needs
+)
+tblLmerS1AttSlopeCoreZ <- lmer(
+  AttitudeZ ~ CoreNeedZ + (1 + CoreNeedZ | PID),
+  data = tblDtS1Needs
+)
+# Attitude ~ CoreNeed + Quality
+tblLmerS1AttSlopeCoreQlt <- lmer(
+  Attitude ~ CoreNeed + Quality + (1 + CoreNeed + Quality | PID),
+  data = tblDtS1Needs
+)
+tblLmerS1AttSlopeCoreQltZ <- lmer(
+  AttitudeZ ~ CoreNeedZ + QualityZ + (1 + CoreNeedZ + QualityZ | PID),
+  data = tblDtS1Needs
+)
+
+
+# Study 2:
+# Rename variables for consistency
+tblDtS2Needs <- dtStudentSupp$studentOutWithinBetween %>%
+  select(
+    Attitude = AttitudesDutch,
+    AttitudeZ = AttitudesDutch_zwc,
+    CoreNeed = KeyNeedFullfillment_cwc,
+    CoreNeedZ = KeyNeedFullfillment_zwc,
+    QualityRaw = quality_overall,
+    Quality = quality_overall_cwc,
+    QualityZ = quality_overall_zwc,
+    PID = PID
+  )
+# Quality ~ CoreNeed
+tblLmerS2QltSlopesCore <- lmer(
+  QualityRaw ~ CoreNeed + (1 + CoreNeed | PID),
+  data = tblDtS2Needs
+)
+tblLmerS2QltSlopesCoreZ <- lmer(
+  QualityZ~ CoreNeedZ + (1 + CoreNeedZ | PID),
+  data = tblDtS2Needs
+)
+# Attitude ~ CoreNeed
+tblLmerS2AttSlopesCore <- lmer(
+  Attitude ~ CoreNeed + (1 + CoreNeed | PID),
+  data = tblDtS2Needs
+)
+tblLmerS2AttSlopesCoreZ <- lmer(
+  AttitudeZ ~ CoreNeedZ + (1 + CoreNeedZ | PID),
+  data = tblDtS2Needs
+)
+# Attitude ~ CoreNeed + Quality
+tblLmerS2AttSlopesCoreQlt <- lmer(
+  Attitude ~ CoreNeed + Quality + (1 + CoreNeed + Quality | PID),
+  data = tblDtS2Needs,
+  control = lmerControl(optimizer="bobyqa", optCtrl=list(maxfun=2e5))
+)
+tblLmerS2AttSlopesCoreQltZ <- lmer(
+  AttitudeZ ~ CoreNeedZ + QualityZ + (1 + CoreNeedZ + QualityZ | PID),
+  data = tblDtS2Needs,
+  control = lmerControl(optimizer="bobyqa", optCtrl=list(maxfun=2e5))
+)
+
+
+# Study 3:
+# Rename variables for consistency
+tblDtS3Needs <- dtMedicalSupp$medicalOutWithinBetween %>%
+  select(
+    Attitude = AttitudesDutch,
+    AttitudeZ = AttitudesDutch_zwc,
+    CoreNeed = KeyNeedFulfillment_cwc,
+    CoreNeedZ = KeyNeedFulfillment_zwc,
+    Allport = AllportsCondition_cwc,
+    AllportZ = AllportsCondition_zwc,
+    QualityRaw = qualityOverall,
+    Quality = qualityOverall_cwc,
+    QualityZ = qualityOverall_zwc,
+    PID = PID
+  )
+# Quality ~ CoreNeed
+tblLmerS3QltSlopesCore <- lmer(
+  QualityRaw ~ CoreNeed + (1 + CoreNeed | PID),
+  data = tblDtS3Needs
+)
+tblLmerS3QltSlopesCoreZ <- lmer(
+  QualityZ ~ CoreNeedZ + (1 + CoreNeedZ | PID),
+  data = tblDtS3Needs
+)
+# Attitude ~ CoreNeed
+tblLmerS3AttSlopesCore <- lmer(
+  Attitude ~ CoreNeed + (1 + CoreNeed | PID),
+  data = tblDtS3Needs
+)
+tblLmerS3AttSlopesCoreZ <- lmer(
+  AttitudeZ ~ CoreNeedZ + (1 + CoreNeedZ | PID),
+  data = tblDtS3Needs
+)
+# Attitude ~ CoreNeed + Quality
+tblLmerS3AttSlopesCoreQlt <- lmer(
+  Attitude ~ CoreNeed + Quality + (1 + CoreNeed + Quality | PID),
+  data = tblDtS3Needs,
+  control = lmerControl(optimizer="bobyqa", optCtrl=list(maxfun=2e5))
+)
+tblLmerS3AttSlopesCoreQltZ <- lmer(
+  AttitudeZ ~ CoreNeedZ + QualityZ + (1 + CoreNeedZ + QualityZ | PID),
+  data = tblDtS3Needs,
+  control = lmerControl(optimizer="bobyqa", optCtrl=list(maxfun=2e5))
+)
+# Quality ~ Allport
+tblLmerS3QltSlopesAllport <- lmer(
+  QualityRaw ~ Allport + (1 + Allport | PID),
+  data = tblDtS3Needs
+)
+tblLmerS3QltSlopesAllportZ <- lmer(
+  QualityZ ~ AllportZ + (1 + AllportZ | PID),
+  data = tblDtS3Needs
+)
+# Attitude ~ Allport
+tblLmerS3AttSlopesAllport <- lmer(
+  Attitude ~ Allport + (1 + Allport | PID),
+  data = tblDtS3Needs
+)
+tblLmerS3AttSlopesAllportZ <- lmer(
+  AttitudeZ ~ AllportZ + (1 + AllportZ | PID),
+  data = tblDtS3Needs
+)
+# Attitude ~ Allport + Quality
+tblLmerS3AttSlopesAllportQlt <- lmer(
+  Attitude ~ Allport + Quality + (1 + Allport + Quality | PID),
+  data = tblDtS3Needs,
+  control = lmerControl(optimizer="bobyqa", optCtrl=list(maxfun=2e5))
+)
+tblLmerS3AttSlopesAllportQltZ <- lmer(
+  AttitudeZ ~ AllportZ + QualityZ + (1 + AllportZ + QualityZ | PID),
+  data = tblDtS3Needs,
+  control = lmerControl(optimizer="bobyqa", optCtrl=list(maxfun=2e5))
+)
+# Attitude ~ Allport + CoreNeed
+tblLmerS3AttSlopesAllportCore <- lmer(
+  Attitude ~ CoreNeed + Allport + (1 + CoreNeed + Allport | PID),
+  data = tblDtS3Needs
+)
+tblLmerS3AttSlopesAllportCoreZ <- lmer(
+  AttitudeZ ~ CoreNeedZ + AllportZ + (1 + CoreNeedZ + AllportZ | PID),
+  data = tblDtS3Needs
+)
+
+tab_model(
+  # Study 1:
+  tblLmerS1QltInterceptCore,
+  tblLmerS1AttSlopeCore,
+  tblLmerS1AttSlopeCoreQlt,
+  # Study 2:
+  tblLmerS2QltSlopesCore,
+  tblLmerS2AttSlopesCore,
+  tblLmerS2AttSlopesCoreQlt,
+  # Study 3:
+  tblLmerS3QltSlopesCore,
+  tblLmerS3AttSlopesCore,
+  tblLmerS3AttSlopesCoreQlt, 
+  tblLmerS3QltSlopesAllport, 
+  tblLmerS3AttSlopesAllport,
+  tblLmerS3AttSlopesAllportQlt,
+  tblLmerS3AttSlopesAllportCore,
+  # Settings
+  show.std = TRUE,
+  show.re.var = TRUE
+)
+
+lmerTblPrep(tblLmerS1QltInterceptCore, tblLmerS1QltInterceptCoreZ)
+
+mdlTblElements <- list(
+  tblLmerS1QltInterceptCore,
+  tblLmerS1AttSlopeCore,
+  tblLmerS1AttSlopeCoreQlt
+  )
+
+mdlPrep <- list()
+
+for (i in 1:length(mdlTblElements)) {
+  mdlPrep[[i]] <- lmerTblPrep(mdlTblElements[[i]])
+}
+
+
+
+stargazer::stargazer(
+  tblLmerS1QltInterceptCore,
+  tblLmerS1AttSlopeCore,
+  tblLmerS1AttSlopeCoreQlt, 
+  title="Regression Results", 
+  align=TRUE
+  )
+
+```
+
+```{r robustnessTbl, include=FALSE}
+# Table of all robustness checks (w/ and w/out SDT only)
+
+
+```
+
 
 <!-- \begin{figure}[h] -->
 
