@@ -4720,6 +4720,17 @@ In a final step we again checked whether during the interaction the core situati
 #     OutgroupInteraction
 #     NonOutgroupInteraction
 
+# OLS 
+# Study 1:
+mdlWorker$lmAttFreqQualX <-
+  lm(AvAttitude ~ SumContactNL * AvQuality, data = dtWorkerSupp$workerAvFreQual)
+# Study 2:
+mdlStudent$lmAttFreqQualX <-
+  lm(AvAttitude ~ SumContactNL_c * AvQuality_c, data = dtStudentSupp$studentContactFreq)
+# Study 3: 
+mdlMedical$lmAttFreqQualX <-
+  lm(AvAttitude ~ SumContactNL_c * AvQuality_c, data = dtMedicalSupp$medicalContactFreq)
+
 
 ```
 
@@ -4920,29 +4931,104 @@ tab_model(
   show.re.var = TRUE
 )
 
-lmerTblPrep(tblLmerS1QltInterceptCore, tblLmerS1QltInterceptCoreZ)
 
 mdlTblElements <- list(
-  tblLmerS1QltInterceptCore,
-  tblLmerS1AttSlopeCore,
-  tblLmerS1AttSlopeCoreQlt
+  # Study 1:
+  c(tblLmerS1QltInterceptCore, tblLmerS1QltInterceptCoreZ),
+  c(tblLmerS1AttSlopeCore, tblLmerS1AttSlopeCoreZ),
+  c(tblLmerS1AttSlopeCoreQlt, tblLmerS1AttSlopeCoreQltZ),
+  # Study 2:
+  c(tblLmerS2QltSlopesCore, tblLmerS2QltSlopesCoreZ),
+  c(tblLmerS2AttSlopesCore, tblLmerS2AttSlopesCoreZ),
+  c(tblLmerS2AttSlopesCoreQlt, tblLmerS2AttSlopesCoreQltZ),
+  # Study 3:
+  c(tblLmerS3QltSlopesCore, tblLmerS3QltSlopesCoreZ),
+  c(tblLmerS3AttSlopesCore, tblLmerS3AttSlopesCoreZ),
+  c(tblLmerS3AttSlopesCoreQlt, tblLmerS3AttSlopesCoreQlt),
+  c(tblLmerS3QltSlopesAllport, tblLmerS3QltSlopesAllportZ),
+  c(tblLmerS3AttSlopesAllport, tblLmerS3AttSlopesAllportZ),
+  c(tblLmerS3AttSlopesAllportQlt, tblLmerS3AttSlopesAllportQltZ),
+  c(tblLmerS3AttSlopesAllportCore, tblLmerS3AttSlopesAllportCoreZ)
   )
+
+# lmerTblPrep(mdlTblElements[[1]][[1]], mdlTblElements[[1]][[2]])
 
 mdlPrep <- list()
-
 for (i in 1:length(mdlTblElements)) {
-  mdlPrep[[i]] <- lmerTblPrep(mdlTblElements[[i]])
+  mdlPrep[[i]] <- lmerTblPrep(mdlTblElements[[i]][[1]], mdlTblElements[[i]][[2]])
 }
 
-
-
-stargazer::stargazer(
-  tblLmerS1QltInterceptCore,
-  tblLmerS1AttSlopeCore,
-  tblLmerS1AttSlopeCoreQlt, 
-  title="Regression Results", 
-  align=TRUE
+mdlTbl <- data.frame(
+  coef = c(
+    "(Intercept)",
+    "CoreNeed",
+    "Quality",
+    "Allport",
+    names(mdlPrep[[1]]$random),
+    names(mdlPrep[[1]]$fit)
   )
+)
+for (i in 1:length(mdlPrep)){
+  mdlTbl <- join(mdlTbl, mdlPrep[[i]]$mdlTbl, by = "coef")
+  #mdlTbl <- merge(mdlTbl, mdlPrep[[i]]$mdlTbl, by = "coef", all = TRUE, sort = FALSE, no.dups = TRUE, suffixes=c("", ""))
+}
+
+mdlTblHeader <- data.frame(
+  data = as.character(mdlTbl[mdlTbl$coef == "data",]),
+  formula = as.character(mdlTbl[mdlTbl$coef == "formula",])
+) %>%
+  filter(data != "",
+         data != "data") %>%
+  mutate(study = str_extract(data, "S1|S2|S3")) %>%
+  mutate(study = gsub("S", "Study ", study)) %>%
+  mutate(dv = sub(" ~.*", "", formula)) %>%
+  mutate(dv = gsub("Raw", " ", dv)) %>%
+  mutate(pred = str_extract(formula, "CoreNeed|Allport")) %>%
+  mutate(header = paste(study, pred))
+
+mdlTblHeaderFreq <- rbind.data.frame(rle(mdlTblHeader$header)) %>%
+  mutate(lengths = lengths*2) %>%
+  rename(names = values, span = lengths) %>%
+  rbind(c(1, ""), .) %>%
+  mutate(span = as.numeric(span)) %>%
+  select(names, span)
+
+mdlTblHeader2 <- data.frame(names = mdlTblHeader$dv, span = 2) %>% 
+  mutate(names = as.character(names)) %>%
+  rbind(c("", 1), .) %>%
+  mutate(span = as.numeric(span))
+
+mdlTblHeader2.2 <- rbind.data.frame(rle(mdlTblHeader$dv)) %>%
+  mutate(lengths = lengths*2) %>%
+  rename(names = values, span = lengths) %>%
+  rbind(c(1, ""), .) %>%
+  mutate(span = as.numeric(span)) %>%
+  select(names, span)
+
+mdlTbl$coef <- mapvalues(mdlTbl$coef, 
+          from = c("sigmaSq", "tau00", "tau11", "rho01", "rho00"), 
+          to = c("\\sigma^2", "\\tau_{00}", "\\tau_{11}", "\\rho_{01}", "\\rho_{00}"))
+
+# Still need to pack rows
+mdlTbl %>%
+  select(-one_of(coef2)) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Test",
+    #format = "latex",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    escape = FALSE,
+    digits = 3
+  ) %>%
+  kable_classic() %>%
+  add_header_above(., mdlTblHeader2) %>%
+  add_header_above(., mdlTblHeaderFreq) %>%
+  pack_rows("Fixed", 1, 4) %>%
+  pack_rows("Random", 5, 9) %>%
+  pack_rows("Fit", 10, 21)
 
 ```
 

@@ -84,14 +84,16 @@ lmerTblPrep <- function (obj, objz = NULL, alpha = 0.05, ...) {
   # collect random effect statistics
   restat <- list(
     sigmaSq = sigmaSq,
-    tau00 = tau00,
-    tau11 = tau11,
-    rho01 = rho01,
-    rho00 = rho00
+    tau00 = ifelse(length(tau00)>1, paste(tau00, collapse = "\n"), tau00),
+    tau11 = ifelse(length(tau11)>1, paste(tau11, collapse = "\n"), tau11),
+    rho01 = ifelse(length(rho01)>1, paste(rho01, collapse = "\n"), rho01),
+    rho00 = ifelse(length(rho00)>1, paste(rho00, collapse = "\n"), rho00)
   )
   
   
   ## Model fit statistics.
+  data = deparse(as.list(obj@call)$data)
+  formula = Reduce(paste, deparse(as.list(obj@call)$formula))
   ll <- logLik(obj)[1]
   deviance <- deviance(obj)
   AIC <- AIC(obj)
@@ -102,6 +104,8 @@ lmerTblPrep <- function (obj, objz = NULL, alpha = 0.05, ...) {
   rSqMarg <- as.numeric(performance::r2(obj)$R2_marginal) # Marginal R2
   rSqCond <- as.numeric(performance::r2(obj)$R2_conditional) # Conditional R2
   sumstat <- list(
+    data = data,
+    formula = formula,
     groupId = groupNam,
     logLik = ll, 
     deviance = deviance, 
@@ -114,10 +118,30 @@ lmerTblPrep <- function (obj, objz = NULL, alpha = 0.05, ...) {
     R2_conditional = rSqCond
   )
   
+  # Combined Table output
+  mdlCoefTbl <- data.frame(
+    coef = coefOut$coef,
+    B = coefOut$B,
+    Beta = coefOut$Beta
+  )
+  mdlRandomTbl <- t(as.data.frame(restat)) %>%
+    magrittr::set_colnames(c("B")) %>%
+    as.data.frame %>%
+    tibble::rownames_to_column(., "coef") %>%
+    mutate(B = gsub("\\(\\)|\\(\\.\\)", "", B),
+           Beta = "")
+  mdlFitTbl <- t(as.data.frame(sumstat)) %>%
+    magrittr::set_colnames(c("B")) %>%
+    as.data.frame %>%
+    tibble::rownames_to_column(., "coef") %>%
+    mutate(Beta = "")
+  mdlTbl <- rbind(mdlCoefTbl, mdlRandomTbl, mdlFitTbl)
+  
   out <- list(
     coeficients = coefOut,
     random = restat,
-    fit = sumstat
+    fit = sumstat,
+    mdlTbl = mdlTbl
   )
   out
 }
