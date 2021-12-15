@@ -1,5 +1,5 @@
-#obj <- tblLmerS3AttSlopesAllportCore
-#objz <- tblLmerS3AttSlopesAllportCoreZ
+#obj <- mdlWorker$lmerInterceptAttTypeTbl
+#objz <- mdlWorker$lmerInterceptAttTypeTblZ
 
 lmerTblPrep <- function (obj, objz = NULL, alpha = 0.05, ...) {
   # Summarize models
@@ -13,7 +13,10 @@ lmerTblPrep <- function (obj, objz = NULL, alpha = 0.05, ...) {
   coefZ <- smryZ$coeftable %>% 
     as.data.frame %>%
     tibble::rownames_to_column(., "coef")
-  confZ <- confint(objz, method = "boot") %>% 
+  confZ <- confint(objz, 
+                   method = "boot", 
+                   parallel = "multicore", 
+                   ncpus = parallel::detectCores(logical = TRUE)) %>% 
     as.data.frame %>%
     tibble::rownames_to_column(., "coef")
   coefZOut <- merge(coefZ, confZ)
@@ -53,7 +56,7 @@ lmerTblPrep <- function (obj, objz = NULL, alpha = 0.05, ...) {
       coefOut, 
       coefZOut %>% 
         select(coef, Beta) %>% 
-        mutate(coef = gsub('Z$', '', coef))
+        mutate(coef = gsub('_zwc|Z$', '', coef))
     )
   
   
@@ -103,6 +106,9 @@ lmerTblPrep <- function (obj, objz = NULL, alpha = 0.05, ...) {
   ICC <- performance::icc(obj)$ICC_adjusted
   rSqMarg <- as.numeric(performance::r2(obj)$R2_marginal) # Marginal R2
   rSqCond <- as.numeric(performance::r2(obj)$R2_conditional) # Conditional R2
+  R2Marg_R2Cond <- paste(format(round(rSqMarg, 3), nsmall = 3), 
+                         format(round(rSqCond, 3), nsmall = 3), 
+                         sep = " / ")
   sumstat <- list(
     data = data,
     formula = formula,
@@ -115,7 +121,8 @@ lmerTblPrep <- function (obj, objz = NULL, alpha = 0.05, ...) {
     Groups = G,
     ICC = ICC,
     R2_marginal = rSqMarg,
-    R2_conditional = rSqCond
+    R2_conditional = rSqCond,
+    R2Marg_R2Cond = R2Marg_R2Cond
   )
   
   # Combined Table output

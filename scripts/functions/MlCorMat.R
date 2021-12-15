@@ -208,6 +208,8 @@ MlTraitState <-
     data <- 
       data %>%
       #select(id, selection) %>%
+      #mutate_if(is.factor, as.numeric) %>% # let's hope this doesn't cause any problems :-D
+      mutate_at(selection, as.numeric) %>% # let's hope this works 
       mutate_at(selection, list(gm = ~mean(., na.rm=TRUE))) %>% # grand mean
       mutate_at(selection, list(gmc = ~.-mean(., na.rm=TRUE))) %>% # grand mean centered
       group_by_at(vars(matches(id))) %>%

@@ -177,7 +177,9 @@ dtWorkerSupp$workerWithinBetween <-
         "competence_1",
         "autonomy_1",
         "relatedness_1", 
-        "quality_overall_1"
+        "quality_overall_1", 
+        "OutgroupInteraction",
+        "NonOutgroupInteraction"
       )
   )
 
@@ -288,6 +290,15 @@ We, additionally, included a common measure of three self-determination theory n
 \subsection{Results}
 
 ```{r WorkerFreqAttCor, include=FALSE}
+dtWorkerSupp$workerAvFreQual <-
+  dtWorkerSupp$workerAvFreQual %>%
+  mutate(
+    SumContactNL_c = SumContactNL - mean(SumContactNL, na.rm = TRUE),
+    SumContactNLAll_c = SumContactNLAll - mean(SumContactNLAll, na.rm = TRUE),
+    AvAttitude_c = AvAttitude - mean(AvAttitude, na.rm = TRUE),
+    AvQuality_c = AvQuality - mean(AvQuality, na.rm = TRUE)
+  )
+
 # correlation panel
 pairs.panels.new(
   dtWorkerSupp$workerAvFreQual %>% select(SumContactNL, SumContactNLAll, AvQuality, AvAttitude),
@@ -319,14 +330,13 @@ mdlWorker <- list()
 
 # regression
 mdlWorker$lmAttFreqQualX <-
-  lm(AvAttitude ~ SumContactNL * AvQuality, data = dtWorkerSupp$workerAvFreQual)
+  lm(AvAttitude ~ SumContactNL_c * AvQuality_c, data = dtWorkerSupp$workerAvFreQual)
 # summary(lmWorkerAttFreqQualX)
 
 summ(
   mdlWorker$lmAttFreqQualX,
   confint = TRUE,
-  digits = 3,
-  center = TRUE
+  digits = 3
 )
 
 mdlWorker$lmAttFreqQualXEta <-
@@ -334,20 +344,20 @@ mdlWorker$lmAttFreqQualXEta <-
 
 interactions::interact_plot(
   mdlWorker$lmAttFreqQualX,
-  pred = AvQuality,
-  modx = SumContactNL,
+  pred = AvQuality_c,
+  modx = SumContactNL_c,
   interval = TRUE,
   partial.residuals = TRUE
 )
 
 interactions::johnson_neyman(mdlWorker$lmAttFreqQualX,
-                             pred = AvQuality,
-                             modx = SumContactNL,
+                             pred = AvQuality_c,
+                             modx = SumContactNL_c,
                              alpha = .05)
 
 ```
 
-However, despite the missing relationship with the number of interactions, we find a medium sized correlation between the participants' Average Interaction Quality and their Average Outgroup Attitudes. Thus within our data participants with a higher quality outgroup interactions also held more positive attitudes towards that group. And when considering the number of interactions and average interaction quality jointly in a linear regression, we additionally find a statistically significant interaction term (\textit{b} = `r coef(summary(mdlWorker$lmAttFreqQualX))["SumContactNL:AvQuality","Estimate"] %>% round(2) %>% format(nsmall=2)`, \textit{t}(`r mdlWorker$lmAttFreqQualX$df.residual`) = `r coef(summary(mdlWorker$lmAttFreqQualX))["SumContactNL:AvQuality","t value"] %>% round(2) %>% format(nsmall=2)`, \textit{p} = `r coef(summary(mdlWorker$lmAttFreqQualX))["SumContactNL:AvQuality","Pr(>|t|)"] %>% round(3) %>% format(nsmall=3)`, $\eta_p^2$ = `r mdlWorker$lmAttFreqQualXEta %>% filter(Parameter == "SumContactNL:AvQuality") %>% select(Eta2_partial) %>% as.numeric %>% round(2) %>% format(nsmall=2)`). Looking at a floodlight analysis of the effect, we find that in our sample with an increasing number of interactions the positive effect of average interaction quality becomes weaker. However, it should be noted that this is based on data aggregating all within participant nuances and is only the date of 21 people. 
+However, despite the missing relationship with the number of interactions, we find a medium sized correlation between the participants' Average Interaction Quality and their Average Outgroup Attitudes. Thus within our data participants with a higher quality outgroup interactions also held more positive attitudes towards that group. And when considering the number of interactions and average interaction quality jointly in a linear regression, we additionally find a statistically significant interaction term (\textit{b} = `r coef(summary(mdlWorker$lmAttFreqQualX))["SumContactNL_c:AvQuality_c","Estimate"] %>% round(2) %>% format(nsmall=2)`, \textit{t}(`r mdlWorker$lmAttFreqQualX$df.residual`) = `r coef(summary(mdlWorker$lmAttFreqQualX))["SumContactNL_c:AvQuality_c","t value"] %>% round(2) %>% format(nsmall=2)`, \textit{p} = `r coef(summary(mdlWorker$lmAttFreqQualX))["SumContactNL_c:AvQuality_c","Pr(>|t|)"] %>% round(3) %>% format(nsmall=3)`, $\eta_p^2$ = `r mdlWorker$lmAttFreqQualXEta %>% filter(Parameter == "SumContactNL_c:AvQuality_c") %>% select(Eta2_partial) %>% as.numeric %>% round(2) %>% format(nsmall=2)`). Looking at a floodlight analysis of the effect, we find that in our sample with an increasing number of interactions the positive effect of average interaction quality becomes weaker. However, it should be noted that this is based on data aggregating all within participant nuances and is only the date of 21 people. 
 
 ```{r workerModelMLAttNull, include=FALSE}
 # Create and save Model
@@ -1403,7 +1413,9 @@ dtStudentSupp$studentWithinBetween <-
         "Autonomy",
         "Relatedness",
         "AttitudesDutch",
-        "quality_overall"
+        "quality_overall",
+        "OutgroupInteraction",
+        "NonOutgroupInteraction"
       )
   )
 dtStudentSupp$studentOutWithinBetween <-
@@ -2707,6 +2719,18 @@ medicalSampleInfo <-
 table(medicalSampleInfo$age)
 table(medicalSampleInfo$gender)
 table(as.character(medicalSampleInfo$nationality))
+
+# divide into trait and state
+dtMedicalSupp$medicalWithinBetween <- 
+  MlTraitState(
+    data = dtMedical$full,
+    id = "PID",
+    selection =
+      c(
+        "OutgroupInteraction",
+        "NonOutgroupInteraction"
+      )
+  )
 ```
 
 ```{r medicalVarDescr, include=FALSE}
@@ -4723,7 +4747,7 @@ In a final step we again checked whether during the interaction the core situati
 # OLS 
 # Study 1:
 mdlWorker$lmAttFreqQualX <-
-  lm(AvAttitude ~ SumContactNL * AvQuality, data = dtWorkerSupp$workerAvFreQual)
+  lm(AvAttitude ~ SumContactNL_c * AvQuality_c, data = dtWorkerSupp$workerAvFreQual)
 # Study 2:
 mdlStudent$lmAttFreqQualX <-
   lm(AvAttitude ~ SumContactNL_c * AvQuality_c, data = dtStudentSupp$studentContactFreq)
@@ -4731,6 +4755,162 @@ mdlStudent$lmAttFreqQualX <-
 mdlMedical$lmAttFreqQualX <-
   lm(AvAttitude ~ SumContactNL_c * AvQuality_c, data = dtMedicalSupp$medicalContactFreq)
 
+tabModelTest <- tab_model(mdlWorker$lmAttFreqQualX,
+                          mdlStudent$lmAttFreqQualX,
+                          mdlMedical$lmAttFreqQualX)
+
+library(XML)
+df <- data.frame(readHTMLTable(htmlParse(tabModelTest))[1])
+# first row as colnames
+colnames(df) <- df[1,]
+# remove the fake first row
+df <- df[-1,]
+
+
+# lme
+# Study 1: 
+dtWorkerSupp$workerWithinBetween$AttitudesDutch <- dtWorkerSupp$workerWithinBetween$thermometerDutch_1
+mdlWorker$lmerInterceptAttTypeTbl <- lmer(
+    AttitudesDutch ~ OutgroupInteraction + NonOutgroupInteraction + (1 | PID),
+    data = dtWorkerSupp$workerWithinBetween
+  )
+dtWorkerSupp$workerWithinBetween$AttitudesDutch_zwc <- dtWorkerSupp$workerWithinBetween$thermometerDutch_1
+mdlWorker$lmerInterceptAttTypeTblZ <- lmer(
+    AttitudesDutch_zwc ~ OutgroupInteraction_zwc + NonOutgroupInteraction_zwc + (1 | PID),
+    data = dtWorkerSupp$workerWithinBetween
+  )
+# Study 2:
+mdlStudent$lmerSlopesAttType <- lmer(
+    AttitudesDutch ~
+      OutgroupInteraction + NonOutgroupInteraction +
+      (1 + OutgroupInteraction + NonOutgroupInteraction | PID),
+    data = dtStudentSupp$studentWithinBetween
+  )
+mdlStudent$lmerSlopesAttTypeZ <- lmer(
+    AttitudesDutch_zwc ~
+      OutgroupInteraction_zwc + NonOutgroupInteraction_zwc +
+      (1 + OutgroupInteraction_zwc + NonOutgroupInteraction_zwc | PID),
+    data = dtStudentSupp$studentWithinBetween
+  )
+# Study 3:
+mdlMedical$lmerSlopesAttType <- lmer(
+    AttitudesDutch ~
+      OutgroupInteraction + NonOutgroupInteraction +
+      (1 + OutgroupInteraction + NonOutgroupInteraction | PID),
+    data = dtMedicalSupp$medicalWithinBetween
+  )
+mdlMedical$lmerSlopesAttTypeZ <- lmer(
+    AttitudesDutch_zwc ~
+      OutgroupInteraction_zwc + NonOutgroupInteraction_zwc +
+      (1 + OutgroupInteraction_zwc + NonOutgroupInteraction_zwc | PID),
+    data = dtMedicalSupp$medicalWithinBetween
+  )
+
+tab_model(
+  mdlWorker$lmerInterceptAttTypeTbl,
+  mdlStudent$lmerSlopesAttType,
+  mdlMedical$lmerSlopesAttType
+)
+
+
+mdlTblElementsGeneralLmer <- list(
+  c(mdlWorker$lmerInterceptAttTypeTbl, mdlWorker$lmerInterceptAttTypeTblZ),
+  c(mdlStudent$lmerSlopesAttType, mdlStudent$lmerSlopesAttTypeZ),
+  c(mdlMedical$lmerSlopesAttType, mdlMedical$lmerSlopesAttTypeZ)
+  )
+
+mdlPrepGeneral <- list()
+for (i in 1:length(mdlTblElementsGeneralLmer)) {
+  mdlPrepGeneral[[i]] <- lmerTblPrep(mdlTblElementsGeneralLmer[[i]][[1]], mdlTblElementsGeneralLmer[[i]][[2]])
+}
+
+mdlTblGeneral <- data.frame(
+  coef = c(
+    "(Intercept)",
+    "OutgroupInteraction",
+    "NonOutgroupInteraction",
+    names(mdlPrepGeneral[[1]]$random),
+    names(mdlPrepGeneral[[1]]$fit)
+  )
+)
+for (i in 1:length(mdlPrepGeneral)){
+  mdlTblGeneral <- join(mdlTblGeneral, mdlPrepGeneral[[i]]$mdlTbl, by = "coef")
+}
+
+mdlTblHeaderGeneral <- data.frame(
+  data = as.character(mdlTblGeneral[mdlTblGeneral$coef == "data",]),
+  formula = as.character(mdlTblGeneral[mdlTblGeneral$coef == "formula",])
+) %>%
+  filter(data != "",
+         data != "data") %>%
+  mutate(study = str_extract(data, "S1|S2|S3")) %>%
+  mutate(study = gsub("S", "Study ", study)) %>%
+  mutate(dv = sub(" ~.*", "", formula)) %>%
+  mutate(dv = gsub("Raw", " ", dv)) %>%
+  mutate(pred = str_extract(formula, "CoreNeed|Allport")) %>%
+  mutate(header = paste(study, pred))
+
+mdlTblHeaderGeneralFreq <- rbind.data.frame(rle(mdlTblHeaderGeneral$header)) %>%
+  mutate(lengths = lengths*2) %>%
+  rename(names = values, span = lengths) %>%
+  rbind(c(1, ""), .) %>%
+  mutate(span = as.numeric(span)) %>%
+  select(names, span)
+
+mdlTblHeaderGeneral2 <- data.frame(names = mdlTblHeaderGeneral$dv, span = 2) %>% 
+  mutate(names = as.character(names)) %>%
+  rbind(c("", 1), .) %>%
+  mutate(span = as.numeric(span))
+
+mdlTblHeaderGeneral2.2 <- rbind.data.frame(rle(mdlTblHeaderGeneral$dv)) %>%
+  mutate(lengths = lengths*2) %>%
+  rename(names = values, span = lengths) %>%
+  rbind(c(1, ""), .) %>%
+  mutate(span = as.numeric(span)) %>%
+  select(names, span)
+
+mdlTblGeneral$coef <- mapvalues(
+  mdlTblGeneral$coef,
+  from = c(
+    "sigmaSq",
+    "tau00",
+    "tau11",
+    "rho01",
+    "rho00",
+    "R2_marginal",
+    "R2_conditional",
+    "R2Marg_R2Cond"
+  ),
+  to = c(
+    "$\\sigma^2$",
+    "$\\tau_{00}$",
+    "$\\tau_{11}$",
+    "$\\rho_{01}$",
+    "$\\rho_{00}$",
+    "$R^2_{marginal}$",
+    "$R^2_{conditional}$",
+    "$R^2_{marginal} / R^2_{conditional}$"
+  )
+)
+
+# Still need to pack rows
+mdlTblGeneral %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Intergroup Contact General within PPT.",
+    #format = "latex",
+    linesep = "",
+    booktabs = T,
+    align = c("l", rep("c", ncol(.)-1)),
+    escape = FALSE,
+    digits = 3
+  ) %>%
+  kable_classic() %>%
+  add_header_above(., mdlTblHeaderGeneral2) %>%
+  pack_rows("Fixed", 1, 3) %>%
+  pack_rows("Random", 4, 8) %>%
+  pack_rows("Fit", 9, 21)
 
 ```
 
@@ -5006,16 +5186,15 @@ mdlTblHeader2.2 <- rbind.data.frame(rle(mdlTblHeader$dv)) %>%
   select(names, span)
 
 mdlTbl$coef <- mapvalues(mdlTbl$coef, 
-          from = c("sigmaSq", "tau00", "tau11", "rho01", "rho00"), 
-          to = c("\\sigma^2", "\\tau_{00}", "\\tau_{11}", "\\rho_{01}", "\\rho_{00}"))
+          from = c("sigmaSq", "tau00", "tau11", "rho01", "rho00", "R2_marginal", "R2_conditional"), 
+          to = c("$\\sigma^2$", "$\\tau_{00}$", "$\\tau_{11}$", "$\\rho_{01}$", "$\\rho_{00}$", "$R^2_{marginal}$", "$R^2_{conditional}$"))
 
 # Still need to pack rows
 mdlTbl %>%
-  select(-one_of(coef2)) %>%
   replace(is.na(.), "") %>%
   kbl(
     .,
-    caption = "Test",
+    caption = "Core Need Fulfillment and Allport's Conditions",
     #format = "latex",
     linesep = "",
     booktabs = T,
@@ -5035,6 +5214,260 @@ mdlTbl %>%
 ```{r robustnessTbl, include=FALSE}
 # Table of all robustness checks (w/ and w/out SDT only)
 
+# Full Sample
+# Study 1:
+robustTblWorkerFull <- 
+  dtWorkerSupp$workerWithinBetween %>%
+  select(
+    AttitudesDutch = thermometerDutch_1,
+    AttitudesDutch_zwc = thermometerDutch_1_zwc,
+    CoreNeed_cwc = keyMotiveFulfilled_cwc,
+    CoreNeed_zwc = keyMotiveFulfilled_zwc,
+    OutgroupInteraction = OutgroupInteraction,
+    OutgroupInteraction_zwc = OutgroupInteraction_zwc,
+    PID = PID
+  )
+mdlWorkerLmerSlopesAttCoreInt <- lmer(
+    AttitudesDutch ~
+      CoreNeed_cwc * OutgroupInteraction +
+      (1 + CoreNeed_cwc + OutgroupInteraction | PID),
+    data = robustTblWorkerFull
+  )
+mdlWorkerLmerSlopesAttCoreIntZ <- lmer(
+    AttitudesDutch_zwc ~
+      CoreNeed_zwc * OutgroupInteraction_zwc +
+      (1 + CoreNeed_zwc + OutgroupInteraction_zwc | PID),
+    data = robustTblWorkerFull
+  )
+#Study 2:
+robustTblStudentFull <- 
+  dtStudentSupp$studentWithinBetween %>%
+  select(
+    AttitudesDutch = AttitudesDutch,
+    AttitudesDutch_zwc = AttitudesDutch_zwc,
+    CoreNeed_cwc = KeyNeedFullfillment_cwc,
+    CoreNeed_zwc = KeyNeedFullfillment_zwc,
+    OutgroupInteraction = OutgroupInteraction,
+    OutgroupInteraction_zwc = OutgroupInteraction_zwc, 
+    PID = PID
+  )
+mdlStudentLmerSlopesAttCoreInt <- lmer(
+    AttitudesDutch ~
+      CoreNeed_cwc * OutgroupInteraction +
+      (1 + CoreNeed_cwc + OutgroupInteraction | PID),
+    data = robustTblStudentFull
+  )
+mdlStudentLmerSlopesAttCoreIntZ <- lmer(
+    AttitudesDutch_zwc ~
+      CoreNeed_zwc * OutgroupInteraction_zwc +
+      (1 + CoreNeed_zwc + OutgroupInteraction_zwc | PID),
+    data = robustTblStudentFull
+  )
+#Study 3:
+robustTblMedicalFull <- 
+  dtMedicalSupp$medicalWithinBetween %>%
+  select(
+    AttitudesDutch = AttitudesDutch,
+    AttitudesDutch_zwc = AttitudesDutch_zwc,
+    CoreNeed_cwc = KeyNeedFulfillment_cwc,
+    CoreNeed_zwc = KeyNeedFulfillment_zwc,
+    OutgroupInteraction = OutgroupInteraction,
+    OutgroupInteraction_zwc = OutgroupInteraction_zwc, 
+    PID = PID
+  )
+mdlMedicalLmerSlopesAttCoreInt <- lmer(
+    AttitudesDutch ~
+      CoreNeed_cwc * OutgroupInteraction +
+      (1 + CoreNeed_cwc + OutgroupInteraction | PID),
+    #data = dtMedical$full
+    data = robustTblMedicalFull
+  )
+mdlMedicalLmerSlopesAttCoreIntZ <- lmer(
+    AttitudesDutch_zwc ~
+      CoreNeed_zwc * OutgroupInteraction_zwc +
+      (1 + CoreNeed_zwc + OutgroupInteraction_zwc | PID),
+    #data = dtMedical$full
+    data = robustTblMedicalFull
+  )
+
+# SDT
+# Study 1:
+robustTblWorkerOut <- 
+  dtWorkerSupp$workerOutWithinBetween %>%
+  select(
+    AttitudesDutch = thermometerDutch_1,
+    AttitudesDutch_zwc = thermometerDutch_1_zwc,
+    CoreNeed_cwc = keymotive_fulfillemt_1_cwc,
+    CoreNeed_zwc = keymotive_fulfillemt_1_zwc,
+    Competence_cwc = competence_1_cwc,
+    Competence_zwc = competence_1_zwc,
+    Autonomy_cwc = autonomy_1_cwc,
+    Autonomy_zwc = autonomy_1_zwc,
+    Relatedness_cwc = relatedness_1_cwc,
+    Relatedness_zwc = relatedness_1_zwc,
+    PID = PID
+  )
+mdlWorkerOutLmerSlopesCoreSdt <- lmer(
+    AttitudesDutch ~
+      CoreNeed_cwc + Competence_cwc + Autonomy_cwc + Relatedness_cwc +
+      (1 + CoreNeed_cwc + Competence_cwc + Autonomy_cwc + Relatedness_cwc | PID),
+    data = robustTblWorkerOut
+  )
+mdlWorkerOutLmerSlopesCoreSdtZ <- lmer(
+    AttitudesDutch_zwc ~
+      CoreNeed_zwc + Competence_zwc + Autonomy_zwc + Relatedness_zwc +
+      (1 + CoreNeed_zwc + Competence_zwc + Autonomy_zwc + Relatedness_zwc | PID),
+    data = robustTblWorkerOut
+  )
+# Study 2:
+robustTblStudentOut <- 
+  dtStudentSupp$studentOutWithinBetween %>%
+  select(
+    AttitudesDutch = AttitudesDutch,
+    AttitudesDutch_zwc = AttitudesDutch_zwc,
+    CoreNeed_cwc = KeyNeedFullfillment_cwc,
+    CoreNeed_zwc = KeyNeedFullfillment_zwc,
+    Competence_cwc = Competence_cwc,
+    Competence_zwc = Competence_zwc,
+    Autonomy_cwc = Autonomy_cwc,
+    Autonomy_zwc = Autonomy_zwc,
+    Relatedness_cwc = Relatedness_cwc,
+    Relatedness_zwc = Relatedness_zwc,
+    PID = PID
+  )
+mdlStudentOutLmerSlopesCoreSdt <- lmer(
+    AttitudesDutch ~
+      CoreNeed_cwc + Competence_cwc + Autonomy_cwc + Relatedness_cwc +
+      (1 + CoreNeed_cwc + Competence_cwc + Autonomy_cwc + Relatedness_cwc | PID),
+    data = robustTblStudentOut
+  )
+mdlStudentOutLmerSlopesCoreSdtZ <- lmer(
+    AttitudesDutch_zwc ~
+      CoreNeed_zwc + Competence_zwc + Autonomy_zwc + Relatedness_zwc +
+      (1 + CoreNeed_zwc + Competence_zwc + Autonomy_zwc + Relatedness_zwc | PID),
+    data = robustTblStudentOut
+  )
+# Study 3:
+robustTblMedicalOut <- 
+  dtMedicalSupp$medicalOutWithinBetween %>%
+  select(
+    AttitudesDutch = AttitudesDutch,
+    AttitudesDutch_zwc = AttitudesDutch_zwc,
+    CoreNeed_cwc = KeyNeedFulfillment_cwc,
+    CoreNeed_zwc = KeyNeedFulfillment_zwc,
+    Competence_cwc = Competence_cwc,
+    Competence_zwc = Competence_zwc,
+    Autonomy_cwc = Autonomy_cwc,
+    Autonomy_zwc = Autonomy_zwc,
+    Relatedness_cwc = Relatedness_cwc,
+    Relatedness_zwc = Relatedness_zwc,
+    PID = PID
+  )
+mdlMedicalOutLmerSlopesCoreSdt <- lmer(
+    AttitudesDutch ~
+      CoreNeed_cwc + Competence_cwc + Autonomy_cwc + Relatedness_cwc +
+      (1 + CoreNeed_cwc + Competence_cwc + Autonomy_cwc + Relatedness_cwc | PID),
+    data = robustTblMedicalOut
+  )
+mdlMedicalOutLmerSlopesCoreSdtZ <- lmer(
+    AttitudesDutch_zwc ~
+      CoreNeed_zwc + Competence_zwc + Autonomy_zwc + Relatedness_zwc +
+      (1 + CoreNeed_zwc + Competence_zwc + Autonomy_zwc + Relatedness_zwc | PID),
+    data = robustTblMedicalOut
+  )
+
+# collect models for table
+mdlRobustTblElements <- list(
+  # full
+  c(mdlWorkerLmerSlopesAttCoreInt, mdlWorkerLmerSlopesAttCoreIntZ),
+  c(mdlStudentLmerSlopesAttCoreInt, mdlStudentLmerSlopesAttCoreIntZ),
+  c(mdlMedicalLmerSlopesAttCoreInt, mdlMedicalLmerSlopesAttCoreIntZ),
+  # outgroup
+  c(mdlWorkerOutLmerSlopesCoreSdt, mdlWorkerOutLmerSlopesCoreSdtZ),
+  c(mdlStudentOutLmerSlopesCoreSdt, mdlStudentOutLmerSlopesCoreSdtZ),
+  c(mdlMedicalOutLmerSlopesCoreSdt, mdlMedicalOutLmerSlopesCoreSdtZ)
+  )
+
+mdlRobustPrep <- list()
+for (i in 1:length(mdlRobustTblElements)) {
+  mdlRobustPrep[[i]] <- lmerTblPrep(mdlRobustTblElements[[i]][[1]], mdlRobustTblElements[[i]][[2]])
+}
+
+sapply(mdlRobustPrep, "[[", 1)
+sapply(mdlRobustPrep, function(x) x[1]$coeficients$coef)
+
+mdlRobustPrep[[1]]$coeficients$coef
+
+mdlRobustTbl <- data.frame(
+  coef = c(
+    "(Intercept)",
+    "CoreNeed",
+    "Quality",
+    "Allport",
+    names(mdlRobustPrep[[1]]$random),
+    names(mdlRobustPrep[[1]]$fit)
+  )
+)
+for (i in 1:length(mdlRobustPrep)){
+  mdlRobustTbl <- join(mdlRobustTbl, mdlRobustPrep[[i]]$mdlTbl, by = "coef")
+  #mdlTbl <- merge(mdlRobustTbl, mdlRobustPrep[[i]]$mdlTbl, by = "coef", all = TRUE, sort = FALSE, no.dups = TRUE, suffixes=c("", ""))
+}
+
+mdlTblHeader <- data.frame(
+  data = as.character(mdlRobustTbl[mdlRobustTbl$coef == "data",]),
+  formula = as.character(mdlRobustTbl[mdlRobustTbl$coef == "formula",])
+) %>%
+  filter(data != "",
+         data != "data") %>%
+  mutate(study = str_extract(data, "S1|S2|S3")) %>%
+  mutate(study = gsub("S", "Study ", study)) %>%
+  mutate(dv = sub(" ~.*", "", formula)) %>%
+  mutate(dv = gsub("Raw", " ", dv)) %>%
+  mutate(pred = str_extract(formula, "CoreNeed|Allport")) %>%
+  mutate(header = paste(study, pred))
+
+mdlTblHeaderFreq <- rbind.data.frame(rle(mdlTblHeader$header)) %>%
+  mutate(lengths = lengths*2) %>%
+  rename(names = values, span = lengths) %>%
+  rbind(c(1, ""), .) %>%
+  mutate(span = as.numeric(span)) %>%
+  select(names, span)
+
+mdlTblHeader2 <- data.frame(names = mdlTblHeader$dv, span = 2) %>% 
+  mutate(names = as.character(names)) %>%
+  rbind(c("", 1), .) %>%
+  mutate(span = as.numeric(span))
+
+mdlTblHeader2.2 <- rbind.data.frame(rle(mdlTblHeader$dv)) %>%
+  mutate(lengths = lengths*2) %>%
+  rename(names = values, span = lengths) %>%
+  rbind(c(1, ""), .) %>%
+  mutate(span = as.numeric(span)) %>%
+  select(names, span)
+
+mdlTbl$coef <- mapvalues(mdlTbl$coef, 
+          from = c("sigmaSq", "tau00", "tau11", "rho01", "rho00", "R2_marginal", "R2_conditional"), 
+          to = c("$\\sigma^2$", "$\\tau_{00}$", "$\\tau_{11}$", "$\\rho_{01}$", "$\\rho_{00}$", "$R^2_{marginal}$", "$R^2_{conditional}$"))
+
+# Still need to pack rows
+mdlTbl %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Core Need Fulfillment and Allport's Conditions",
+    #format = "latex",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    escape = FALSE,
+    digits = 3
+  ) %>%
+  kable_classic() %>%
+  add_header_above(., mdlTblHeader2) %>%
+  add_header_above(., mdlTblHeaderFreq) %>%
+  pack_rows("Fixed", 1, 4) %>%
+  pack_rows("Random", 5, 9) %>%
+  pack_rows("Fit", 10, 21)
 
 ```
 
