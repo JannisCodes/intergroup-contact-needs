@@ -5004,6 +5004,7 @@ mdlTblGeneralShort <- mdlTblGeneral %>%
   gsub("_cwc", "", ., fixed = TRUE)   %>%
   gsub("\\makecell[l]", "\\makecell[c]", ., fixed = TRUE) %>%
   gsub("\\makecell[r]", "\\makecell[c]", ., fixed = TRUE) %>%
+  gsub("objVar$", "objVar.", ., fixed = TRUE) %>%
   gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
   gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
   kableExtra::landscape() %>%
@@ -5346,6 +5347,7 @@ mdlTblTheoreticalShort <- mdlTblTheoreticalShort %>%
   kableExtra::landscape() %>%
   gsub("\\makecell[l]", "\\makecell[c]", ., fixed = TRUE) %>%
   gsub("\\makecell[r]", "\\makecell[c]", ., fixed = TRUE) %>%
+  gsub("objVar$", "objVar.", ., fixed = TRUE) %>%
   gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
   gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
   save_kable("Tables/mdlTheory.tex")
@@ -5692,6 +5694,7 @@ mdlTblRobustShort <- mdlTblRobustShort %>%
   gsub("_cwc", "", ., fixed = TRUE)  %>%
   gsub("\\makecell[l]", "\\makecell[c]", ., fixed = TRUE) %>%
   gsub("\\makecell[r]", "\\makecell[c]", ., fixed = TRUE) %>%
+  gsub("objVar$", "objVar.", ., fixed = TRUE) %>%
   gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
   gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
   save_kable("Tables/mdlRobustness.tex")
