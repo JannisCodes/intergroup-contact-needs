@@ -4967,6 +4967,7 @@ mdlTblGeneralShort <- mdlTblGeneral %>%
       "deviance"
     )
   ) %>%
+  mutate_all(linebreak) %>%
   kbl(
     .,
     caption = "Intergroup General",
@@ -5336,7 +5337,7 @@ mdlTblTheoreticalShort <- mdlTblTheoreticalShort %>%
                 "**** $p$ < .0001, *** $p$ < .001, ** $p$ < .01, * $p$ < .05"
     )
   ) %>%
-  #kable_styling(latex_options = "scale_down") %>%
+  kable_styling(latex_options = "scale_down") %>%
   kableExtra::landscape() %>%
   gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
   gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
@@ -5646,6 +5647,7 @@ mdlTblRobustShort <- mdlTblRobustShort %>%
       "deviance"
     )
   ) %>%
+  mutate_all(linebreak) %>%
   kbl(
     .,
     caption = "Robustness Analyses",
