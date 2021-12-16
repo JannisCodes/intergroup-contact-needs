@@ -5282,7 +5282,7 @@ mdlTblTheoreticalLong <- mdlTbl %>%
   kbl(
     .,
     caption = "Theoretical Test: Core Need Fulfillment and Allport's Conditions",
-    #format = "latex",
+    format = "latex",
     linesep = "",
     booktabs = T,
     align = rep("c", ncol(.)),
@@ -5312,14 +5312,15 @@ mdlTblTheoreticalShort <- mdlTblTheoreticalShort %>%
       "deviance"
     )
   ) %>%
+  mutate_all(linebreak) %>%
   kbl(
     .,
     caption = "Core Need Fulfillment and Allport's Conditions",
-    format = "latex",
+    #format = "latex",
     linesep = "",
     booktabs = TRUE,
     col.names = c("", rep(c("$B$", "$\\beta$"), (ncol(.)-1)/2)),
-    align = rep("c", ncol(.)),
+    align = c("l", rep("c", ncol(.)-1)),
     escape = FALSE,
     digits = 3
   ) %>%
@@ -5335,7 +5336,7 @@ mdlTblTheoreticalShort <- mdlTblTheoreticalShort %>%
                 "**** $p$ < .0001, *** $p$ < .001, ** $p$ < .01, * $p$ < .05"
     )
   ) %>%
-  kable_styling(latex_options = "scale_down") %>%
+  #kable_styling(latex_options = "scale_down") %>%
   kableExtra::landscape() %>%
   gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
   gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
