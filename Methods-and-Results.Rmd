@@ -20,6 +20,7 @@ gc() # garbage collector
 lib <- c(
   "rmarkdown",
   "knitr",
+  "berryFunctions",
   "remedy",
   "bookdown",
   "brms",
@@ -4755,17 +4756,29 @@ mdlStudent$lmAttFreqQualX <-
 mdlMedical$lmAttFreqQualX <-
   lm(AvAttitude ~ SumContactNL_c * AvQuality_c, data = dtMedicalSupp$medicalContactFreq)
 
-tabModelTest <- tab_model(mdlWorker$lmAttFreqQualX,
-                          mdlStudent$lmAttFreqQualX,
-                          mdlMedical$lmAttFreqQualX)
+# tabModelTest <- tab_model(mdlWorker$lmAttFreqQualX,
+#                           mdlStudent$lmAttFreqQualX,
+#                           mdlMedical$lmAttFreqQualX)
 
-library(XML)
-df <- data.frame(readHTMLTable(htmlParse(tabModelTest))[1])
-# first row as colnames
-colnames(df) <- df[1,]
-# remove the fake first row
-df <- df[-1,]
+summ(mdlWorker$lmAttFreqQualX)
 
+mdlTblElementsGeneralLm <- list(mdlWorker$lmAttFreqQualX,
+                                mdlStudent$lmAttFreqQualX,
+                                mdlMedical$lmAttFreqQualX)
+
+mdlPrepLmGeneral <- list()
+for (i in 1:length(mdlTblElementsGeneralLm)) {
+  mdlPrepLmGeneral[[i]] <- lmTblPrep(mdlTblElementsGeneralLm[[i]])
+}
+mdlTblGeneralLm <- data.frame(
+  coef = c(
+    sapply(mdlPrepLmGeneral, function(x) x[1]$coeficients$coef) %>% as.character %>% unique,
+    names(mdlPrepLmGeneral[[1]]$fit)
+  )
+)
+for (i in 1:length(mdlPrepGeneral)){
+  mdlTblGeneralLm <- join(mdlTblGeneralLm, mdlPrepLmGeneral[[i]]$mdlTbl, by = "coef")
+}
 
 # lme
 # Study 1: 
@@ -4806,12 +4819,6 @@ mdlMedical$lmerSlopesAttTypeZ <- lmer(
     data = dtMedicalSupp$medicalWithinBetween
   )
 
-tab_model(
-  mdlWorker$lmerInterceptAttTypeTbl,
-  mdlStudent$lmerSlopesAttType,
-  mdlMedical$lmerSlopesAttType
-)
-
 
 mdlTblElementsGeneralLmer <- list(
   c(mdlWorker$lmerInterceptAttTypeTbl, mdlWorker$lmerInterceptAttTypeTblZ),
@@ -4824,50 +4831,35 @@ for (i in 1:length(mdlTblElementsGeneralLmer)) {
   mdlPrepGeneral[[i]] <- lmerTblPrep(mdlTblElementsGeneralLmer[[i]][[1]], mdlTblElementsGeneralLmer[[i]][[2]])
 }
 
-mdlTblGeneral <- data.frame(
+mdlTblGeneralLmer <- data.frame(
   coef = c(
-    "(Intercept)",
-    "OutgroupInteraction",
-    "NonOutgroupInteraction",
+    sapply(mdlPrepGeneral, function(x) x[1]$coeficients$coef) %>% as.character %>% unique,
     names(mdlPrepGeneral[[1]]$random),
     names(mdlPrepGeneral[[1]]$fit)
   )
 )
 for (i in 1:length(mdlPrepGeneral)){
-  mdlTblGeneral <- join(mdlTblGeneral, mdlPrepGeneral[[i]]$mdlTbl, by = "coef")
+  mdlTblGeneralLmer <- join(mdlTblGeneralLmer, mdlPrepGeneral[[i]]$mdlTbl, by = "coef")
 }
 
-mdlTblHeaderGeneral <- data.frame(
-  data = as.character(mdlTblGeneral[mdlTblGeneral$coef == "data",]),
-  formula = as.character(mdlTblGeneral[mdlTblGeneral$coef == "formula",])
-) %>%
-  filter(data != "",
-         data != "data") %>%
-  mutate(study = str_extract(data, "S1|S2|S3")) %>%
-  mutate(study = gsub("S", "Study ", study)) %>%
-  mutate(dv = sub(" ~.*", "", formula)) %>%
-  mutate(dv = gsub("Raw", " ", dv)) %>%
-  mutate(pred = str_extract(formula, "CoreNeed|Allport")) %>%
-  mutate(header = paste(study, pred))
-
-mdlTblHeaderGeneralFreq <- rbind.data.frame(rle(mdlTblHeaderGeneral$header)) %>%
-  mutate(lengths = lengths*2) %>%
-  rename(names = values, span = lengths) %>%
-  rbind(c(1, ""), .) %>%
-  mutate(span = as.numeric(span)) %>%
-  select(names, span)
-
-mdlTblHeaderGeneral2 <- data.frame(names = mdlTblHeaderGeneral$dv, span = 2) %>% 
-  mutate(names = as.character(names)) %>%
-  rbind(c("", 1), .) %>%
-  mutate(span = as.numeric(span))
-
-mdlTblHeaderGeneral2.2 <- rbind.data.frame(rle(mdlTblHeaderGeneral$dv)) %>%
-  mutate(lengths = lengths*2) %>%
-  rename(names = values, span = lengths) %>%
-  rbind(c(1, ""), .) %>%
-  mutate(span = as.numeric(span)) %>%
-  select(names, span)
+names(mdlTblGeneralLmer) <- make.unique(names(mdlTblGeneralLmer))
+mdlTblGeneral <-
+  merge(mdlTblGeneralLm,
+        mdlTblGeneralLmer %>% 
+          mutate(coef = gsub("R2Marg_R2Cond", "R2_R2_adjusted", coef)),
+        by = "coef",
+        all = TRUE) 
+names(mdlTblGeneral) <- make.unique(names(mdlTblGeneral))
+mdlTblGeneral <- mdlTblGeneral %>%
+  arrange(match(coef, c(
+    sapply(mdlPrepLmGeneral, function(x) x[1]$coeficients$coef) %>% as.character %>% unique,
+    sapply(mdlPrepGeneral, function(x) x[1]$coeficients$coef) %>% as.character %>% unique %>% setdiff(., "(Intercept)"),
+    names(mdlPrepGeneral[[1]]$random),
+    "Groups",
+    names(mdlPrepLmGeneral[[1]]$fit),
+    setdiff(names(mdlPrepGeneral[[1]]$fit), c(names(mdlPrepLmGeneral[[1]]$fit), "Groups"))
+  ))) %>%
+  replace(is.na(.), "")
 
 mdlTblGeneral$coef <- mapvalues(
   mdlTblGeneral$coef,
@@ -4877,6 +4869,10 @@ mdlTblGeneral$coef <- mapvalues(
     "tau11",
     "rho01",
     "rho00",
+    "fTest",
+    "R2",
+    "R2_adjusted",
+    "R2_R2_adjusted",
     "R2_marginal",
     "R2_conditional",
     "R2Marg_R2Cond"
@@ -4887,31 +4883,125 @@ mdlTblGeneral$coef <- mapvalues(
     "$\\tau_{11}$",
     "$\\rho_{01}$",
     "$\\rho_{00}$",
+    "F Test",
+    "$R^2$",
+    "$R^2_{adjusted}$",
+    "$R^{2 (a)}$",
     "$R^2_{marginal}$",
     "$R^2_{conditional}$",
     "$R^2_{marginal} / R^2_{conditional}$"
   )
 )
 
-# Still need to pack rows
-mdlTblGeneral %>%
-  replace(is.na(.), "") %>%
+# Headers
+mdlTblGeneralHeader <- data.frame(
+  data = as.character(mdlTblGeneral[mdlTblGeneral$coef == "data",]),
+  formula = as.character(mdlTblGeneral[mdlTblGeneral$coef == "formula",])
+) %>%
+  filter(data != "",
+         data != "data") %>%
+  mutate(study = str_extract(data, "Worker|Student|Medical")) %>%
+  mutate(study = gsub("Worker", "Study 1", study)) %>%
+  mutate(study = gsub("Student", "Study 2", study)) %>%
+  mutate(study = gsub("Medical", "Study 3", study)) %>%
+  mutate(dv = sub(" ~.*", "", formula)) %>%
+  mutate(dv = gsub("Raw", " ", dv))
+
+mdlTblGeneralHeaderDv <- data.frame(names = mdlTblGeneralHeader$dv, span = 2) %>% 
+  mutate(names = as.character(names)) %>%
+  rbind(c("", 1), .) %>%
+  mutate(span = as.numeric(span))
+
+mdlTblGeneralHeaderStudy <- rbind.data.frame(rle(mdlTblGeneralHeader$study)) %>%
+  mutate(lengths = lengths*2) %>%
+  rename(names = values, span = lengths) %>%
+  rbind(c(1, ""), .) %>%
+  mutate(span = as.numeric(span)) %>%
+  select(names, span)
+
+
+# Long Table
+mdlTblGeneralLong <- mdlTblGeneral %>%
   kbl(
     .,
-    caption = "Intergroup Contact General within PPT.",
+    caption = "Robustness Analyses",
     #format = "latex",
     linesep = "",
     booktabs = T,
-    align = c("l", rep("c", ncol(.)-1)),
+    align = c("l", rep("c", ncol(.) - 1)),
     escape = FALSE,
     digits = 3
   ) %>%
   kable_classic() %>%
-  add_header_above(., mdlTblHeaderGeneral2) %>%
-  pack_rows("Fixed", 1, 3) %>%
-  pack_rows("Random", 4, 8) %>%
-  pack_rows("Fit", 9, 21)
+  add_header_above(., mdlTblGeneralHeaderStudy) %>%
+  add_header_above(
+    .,
+    c(
+      "",
+      "Contact [Full Sample]" = 6,
+      "Self-Determination Theory [Outgroup Interactions only]" = 6
+    )
+  ) %>%
+  pack_rows("Random", 7, 11) %>%
+  pack_rows("Fit", 12, 27) %>%
+  footnote(
+    general = c("PID = Participant ID number (grouping variable)",
+                "$\\sigma^2$: residual variance, $\\tau_{00}$: random intercept variance, $\\tau_{11}$: random slope variance(s), $\\rho_{01}$: random slope-intercept correlation(s) , $\\rho_{00}$: correlation(s) between random slopes",
+                "**** $p$ < .0001, *** $p$ < .001, ** $p$ < .01, * $p$ < .05"
+    )
+  ) %>%
+  gsub("_cwc", "", ., fixed = TRUE) 
 
+# shortened Table
+mdlTblGeneralShort <- mdlTblGeneral %>%
+  filter(
+    !coef %in% c(
+      "data",
+      "formula",
+      "groupId",
+      "$R^2$",
+      "$R^2_{adjusted}$",
+      "$R^2_{marginal}$",
+      "$R^2_{conditional}$",
+      "logLik",
+      "deviance"
+    )
+  ) %>%
+  kbl(
+    .,
+    caption = "Intergroup General",
+    format = "latex",
+    linesep = "",
+    booktabs = TRUE,
+    col.names = c("", rep(c("$B$", "$\\eta_p$"), (ncol(.)-1)/4), rep(c("$B$", "$\\beta$"), (ncol(.)-1)/4)),
+    align = c("l", rep("c", ncol(.) - 1)),
+    escape = FALSE,
+    digits = 3
+  )  %>%
+  kable_classic() %>%
+  add_header_above(., mdlRobustTblHeaderStudy) %>%
+  add_header_above(
+    .,
+    c(
+      "",
+      "Aggregated [across participants]" = 6,
+      "Contemporaneous [within participants]" = 6
+    )
+  ) %>%
+  pack_rows("Random", 7, 11) %>%
+  pack_rows("Fit", 12, 18) %>%
+  footnote(
+    general = c("PID = Participant ID number (grouping variable)",
+                "$\\sigma^2$: residual variance, $\\tau_{00}$: random intercept variance, $\\tau_{11}$: random slope variance(s), $\\rho_{01}$: random slope-intercept correlation(s) , $\\rho_{00}$: correlation(s) between random slopes",
+                "**** $p$ < .0001, *** $p$ < .001, ** $p$ < .01, * $p$ < .05"
+    ),
+    alphabet = c("For linear regression: $R^2 / R^2_{adjusted}$, for multilevel regression: $R^2_{marginal} / R^2_{conditional}$ ")
+  ) %>%
+  gsub("_cwc", "", ., fixed = TRUE)   %>%
+  gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
+  gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
+  save_kable("Tables/mdlContactGeneral.tex")
+mdlTblGeneralShort
 ```
 
 ```{r intergroupNeedsTbl, include=FALSE}
@@ -5089,28 +5179,6 @@ tblLmerS3AttSlopesAllportCoreZ <- lmer(
   data = tblDtS3Needs
 )
 
-tab_model(
-  # Study 1:
-  tblLmerS1QltInterceptCore,
-  tblLmerS1AttSlopeCore,
-  tblLmerS1AttSlopeCoreQlt,
-  # Study 2:
-  tblLmerS2QltSlopesCore,
-  tblLmerS2AttSlopesCore,
-  tblLmerS2AttSlopesCoreQlt,
-  # Study 3:
-  tblLmerS3QltSlopesCore,
-  tblLmerS3AttSlopesCore,
-  tblLmerS3AttSlopesCoreQlt, 
-  tblLmerS3QltSlopesAllport, 
-  tblLmerS3AttSlopesAllport,
-  tblLmerS3AttSlopesAllportQlt,
-  tblLmerS3AttSlopesAllportCore,
-  # Settings
-  show.std = TRUE,
-  show.re.var = TRUE
-)
-
 
 mdlTblElements <- list(
   # Study 1:
@@ -5140,10 +5208,7 @@ for (i in 1:length(mdlTblElements)) {
 
 mdlTbl <- data.frame(
   coef = c(
-    "(Intercept)",
-    "CoreNeed",
-    "Quality",
-    "Allport",
+    sapply(mdlPrep, function(x) x[1]$coeficients$coef) %>% unlist %>% unique,
     names(mdlPrep[[1]]$random),
     names(mdlPrep[[1]]$fit)
   )
@@ -5163,8 +5228,8 @@ mdlTblHeader <- data.frame(
   mutate(study = gsub("S", "Study ", study)) %>%
   mutate(dv = sub(" ~.*", "", formula)) %>%
   mutate(dv = gsub("Raw", " ", dv)) %>%
-  mutate(pred = str_extract(formula, "CoreNeed|Allport")) %>%
-  mutate(header = paste(study, pred))
+  mutate(pred = str_extract(formula, "(CoreNeed \\+ Allport)|CoreNeed|Allport")) %>%
+  mutate(header = paste(study, pred, sep = " - "))
 
 mdlTblHeaderFreq <- rbind.data.frame(rle(mdlTblHeader$header)) %>%
   mutate(lengths = lengths*2) %>%
@@ -5185,16 +5250,36 @@ mdlTblHeader2.2 <- rbind.data.frame(rle(mdlTblHeader$dv)) %>%
   mutate(span = as.numeric(span)) %>%
   select(names, span)
 
-mdlTbl$coef <- mapvalues(mdlTbl$coef, 
-          from = c("sigmaSq", "tau00", "tau11", "rho01", "rho00", "R2_marginal", "R2_conditional"), 
-          to = c("$\\sigma^2$", "$\\tau_{00}$", "$\\tau_{11}$", "$\\rho_{01}$", "$\\rho_{00}$", "$R^2_{marginal}$", "$R^2_{conditional}$"))
+mdlTbl$coef <- mapvalues(
+  mdlTbl$coef,
+  from = c(
+    "sigmaSq",
+    "tau00",
+    "tau11",
+    "rho01",
+    "rho00",
+    "R2_marginal",
+    "R2_conditional", 
+    "R2Marg_R2Cond"
+  ),
+  to = c(
+    "$\\sigma^2$",
+    "$\\tau_{00}$",
+    "$\\tau_{11}$",
+    "$\\rho_{01}$",
+    "$\\rho_{00}$",
+    "$R^2_{marginal}$",
+    "$R^2_{conditional}$",
+    "$R^2_{marginal}$ / $R^2_{conditional}$"
+  )
+)
 
-# Still need to pack rows
-mdlTbl %>%
+# Full Table
+mdlTblTheoreticalLong <- mdlTbl %>%
   replace(is.na(.), "") %>%
   kbl(
     .,
-    caption = "Core Need Fulfillment and Allport's Conditions",
+    caption = "Theoretical Test: Core Need Fulfillment and Allport's Conditions",
     #format = "latex",
     linesep = "",
     booktabs = T,
@@ -5209,6 +5294,49 @@ mdlTbl %>%
   pack_rows("Random", 5, 9) %>%
   pack_rows("Fit", 10, 21)
 
+# shortened Table
+mdlTblTheoreticalShort <- mdlTbl %>%
+  replace(is.na(.), "")
+names(mdlTblTheoreticalShort) <- make.unique(names(mdlTblTheoreticalShort))
+mdlTblTheoreticalShort <- mdlTblTheoreticalShort %>%
+  filter(
+    !coef %in% c(
+      "data",
+      "formula",
+      "groupId",
+      "$R^2_{marginal}$",
+      "$R^2_{conditional}$",
+      "logLik",
+      "deviance"
+    )
+  ) %>%
+  kbl(
+    .,
+    caption = "Core Need Fulfillment and Allport's Conditions",
+    format = "latex",
+    linesep = "",
+    booktabs = TRUE,
+    col.names = c("", rep(c("$B$", "$\\beta$"), (ncol(.)-1)/2)),
+    align = rep("c", ncol(.)),
+    escape = FALSE,
+    digits = 3
+  ) %>%
+  kable_classic() %>%
+  add_header_above(., mdlTblHeader2) %>%
+  add_header_above(., mdlTblHeaderFreq) %>%
+  pack_rows("Fixed", 1, 4) %>%
+  pack_rows("Random", 5, 9) %>%
+  pack_rows("Fit", 10, 15) %>%
+  footnote(
+    general = c("PID = Participant ID number (grouping variable)",
+                "$\\sigma^2$: residual variance, $\\tau_{00}$: random intercept variance, $\\tau_{11}$: random slope variance(s), $\\rho_{01}$: random slope-intercept correlation(s) , $\\rho_{00}$: correlation(s) between random slopes",
+                "**** $p$ < .0001, *** $p$ < .001, ** $p$ < .01, * $p$ < .05"
+    )
+  )  %>%
+  gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
+  gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
+  save_kable("Tables/mdlTheory.tex")
+mdlTblTheoreticalShort
 ```
 
 ```{r robustnessTbl, include=FALSE}
@@ -5393,17 +5521,9 @@ for (i in 1:length(mdlRobustTblElements)) {
   mdlRobustPrep[[i]] <- lmerTblPrep(mdlRobustTblElements[[i]][[1]], mdlRobustTblElements[[i]][[2]])
 }
 
-sapply(mdlRobustPrep, "[[", 1)
-sapply(mdlRobustPrep, function(x) x[1]$coeficients$coef)
-
-mdlRobustPrep[[1]]$coeficients$coef
-
 mdlRobustTbl <- data.frame(
   coef = c(
-    "(Intercept)",
-    "CoreNeed",
-    "Quality",
-    "Allport",
+    sapply(mdlRobustPrep, function(x) x[1]$coeficients$coef) %>% unlist %>% unique,
     names(mdlRobustPrep[[1]]$random),
     names(mdlRobustPrep[[1]]$fit)
   )
@@ -5413,64 +5533,154 @@ for (i in 1:length(mdlRobustPrep)){
   #mdlTbl <- merge(mdlRobustTbl, mdlRobustPrep[[i]]$mdlTbl, by = "coef", all = TRUE, sort = FALSE, no.dups = TRUE, suffixes=c("", ""))
 }
 
-mdlTblHeader <- data.frame(
+mdlRobustTblHeader <- data.frame(
   data = as.character(mdlRobustTbl[mdlRobustTbl$coef == "data",]),
   formula = as.character(mdlRobustTbl[mdlRobustTbl$coef == "formula",])
 ) %>%
   filter(data != "",
          data != "data") %>%
-  mutate(study = str_extract(data, "S1|S2|S3")) %>%
-  mutate(study = gsub("S", "Study ", study)) %>%
+  mutate(study = str_extract(data, "Worker|Student|Medical")) %>%
+  mutate(study = gsub("Worker", "Study 1", study)) %>%
+  mutate(study = gsub("Student", "Study 2", study)) %>%
+  mutate(study = gsub("Medical", "Study 3", study)) %>%
   mutate(dv = sub(" ~.*", "", formula)) %>%
   mutate(dv = gsub("Raw", " ", dv)) %>%
   mutate(pred = str_extract(formula, "CoreNeed|Allport")) %>%
-  mutate(header = paste(study, pred))
+  mutate(header = paste(study, pred, sep = " - "))
 
-mdlTblHeaderFreq <- rbind.data.frame(rle(mdlTblHeader$header)) %>%
+mdlRobustTblHeaderFreq <- rbind.data.frame(rle(mdlRobustTblHeader$header)) %>%
   mutate(lengths = lengths*2) %>%
   rename(names = values, span = lengths) %>%
   rbind(c(1, ""), .) %>%
   mutate(span = as.numeric(span)) %>%
   select(names, span)
 
-mdlTblHeader2 <- data.frame(names = mdlTblHeader$dv, span = 2) %>% 
+mdlRobustTblHeaderDv <- data.frame(names = mdlRobustTblHeader$dv, span = 2) %>% 
   mutate(names = as.character(names)) %>%
   rbind(c("", 1), .) %>%
   mutate(span = as.numeric(span))
 
-mdlTblHeader2.2 <- rbind.data.frame(rle(mdlTblHeader$dv)) %>%
+mdlRobustTblHeaderStudy <- rbind.data.frame(rle(mdlRobustTblHeader$study)) %>%
   mutate(lengths = lengths*2) %>%
   rename(names = values, span = lengths) %>%
   rbind(c(1, ""), .) %>%
   mutate(span = as.numeric(span)) %>%
   select(names, span)
 
-mdlTbl$coef <- mapvalues(mdlTbl$coef, 
-          from = c("sigmaSq", "tau00", "tau11", "rho01", "rho00", "R2_marginal", "R2_conditional"), 
-          to = c("$\\sigma^2$", "$\\tau_{00}$", "$\\tau_{11}$", "$\\rho_{01}$", "$\\rho_{00}$", "$R^2_{marginal}$", "$R^2_{conditional}$"))
+mdlRobustTbl$coef <- mapvalues(
+  mdlRobustTbl$coef,
+  from = c(
+    "sigmaSq",
+    "tau00",
+    "tau11",
+    "rho01",
+    "rho00",
+    "R2_marginal",
+    "R2_conditional", 
+    "R2Marg_R2Cond"
+  ),
+  to = c(
+    "$\\sigma^2$",
+    "$\\tau_{00}$",
+    "$\\tau_{11}$",
+    "$\\rho_{01}$",
+    "$\\rho_{00}$",
+    "$R^2_{marginal}$",
+    "$R^2_{conditional}$",
+    "$R^2_{marginal}$ / $R^2_{conditional}$"
+  )
+)
 
-# Still need to pack rows
-mdlTbl %>%
+# Long Table
+mdlTblRobustLong <- mdlRobustTbl %>%
   replace(is.na(.), "") %>%
   kbl(
     .,
-    caption = "Core Need Fulfillment and Allport's Conditions",
+    caption = "Robustness Analyses",
     #format = "latex",
     linesep = "",
     booktabs = T,
-    align = rep("c", ncol(.)),
+    align = c("l", rep("c", ncol(.) - 1)),
     escape = FALSE,
     digits = 3
   ) %>%
   kable_classic() %>%
-  add_header_above(., mdlTblHeader2) %>%
-  add_header_above(., mdlTblHeaderFreq) %>%
-  pack_rows("Fixed", 1, 4) %>%
-  pack_rows("Random", 5, 9) %>%
-  pack_rows("Fit", 10, 21)
+  add_header_above(., mdlRobustTblHeaderStudy) %>%
+  add_header_above(
+    .,
+    c(
+      "",
+      "Contact [Full Sample]" = 6,
+      "Self-Determination Theory [Outgroup Interactions only]" = 6
+    )
+  ) %>%
+  pack_rows("Fixed", 1, 7) %>%
+  pack_rows("Random", 8, 12) %>%
+  pack_rows("Fit", 13, 25) %>%
+  footnote(
+    general = c("PID = Participant ID number (grouping variable)",
+                "$\\sigma^2$: residual variance, $\\tau_{00}$: random intercept variance, $\\tau_{11}$: random slope variance(s), $\\rho_{01}$: random slope-intercept correlation(s) , $\\rho_{00}$: correlation(s) between random slopes",
+                "**** $p$ < .0001, *** $p$ < .001, ** $p$ < .01, * $p$ < .05"
+    )
+  ) %>%
+  gsub("_cwc", "", ., fixed = TRUE) 
 
+# shortened Table
+mdlTblRobustShort <- mdlRobustTbl %>%
+  replace(is.na(.), "")
+names(mdlTblRobustShort) <- make.unique(names(mdlTblRobustShort))
+mdlTblRobustShort <- mdlTblRobustShort %>%
+  filter(
+    !coef %in% c(
+      "data",
+      "formula",
+      "groupId",
+      "$R^2_{marginal}$",
+      "$R^2_{conditional}$",
+      "logLik",
+      "deviance"
+    )
+  ) %>%
+  kbl(
+    .,
+    caption = "Robustness Analyses",
+    format = "latex",
+    linesep = "",
+    booktabs = TRUE,
+    col.names = c("", rep(c("$B$", "$\\beta$"), (ncol(.)-1)/2)),
+    align = c("l", rep("c", ncol(.) - 1)),
+    escape = FALSE,
+    digits = 3
+  )  %>%
+  kable_classic() %>%
+  add_header_above(., mdlRobustTblHeaderStudy) %>%
+  add_header_above(
+    .,
+    c(
+      "",
+      "Contact [Full Sample]" = 6,
+      "Self-Determination Theory [Outgroup Interactions only]" = 6
+    )
+  ) %>%
+  pack_rows("Fixed", 1, 7) %>%
+  pack_rows("Random", 8, 12) %>%
+  pack_rows("Fit", 13, 18) %>%
+  footnote(
+    general = c("PID = Participant ID number (grouping variable)",
+                "$\\sigma^2$: residual variance, $\\tau_{00}$: random intercept variance, $\\tau_{11}$: random slope variance(s), $\\rho_{01}$: random slope-intercept correlation(s) , $\\rho_{00}$: correlation(s) between random slopes",
+                "**** $p$ < .0001, *** $p$ < .001, ** $p$ < .01, * $p$ < .05"
+    )
+  ) %>%
+  gsub("_cwc", "", ., fixed = TRUE)  %>%
+  gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
+  gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
+  save_kable("Tables/mdlRobustness.tex")
+mdlTblRobustShort
 ```
 
+\input{Tables/mdlContactGeneral}
+\input{Tables/mdlTheory}
+\input{Tables/mdlRobustness}
 
 <!-- \begin{figure}[h] -->
 

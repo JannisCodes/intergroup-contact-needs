@@ -1,5 +1,5 @@
-#obj <- mdlWorker$lmerInterceptAttTypeTbl
-#objz <- mdlWorker$lmerInterceptAttTypeTblZ
+#obj <- mdlWorkerLmerSlopesAttCoreInt
+#objz <- mdlWorkerLmerSlopesAttCoreIntZ
 
 lmerTblPrep <- function (obj, objz = NULL, alpha = 0.05, ...) {
   # Summarize models
@@ -14,9 +14,10 @@ lmerTblPrep <- function (obj, objz = NULL, alpha = 0.05, ...) {
     as.data.frame %>%
     tibble::rownames_to_column(., "coef")
   confZ <- confint(objz, 
-                   method = "boot", 
-                   parallel = "multicore", 
-                   ncpus = parallel::detectCores(logical = TRUE)) %>% 
+                   method = "Wald") %>% 
+                   #method = "boot", 
+                   #parallel = "multicore", 
+                   #ncpus = parallel::detectCores(logical = TRUE)) %>% 
     as.data.frame %>%
     tibble::rownames_to_column(., "coef")
   coefZOut <- merge(coefZ, confZ)
@@ -34,10 +35,12 @@ lmerTblPrep <- function (obj, objz = NULL, alpha = 0.05, ...) {
   coef <- smry$coeftable %>% 
     as.data.frame %>%
     tibble::rownames_to_column(., "coef")
-  conf <- confint(obj) %>% 
+  conf <- confint(obj,
+                  method = "Wald") %>% 
+                  #method = "profile") %>% 
     as.data.frame %>%
     tibble::rownames_to_column(., "coef")
-  coefOut <- merge(coef, conf)
+  coefOut <- join(coef, conf, by = "coef")
   colnames(coefOut) <- c("coef", "est", "se", "tval", "df", "p", "lwr", "upr")
   coefOut$B <- paste0(
     format(round(coefOut$est, 2), nsmall = 2),
@@ -52,11 +55,14 @@ lmerTblPrep <- function (obj, objz = NULL, alpha = 0.05, ...) {
     "]"
   )
   coefOut <- 
-    merge(
-      coefOut, 
+    join(
+      coefOut %>% 
+        mutate(coef = gsub('_cwc', '', coef)), 
       coefZOut %>% 
         select(coef, Beta) %>% 
-        mutate(coef = gsub('_zwc|Z$', '', coef))
+        mutate(coef = gsub('_zwc|Z$', '', coef)) %>%
+        mutate(Beta = ifelse(coef == "(Intercept)", "", Beta)),
+      by = "coef"
     )
   
   
@@ -103,7 +109,11 @@ lmerTblPrep <- function (obj, objz = NULL, alpha = 0.05, ...) {
   BIC <- BIC(obj)
   N <- as.numeric(obj@devcomp$dims["n"])
   G <- as.numeric(as.data.frame(smry$gvars)["# groups"])
-  ICC <- performance::icc(obj)$ICC_adjusted
+  ICC <- ifelse(
+    berryFunctions::is.error(performance::icc(obj)$ICC_adjusted), 
+    performance::icc(obj),
+    performance::icc(obj)$ICC_adjusted
+  ) 
   rSqMarg <- as.numeric(performance::r2(obj)$R2_marginal) # Marginal R2
   rSqCond <- as.numeric(performance::r2(obj)$R2_conditional) # Conditional R2
   R2Marg_R2Cond <- paste(format(round(rSqMarg, 3), nsmall = 3), 
@@ -152,3 +162,115 @@ lmerTblPrep <- function (obj, objz = NULL, alpha = 0.05, ...) {
   )
   out
 }
+
+#obj <- mdlWorker$lmAttFreqQualX
+lmTblPrep <- function (obj, alpha = 0.05, ...) {
+  # Summarize models
+  smry <- summ(obj, confint = TRUE)
+  
+  # Get unstandardized coefficients
+  coef <- smry$coeftable %>% 
+    as.data.frame %>%
+    tibble::rownames_to_column(., "coef")
+  colnames(coef) <- c("coef", "est", "lwr", "upr", "tval", "p")
+  coef$B <- paste0(
+    format(round(coef$est, 2), nsmall = 2),
+    ifelse(coef$p < .0001, "****", 
+           ifelse(coef$p < .001, "***", 
+                  ifelse(coef$p < .01, "**", 
+                         ifelse(coef$p < .05, "*", "")))),
+    " [", 
+    format(round(coef$lwr, 2), nsmall = 2),
+    ", ",
+    format(round(coef$upr, 2), nsmall = 2),
+    "]"
+  )
+  
+  # calc effect size
+  eta <- effectsize::eta_squared(obj, partial = TRUE) %>%
+    as.data.frame %>%
+    mutate(coef = Parameter) %>%
+    mutate(Eta2_partial = format(round(Eta2_partial, 2), nsmall = 2))
+  
+  # Merge B and effect size
+  coefOut <- 
+    join(
+      coef %>% 
+        mutate(coef = gsub('_c', '', coef)), 
+       eta %>% 
+        select(coef, Eta2_partial) %>% 
+        mutate(coef = gsub('_c', '', coef)),
+      by = "coef"
+    )
+  
+  
+  ## Model fit statistics.
+  data = deparse(as.list(smry$model$call)$data)
+  formula = Reduce(paste, deparse(as.list(smry$model$call)$formula))
+  N <- nrow(smry$model$model)
+  fTest <-
+    paste(
+      "F(",
+      summary(obj)$fstatistic[2],
+      ", ",
+      summary(obj)$fstatistic[3],
+      ") = ",
+      format(round(summary(obj)$fstatistic[1], 2), nsmall = 2),
+      ", ",
+      ifelse(
+        pf(
+          summary(obj)$fstatistic[1],
+          summary(obj)$fstatistic[2],
+          summary(obj)$fstatistic[3],
+          lower.tail = FALSE
+        ) < .001,
+        "p < .001",
+        paste("p = ", format(round(
+          pf(
+            summary(obj)$fstatistic[1],
+            summary(obj)$fstatistic[2],
+            summary(obj)$fstatistic[3],
+            lower.tail = FALSE
+          ),
+          3
+        ), nsmall = 3))
+      ),
+      sep = ""
+    )
+  
+  R2 <- as.numeric(performance::r2(obj)$R2) # Marginal R2
+  R2_adjusted <- as.numeric(performance::r2(obj)$R2_adjusted) # Conditional R2
+  R2_R2_adjusted <- paste(format(round(R2, 3), nsmall = 3), 
+                         format(round(R2_adjusted, 3), nsmall = 3), 
+                         sep = " / ")
+  sumstat <- list(
+    data = data,
+    formula = formula, 
+    N = N, 
+    fTest = fTest,
+    R2 = R2,
+    R2_adjusted = R2_adjusted,
+    R2_R2_adjusted = R2_R2_adjusted
+  )
+  
+  # Combined Table output
+  mdlCoefTbl <- data.frame(
+    coef = coefOut$coef,
+    B = coefOut$B,
+    Eta2_partial = coefOut$Eta2_partial
+  )
+  mdlFitTbl <- t(as.data.frame(sumstat)) %>%
+    magrittr::set_colnames(c("B")) %>%
+    as.data.frame %>%
+    tibble::rownames_to_column(., "coef") %>%
+    mutate(Eta2_partial = "")
+  mdlTbl <- rbind(mdlCoefTbl, mdlFitTbl)
+  
+  out <- list(
+    coeficients = coefOut,
+    fit = sumstat,
+    mdlTbl = mdlTbl
+  )
+  out
+}
+
