@@ -4997,9 +4997,11 @@ mdlTblGeneralShort <- mdlTblGeneral %>%
     ),
     alphabet = c("For linear regression: $R^2 / R^2_{adjusted}$, for multilevel regression: $R^2_{marginal} / R^2_{conditional}$ ")
   ) %>%
+  kable_styling(latex_options = "scale_down") %>%
   gsub("_cwc", "", ., fixed = TRUE)   %>%
   gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
   gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
+  kableExtra::landscape() 
   save_kable("Tables/mdlContactGeneral.tex")
 mdlTblGeneralShort
 ```
@@ -5332,7 +5334,8 @@ mdlTblTheoreticalShort <- mdlTblTheoreticalShort %>%
                 "$\\sigma^2$: residual variance, $\\tau_{00}$: random intercept variance, $\\tau_{11}$: random slope variance(s), $\\rho_{01}$: random slope-intercept correlation(s) , $\\rho_{00}$: correlation(s) between random slopes",
                 "**** $p$ < .0001, *** $p$ < .001, ** $p$ < .01, * $p$ < .05"
     )
-  )  %>%
+  ) %>%
+  kable_styling(latex_options = "scale_down") %>%
   gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
   gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
   save_kable("Tables/mdlTheory.tex")
@@ -5671,6 +5674,7 @@ mdlTblRobustShort <- mdlTblRobustShort %>%
                 "**** $p$ < .0001, *** $p$ < .001, ** $p$ < .01, * $p$ < .05"
     )
   ) %>%
+  kable_styling(latex_options = "scale_down") %>%
   gsub("_cwc", "", ., fixed = TRUE)  %>%
   gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
   gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
