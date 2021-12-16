@@ -4948,7 +4948,8 @@ mdlTblGeneralLong <- mdlTblGeneral %>%
     general = c("PID = Participant ID number (grouping variable)",
                 "$\\sigma^2$: residual variance, $\\tau_{00}$: random intercept variance, $\\tau_{11}$: random slope variance(s), $\\rho_{01}$: random slope-intercept correlation(s) , $\\rho_{00}$: correlation(s) between random slopes",
                 "**** $p$ < .0001, *** $p$ < .001, ** $p$ < .01, * $p$ < .05"
-    )
+    ), 
+    escape = TRUE
   ) %>%
   gsub("_cwc", "", ., fixed = TRUE) 
 
@@ -5001,6 +5002,7 @@ mdlTblGeneralShort <- mdlTblGeneral %>%
   ) %>%
   kable_styling(latex_options = "scale_down") %>%
   gsub("_cwc", "", ., fixed = TRUE)   %>%
+  gsub("\\makecell[l]", "\\makecell[c]", ., fixed = TRUE) %>%
   gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
   gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
   kableExtra::landscape() %>%
@@ -5341,6 +5343,7 @@ mdlTblTheoreticalShort <- mdlTblTheoreticalShort %>%
   ) %>%
   kable_styling(latex_options = "scale_down") %>%
   kableExtra::landscape() %>%
+  gsub("\\makecell[l]", "\\makecell[c]", ., fixed = TRUE) %>%
   gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
   gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
   save_kable("Tables/mdlTheory.tex")
@@ -5679,11 +5682,13 @@ mdlTblRobustShort <- mdlTblRobustShort %>%
     general = c("PID = Participant ID number (grouping variable)",
                 "$\\sigma^2$: residual variance, $\\tau_{00}$: random intercept variance, $\\tau_{11}$: random slope variance(s), $\\rho_{01}$: random slope-intercept correlation(s) , $\\rho_{00}$: correlation(s) between random slopes",
                 "**** $p$ < .0001, *** $p$ < .001, ** $p$ < .01, * $p$ < .05"
-    )
+    ), 
+    escape = FALSE
   ) %>%
   kable_styling(latex_options = "scale_down") %>%
   kableExtra::landscape() %>%
   gsub("_cwc", "", ., fixed = TRUE)  %>%
+  gsub("\\makecell[l]", "\\makecell[c]", ., fixed = TRUE) %>%
   gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
   gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
   save_kable("Tables/mdlRobustness.tex")
