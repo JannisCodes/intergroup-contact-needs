@@ -5003,6 +5003,7 @@ mdlTblGeneralShort <- mdlTblGeneral %>%
   kable_styling(latex_options = "scale_down") %>%
   gsub("_cwc", "", ., fixed = TRUE)   %>%
   gsub("\\makecell[l]", "\\makecell[c]", ., fixed = TRUE) %>%
+  gsub("\\makecell[r]", "\\makecell[c]", ., fixed = TRUE) %>%
   gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
   gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
   kableExtra::landscape() %>%
@@ -5320,7 +5321,7 @@ mdlTblTheoreticalShort <- mdlTblTheoreticalShort %>%
   kbl(
     .,
     caption = "Core Need Fulfillment and Allport's Conditions",
-    #format = "latex",
+    format = "latex",
     linesep = "",
     booktabs = TRUE,
     col.names = c("", rep(c("$B$", "$\\beta$"), (ncol(.)-1)/2)),
@@ -5344,6 +5345,7 @@ mdlTblTheoreticalShort <- mdlTblTheoreticalShort %>%
   kable_styling(latex_options = "scale_down") %>%
   kableExtra::landscape() %>%
   gsub("\\makecell[l]", "\\makecell[c]", ., fixed = TRUE) %>%
+  gsub("\\makecell[r]", "\\makecell[c]", ., fixed = TRUE) %>%
   gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
   gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
   save_kable("Tables/mdlTheory.tex")
@@ -5689,6 +5691,7 @@ mdlTblRobustShort <- mdlTblRobustShort %>%
   kableExtra::landscape() %>%
   gsub("_cwc", "", ., fixed = TRUE)  %>%
   gsub("\\makecell[l]", "\\makecell[c]", ., fixed = TRUE) %>%
+  gsub("\\makecell[r]", "\\makecell[c]", ., fixed = TRUE) %>%
   gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
   gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
   save_kable("Tables/mdlRobustness.tex")
