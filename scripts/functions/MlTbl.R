@@ -93,10 +93,10 @@ lmerTblPrep <- function (obj, objz = NULL, alpha = 0.05, ...) {
   # collect random effect statistics
   restat <- list(
     sigmaSq = sigmaSq,
-    tau00 = ifelse(length(tau00)>1, paste(tau00, collapse = "\n"), tau00),
-    tau11 = ifelse(length(tau11)>1, paste(tau11, collapse = "\n"), tau11),
-    rho01 = ifelse(length(rho01)>1, paste(rho01, collapse = "\n"), rho01),
-    rho00 = ifelse(length(rho00)>1, paste(rho00, collapse = "\n"), rho00)
+    tau00 = ifelse(length(tau00)>1, paste(tau00, collapse = "\\n"), tau00),
+    tau11 = ifelse(length(tau11)>1, paste(tau11, collapse = "\\n"), tau11),
+    rho01 = ifelse(length(rho01)>1, paste(rho01, collapse = "\\n"), rho01),
+    rho00 = ifelse(length(rho00)>1, paste(rho00, collapse = "\\n"), rho00)
   )
   
   

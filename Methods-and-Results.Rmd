@@ -5001,7 +5001,7 @@ mdlTblGeneralShort <- mdlTblGeneral %>%
   gsub("_cwc", "", ., fixed = TRUE)   %>%
   gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
   gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
-  kableExtra::landscape() 
+  kableExtra::landscape() %>%
   save_kable("Tables/mdlContactGeneral.tex")
 mdlTblGeneralShort
 ```
@@ -5336,6 +5336,7 @@ mdlTblTheoreticalShort <- mdlTblTheoreticalShort %>%
     )
   ) %>%
   kable_styling(latex_options = "scale_down") %>%
+  kableExtra::landscape() %>%
   gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
   gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
   save_kable("Tables/mdlTheory.tex")
@@ -5675,6 +5676,7 @@ mdlTblRobustShort <- mdlTblRobustShort %>%
     )
   ) %>%
   kable_styling(latex_options = "scale_down") %>%
+  kableExtra::landscape() %>%
   gsub("_cwc", "", ., fixed = TRUE)  %>%
   gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
   gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
