@@ -1,0 +1,84 @@
+\begin{table}
+\begin{minipage}[t][\textheight][t]{\textwidth}
+
+\caption{\label{tab:robustnessTbl}Robustness Analyses}
+\centering
+\begin{tabular}[t]{lcccccccccccc}
+\toprule
+\multicolumn{1}{c}{} & \multicolumn{6}{c}{Contact [Full Sample]} & \multicolumn{6}{c}{Self-Determination Theory [Outgroup Interactions only]} \\
+\cmidrule(l{3pt}r{3pt}){2-7} \cmidrule(l{3pt}r{3pt}){8-13}
+\multicolumn{1}{c}{} & \multicolumn{2}{c}{Study 1} & \multicolumn{2}{c}{Study 2} & \multicolumn{2}{c}{Study 3} & \multicolumn{2}{c}{Study 1} & \multicolumn{2}{c}{Study 2} & \multicolumn{2}{c}{Study 3} \\
+\cmidrule(l{3pt}r{3pt}){2-3} \cmidrule(l{3pt}r{3pt}){4-5} \cmidrule(l{3pt}r{3pt}){6-7} \cmidrule(l{3pt}r{3pt}){8-9} \cmidrule(l{3pt}r{3pt}){10-11} \cmidrule(l{3pt}r{3pt}){12-13}
+ & $B$ & $\beta$ & $B$ & $\beta$ & $B$ & $\beta$ & $B$ & $\beta$ & $B$ & $\beta$ & $B$ & $\beta$\\
+\midrule
+\addlinespace[0.3em]
+\multicolumn{13}{l}{\textbf{Fixed}}\\
+\hspace{1em}(Intercept) & 68.88**** [63.24, 74.53] &  & 63.90**** [59.56, 68.24] &  & 57.06**** [52.63, 61.48] &  & 72.53**** [66.79, 78.27] &  & 70.69**** [67.53, 73.85] &  & 68.32**** [65.11, 71.53] & \\
+\hspace{1em}CoreNeed & -0.10* [-0.18, -0.01] & 0.15 [ 0.07, 0.22] & -0.03 [-0.08,  0.02] & 0.08 [ 0.05, 0.12] & -0.14**** [-0.21, -0.08] & 0.12 [ 0.08, 0.16] & 0.09* [ 0.01,  0.18] & 0.20 [ 0.09, 0.31] & 0.08** [ 0.03,  0.13] & 0.08 [ 0.00, 0.16] & 0.15*** [ 0.07,  0.22] & 0.13 [ 0.07, 0.20]\\
+\hspace{1em}OutgroupInteraction & 1.81* [ 0.25,  3.37] & 0.14 [ 0.03, 0.24] & 2.88*** [ 1.36,  4.40] & 0.11 [ 0.06, 0.15] & 5.41**** [ 3.74,  7.07] & 0.21 [ 0.15, 0.27] &  &  &  &  &  & \\
+\hspace{1em}CoreNeed:OutgroupInteraction & 0.13**** [ 0.07,  0.18] & 0.13 [ 0.07, 0.18] & 0.06** [ 0.02,  0.10] & 0.04 [ 0.01, 0.08] & 0.17**** [ 0.12,  0.21] & 0.08 [ 0.05, 0.11] &  &  &  &  &  & \\
+\hspace{1em}Competence &  &  &  &  &  &  & 0.05 [-0.16,  0.25] & -0.05 [-0.21, 0.11] & 0.06* [ 0.01,  0.10] & 0.07 [-0.02, 0.17] & 0.06* [ 0.02,  0.10] & 0.09 [ 0.02, 0.15]\\
+\hspace{1em}Autonomy &  &  &  &  &  &  & 0.06 [-0.12,  0.23] & 0.20 [ 0.09, 0.31] & 0.03 [-0.02,  0.08] & 0.04 [-0.06, 0.14] & 0.04 [-0.01,  0.08] & 0.06 [-0.01, 0.13]\\
+\hspace{1em}Relatedness &  &  &  &  &  &  & 0.10*** [ 0.05,  0.14] & 0.23 [ 0.13, 0.34] & 0.07*** [ 0.04,  0.10] & 0.17 [ 0.09, 0.25] & 0.06** [ 0.02,  0.09] & 0.11 [ 0.05, 0.18]\\
+\addlinespace[0.3em]
+\multicolumn{13}{l}{\textbf{Random}}\\
+\hspace{1em}$\sigma^2$ & 64.7 &  & 77.34 &  & 84.37 &  & 41.11 &  & 82.65 &  & 83.36 & \\
+\hspace{1em}$\tau_{00}$ & 174.00 (PID) &  & 523.56 (PID) &  & 339.72 (PID) &  & 176.39 (PID) &  & 262.18 (PID) &  & 181.84 (PID) & \\
+$\tau_{11}$ & 0.01 (PID.CoreNeed)
+6.05 (PID.OutgroupInteraction) &  & 0.00 (PID.CoreNeed)
+46.82 (PID.OutgroupInteraction) &  & 0.01 (PID.CoreNeed)
+40.96 (PID.OutgroupInteraction) &  & 0.02 (PID.CoreNeed)
+0.20 (PID.Competence)
+0.14 (PID.Autonomy)
+0.00 (PID.Relatedness) &  & 0.01 (PID.CoreNeed)
+0.00 (PID.Competence)
+0.00 (PID.Autonomy)
+0.00 (PID.Relatedness) &  & 0.05 (PID.CoreNeed)
+0.01 (PID.Competence)
+0.00 (PID.Autonomy)
+\hspace{1em}0.01 (PID.Relatedness) & \\
+$\rho_{01}$ & 0.01 (PID.CoreNeed)
+-0.27 (PID.OutgroupInteraction) &  & 0.27 (PID.CoreNeed)
+-0.68 (PID.OutgroupInteraction) &  & -0.15 (PID.CoreNeed)
+-0.68 (PID.OutgroupInteraction) &  & 0.55 (PID.CoreNeed)
+-0.15 (PID.Competence)
+-0.09 (PID.Autonomy)
+ 0.56 (PID.Relatedness) &  & -0.16 (PID.CoreNeed)
+-0.05 (PID.Competence)
+-0.44 (PID.Autonomy)
+-0.20 (PID.Relatedness) &  & -0.25 (PID.CoreNeed)
+-0.29 (PID.Competence)
+-0.23 (PID.Autonomy)
+\hspace{1em} 0.02 (PID.Relatedness) & \\
+$\rho_{00}$ & 0.33 (PID.CoreNeed-OutgroupInteraction) &  & -0.08 (PID.CoreNeed-OutgroupInteraction) &  & 0.01 (PID.CoreNeed-OutgroupInteraction) &  & 0.03 (PID.CoreNeed-Autonomy)
+-0.93 (PID.Competence-Autonomy)
+-0.11 (PID.CoreNeed-Competence)
+ 0.17 (PID.CoreNeed-Relatedness)
+ 0.16 (PID.Competence-Relatedness)
+-0.10 (PID.Autonomy-Relatedness) &  & 0.60 (PID.CoreNeed-Autonomy)
+ 0.83 (PID.Competence-Autonomy)
+ 0.20 (PID.CoreNeed-Competence)
+ 0.42 (PID.CoreNeed-Relatedness)
+-0.79 (PID.Competence-Relatedness)
+-0.35 (PID.Autonomy-Relatedness) &  & 0.57 (PID.CoreNeed-Autonomy)
+-0.68 (PID.Competence-Autonomy)
+ 0.09 (PID.CoreNeed-Competence)
+-0.27 (PID.CoreNeed-Relatedness)
+-0.31 (PID.Competence-Relatedness)
+\hspace{1em}-0.08 (PID.Autonomy-Relatedness) & \\
+\addlinespace[0.3em]
+\multicolumn{13}{l}{\textbf{Fit}}\\
+\hspace{1em}AIC & 8761 &  & 36475 &  & 28974 &  & 2757 &  & 7219 &  & 12581 & \\
+\hspace{1em}BIC & 8817 &  & 36546 &  & 29043 &  & 2840 &  & 7321 &  & 12695 & \\
+\hspace{1em}N & 1225 &  & 4965 &  & 3909 &  & 386 &  & 935 &  & 1672 & \\
+\hspace{1em}Groups & 23 &  & 113 &  & 71 &  & 21 &  & 108 &  & 70 & \\
+\hspace{1em}ICC & 0.722 &  & 0.8168 &  & 0.7112 &  &  &  &  &  & 0.6997 & \\
+\hspace{1em}$R^2_{marginal}$ / $R^2_{conditional}$ & 0.017 / 0.727 &  & 0.005 / 0.818 &  & 0.036 / 0.722 &  & 0.249 / NA &  & 0.093 / NA &  & 0.035 / 0.710 & \\
+\bottomrule
+\multicolumn{13}{l}{\rule{0pt}{1em}\textit{Note: }}\\
+\multicolumn{13}{l}{\rule{0pt}{1em}PID = Participant ID number (grouping variable)}\\
+\multicolumn{13}{l}{\rule{0pt}{1em}\$\textbackslash{}sigma\textasciicircum{}2\$: residual variance, \$\textbackslash{}tau\_\{00\}\$: random intercept variance, \$\textbackslash{}tau\_\{11\}\$: random slope variance(s), \$\textbackslash{}rho\_\{01\}\$: random slope-intercept correlation(s) , \$\textbackslash{}rho\_\{00\}\$: correlation(s) between random slopes}\\
+\multicolumn{13}{l}{\rule{0pt}{1em}**** \$p\$ < .0001, *** \$p\$ < .001, ** \$p\$ < .01, * \$p\$ < .05}\\
+\end{tabular}
+\end{minipage}
+\end{table}

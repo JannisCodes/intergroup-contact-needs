@@ -1121,7 +1121,7 @@ ggsave(
 )
 ```
 
-To build further confidence in our results, we assessed two additional models that might offer alternative explanations. First, to ensure that the effect of core need fulfillment is specific to an actual interaction, we compared it core need fulfillement in situations without an interaction. For this, we analzed the generalized situational core need fulfillment (either during an interaction or about the daytime in general) and tested whether the effect differed during daily diary measurements with and without outgroup contacts. We found no main effect of core need fulfillment (random slopes model; `r MlCoeffLatex(lmeMdl = mdlWorker$lmeSlopesAttCoreInt, lmerCI = mdlWorker$lmerSlopesAttCoreIntCI, varName = "keyMotiveFulfilled_cwc")`) but a significant interaction effect of core need fulfillment and outgroup contact (`r MlCoeffLatex(lmeMdl = mdlWorker$lmeSlopesAttCoreInt, lmerCI = mdlWorker$lmerSlopesAttCoreIntCI, varName = "keyMotiveFulfilled_cwc:OutgroupInteractionYes")`). Together with a significant main effect of having an outgroup contact, this indicates that it is not key need fulfillment in general --- but only key need fulfillment during an outgroup contact that predicts more positive outgroup attitudes. 
+To build further confidence in our results, we assessed two additional models that might offer alternative explanations. First, to ensure that the effect of core need fulfillment is specific to an actual interaction, we compared it core need fulfillement in situations without an interaction. For this, we analyzed the generalized situational core need fulfillment (either during an interaction or about the daytime in general) and tested whether the effect differed during daily diary measurements with and without outgroup contacts. We found no main effect of core need fulfillment (random slopes model; `r MlCoeffLatex(lmeMdl = mdlWorker$lmeSlopesAttCoreInt, lmerCI = mdlWorker$lmerSlopesAttCoreIntCI, varName = "keyMotiveFulfilled_cwc")`) but a significant interaction effect of core need fulfillment and outgroup contact (`r MlCoeffLatex(lmeMdl = mdlWorker$lmeSlopesAttCoreInt, lmerCI = mdlWorker$lmerSlopesAttCoreIntCI, varName = "keyMotiveFulfilled_cwc:OutgroupInteraction")`). Together with a significant main effect of having an outgroup contact, this indicates that it is not key need fulfillment in general --- but only key need fulfillment during an outgroup contact that predicts more positive outgroup attitudes. 
 
 ```{r workerOutModelInterceptAttCoreSdt, include=FALSE}
 # Create and save Model
@@ -2455,7 +2455,7 @@ ggsave(
 )
 ```
 
-We again checked for alternative models. First, when considering generalized situational core need fulfillment together with whether an intergroup contact took place, we find that there is only a minuscule main effect of core need fulfillment (random slopes model; `r MlCoeffLatex(lmeMdl = mdlStudent$lmeSlopesAttCoreInt, lmerCI = mdlStudent$lmerSlopesAttCoreIntCI, varName = "KeyNeedFullfillment_cwc")`) but a stronger interaction effect of core need fulfillment and outgroup contact (`r MlCoeffLatex(lmeMdl = mdlStudent$lmeSlopesAttCoreInt, lmerCI = mdlStudent$lmerSlopesAttCoreIntCI, varName = "KeyNeedFullfillment_cwc:OutgroupInteractionYes")`). Together with a significant main effect of having an outgroup contact (`r MlCoeffLatex(lmeMdl = mdlStudent$lmeSlopesAttCoreInt, lmerCI = mdlStudent$lmerSlopesAttCoreIntCI, varName = "OutgroupInteractionYes")`), this indicates that it is not key need fulfillment in general --- but key need fulfillment during an outgroup contact that predicts more positive outgroup attitudes. This finding is consistent with the results of the previous study, albeit with slightly weaker effect (likely because of the large number of measurements that did not include an outgroup interaction).
+We again checked for alternative models. First, when considering generalized situational core need fulfillment together with whether an intergroup contact took place, we find that there is only a minuscule main effect of core need fulfillment (random slopes model; `r MlCoeffLatex(lmeMdl = mdlStudent$lmeSlopesAttCoreInt, lmerCI = mdlStudent$lmerSlopesAttCoreIntCI, varName = "KeyNeedFullfillment_cwc")`) but a stronger interaction effect of core need fulfillment and outgroup contact (`r MlCoeffLatex(lmeMdl = mdlStudent$lmeSlopesAttCoreInt, lmerCI = mdlStudent$lmerSlopesAttCoreIntCI, varName = "KeyNeedFullfillment_cwc:OutgroupInteraction")`). Together with a significant main effect of having an outgroup contact (`r MlCoeffLatex(lmeMdl = mdlStudent$lmeSlopesAttCoreInt, lmerCI = mdlStudent$lmerSlopesAttCoreIntCI, varName = "OutgroupInteraction")`), this indicates that it is not key need fulfillment in general --- but key need fulfillment during an outgroup contact that predicts more positive outgroup attitudes. This finding is consistent with the results of the previous study, albeit with slightly weaker effect (likely because of the large number of measurements that did not include an outgroup interaction).
 
 ```{r studentOutModelInterceptAttCoreSdt, include=FALSE}
 # Create and save Model
@@ -4776,7 +4776,7 @@ mdlTblGeneralLm <- data.frame(
     names(mdlPrepLmGeneral[[1]]$fit)
   )
 )
-for (i in 1:length(mdlPrepGeneral)){
+for (i in 1:length(mdlPrepLmGeneral)){
   mdlTblGeneralLm <- join(mdlTblGeneralLm, mdlPrepLmGeneral[[i]]$mdlTbl, by = "coef")
 }
 
@@ -4979,7 +4979,7 @@ mdlTblGeneralShort <- mdlTblGeneral %>%
     digits = 3
   )  %>%
   kable_classic() %>%
-  add_header_above(., mdlRobustTblHeaderStudy) %>%
+  add_header_above(., mdlTblGeneralHeaderStudy) %>%
   add_header_above(
     .,
     c(
