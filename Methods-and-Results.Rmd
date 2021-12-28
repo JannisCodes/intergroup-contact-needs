@@ -5704,9 +5704,47 @@ mdlTblRobustShort <- mdlTblRobustShort %>%
 mdlTblRobustShort
 ```
 
+
+```{r CombinedDescriptivesTbl, include=FALSE}
+
+workerMlCor
+workerOutMlCor
+ifelse(identical(names(workerMlCor), names(workerOutMlCor)), NA, warning("column names not identical"))
+workerDescrComb <- rbind(workerMlCor %>% rownames_to_column(., "Variable"), 
+                         workerOutMlCor %>% rownames_to_column(., "Variable"))
+
+studentMlCor
+studentOutMlCor
+ifelse(identical(names(studentMlCor), names(studentOutMlCor)), NA, warning("column names not identical"))
+studentDescrComb <- rbind(studentMlCor %>% rownames_to_column(., "Variable"), 
+                          studentOutMlCor %>% rownames_to_column(., "Variable"))
+
+medicalMlCor
+medicalOutMlCor
+ifelse(identical(names(medicalMlCor), names(medicalOutMlCor)), NA, warning("column names not identical"))
+medicalDescrComb <- rbind(medicalMlCor %>% rownames_to_column(., "Variable"), 
+                          medicalOutMlCor %>% rownames_to_column(., "Variable"))
+
+ifelse(identical(names(workerDescrComb), names(studentDescrComb)), NA, warning("column names not identical"))
+DescrComb1 <- rbind(workerDescrComb, studentDescrComb)
+
+
+
+ifelse(identical(names(DescrComb1), names(medicalDescrComb)), NA, warning("column names not identical"))
+
+rbind(DescrComb1 %>% mutate(Allport = ""), medicalDescrComb %>% select(names(studentDescrComb), "Allport"))
+
+
+```
+
+
+
 \input{Tables/mdlContactGeneral}
 \input{Tables/mdlTheory}
 \input{Tables/mdlRobustness}
+
+
+
 
 <!-- \begin{figure}[h] -->
 
