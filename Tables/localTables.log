@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2021.12.16)  16 DEC 2021 07:16
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2021.12.16)  3 JAN 2022 17:28
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -837,74 +837,74 @@ Package csquotes Info: Redefining alias 'default' -> 'american'.
  (./localTables.aux)
 \openout1 = `localTables.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 49.
-LaTeX Font Info:    ... okay on input line 49.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 49.
-LaTeX Font Info:    ... okay on input line 49.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 49.
-LaTeX Font Info:    ... okay on input line 49.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 49.
-LaTeX Font Info:    ... okay on input line 49.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 49.
-LaTeX Font Info:    ... okay on input line 49.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 49.
-LaTeX Font Info:    ... okay on input line 49.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 49.
-LaTeX Font Info:    ... okay on input line 49.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 49.
-LaTeX Font Info:    ... okay on input line 49.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 49.
-LaTeX Font Info:    ... okay on input line 49.
-LaTeX Font Info:    Checking defaults for FML/futm/m/it on input line 49.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 39.
+LaTeX Font Info:    ... okay on input line 39.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 39.
+LaTeX Font Info:    ... okay on input line 39.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 39.
+LaTeX Font Info:    ... okay on input line 39.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 39.
+LaTeX Font Info:    ... okay on input line 39.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 39.
+LaTeX Font Info:    ... okay on input line 39.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 39.
+LaTeX Font Info:    ... okay on input line 39.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 39.
+LaTeX Font Info:    ... okay on input line 39.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 39.
+LaTeX Font Info:    ... okay on input line 39.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 39.
+LaTeX Font Info:    ... okay on input line 39.
+LaTeX Font Info:    Checking defaults for FML/futm/m/it on input line 39.
 LaTeX Font Info:    Trying to load font information for FML+futm on input line 
-49.
+39.
  (/usr/local/texlive/2021/texmf-dist/tex/latex/fourier/fmlfutm.fd
 File: fmlfutm.fd 2004/10/30 Fontinst v1.926 font definitions for FML/futm.
 )
-LaTeX Font Info:    ... okay on input line 49.
-LaTeX Font Info:    Checking defaults for FMS/futm/m/n on input line 49.
+LaTeX Font Info:    ... okay on input line 39.
+LaTeX Font Info:    Checking defaults for FMS/futm/m/n on input line 39.
 LaTeX Font Info:    Trying to load font information for FMS+futm on input line 
-49.
+39.
 
 (/usr/local/texlive/2021/texmf-dist/tex/latex/fourier/fmsfutm.fd
 File: fmsfutm.fd 2004/10/30 Fontinst v1.926 font definitions for FMS/futm.
 )
-LaTeX Font Info:    ... okay on input line 49.
-LaTeX Font Info:    Checking defaults for FMX/futm/m/n on input line 49.
+LaTeX Font Info:    ... okay on input line 39.
+LaTeX Font Info:    Checking defaults for FMX/futm/m/n on input line 39.
 LaTeX Font Info:    Trying to load font information for FMX+futm on input line 
-49.
+39.
 
 (/usr/local/texlive/2021/texmf-dist/tex/latex/fourier/fmxfutm.fd
 File: fmxfutm.fd futm-extension
 )
-LaTeX Font Info:    ... okay on input line 49.
+LaTeX Font Info:    ... okay on input line 39.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
 *geometry* verbose mode - [ preamble ] result:
 * driver: pdftex
-* paper: a1paper
+* paper: a3paper
 * layout: <same size as paper>
 * layoutoffset:(h,v)=(0.0pt,0.0pt)
-* modes: includehead includefoot 
-* h-part:(L,W,R)=(-569.05511pt, 2230.69606pt, 28.45274pt)
-* v-part:(T,H,B)=(0.0pt, 2335.97127pt, 56.9055pt)
-* \paperwidth=1690.09369pt
-* \paperheight=2392.87677pt
-* \textwidth=2230.69606pt
-* \textheight=2305.97127pt
-* \oddsidemargin=-641.3251pt
-* \evensidemargin=-641.3251pt
-* \topmargin=-72.26999pt
-* \headheight=0.0pt
-* \headsep=0.0pt
+* modes: landscape 
+* h-part:(L,W,R)=(179.25418pt, 836.50737pt, 179.2542pt)
+* v-part:(T,H,B)=(101.40665pt, 591.5302pt, 152.11pt)
+* \paperwidth=1195.01575pt
+* \paperheight=845.04684pt
+* \textwidth=836.50737pt
+* \textheight=591.5302pt
+* \oddsidemargin=106.98419pt
+* \evensidemargin=106.98419pt
+* \topmargin=-7.86334pt
+* \headheight=12.0pt
+* \headsep=25.0pt
 * \topskip=10.0pt
 * \footskip=30.0pt
 * \marginparwidth=65.0pt
 * \marginparsep=11.0pt
 * \columnsep=10.0pt
 * \skip\footins=9.0pt plus 4.0pt minus 2.0pt
-* \hoffset=1138.11023pt
+* \hoffset=0.0pt
 * \voffset=0.0pt
 * \mag=1000
 * \@twocolumnfalse
@@ -935,7 +935,7 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
-Package hyperref Info: Link coloring OFF on input line 49.
+Package hyperref Info: Link coloring OFF on input line 39.
 
 (/usr/local/texlive/2021/texmf-dist/tex/latex/hyperref/nameref.sty
 Package: nameref 2021-04-02 v2.47 Cross-referencing by name of section
@@ -949,9 +949,9 @@ Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
 )
 \c@section@level=\count354
 )
-LaTeX Info: Redefining \ref on input line 49.
-LaTeX Info: Redefining \pageref on input line 49.
-LaTeX Info: Redefining \nameref on input line 49.
+LaTeX Info: Redefining \ref on input line 39.
+LaTeX Info: Redefining \pageref on input line 39.
+LaTeX Info: Redefining \nameref on input line 39.
  (./localTables.out) (./localTables.out)
 \@outlinefile=\write3
 \openout3 = `localTables.out'.
@@ -959,51 +959,49 @@ LaTeX Info: Redefining \nameref on input line 49.
 Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: float package is loaded.
 Package caption Info: End \AtBeginDocument code.
- (./mdlContactGeneral.tex
+ (./TestTable.tex
 LaTeX Font Info:    Trying to load font information for FML+futmi on input line
- 44.
+ 3.
 
 (/usr/local/texlive/2021/texmf-dist/tex/latex/fourier/fmlfutmi.fd
 File: fmlfutmi.fd 2004/10/30 Fontinst v1.926 font definitions for FML/futmi.
 )
 LaTeX Font Info:    Font shape `FMX/futm/m/n' will be
-(Font)              scaled to size 9.19998pt on input line 44.
+(Font)              scaled to size 9.19998pt on input line 3.
 LaTeX Font Info:    Font shape `FMX/futm/m/n' will be
-(Font)              scaled to size 6.99199pt on input line 44.
+(Font)              scaled to size 6.99199pt on input line 3.
 LaTeX Font Info:    Font shape `FMX/futm/m/n' will be
-(Font)              scaled to size 5.51999pt on input line 44.
+(Font)              scaled to size 5.51999pt on input line 3.
 LaTeX Font Info:    Font shape `U/futm/m/n' will be
-(Font)              scaled to size 9.19998pt on input line 44.
+(Font)              scaled to size 9.19998pt on input line 3.
 LaTeX Font Info:    Font shape `U/futm/m/n' will be
-(Font)              scaled to size 6.99199pt on input line 44.
+(Font)              scaled to size 6.99199pt on input line 3.
 LaTeX Font Info:    Font shape `U/futm/m/n' will be
-(Font)              scaled to size 5.51999pt on input line 44.
- [1{/usr/local/texlive/2021/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]) (./
-mdlTheory.tex [2]) (./mdlRobustness.tex [3])
+(Font)              scaled to size 5.51999pt on input line 3.
+)
 \tf@thm=\write4
 \openout4 = `localTables.thm'.
 
- (./localTables.aux)
+ [1{/usr/local/texlive/2021/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
+(./localTables.aux)
 Package rerunfilecheck Info: File `localTables.out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
  ) 
 Here is how much of TeX's memory you used:
- 21822 strings out of 478353
- 375962 string characters out of 5848085
- 827952 words of memory out of 5000000
- 39586 multiletter control sequences out of 15000+600000
- 436880 words of font info for 62 fonts, out of 8000000 for 9000
+ 21789 strings out of 478353
+ 375420 string characters out of 5848085
+ 801469 words of memory out of 5000000
+ 39573 multiletter control sequences out of 15000+600000
+ 430418 words of font info for 52 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 68i,18n,77p,858b,470s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 68i,9n,77p,376b,388s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2021/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/t
-exlive/2021/texmf-dist/fonts/type1/public/fourier/fourier-mlit.pfb></usr/local/
-texlive/2021/texmf-dist/fonts/type1/adobe/utopia/putb8a.pfb></usr/local/texlive
-/2021/texmf-dist/fonts/type1/adobe/utopia/putr8a.pfb></usr/local/texlive/2021/t
-exmf-dist/fonts/type1/adobe/utopia/putri8a.pfb>
-Output written on localTables.pdf (3 pages, 60461 bytes).
+exlive/2021/texmf-dist/fonts/type1/adobe/utopia/putb8a.pfb></usr/local/texlive/
+2021/texmf-dist/fonts/type1/adobe/utopia/putr8a.pfb>
+Output written on localTables.pdf (1 page, 32143 bytes).
 PDF statistics:
- 44 PDF objects out of 1000 (max. 8388607)
- 30 compressed objects within 1 object stream
- 6 named destinations out of 1000 (max. 500000)
+ 24 PDF objects out of 1000 (max. 8388607)
+ 16 compressed objects within 1 object stream
+ 2 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 

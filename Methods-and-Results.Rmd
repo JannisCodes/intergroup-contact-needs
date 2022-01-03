@@ -5706,34 +5706,125 @@ mdlTblRobustShort
 
 
 ```{r CombinedDescriptivesTbl, include=FALSE}
+# Full Sample Descriptives Table
+rbind(
+  workerMlCor %>%
+    rownames_to_column(., "Variable") %>%
+    mutate(Allport = ""),
+  studentMlCor %>%
+    select(names(workerMlCor)) %>%
+    rownames_to_column(., "Variable") %>%
+    mutate(Allport = ""),
+  medicalMlCor %>%
+    select(names(workerMlCor), "Allport") %>%
+    rownames_to_column(., "Variable")
+) %>%
+  kbl(.,
+      format = "latex",
+      booktabs = TRUE,
+      align = c("l", rep("c", ncol(.) - 1))) %>%
+  pack_rows("Study 1", 1, nrow(workerMlCor)) %>%
+  pack_rows("Study 2", nrow(workerMlCor) + 1,
+            sum(nrow(workerMlCor), nrow(studentMlCor))) %>%
+  pack_rows("Study 3", sum(nrow(workerMlCor), nrow(studentMlCor)) + 1,  
+            sum(nrow(workerMlCor), nrow(studentMlCor), nrow(medicalMlCor))) %>%
+  gsub("\\hspace{1em}Grand Mean", "\\addlinespace\n\\hspace{1em}Grand Mean", ., fixed = TRUE) # fix table position
 
-workerMlCor
-workerOutMlCor
-ifelse(identical(names(workerMlCor), names(workerOutMlCor)), NA, warning("column names not identical"))
-workerDescrComb <- rbind(workerMlCor %>% rownames_to_column(., "Variable"), 
-                         workerOutMlCor %>% rownames_to_column(., "Variable"))
 
-studentMlCor
-studentOutMlCor
-ifelse(identical(names(studentMlCor), names(studentOutMlCor)), NA, warning("column names not identical"))
-studentDescrComb <- rbind(studentMlCor %>% rownames_to_column(., "Variable"), 
-                          studentOutMlCor %>% rownames_to_column(., "Variable"))
+# Full Sample Descriptives Table --- wider version
+rbind(
+  workerMlCor %>%
+    t %>%
+    as.data.frame %>%
+    rownames_to_column(., "Variable") %>%
+    add_column(Allport = "",
+               .before = "Grand Mean"),
+  studentMlCor %>%
+    t %>%
+    as.data.frame %>%
+    rownames_to_column(., "Variable") %>%
+    add_column(Allport = "",
+               .before = "Grand Mean"),
+  medicalMlCor %>%
+    select(names(workerMlCor), "Allport") %>%
+    t %>%
+    as.data.frame %>%
+    rownames_to_column(., "Variable")
+) %>%
+  kbl(.,
+      format = "latex",
+      booktabs = TRUE,
+      align = c("l", rep("c", ncol(.) - 1)))  %>%
+  kable_classic() %>%
+  add_header_above(
+    .,
+    c(
+      "",
+      "Correlations" = ncol(medicalMlCor),
+      "Descriptives" = nrow(medicalMlCor) - ncol(medicalMlCor)
+    )
+  ) %>%
+  pack_rows("Study 1", 1, ncol(workerMlCor)) %>%
+  pack_rows("Study 2", ncol(workerMlCor) + 1,
+            sum(ncol(workerMlCor), ncol(studentMlCor))) %>%
+  pack_rows("Study 3", sum(ncol(workerMlCor), ncol(studentMlCor)) + 1,  
+            sum(ncol(workerMlCor), ncol(studentMlCor), ncol(medicalMlCor)))
 
-medicalMlCor
-medicalOutMlCor
-ifelse(identical(names(medicalMlCor), names(medicalOutMlCor)), NA, warning("column names not identical"))
-medicalDescrComb <- rbind(medicalMlCor %>% rownames_to_column(., "Variable"), 
-                          medicalOutMlCor %>% rownames_to_column(., "Variable"))
 
-ifelse(identical(names(workerDescrComb), names(studentDescrComb)), NA, warning("column names not identical"))
-DescrComb1 <- rbind(workerDescrComb, studentDescrComb)
+# Outgroup Interaction Sample Descriptives Table
+rbind(
+  workerOutMlCor %>%
+    rownames_to_column(., "Variable") %>%
+    mutate(Allport = ""),
+  studentOutMlCor %>%
+    select(names(workerOutMlCor)) %>%
+    rownames_to_column(., "Variable") %>%
+    mutate(Allport = ""),
+  medicalOutMlCor %>%
+    select(names(workerOutMlCor), "Allport") %>%
+    rownames_to_column(., "Variable")
+) %>%
+  kbl(.,
+      format = "latex",
+      booktabs = TRUE,
+      align = c("l", rep("c", ncol(.) - 1))) %>%
+  pack_rows("Study 1", 1, nrow(workerOutMlCor)) %>%
+  pack_rows("Study 2", nrow(workerOutMlCor) + 1,
+            sum(nrow(workerOutMlCor), nrow(studentOutMlCor))) %>%
+  pack_rows("Study 3", sum(nrow(workerOutMlCor), nrow(studentOutMlCor)) + 1,  
+            sum(nrow(workerOutMlCor), nrow(studentOutMlCor), nrow(medicalOutMlCor))) %>%
+  gsub("\\hspace{1em}Grand Mean", "\\addlinespace\n\\hspace{1em}Grand Mean", ., fixed = TRUE) # fix table position
 
 
-
-ifelse(identical(names(DescrComb1), names(medicalDescrComb)), NA, warning("column names not identical"))
-
-rbind(DescrComb1 %>% mutate(Allport = ""), medicalDescrComb %>% select(names(studentDescrComb), "Allport"))
-
+# Outgroup Interaction Sample Descriptives Table --- wider version
+rbind(
+  workerOutMlCor %>%
+    t %>%
+    as.data.frame %>%
+    rownames_to_column(., "Variable") %>%
+    add_column(Allport = "",
+               .before = "Grand Mean"),
+  studentOutMlCor %>%
+    t %>%
+    as.data.frame %>%
+    rownames_to_column(., "Variable") %>%
+    add_column(Allport = "",
+               .before = "Grand Mean"),
+  medicalOutMlCor %>%
+    select(names(workerOutMlCor), "Allport") %>%
+    t %>%
+    as.data.frame %>%
+    rownames_to_column(., "Variable")
+) %>%
+  kbl(.,
+      format = "latex",
+      booktabs = TRUE,
+      align = c("l", rep("c", ncol(.) - 1))) %>%
+  pack_rows("Study 1", 1, ncol(workerOutMlCor)) %>%
+  pack_rows("Study 2", ncol(workerOutMlCor) + 1,
+            sum(ncol(workerOutMlCor), ncol(studentOutMlCor))) %>%
+  pack_rows("Study 3", sum(ncol(workerOutMlCor), ncol(studentOutMlCor)) + 1,  
+            sum(ncol(workerOutMlCor), ncol(studentOutMlCor), ncol(medicalOutMlCor)))
 
 ```
 
