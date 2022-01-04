@@ -5706,7 +5706,9 @@ mdlTblRobustShort
 
 
 ```{r CombinedDescriptivesTbl, include=FALSE}
-# Full Sample Descriptives Table
+
+# ALTERNATIVE:
+# Full Sample Descriptives Table [longer format (Descriptives below correlations)]
 rbind(
   workerMlCor %>%
     rownames_to_column(., "Variable") %>%
@@ -5728,10 +5730,11 @@ rbind(
             sum(nrow(workerMlCor), nrow(studentMlCor))) %>%
   pack_rows("Study 3", sum(nrow(workerMlCor), nrow(studentMlCor)) + 1,  
             sum(nrow(workerMlCor), nrow(studentMlCor), nrow(medicalMlCor))) %>%
-  gsub("\\hspace{1em}Grand Mean", "\\addlinespace\n\\hspace{1em}Grand Mean", ., fixed = TRUE) # fix table position
+  gsub("\\hspace{1em}Grand Mean", "\\addlinespace\n\\hspace{1em}Grand Mean", ., fixed = TRUE) %>% # fix table position
+  save_kable("Tables/descrFullLong.tex")
 
 
-# Full Sample Descriptives Table --- wider version
+# Full Sample Descriptives Table [wider format (descriptives next to correlation)]
 rbind(
   workerMlCor %>%
     t %>%
@@ -5768,7 +5771,8 @@ rbind(
   pack_rows("Study 2", ncol(workerMlCor) + 1,
             sum(ncol(workerMlCor), ncol(studentMlCor))) %>%
   pack_rows("Study 3", sum(ncol(workerMlCor), ncol(studentMlCor)) + 1,  
-            sum(ncol(workerMlCor), ncol(studentMlCor), ncol(medicalMlCor)))
+            sum(ncol(workerMlCor), ncol(studentMlCor), ncol(medicalMlCor))) %>% # fix table position
+  save_kable("Tables/descrFullWide.tex")
 
 
 # Outgroup Interaction Sample Descriptives Table
@@ -5793,7 +5797,8 @@ rbind(
             sum(nrow(workerOutMlCor), nrow(studentOutMlCor))) %>%
   pack_rows("Study 3", sum(nrow(workerOutMlCor), nrow(studentOutMlCor)) + 1,  
             sum(nrow(workerOutMlCor), nrow(studentOutMlCor), nrow(medicalOutMlCor))) %>%
-  gsub("\\hspace{1em}Grand Mean", "\\addlinespace\n\\hspace{1em}Grand Mean", ., fixed = TRUE) # fix table position
+  gsub("\\hspace{1em}Grand Mean", "\\addlinespace\n\\hspace{1em}Grand Mean", ., fixed = TRUE) %>% # fix table position
+  save_kable("Tables/descrOutLong.tex")
 
 
 # Outgroup Interaction Sample Descriptives Table --- wider version
@@ -5824,11 +5829,14 @@ rbind(
   pack_rows("Study 2", ncol(workerOutMlCor) + 1,
             sum(ncol(workerOutMlCor), ncol(studentOutMlCor))) %>%
   pack_rows("Study 3", sum(ncol(workerOutMlCor), ncol(studentOutMlCor)) + 1,  
-            sum(ncol(workerOutMlCor), ncol(studentOutMlCor), ncol(medicalOutMlCor)))
+            sum(ncol(workerOutMlCor), ncol(studentOutMlCor), ncol(medicalOutMlCor))) %>% 
+  save_kable("Tables/descrOutWide.tex")
 
 ```
 
 
+\input{Tables/descrFullWide}
+\input{Tables/descrOutWide}
 
 \input{Tables/mdlContactGeneral}
 \input{Tables/mdlTheory}
