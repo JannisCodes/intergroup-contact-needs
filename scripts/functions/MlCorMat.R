@@ -161,7 +161,7 @@ MlCorMat <-
         data %>%
         select(id, selection[i]) %>%
         na.omit
-      descriptives$Within.person.SD[i] <-
+      descriptives$Within.SD[i] <-
         sqrt(sum(
           misty::cluster.scores(
             x = dataRed %>% select(selection[i]) ,
