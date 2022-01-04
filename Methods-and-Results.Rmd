@@ -5705,9 +5705,7 @@ mdlTblRobustShort
 ```
 
 
-```{r CombinedDescriptivesTbl, include=FALSE}
-
-# ALTERNATIVE:
+```{r descrFullLong, include=FALSE}
 # Full Sample Descriptives Table [longer format (Descriptives below correlations)]
 rbind(
   workerMlCor %>%
@@ -5723,6 +5721,7 @@ rbind(
 ) %>%
   kbl(.,
       format = "latex",
+      caption = "Descr Full Long",
       booktabs = TRUE,
       align = c("l", rep("c", ncol(.) - 1))) %>%
   pack_rows("Study 1", 1, nrow(workerMlCor)) %>%
@@ -5731,9 +5730,20 @@ rbind(
   pack_rows("Study 3", sum(nrow(workerMlCor), nrow(studentMlCor)) + 1,  
             sum(nrow(workerMlCor), nrow(studentMlCor), nrow(medicalMlCor))) %>%
   gsub("\\hspace{1em}Grand Mean", "\\addlinespace\n\\hspace{1em}Grand Mean", ., fixed = TRUE) %>% # fix table position
+  footnote(
+    general = c(
+      "Upper triangle: Between-person correlations;",
+      "Lower triangle: Within-person correlations;",
+      "*** p < .001, ** p < .01,  * p < .05"
+    )
+  ) %>%
+  kable_styling(latex_options = "scale_down") %>%
+  gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
+  gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
   save_kable("Tables/descrFullLong.tex")
+```
 
-
+```{r descrFullWide, include=FALSE}
 # Full Sample Descriptives Table [wider format (descriptives next to correlation)]
 rbind(
   workerMlCor %>%
@@ -5756,6 +5766,7 @@ rbind(
 ) %>%
   kbl(.,
       format = "latex",
+      caption = "Descr Full Wide",
       booktabs = TRUE,
       align = c("l", rep("c", ncol(.) - 1)))  %>%
   kable_classic() %>%
@@ -5772,9 +5783,20 @@ rbind(
             sum(ncol(workerMlCor), ncol(studentMlCor))) %>%
   pack_rows("Study 3", sum(ncol(workerMlCor), ncol(studentMlCor)) + 1,  
             sum(ncol(workerMlCor), ncol(studentMlCor), ncol(medicalMlCor))) %>% # fix table position
+  footnote(
+    general = c(
+      "Upper triangle: Between-person correlations;",
+      "Lower triangle: Within-person correlations;",
+      "*** p < .001, ** p < .01,  * p < .05"
+    )
+  ) %>%
+  kable_styling(latex_options = "scale_down") %>%
+  gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
+  gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
   save_kable("Tables/descrFullWide.tex")
+```
 
-
+```{r descrOutLong, include=FALSE}
 # Outgroup Interaction Sample Descriptives Table
 rbind(
   workerOutMlCor %>%
@@ -5790,6 +5812,7 @@ rbind(
 ) %>%
   kbl(.,
       format = "latex",
+      caption = "Descr Out Long",
       booktabs = TRUE,
       align = c("l", rep("c", ncol(.) - 1))) %>%
   pack_rows("Study 1", 1, nrow(workerOutMlCor)) %>%
@@ -5797,10 +5820,22 @@ rbind(
             sum(nrow(workerOutMlCor), nrow(studentOutMlCor))) %>%
   pack_rows("Study 3", sum(nrow(workerOutMlCor), nrow(studentOutMlCor)) + 1,  
             sum(nrow(workerOutMlCor), nrow(studentOutMlCor), nrow(medicalOutMlCor))) %>%
+  footnote(
+    general = c(
+      "Upper triangle: Between-person correlations;",
+      "Lower triangle: Within-person correlations;",
+      "*** p < .001, ** p < .01,  * p < .05"
+    )
+  ) %>%
+  kable_styling(latex_options = "scale_down") %>%
+  gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
+  gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
   gsub("\\hspace{1em}Grand Mean", "\\addlinespace\n\\hspace{1em}Grand Mean", ., fixed = TRUE) %>% # fix table position
   save_kable("Tables/descrOutLong.tex")
+```
 
 
+```{r descrOutWide, include=FALSE}
 # Outgroup Interaction Sample Descriptives Table --- wider version
 rbind(
   workerOutMlCor %>%
@@ -5823,6 +5858,7 @@ rbind(
 ) %>%
   kbl(.,
       format = "latex",
+      caption = "Descr Out Wide",
       booktabs = TRUE,
       align = c("l", rep("c", ncol(.) - 1))) %>%
   pack_rows("Study 1", 1, ncol(workerOutMlCor)) %>%
@@ -5830,6 +5866,16 @@ rbind(
             sum(ncol(workerOutMlCor), ncol(studentOutMlCor))) %>%
   pack_rows("Study 3", sum(ncol(workerOutMlCor), ncol(studentOutMlCor)) + 1,  
             sum(ncol(workerOutMlCor), ncol(studentOutMlCor), ncol(medicalOutMlCor))) %>% 
+  footnote(
+    general = c(
+      "Upper triangle: Between-person correlations;",
+      "Lower triangle: Within-person correlations;",
+      "*** p < .001, ** p < .01,  * p < .05"
+    )
+  ) %>%
+  kable_styling(latex_options = "scale_down") %>%
+  gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
+  gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
   save_kable("Tables/descrOutWide.tex")
 
 ```
