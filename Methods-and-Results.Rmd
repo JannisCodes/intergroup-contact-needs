@@ -285,9 +285,6 @@ We, additionally, included a common measure of three self-determination theory n
 
 \paragraph{Outgroup Attitudes}At the end of every daily diary measurement we asked all participants about their current attitudes towards the Dutch – our main dependent variable. To assess the momentary outgroup evaluation we used the common feeling thermometer: “How favorable do you feel towards the Dutch?” \citep[][]{Lavrakas2008}. Participants then rated their attitude on a continuous slider scale from “very cold – 0” through “no feeling – 50” to “very warm – 100”. Both the question phrasing as well as the tick labels were consistent with large-scale panel surveys \citep[e.g.,][]{DeBell2010}.
 
-\input{Tables/workerVarDescr}
-\input{Tables/workerOutVarDescr}
-
 \subsection{Results}
 
 ```{r WorkerFreqAttCor, include=FALSE}
@@ -1515,9 +1512,6 @@ The measurement of the self determination needs was identical to study 1.
 \paragraph{Perceived Interaction Quality}The ratings of the perceived interaction quality was identical to study one.
 
 \paragraph{Outgroup Attitudes}As in Study 1, attitudes towards the Dutch majority outgroup were again measured using the feeling thermometer. All survey details are also available in Online Supplemental Materials A and B. 
-
-\input{Tables/studentVarDescr}
-\input{Tables/studentOutVarDescr}
 
 \subsection{Results}
 
@@ -2814,9 +2808,6 @@ medicalOutMlCor %>%
 \paragraph{Perceived Interaction Quality}The ratings of the perceived interaction quality was identical to study one.
 
 \paragraph{Outgroup Attitudes}Attitudes towards the Dutch majority outgroup was again measured using the feeling thermometer, as in studies one and two. All survey details are also available in Online Supplemental Materials A and B. 
-
-\input{Tables/medicalVarDescr}
-\input{Tables/medicalOutVarDescr}
 
 \subsection{Results}
 
