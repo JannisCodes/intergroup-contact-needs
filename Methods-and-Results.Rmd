@@ -5861,6 +5861,15 @@ rbind(
       caption = "Descr Out Wide",
       booktabs = TRUE,
       align = c("l", rep("c", ncol(.) - 1))) %>%
+  kable_classic() %>%
+  add_header_above(
+    .,
+    c(
+      "",
+      "Correlations" = ncol(medicalMlCor),
+      "Descriptives" = nrow(medicalMlCor) - ncol(medicalMlCor)
+    )
+  ) %>%
   pack_rows("Study 1", 1, ncol(workerOutMlCor)) %>%
   pack_rows("Study 2", ncol(workerOutMlCor) + 1,
             sum(ncol(workerOutMlCor), ncol(studentOutMlCor))) %>%

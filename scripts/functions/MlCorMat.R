@@ -135,13 +135,13 @@ MlCorMat <-
         select(paste0(selection, "_trait")) %>%
         distinct %>%
         colMeans(., na.rm = TRUE),
-      `Between-person SD` =
+      `Between SD` =
         data %>%
         select(paste0(selection, "_trait")) %>%
         distinct %>%
         summarise_all(sd, na.rm = TRUE) %>%
         unlist,
-      `Within-person SD` = NA,
+      `Within SD` = NA,
       `ICC(1)` =
         misty::multilevel.icc(
           data %>% select(selection),
@@ -186,8 +186,8 @@ MlCorMat <-
       rbind(rMlComb, t(descriptives)) %>%
       as.data.frame
     rownames(out)[rownames(out) == "Grand.Mean"] <- "Grand Mean"
-    rownames(out)[rownames(out) == "Between.person.SD"] <- "Between-person SD"
-    rownames(out)[rownames(out) == "Within.person.SD"] <- "Within-person SD"
+    rownames(out)[rownames(out) == "Between.SD"] <- "Between SD"
+    rownames(out)[rownames(out) == "Within.SD"] <- "Within SD"
     rownames(out)[rownames(out) == "ICC.1."] <- "ICC(1)"
     rownames(out)[rownames(out) == "ICC.2."] <- "ICC(2)"
     
