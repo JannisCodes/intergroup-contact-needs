@@ -4726,7 +4726,7 @@ medicalSdtCompChiSq <- paste0("$\\chi^2$(", medicalSdtCompDf, ", \\textit{N} = "
 
 In a final step we again checked whether during the interaction the core situational need remains a meaningful predictor even when taking other fundamental psychological needs into account. We find that the core need adds significantly above a model with only the self determination theory needs (random slopes models; `r medicalSdtCompChiSq`). We find that the core need explains the most variance in outgroup attitudes after an outgroup contact (`r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreSdt, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreSdtCI, varName = "KeyNeedFulfillment_cwc")`). When compared to the model with only the SDT needs, the core need fulfillment flexibly takes on some of the explained variance of all of the three fundamental needs. However, similar to the previous study, in this large sample relatedness (`r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreSdt, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreSdtCI, varName = "Relatedness_cwc")`), competence (`r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreSdt, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreSdtCI, varName = "Competence_cwc")`) and autonomy (`r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreSdt, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreSdtCI, varName = "Autonomy_cwc")`) each also predicted positive outgroup attitudes independently. However, the regression coefficient is three times as large for the core need fulfillment (with all scaling being equal). For full results see Online Supplementary Information B.
 
-```{r intergroupGeneralTbl, include=FALSE}
+```{r intergroupGeneralTblLong, include=FALSE}
 # Table of intergroup contact in ESM data:
 # lm
 #    #Contact
@@ -4751,7 +4751,7 @@ mdlMedical$lmAttFreqQualX <-
 #                           mdlStudent$lmAttFreqQualX,
 #                           mdlMedical$lmAttFreqQualX)
 
-summ(mdlWorker$lmAttFreqQualX)
+# summ(mdlWorker$lmAttFreqQualX)
 
 mdlTblElementsGeneralLm <- list(mdlWorker$lmAttFreqQualX,
                                 mdlStudent$lmAttFreqQualX,
@@ -4834,6 +4834,64 @@ for (i in 1:length(mdlPrepGeneral)){
 }
 
 names(mdlTblGeneralLmer) <- make.unique(names(mdlTblGeneralLmer))
+names(mdlTblGeneralLmer) <- gsub("Beta", "ES", names(mdlTblGeneralLmer))
+names(mdlTblGeneralLm) <- make.unique(names(mdlTblGeneralLm))
+names(mdlTblGeneralLm) <- gsub("Eta2_partial", "ES", names(mdlTblGeneralLm))
+
+
+#mdlTblGeneralLong <- 
+  rbind(mdlTblGeneralLm %>%
+                             filter(
+                               coef %in% c(
+                                 "(Intercept)",
+                                 "SumContactNL",
+                                 "AvQuality",
+                                 "SumContactNL:AvQuality",
+                                 "R2_R2_adjusted"
+                               )
+                             ),
+                           mdlTblGeneralLmer %>%
+                             filter(
+                               coef %in% c(
+                                 "(Intercept)",
+                                 "OutgroupInteraction",
+                                 "NonOutgroupInteraction",
+                                 "R2Marg_R2Cond"
+                               )
+                             )) %>%
+    replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Intergroup General",
+    #format = "latex",
+    linesep = "",
+    booktabs = TRUE,
+    col.names = c("", rep(c("$B$", "Effect Size"), (ncol(.)-1)/2)),
+    align = c("l", rep("c", ncol(.) - 1)),
+    escape = FALSE,
+    digits = 3
+  )  %>%
+  kable_classic() %>%
+  add_header_above(
+    .,
+    c(
+      "",
+      "Study 1" = 2,
+      "Study 2" = 2,
+      "Study 3" = 2
+    )
+  ) %>%
+  pack_rows("Between Participant [aggregated linear regression] (ES = $\\eta_{partial}$)", 1, 5) %>%
+  pack_rows("Within Participants [multilevel linear regression] (ES = $Beta$)", 6, 9) %>%
+  kable_styling(latex_options = "scale_down") %>%
+  gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
+  gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
+  kableExtra::landscape() %>%
+  save_kable("Tables/mdlContactGeneralLong.tex")
+```
+
+
+```{r intergroupGeneralTblWide, include=FALSE}
 mdlTblGeneral <-
   merge(mdlTblGeneralLm,
         mdlTblGeneralLmer %>% 
@@ -5989,6 +6047,7 @@ rbind(
 \input{Tables/descrOutLong}
 
 \input{Tables/mdlContactGeneral}
+\input{Tables/mdlContactGeneralLong}
 <!-- \input{Tables/mdlTheory} -->
 \input{Tables/mdlTheorylong}
 \input{Tables/mdlRobustness}
