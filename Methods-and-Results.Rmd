@@ -5520,7 +5520,7 @@ mdlTblTheoreticalShort <- mdlTblTheoreticalShort %>%
 mdlTblTheoreticalShort
 ```
 
-```{r robustnessTbl, include=FALSE}
+```{r robustnessTblLong, include=FALSE}
 # Table of all robustness checks (w/ and w/out SDT only)
 
 # Full Sample
@@ -5702,6 +5702,77 @@ for (i in 1:length(mdlRobustTblElements)) {
   mdlRobustPrep[[i]] <- lmerTblPrep(mdlRobustTblElements[[i]][[1]], mdlRobustTblElements[[i]][[2]])
 }
 
+# manual assembly
+shortRobustPrep <- list()
+for(i in 1:length(mdlRobustPrep)){
+  study <- str_extract(mdlRobustPrep[[i]]$fit$data, "Worker|Student|Medical")
+  sample <- str_extract(mdlRobustPrep[[i]]$fit$data, "Full|Out")
+  #dv <- sub(" ~.*", "", mdlRobustPrep[[i]]$fit$formula)
+  #pred <- gsub("\\(Intercept\\)", "", paste(mdlRobustPrep[[i]]$coeficients$coef, collapse = ''))
+  
+  name <- paste(study, sample, sep='.')
+  tmp <- rbind(
+    mdlRobustPrep[[i]]$coeficients[, c("coef", "B", "Beta")],
+    data.frame(
+      coef = "R2Marg_R2Cond",
+      B = mdlRobustPrep[[i]]$fit$R2Marg_R2Cond,
+      Beta = ""
+    )
+  )
+  shortRobustPrep[[name]] <- tmp
+}
+
+
+tmp <- shortRobustPrep[grepl("Full", names(shortRobustPrep))]
+fullRobustTbl <- data.frame(coef = shortRobustPrep$Medical.Full$coef)
+for (i in 1:length(tmp)){
+  fullRobustTbl <- join(fullRobustTbl, tmp[[i]], by = "coef")
+}
+
+tmp <- shortRobustPrep[grepl("Out", names(shortRobustPrep))]
+outRobustTbl <- data.frame(coef = shortRobustPrep$Medical.Out$coef)
+for (i in 1:length(tmp)){
+  outRobustTbl <- join(outRobustTbl, tmp[[i]], by = "coef")
+}
+
+robustTblLong <- rbind(
+  fullRobustTbl,
+  outRobustTbl
+)
+
+robustTblLong$coef <- mapvalues(
+  robustTblLong$coef,
+  from = c(
+    "R2Marg_R2Cond"
+  ),
+  to = c(
+    "$R^2_{marginal}$ / $R^2_{conditional}$"
+  )
+)
+
+mdlTblRobustLong <- robustTblLong %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Robustness Analyses",
+    #format = "latex",
+    linesep = "",
+    booktabs = T,
+    align = c("l", rep("c", ncol(.)-1)),
+    escape = FALSE
+  ) %>%
+  kable_classic() %>%
+  add_header_above(., c(" ", "Study 1" = 2, "Study 2" = 2, "Study 3" = 2)) %>%
+  pack_rows("Contact [Full Sample]", 1, 5) %>%
+  pack_rows("Self-Determination Theory [Outgroup Interactions only]", 6, 11) %>%
+  kable_styling(latex_options = "scale_down") %>%
+  kableExtra::landscape() %>%
+  gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
+  gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
+  save_kable("Tables/mdlRobustlong.tex")
+```
+
+```{r robustnessTblWide, include=FALSE}
 # Wide format
 mdlRobustTbl <- data.frame(
   coef = c(
@@ -6061,12 +6132,14 @@ rbind(
 \input{Tables/descrFullLong}
 \input{Tables/descrOutLong}
 
-\input{Tables/mdlContactGeneral}
+<!-- \input{Tables/mdlContactGeneral} -->
 \input{Tables/mdlContactGeneralLong}
+
 <!-- \input{Tables/mdlTheory} -->
 \input{Tables/mdlTheorylong}
-\input{Tables/mdlRobustness}
 
+\input{Tables/mdlRobustness}
+\input{Tables/mdlRobustlong}
 
 
 
