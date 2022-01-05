@@ -4838,8 +4838,7 @@ names(mdlTblGeneralLmer) <- gsub("Beta", "ES", names(mdlTblGeneralLmer))
 names(mdlTblGeneralLm) <- make.unique(names(mdlTblGeneralLm))
 names(mdlTblGeneralLm) <- gsub("Eta2_partial", "ES", names(mdlTblGeneralLm))
 
-
-#mdlTblGeneralLong <- 
+mdlTblGeneralLong <- 
   rbind(mdlTblGeneralLm %>%
                              filter(
                                coef %in% c(
@@ -4858,12 +4857,24 @@ names(mdlTblGeneralLm) <- gsub("Eta2_partial", "ES", names(mdlTblGeneralLm))
                                  "NonOutgroupInteraction",
                                  "R2Marg_R2Cond"
                                )
-                             )) %>%
+                             ))
+mdlTblGeneralLong$coef <- mapvalues(
+  mdlTblGeneralLong$coef,
+  from = c(
+    "R2_R2_adjusted",
+    "R2Marg_R2Cond"
+  ),
+  to = c(
+    "$R^2 / R^2_{adjusted}$",
+    "$R^2_{marginal} / R^2_{conditional}$"
+  )
+)
+mdlTblGeneralLong %>%
     replace(is.na(.), "") %>%
   kbl(
     .,
     caption = "Intergroup General",
-    #format = "latex",
+    format = "latex",
     linesep = "",
     booktabs = TRUE,
     col.names = c("", rep(c("$B$", "Effect Size"), (ncol(.)-1)/2)),
@@ -4881,8 +4892,12 @@ names(mdlTblGeneralLm) <- gsub("Eta2_partial", "ES", names(mdlTblGeneralLm))
       "Study 3" = 2
     )
   ) %>%
-  pack_rows("Between Participant [aggregated linear regression] (ES = $\\eta_{partial}$)", 1, 5, escape = FALSE) %>%
-  pack_rows("Within Participants [multilevel linear regression] (ES = $Beta$)", 6, 9, escape = FALSE) %>%
+  pack_rows("Between Participant [aggregated linear regression] (Effect Size = $\\eta_{partial}$)", 1, 5, escape = FALSE) %>%
+  pack_rows("Within Participants [multilevel linear regression] (Effect Size = $\\beta$)", 6, 9, escape = FALSE) %>%
+  footnote(
+    general = c("**** $p$ < .0001, *** $p$ < .001, ** $p$ < .01, * $p$ < .05"), 
+    escape = FALSE
+  ) %>%
   kable_styling(latex_options = "scale_down") %>%
   gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
   gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
