@@ -5297,6 +5297,8 @@ mdlTblTheoreticalLong <- mdlTblLong %>%
   pack_rows("Study 3: Needs", 9, 12) %>%
   pack_rows("Study 3: Allport", 13, 16) %>%
   pack_rows("Study 3: Needs & Allport", 17, 20)  %>%
+  kable_styling(latex_options = "scale_down") %>%
+  kableExtra::landscape() %>%
   gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
   gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
   save_kable("Tables/mdlTheorylong.tex")
