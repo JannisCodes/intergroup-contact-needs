@@ -4881,8 +4881,8 @@ names(mdlTblGeneralLm) <- gsub("Eta2_partial", "ES", names(mdlTblGeneralLm))
       "Study 3" = 2
     )
   ) %>%
-  pack_rows("Between Participant [aggregated linear regression] (ES = $\\eta_{partial}$)", 1, 5) %>%
-  pack_rows("Within Participants [multilevel linear regression] (ES = $Beta$)", 6, 9) %>%
+  pack_rows("Between Participant [aggregated linear regression] (ES = $\\eta_{partial}$)", 1, 5, escape = FALSE) %>%
+  pack_rows("Within Participants [multilevel linear regression] (ES = $Beta$)", 6, 9, escape = FALSE) %>%
   kable_styling(latex_options = "scale_down") %>%
   gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
   gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
