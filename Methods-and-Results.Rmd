@@ -5004,7 +5004,7 @@ mdlTblGeneralShort <- mdlTblGeneral %>%
 mdlTblGeneralShort
 ```
 
-```{r intergroupNeedsTbl, include=FALSE}
+```{r intergroupNeedsTblLong, include=FALSE}
 # Table of core need and Allports Conditions (potentially two tables — e.g., needs + allport)
 # all lmer models :-)
 # make different options
@@ -5206,6 +5206,104 @@ for (i in 1:length(mdlTblElements)) {
   mdlPrep[[i]] <- lmerTblPrep(mdlTblElements[[i]][[1]], mdlTblElements[[i]][[2]])
 }
 
+# Long format
+shortMdlPrep <- list()
+for(i in 1:length(mdlPrep)){
+  study <- gsub("S", "Study", str_extract(mdlPrep[[i]]$fit$data, "S1|S2|S3"))
+  dv <- gsub("Raw", "", sub(" ~.*", "", mdlPrep[[i]]$fit$formula)) 
+  pred <- gsub("\\(Intercept\\)", "", paste(mdlPrep[[i]]$coeficients$coef, collapse = ''))
+  
+  name <- paste(study, dv, pred, sep='.')
+  tmp <- rbind(
+    mdlPrep[[i]]$coeficients[, c("coef", "B", "Beta")],
+    data.frame(
+      coef = "R2Marg_R2Cond",
+      B = mdlPrep[[i]]$fit$R2Marg_R2Cond,
+      Beta = ""
+    )
+  )
+  shortMdlPrep[[name]] <- tmp
+}
+
+# Manual assembly
+emptyNeedTbl <- data.frame(coef = shortMdlPrep$Study3.Attitude.CoreNeedQuality$coef, B = NA, Beta = NA)
+tmp <- shortMdlPrep[grepl("Study1", names(shortMdlPrep))]
+s1MdlTbl <- data.frame(coef = shortMdlPrep$Study1.Attitude.CoreNeedQuality$coef)
+for (i in 1:length(tmp)){
+  s1MdlTbl <- join(s1MdlTbl, tmp[[i]], by = "coef")
+}
+s1MdlTbl <- s1MdlTbl %>%
+  join(., emptyNeedTbl, by = "coef")
+tmp <- shortMdlPrep[grepl("Study2", names(shortMdlPrep))]
+s2MdlTbl <- data.frame(coef = shortMdlPrep$Study2.Attitude.CoreNeedQuality$coef)
+for (i in 1:length(tmp)){
+  s2MdlTbl <- join(s2MdlTbl, tmp[[i]], by = "coef")
+}
+s2MdlTbl <- s2MdlTbl %>%
+  join(., emptyNeedTbl, by = "coef")
+
+s3NeedMdlTbl <- data.frame(coef = shortMdlPrep$Study3.Attitude.CoreNeedQuality$coef) %>%
+  join(., shortMdlPrep$Study3.Quality.CoreNeed, by = "coef") %>%
+  join(., shortMdlPrep$Study3.Attitude.CoreNeed, by = "coef") %>%
+  join(., shortMdlPrep$Study3.Attitude.CoreNeedQuality, by = "coef") %>%
+  join(., emptyNeedTbl, by = "coef")
+
+s3AllportMdlTbl <- data.frame(coef = shortMdlPrep$Study3.Attitude.AllportQuality$coef) %>%
+  join(., shortMdlPrep$Study3.Quality.Allport, by = "coef") %>%
+  join(., shortMdlPrep$Study3.Attitude.Allport, by = "coef") %>%
+  join(., shortMdlPrep$Study3.Attitude.AllportQuality, by = "coef") %>%
+  join(., emptyNeedTbl, by = "coef")
+
+emptyNeedAllportTbl <- data.frame(coef = shortMdlPrep$Study3.Attitude.CoreNeedAllport$coef, B = NA, Beta = NA)
+s3NeedAllportMdlTbl <- emptyNeedAllportTbl %>%
+  join(., emptyNeedAllportTbl, by = "coef") %>%
+  join(., emptyNeedAllportTbl, by = "coef") %>%
+  join(., shortMdlPrep$Study3.Attitude.CoreNeedAllport, by = "coef")
+  
+mdlTblLong <- rbind(
+  s1MdlTbl,
+  s2MdlTbl,
+  s3NeedMdlTbl,
+  s3AllportMdlTbl,
+  s3NeedAllportMdlTbl
+)
+
+mdlTblLong$coef <- mapvalues(
+  mdlTblLong$coef,
+  from = c(
+    "R2Marg_R2Cond"
+  ),
+  to = c(
+    "$R^2_{marginal}$ / $R^2_{conditional}$"
+  )
+)
+
+mdlTblTheoreticalLong <- mdlTblLong %>%
+  replace(is.na(.), "") %>%
+  #mutate_all(linebreak) %>%
+  kbl(
+    .,
+    caption = "Theoretical Test: Core Need Fulfillment and Allport's Conditions",
+    format = "latex",
+    linesep = "",
+    booktabs = T,
+    align = c("l", rep("c", ncol(.)-1)),
+    escape = FALSE
+  ) %>%
+  kable_classic() %>%
+  add_header_above(., c(" ", "Quality" = 2, "Attitude" = 6)) %>%
+  pack_rows("Study 1: Needs", 1, 4) %>%
+  pack_rows("Study 2: Needs", 5, 8) %>%
+  pack_rows("Study 3: Needs", 9, 12) %>%
+  pack_rows("Study 3: Allport", 13, 16) %>%
+  pack_rows("Study 3: Needs & Allport", 17, 20)  %>%
+  gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
+  gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
+  save_kable("Tables/mdlTheorylong.tex")
+```
+
+```{r intergroupNeedsTblWide, include=FALSE}
+# wide format
 mdlTbl <- data.frame(
   coef = c(
     sapply(mdlPrep, function(x) x[1]$coeficients$coef) %>% unlist %>% unique,
@@ -5529,6 +5627,7 @@ for (i in 1:length(mdlRobustTblElements)) {
   mdlRobustPrep[[i]] <- lmerTblPrep(mdlRobustTblElements[[i]][[1]], mdlRobustTblElements[[i]][[2]])
 }
 
+# Wide format
 mdlRobustTbl <- data.frame(
   coef = c(
     sapply(mdlRobustPrep, function(x) x[1]$coeficients$coef) %>% unlist %>% unique,
@@ -5881,14 +5980,15 @@ rbind(
 ```
 
 
-\input{Tables/descrFullWide}
-\input{Tables/descrOutWide}
+<!-- \input{Tables/descrFullWide} -->
+<!-- \input{Tables/descrOutWide} -->
 
 \input{Tables/descrFullLong}
 \input{Tables/descrOutLong}
 
 \input{Tables/mdlContactGeneral}
-\input{Tables/mdlTheory}
+<!-- \input{Tables/mdlTheory} -->
+\input{Tables/mdlTheorylong}
 \input{Tables/mdlRobustness}
 
 
