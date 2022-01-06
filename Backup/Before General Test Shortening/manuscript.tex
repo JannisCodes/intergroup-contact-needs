@@ -1,0 +1,403 @@
+% define document type (i.e., template. Here: A4 APA manuscript with 12pt font)
+\documentclass[man, 12pt, a4paper]{apa7}
+
+% change margins (e.g., for margin comments):
+%\usepackage{geometry}
+% \geometry{
+% a4paper,
+% marginparwidth=30mm,
+% right=50mm,
+%}
+
+% add packages
+\usepackage[american]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{csquotes}
+\usepackage{hyperref}
+\usepackage[style=apa, sortcites=true, sorting=nyt, backend=biber, natbib=true, uniquename=false, uniquelist=false, useprefix=true]{biblatex}
+\usepackage{authblk}
+\usepackage{graphicx}
+\usepackage{setspace,caption}
+\usepackage{subcaption}
+\usepackage{enumitem}
+\usepackage{lipsum}
+\usepackage{soul}
+\usepackage{xcolor}
+\usepackage{fourier}
+\usepackage{stackengine}
+\usepackage{scalerel}
+\usepackage{fontawesome5}
+\usepackage[normalem]{ulem}
+% \usepackage{longtable}
+\usepackage{amsmath}
+\usepackage{ntheorem}
+\usepackage{afterpage}
+\usepackage{float}
+\usepackage{array}
+\usepackage{censor}
+\usepackage{pdflscape}
+\usepackage{lscape}
+\usepackage{pdfpages}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{adjustbox}
+\usepackage{makecell}
+\usepackage{tabu}
+
+% make warning with red triangle
+\newcommand\Warning[1][2ex]{%
+  \renewcommand\stacktype{L}%
+  \scaleto{\stackon[1.3pt]{\color{red}$\triangle$}{\tiny\bfseries !}}{#1}}%
+
+% make question with red triangle
+\newcommand\Question[1][2ex]{%
+  \renewcommand\stacktype{L}%
+  \scaleto{\stackon[1.3pt]{\color{red}$\triangle$}{\tiny\bfseries ?}}{#1}}%
+  
+% add definition sections
+\theoremstyle{break}
+\newtheorem{definition}{Definition}
+
+% add hypothesis sections
+\theoremstyle{plain}
+\theoremseparator{:}
+\newtheorem{hyp}{Hypothesis}
+
+\newtheorem{subhyp}{Hypothesis}
+   \renewcommand\thesubhyp{\thehyp\alph{subhyp}}
+
+% add quote section
+\usepackage{csquotes}
+
+% framed box section
+\usepackage{framed}
+\emergencystretch=1em
+
+% formatting links in the PDF file
+\hypersetup{
+pdfpagemode={UseOutlines},
+bookmarksopen=true,
+bookmarksopenlevel=0,
+hypertexnames=false,
+colorlinks   = true, %Colours links instead of ugly boxes
+urlcolor     = blue, %Colour for external hyperlinks
+linkcolor    = blue, %Colour of internal links
+citecolor   = cyan, %Colour of citations
+pdfstartview={FitV},
+unicode,
+breaklinks=true,
+}
+
+% language settings
+\DeclareLanguageMapping{american}{american-apa}
+
+% add reference library file
+\addbibresource{references.bib}
+
+% Title and header
+\title{Psychological Needs During Intergroup Contact}
+\shorttitle{Needs in Intergroup Contact}
+
+% Authors
+\author[*,1,2]{Jannis Kreienkamp}
+\author[1,2]{Maximilian Agostini}
+\author[1,2]{Laura F. Bringmann}
+\author[1,2]{Peter de Jonge}
+\author[1,2]{Kai Epstude}
+\affiliation{\hfill}
+
+\affil[1]{University of Groningen, Department of Psychology}
+\affil[2]{Author-order to be discussed; currently alphabetic by last name.}
+
+
+\authornote{
+   \addORCIDlink{* Jannis Kreienkamp}{0000-0002-1831-5604}\\
+   \addORCIDlink{Maximilian Agostini}{0000-0001-6435-7621}\\
+   \addORCIDlink{Laura F. Bringmann}{0000-0002-8091-9935}\\
+   \addORCIDlink{Peter de Jonge}{0000-0002-0866-6929}\\
+   \addORCIDlink{Kai Epstude}{0000-0001-9817-3847}
+
+We have no known conflict of interest to declare. The authors received no specific funding for this work. Source data and  software is available at \url{https://janniscodes.github.io/intergroup-contact-needs/}. Protocols, materials, analysis data, and code are available at \url{osf.io}. 
+
+Correspondence concerning this article should be addressed to Jannis Kreienkamp, Department of Psychology, University of Groningen, Grote Kruisstraat 2/1, 9712 TS Groningen (The Netherlands).  E-mail: j.kreienkamp@rug.nl}
+
+\leftheader{Kreienkamp}
+
+% Abstract
+\abstract{
+Abstract goes here.
+
+\noindent\textbf{Public significance statement}: Significance Statement goes here.
+}
+
+\keywords{Intergroup Contact, Psychological Needs, Outgroup Attitudes, Interaction Quality, Extensive Longitudinal Data}
+
+
+% set indentation size
+\setlength\parindent{1.27cm}
+
+% Start of the main document:
+\begin{document}
+
+% add title information (incl. title page and abstract)
+\maketitle
+
+% **CHEAT SHEET / LEGEND**
+%
+% Comments:
+% '%' starts a comment in LaTeX (not printed)
+% '\todo[inline]{} makes orange boxes in PDF
+% '\marginpar{}' notes in margins
+% '\footnote{}' footnote
+% '\Warning' important note indicator in PDF (triangle with exclamation mark)
+% '\Question' question note indicator in PDF (triangle with question mark)
+%
+% Citation (with Natbib citation style):
+% '\citep[e.g.][p. 15]{CitationKey}' citation in parentheses "(e.g., Berry, 2003, p. 15)"
+% '\citet{CitationKey}' citation in text "Berry (2003)"
+% '\citealt' and '\citealp' alternate citation without parentheses
+% '\citeauthor' and '\citeyear' only year or author
+% 
+% Headings:
+% '\part{}' and '\chapter{}' only relevant for multi-part or multi-chapter documents
+% '\section{}' heading level 1
+% '\subsection{}' heading level 2
+% '\subsubsection{}' heading level 3
+% '\paragraph{}' heading level 4
+% '\subparagraph{}' heading level 5
+%
+% formatting:
+% '\textbf{}' text bold font
+% '\textit{}' text italic font
+% '\underline{}' text underline
+% '\sout{}' text strike out
+% '\textsc{}' text small caps
+% '\vspace{1em}' add vertical space
+% '\hspace{1em}' add horizontal space
+% '\\' new line (i.e., line break)
+% '\pagebreak' start new page (i.e., page break)
+% '\noindent' do not indent current line (e.g., current paragraph)
+% 'begin{center}...end{center}' center text or object
+%
+% Math mode:
+% '$\alpha = .8$' mathematical equation inline
+% '$$\hat{y} = b_0 + b_1x$$' mathematical equation in its own line
+% '\begin{equation}...\end{equation}' multi-line equation
+% '\approx' approximate symbol
+% '\neq' not equal
+% '\bar' mean bar over letter
+% '\pm' plus minus sign 
+% '^{}' superscript
+% '_{}' subscript
+% '\fraq{numerator}{denominator}' fraction
+% '\sqrt[n]{}' square root
+% '\sum_{k=1}^n' sum for 1 through n
+%
+% Insert things from elsewhere:
+% '\input{filename}' inputs the raw (tex) file as a command (e.g., tables and R-Markdown imports)
+% '\include{filename}' includes section on new page (incl. possible auxiliary info)
+% '\includegraphics[settings]{filename}' add a figure or graph
+% '\caption{}' adds a caption to a table or figure
+% '\label{}' labels sections, tables, figures, etc. so that they can be referred to.
+% '\ref{}' refer to a labelled sections, tables, figures, etc.
+% '\begin{enumerate}...\end{enumerate}' numbered list
+% '\begin{itemize}...\end{itemize}' bullet-ed list
+% '\item' item in list section 
+%
+% Symbols:
+% '\&' and sign
+% '\%' percent sign
+% '\_' three dotes
+% '\#' hash symbol
+% ------------------------------------------------------------------
+
+% Migrant Example Pathways
+\textbf{Relevance (Version 1 of 2): Migrant Example Version:}
+
+Conflict between social groups and their individual members remains a prevalent feature of the modern human condition. One of the main examples to date are the struggles of many migrants across the world, hoping to build a positive relationship with the majority group. One of the main ameliorations proposed by social psychologists has been the intergroup contact hypothesis. In its most essential interpretation, the intergroup contact hypothesis postulates that prejudice can be reduced and favorable attitudes increased if members of two groups have frequent and positive contact \citep[e.g.,][]{Allport1954b, Hewstone1996, Pettigrew1998}. Over the past 70 years, a plethora of studies and interventions have shown the general effectiveness of positive intergroup contact \citep[e.g.,][]{Pettigrew2006}. However, even though a central assumption of intergroup contact theory has been that the contact should be positive, relatively little research has thus far explained when and why people perceive their everyday inter-group interactions as positive.
+
+% Full Migrant Pathway
+\textbf{Relevance (Version 2 of 2): Full Migrant Focus Version:}
+
+The adaptation of migrants in new cultural contexts has become an important issue for many societies around the world. A major aspect of such migrant adaptation arguably unfolds during the daily interactions migrants have with the cultural majority members \citep{Maxwell2017, Sam2010}. One of the main social psychological theories proposed for understanding how contact between groups functions has been the ’intergroup contact hypothesis’. In its most essential interpretation, the intergroup contact hypothesis postulates that prejudice can be reduced and favorable attitudes increased if members of two groups have frequent and positive contact \citep[e.g.,][]{Allport1954b, Hewstone1996, Pettigrew1998}. Over the past 70 years, a plethora of studies and interventions have shown the general effectiveness of positive intergroup contact \citep[e.g.,][]{Pettigrew2006}. However, even though a central assumption of intergroup contact theory has been that the contact should be positive, relatively little research has thus far explained when and why people perceive their everyday inter-group interactions as positive.
+
+% Old Relevance: Conflict is a problem, positive contact as solution, but little research on when daily contact is perceived positive
+%Conflict between social groups and their individual members remains a prevalent feature of the modern human condition. Experiences of prejudices, discrimination, and animosities with other groups continue to plague the everyday lives of many people around the world. One of the main ameliorations proposed by social psychologists has been the intergroup contact hypothesis. In its most essential interpretation, the intergroup contact hypothesis postulates that frequent and positive contact with an out-group reduces prejudice and increases favorable attitudes towards the other group \citep[e.g.,][]{Allport1954b, Hewstone1996, Pettigrew1998}. And even though over the past 70 years, a plethora of studies and interventions have shown the general effectiveness of positive intergroup contact \citep[e.g.,][]{Pettigrew2006}, relatively little research has thus far explained when and why people's everyday inter-group interactions are perceived as positive.
+
+% Problem v.02: theoretical interaction quality central to understanding outcomes, practical many impactful negative interactions in everyday life
+\textbf{Problem Illustration Paragraph:}
+
+Importantly, not understanding when and why an interaction is perceived as positive presents substantial theoretical and practical obstacles. There is now consistent evidence that negative intergroup contacts lead to worse attitudes, prejudice, and future interaction motivation \citep[e.g.,][]{Barlow2012, Prati2021, Graf2014}. Theoretically, understanding whether an interaction is perceived as positive or negative (i.e., interaction quality) thus sits at the heart of when the intergroup contact hypothesis is successful (e.g., Brown et al. \citeyear{Brown2007}, Tropp et al. \citeyear{Tropp2016}; also cf. Allport’s original sentiment, Allport \citeyear{Allport1954b}). Practically, policymakers and practitioners are thus far often under-prepared to deal with the occurrences of negative interactions, especially in every-day life contexts. Understanding the psychological mechanisms of when and why interactions are perceived as positive is, thus, an important issue for understanding whether an interaction leads to better intergroup perceptions, especially during everyday interactions outside the lab.
+
+% Aim / Solution v.02: look at need fulfillment as mechanism in daily interactions of migrants
+\textbf{Proposal Paragraph:}
+
+In this article, we propose that the fulfillment of fundamental psychological needs might offer a psycho-social mechanism for understanding and explaining contact quality and positive outgroup attitudes. That is to say, that if a person, for example, seeks to feel accepted by their interaction partner and this need is fulfilled during the interaction, the person should rate the interaction and the group of the interaction partner more favorably. To test this, we collected three sets of real-life data from recent immigrants, tracking situational needs, interaction quality, and outgroup attitudes, following their daily interactions with majority group members. 
+
+\section{Need Mechanism in Intergroup Contact}
+% Motivational mechanism:
+% interaction quality is important
+% past research has either focused on conditions or cognitive-affective processes
+% neither are necessary or explain why an interaction is positive
+
+Several meta-analytic reviews found that positive intergroup contact reduces prejudice and increases positive attitudes in experimental and cross-sectional studies \citep[][]{Tropp2005, Pettigrew2006, Davies2011}, as well as in intergroup contact interventions outside the lab \citep[][]{Beelmann2014, Lemmer2015}. It is widely accepted that equal status, common goals, collaboration, and structural support during the interaction form the optimal conditions for such positive contact effects \citep[Allport's Optimal Contact conditions;][]{Allport1954b, Pettigrew1969}. However, a major meta-analysis of these contact conditions showed that contact resulted in more positive intergroup relations even when Allport's conditions were not met \citep[][]{Pettigrew2006}. It, thus, remains unclear when and why exactly an interaction is perceived as positive and what factors (beyond Allport's conditions) explain positive contact effects\footnote{It should be noted here that following Allport's original conditions, several additional conditions of optimal contact were proposed \citep[for a critical discussion see][]{Pettigrew1986}. Similarly, since the early 21\textsuperscript{st} century many psychological processes during intergroup contact were examined \citep[e.g. see,][]{Paolini2021}. Among others, researchers have for example explored different forms of social categorizations \citep[][]{Pettigrew1998}, the salience of social categories \citep[][]{Brown2005}, intimacy \citep[e.g.,][]{Marinucci2021} and attachment \citep[e.g.,][]{Tropp2021}, threat and intergroup anxiety \citep[e.g.,][]{Stephan2008, Paolini2004}, and to a lesser extent knowledge about the other group \citep[][]{Pettigrew2008c}. However, all these advances share the underlying criticism that they are not geared towards understanding when and why an interaction is perceived as positive.}. We propose that we may look to the literature on motivation and psychological needs to understand when and why exactly an interaction is perceived as positive.
+
+% ALTERNATIVE: SHORTER BUT NOT FOCUSED ON ALLPORT'S CONDITIONS (WHICH WE TEST LATER)
+% Several meta-analytic reviews found that positive intergroup contact reduces prejudice and increases positive attitudes in experimental and cross-sectional studies \citep[][]{Tropp2005, Pettigrew2006, Davies2011}, as well as in intergroup contact interventions outside the lab \citep[][]{Beelmann2014, Lemmer2015}. Past research has either focused on conditions under which interactions tend to have favorable effects \citep[e.g., Allport's optimal conditions;][]{Allport1954b, Pettigrew1969} or has investigated cognitive-affective processes during contact \citep[e.g., group salience, intimacy, attachment, or intergroup anxiety;][]{Brown2005, Marinucci2021, Tropp2021, Paolini2004}. However, neither the contact conditions nor the cognitive-affective processes are particularly well equipped to explain when and why an interaction will be perceived as positive. We propose that we may look to the literature on motivation and psychological needs to understand when and why exactly an interaction is perceived as positive.
+
+
+% Important in broader field: needs have been found to be important in broader intergroup relations and interpersonal contact literature.
+Although considerations of psychological needs and motivations have remained markedly absent within the intergroup contact literature, the concepts are in no way foreign to the broader topic of intergroup relations. Psychological needs have for example found fruitful utility in reconciliation research \citep[][]{Shnabel2008}, the study of minority's discrimination experiences \citep[][]{Celebi2017}, and in non-intergroup interactions \citep[][]{Downie2008}. 
+% On the most general level, research on intergroup conflicts has, for example, shown that addressing the group-specific needs predicts willingness to reconcile with the other group \citep[][]{Shnabel2008}. For the case of refugee migrants in their relationship with a majority group, a recent study found that identity needs will buffer against discrimination experiences and will protect personal health \citep[][]{Celebi2017}. Additionally, within the field of interpersonal relations, we find first evidence that the fulfillment of fundamental psychological needs might predict perceived interaction quality in non-intergroup interactions \citep[][]{Downie2008}. 
+% Promising for intergroup contact: Asked for in intergroup contact reviews and first research looked at social change
+And even within the field of intergroup contact the idea of need fulfillment as a psychological mechanism is not entirely novel. \citet{Dovidio2017} in their narrative review have suggested that understanding psychological needs might be essential to constructive intergroup contact. And recently first empirical research has even found psychological need fulfillment during intergroup contacts to predict support for social change \citep[][]{Hassler2021}. There is thus initial evidence to suggest that need fulfillment during intergroup contact might offer a promising psychological mechanism to understand perceived interaction quality and positive outgroup attitudes. 
+
+% Difficult to test general mechanism: Either consider too many needs (situationally relevant but not feasible) or too few (feasible but not transferable). Solution: ask for main need + rating of main need  
+% MAYBE MOVE THIS TO 'The Present Research Section'
+One reason why motivational considerations might have remained absent from the intergroup contact literature is that there is an overwhelming number of individual needs or goals that might be relevant to a person during an intergroup interaction. Researchers considering the motivational content would, thus, either test few hyper-specific needs that might not be transferable to other intergroup contexts or they may need to assess a broad range of fundamental psychological needs. To avoid this predicament we propose to start by using adaptive and responsive survey designs that allow a tailored approach based on the participants inputs \citep[e.g.,][]{Tourangeau2017}. In particular, we propose to ask the participants to report their main goal during the interaction in a short open-ended question (i.e., situation core need) and with reference to their own response the participants can then indicate how much this need was fulfilled during the interaction (i.e., need fulfillment). Such an adaptive approach would allow us to test the fundamental psychological mechanism of whether situational psychological needs indeed predict perceived interaction quality and positive outgroup attitudes. 
+
+\section{Real-Life Process Data}
+While we have argued that a need fulfillment mechanism is relevant to intergroup contact generally, its flexible and broad applicability might be ideally suited to address the pressing issue of understanding natural intergroup contacts outside the lab. Investigations of such 'real-life interactions' often suffer from the difficulty that past intergroup contact research has either focused on the mechanisms of individual interactions in artificial lab studies or has focused on longer-term recall self-reports of natural interactions \citep[e.g.,][]{Pettigrew2006}. Even with extended intervention studies, the most fine-grained data available is usually limited to pre-post-control designs. Such empirical practices stand, however, in stark contrast to many of the theoretical advances that have focused on the dynamic nature of intergroup relations \citep[e.g.,][]{Pettigrew1998}, as well as the core idea of the contact hypothesis, which was focused on the daily interactions of people \citep[see][]{Allport1954b}. As a result, prominent figures within the intergroup contact field have called for studies that collect longitudinal \citep[][]{Pettigrew1998, Pettigrew2008, Pettigrew2008b, Pettigrew2011} and real-life experience-sampling data outside the lab \citep[][]{MacInnis2015, McKeown2017, Dixon2005}. Such data would be able to capture real-life interactions that include interaction-specific mechanism information close the actual experience\footnote{Additionally, such experience-sampling data can be collected close to the intergroup interactions and would, thus, largely mitigate recall biases. Moreover, because data is nested within participants, experience-sampling data often allows to capture large amounts of high-quality data with relatively few participants.}.
+
+% Used to be difficult but technological and methodological developments (e.g., FormR + HLM) → collect large body of intensive longitudinal data
+In the past, such data collections were often unfeasible because they were either physically impractical or too expensive. However, recent technological developments allow us to easily collect experience sampling data on mobile devices \citep[e.g.,][]{Keil2020} or using web-based applications \citep[e.g.,][]{Arslan2020}. At the same time, analytical methods for such more complex data have become more readily available, making the analyses more approachable \citep[see, e.g.,][]{ODonnell2021}. Given these, technological and methodological developments, we were able to collect a large amount of real-life data following the daily intergroup interactions of recent migrants with the majority group members.  
+
+\section{The Present Research}
+The aim of this paper is essentially threefold. First, our study is among the first to test the fundamental tenets of intergroup contact and Allport's conditions in real-life extensive longitudinal data. Second, we test whether the fulfillment situational psychological needs is meaningfully related to more positive outgroup attitudes following intergroup interactions. And third, we test the role of interaction quality in  the relationship of psychological need fulfillment and outgroup attitudes. Based on this we formulated three main hypotheses:
+\begin{enumerate}[label=H\arabic*:]
+    \item Based on the most general understanding of the contact hypothesis, an increase in frequency and quality of contact should jointly account for changes in more favorable outgroup attitudes across extensive longitudinal data.
+    \item Based on Allport’s optimal contact conditions, intergroup interactions with equal status, common goals, collaboration, and structural support should predict more favorable outgroup attitudes due to more positive interaction quality perceptions within the extensive longitudinal data.
+    \item Based on our proposal, intergroup interactions with higher situational core need fulfillment should predict more favorable outgroup attitudes due to more positive interaction quality perceptions within the extensive longitudinal data.
+\end{enumerate}
+Beyond these main hypotheses we have formulated several sub-hypotheses that form the basis for our analysis plan (these sub-hypotheses also include several robustness checks and are available in Appendix \ref{app:AppendixHypotheses}). Given the more complex data structure of the extensive longitudinal data, we opted to test our hypotheses using a multilevel regression model, where the measurement occasions (level 1) were nested within the participants (level 2). Given that more complex dynamic modeling procedures are not necessary to test these more basic hypotheses, we will focus on the contemporaneous effect of the data (e.g., need fulfillment during the intergroup interaction predicts outgroup attitudes following the interaction). Such an approach is also tolerant to missing data and uneven case numbers within participants.
+
+To test our main hypotheses, we collected three independent sets of extensive longitudinal data (Studies 1–3). The full surveys are available in Supplementary Materials A as well as in our open science repository (including a complete codebook, see OSF-REFERENCE). Our most comprehensive study (Study 3) was fully preregistered  \citep[available at][]{Kreienkamp2021f}. The fully annotated analyses are available in Supplementary Material B. As is common with multilevel analyses, we use a hierarchical modeling approach and always report the final model in-text (for the full modeling process see Supplementary Material B).
+
+\input{Methods-and-Results}
+
+\section{Discussion}
+% aims re-iterated
+In this paper we set out to (1) test the basic predictions of the intergroup contact hypothesis and Allport's optimal conditions in real-life extensive longitudinal data, (2) we proposed that the fulfillment situational psychological needs meaningfully predicts positive outgroup attitudes, and (3) that the fulfillment of psychological needs (and Allport's conditions) have their effect (partially) through perceived interaction quality. 
+
+% Contact hypothesis in ESM data [inconsistent in aggregate but consistent in ML analysis]
+When considering the results of the three studies jointly, we find mixed results for the basic intergroup contact hypothesis. The aggregated number of outgroup interactions across all measurements only had a significant effect on average outgroup attitudes in one of the three studies and in that study there was no significant effect of average interaction quality on outgroup attitudes (which was significant for the other two studies). This meant that only for our smallest study did we find the expected interaction between interaction frequency and interaction quality when looking at the aggregated data across all measurements. However, once we considered the effect of having an interaction with an outgroup member (vs. not having an outgroup interaction) within the participants, we find that intergroup contact is a strong predictor of outgroup attitudes across all three studies (even when taking other non-outgroup interactions into account). While this later results is in line with our expectations, the earlier aggregate findings are surprising because most past cross-sectional studies that have investigated the effect of interaction frequency have also considered an aggregate measurement (albeit not one from actual daily reports). Even though this inconsistency with past research might be a data artefact (e.g., because most people reported more substantially mode measurements during which they did not have an outgroup interaction), the absence of this aggregate effect could underline the fact that cross-sectional retrospective data might suffer from recall biases (e.g., where times with no outgroup interactions are undervalued by participants during the retrospective evaluations). In summary, we thus find that when we aggregate interaction frequencies and interaction quality from our intensive longitudinal data we find inconsistent results from the past literature but within participants intergroup contacts are significantly related with positive outgroup attitudes.
+
+% Allport's conditions in ESM data [consistent predictor and partially through quality]
+Using the data from our third study, we find that Allport's conditions are related to higher interaction quality perceptions and more positive outgroup attitudes. And when we consider interaction quality and Allport's conditions jointly, we find further evidence that part of the benefits of Allport's conditions are due to the case that such interactions are also perceived as more positive. We thus find first evidence that Allport's conditions of optimal contact are also relevant to the daily interactions recent migrants have in their interactions with majority group members. 
+
+% Need fulfillment in intergroup contact [consistent predictor, through quality, slightly better than Allport and SDT]
+Finally, when looking at the results for our main proposal regarding the importance of situational key needs, we find highly consistent positive results across all three studies. We find that in all three extensive longitudinal datasets, the fulfillment of core needs during intergroup contacts predicts higher interaction quality perceptions and more positive outgroup attitudes. We find that in all three studies the effect of core need fulfillment on outgroup attitudes is either fully or partially through its effect on quality perceptions, and we find that need fulfillment is an important predictor even when taking other fundamental psychological needs or Allport's conditions into account. In fact we find that our core situational needs measure predicted outgroup attitudes slightly better than Allport's conditions and consistently explained more variance in outgroup attitudes than any of the other psychological needs. In most cases the core need even took over the variances previously explained by the self-determination theory needs. We thus find strong evidence that within everyday life interactions of recent migrants with majority group members, the perception that one's interaction specific psychological needs are fulfilled offers a meaningful and flexible predictor of outgroup attitudes. As such the data offers a first test of the motivational basis of intergroup contact.
+
+\subsection{Limitations}
+to be discussed, potentially:
+\begin{enumerate}
+    \item migrants are not refugees (generalizability potentially even more relevant?)
+    \item minority perspective only
+    \item lagged effects left for future studies (potentially not relevant, time scale)
+    \item ESM: real-life data comes at the expense of having short/single item operationalizations
+\end{enumerate}
+
+\subsection{Implications}
+to be discussed, potentially:
+\begin{enumerate}
+    \item feasible to collect large amount of data on intergroup contact using ESM method (do we have a formR ref in there?; set up is feasible but not the easiest; maybe even advertise the reusability of the formR survey?)
+    \item role of motivation in intergroup contact promising (potential for interventions, e.g., most immediate to the data: settlement practices). 
+    \item potential to identify context specific needs
+\end{enumerate}
+
+\subsection{Conclusion paragraph (not a real heading)}
+to be written after co-author meeting.
+
+
+\printbibliography
+
+\appendix
+
+\section{Appendix A: Hypotheses}
+\label{app:AppendixHypotheses}
+
+\begin{hyp}[H\ref{hyp:contact}] \label{hyp:contact}
+Based on the most general understanding of the contact hypothesis, an increase in frequency and quality of contact should jointly account for changes in more favorable outgroup attitudes.
+\end{hyp}
+
+\begin{subhyp}[H\ref{hyp:contactFreq}] \label{hyp:contactFreq}
+\addtolength{\leftskip}{2.5em}
+Participants with more intergroup interactions should have a more favorable outgroup attitudes.
+\end{subhyp}
+
+\begin{subhyp}[H\ref{hyp:contactDummy}] \label{hyp:contactDummy}
+\addtolength{\leftskip}{2.5em}
+Outgroup attitudes should be more positive after an intergroup interaction compared to a non-outgroup interaction.
+\end{subhyp}
+
+\begin{subhyp}[H\ref{hyp:contactFreqQual}] \label{hyp:contactFreqQual}
+\addtolength{\leftskip}{2.5em}
+Participants with more intergroup interactions should have a more favorable outgroup attitudes depending on the average interaction quality.
+\end{subhyp}
+
+\begin{hyp}[H\ref{hyp:AllportsConditions}] \label{hyp:AllportsConditions}
+Based on Allport's optimal contact conditions, intergroup interactions with equal status, common goals, collaboration, and structural support should predict more favorable outgroup attitudes due to more positive interaction quality perceptions.
+\end{hyp}
+
+\setcounter{subhyp}{0}
+\begin{subhyp}[H\ref{hyp:AllportsPred}] \label{hyp:AllportsPred}
+\addtolength{\leftskip}{2.5em}
+Based on Allport's optimal contact conditions, outgroup attitudes should be more favorable after intergroup interactions with equal status, common goals, collaboration, and structural support.
+\end{subhyp}
+
+\begin{subhyp}[H\ref{hyp:AllportsQuality}] \label{hyp:AllportsQuality}
+\addtolength{\leftskip}{2.5em}
+Based on past research on the role of interaction quality, interaction quality should be more perceived as more favorable after intergroup interactions with equal status, common goals, collaboration, and structural support.
+\end{subhyp}
+
+\begin{subhyp}[H\ref{hyp:AllportsQualityMediation}] \label{hyp:AllportsQualityMediation}
+\addtolength{\leftskip}{2.5em}
+Based on past research on the role of interaction quality, the variance explained in outgroup attitudes by Allport's optimal contact should to a large extend be assumed by interaction quality.
+\end{subhyp}
+
+\begin{hyp}[H\ref{hyp:keyNeed}] \label{hyp:keyNeed}
+Based on our proposal, intergroup interactions with higher situational core need fulfillment should predict more favorable outgroup attitudes due to more positive interaction quality perceptions.
+\end{hyp}
+
+\setcounter{subhyp}{0}
+\begin{subhyp}[H\ref{hyp:keyNeedPred}] \label{hyp:keyNeedPred}
+\addtolength{\leftskip}{2.5em}
+Outgroup attitudes should be more favorable after intergroup interactions with high key need fulfillment.
+\end{subhyp}
+
+\begin{subhyp}[H\ref{hyp:keyNeedQual}] \label{hyp:keyNeedQual}
+\addtolength{\leftskip}{2.5em}
+Interaction Quality should be perceived as more positive after intergroup interactions with higher key need fulfillment.
+\end{subhyp}
+
+\begin{subhyp}[H\ref{hyp:keyNeedMediation}] \label{hyp:keyNeedMediation}
+\addtolength{\leftskip}{2.5em}
+The variance explained in outgroup attitudes by key need fulfillment should to a large extend be assumed by interaction quality.
+\end{subhyp}
+
+\begin{subhyp}[H\ref{hyp:keyNeedContactType}] \label{hyp:keyNeedContactType}
+\addtolength{\leftskip}{2.5em}
+The effect of key need fulfillment on outgroup attitudes should be specific to intergroup interactions and not be due to need fulfillment in general. Thus, the effect of key need fulfillment on outgroup attitudes should stronger for intergroup interact than for ingroup interactions. 
+\end{subhyp}
+
+\begin{subhyp}[H\ref{hyp:keyNeedSDT}] \label{hyp:keyNeedSDT}
+\addtolength{\leftskip}{2.5em}
+The effect of key need fulfillment on outgroup attitudes should be persist even when taking other fundamental psychological needs into account. Thus, the effect of key need fulfillment on outgroup attitudes should remain strong even after controlling for autonomy, competence, and relatedness fulfillment during the interaction (cf., self-determination theory). 
+\end{subhyp}
+
+\begin{hyp}[H\ref{hyp:comparison}] \label{hyp:comparison}
+Based on our proposal, intergroup interactions with higher situational core need fulfillment should predict outgroup attitudes at least as well as Allport's conditions.
+\end{hyp}
+
+\setcounter{subhyp}{0}
+\begin{subhyp}[H\ref{hyp:compModel}] \label{hyp:compModel}
+\addtolength{\leftskip}{2.5em}
+The need model (H\ref{hyp:keyNeedPred}) should predict more variance in outgroup attitudes than the model based on Allport's conditions (H\ref{hyp:AllportsPred}).
+\end{subhyp}
+
+\begin{subhyp}[H\ref{hyp:compTogether}] \label{hyp:compTogether}
+\addtolength{\leftskip}{2.5em}
+The  effect of key need fulfillment on outgroup attitudes should  persist even when taking other Allport's conditions into account. Thus, the effect of key need fulfillment on outgroup attitudes should remain strong even after controlling for equal status, common goals, collaboration, and structural support.  
+\end{subhyp}
+
+\end{document}
