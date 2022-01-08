@@ -6,7 +6,7 @@ This repository brings together the full manuscript (syncronized from Overleaf) 
 
 The full annotated analysis code is available [here](https://janniscodes.github.io/intergroup-contact-needs/Supplemental-Material-B-Annotated-Analysis).
 
-Please note that the full repository will remain 'private' until after the manuscript has been accepted for publication (to allow for blind peer review).
+Please note that the full repository will remain 'private' and anonymized until after the manuscript has been accepted for publication (to allow for blind peer review).
 
 
 
