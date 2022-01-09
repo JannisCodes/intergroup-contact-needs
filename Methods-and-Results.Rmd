@@ -4806,7 +4806,6 @@ mdlMedical$lmerSlopesAttTypeZ <- lmer(
     data = dtMedicalSupp$medicalWithinBetween
   )
 
-
 mdlTblElementsGeneralLmer <- list(
   c(mdlWorker$lmerInterceptAttTypeTbl, mdlWorker$lmerInterceptAttTypeTblZ),
   c(mdlStudent$lmerSlopesAttType, mdlStudent$lmerSlopesAttTypeZ),
@@ -6122,6 +6121,76 @@ rbind(
 ```
 
 
+
+
+```{r metaGeneral, include=FALSE}
+
+mdlTblElementsGeneralLm <- list(mdlWorker$lmAttFreqQualX,
+                                mdlStudent$lmAttFreqQualX,
+                                mdlMedical$lmAttFreqQualX)
+
+mdlTblElementsGeneralLmer <- list(
+  c(mdlWorker$lmerInterceptAttTypeTbl, mdlWorker$lmerInterceptAttTypeTblZ),
+  c(mdlStudent$lmerSlopesAttType, mdlStudent$lmerSlopesAttTypeZ),
+  c(mdlMedical$lmerSlopesAttType, mdlMedical$lmerSlopesAttTypeZ)
+  )
+
+# R2 of betas.
+# https://rdrr.io/cran/r2glmm/man/r2beta.html
+r2glmm::r2beta(
+  model = mdlWorker$lmAttFreqQualX,
+  partial = TRUE,
+  method = 'lm'
+)
+
+r2glmm::r2beta(
+  model = mdlWorker$lmerInterceptAttTypeTbl,
+  partial = TRUE,
+  # 'sgv' standardized generalized variance approach, 
+  # 'kr' (Kenward Roger approach; only with lme),
+  # 'nsj' (Nakagawa and Schielzeth approach)
+  method = 'sgv' 
+)
+
+# var = parameter name
+# https://www.rdocumentation.org/packages/metafor/versions/3.0-2/topics/escalc
+      md <- escalc(data = process[process$Parameter==var[i],],
+                   measure = "SPCOR",
+                   ti = t,
+                   ni = N,
+                   mi = m,
+                   r2i = r2,
+                   var.names = c(paste(var[i],".yi",sep=""),paste(var[i],".vi",sep="")))
+      
+      meta.parametric[[var[i]]] <- rma(yi = get(paste(var[i],".yi",sep="")),
+                                       vi = get(paste(var[i],".vi",sep="")), 
+                                       data = md, 
+                                       method = "REML", 
+                                       slab = Study)
+      
+      
+# Alternative Meta:
+      Metaan::estmeta(
+        Beta = beta,
+        l = lowerCI,
+        u = upperCI,
+        test = "FIXED", # "RANDOM"
+      )
+
+```
+
+```{r metaTheory, include=FALSE}
+
+
+```
+
+```{r metaRobust, include=FALSE}
+
+
+```
+
+
+
 <!-- \input{Tables/descrFullWide} -->
 <!-- \input{Tables/descrOutWide} -->
 
@@ -6129,13 +6198,14 @@ rbind(
 \input{Tables/descrOutLong}
 
 <!-- \input{Tables/mdlContactGeneral} -->
-\input{Tables/mdlContactGeneralLong}
-
 <!-- \input{Tables/mdlTheory} -->
-\input{Tables/mdlTheorylong}
-
 <!-- \input{Tables/mdlRobustness} -->
+
+\input{Tables/mdlContactGeneralLong}
+\input{Tables/mdlTheorylong}
 \input{Tables/mdlRobustlong}
+
+
 
 
 
