@@ -6231,7 +6231,7 @@ for(i in 1:length(var)){
       text(-2.05, c(17,11,5), cex=0.75, pos=4, names)
       m=1
       for(i in 3:1){
-        addpoly(meta.parametric[[i]], row=m, cex=0.75, mlab=paste("►FE",names[i]),)
+        addpoly(meta.parametric[[i]], row=m, cex=0.75, mlab="► Fixed Effect")
         m <- m+6
       }
       text(-2.05, 19, "Predictors by study",  cex=.8, pos=4)
@@ -6354,7 +6354,7 @@ for(i in 1:length(var)){
       text(-2.05, c(17,11,5), cex=0.75, pos=4, names)
       m=1
       for(i in 3:1){
-        addpoly(meta.bootstrapped[[i]], row=m, cex=0.75, mlab=paste("►FE",names.boot[i]),)
+        addpoly(meta.bootstrapped[[i]], row=m, cex=0.75, mlab="► Fixed Effect")
         m <- m+6
       }
       text(-2.05, 19, "Predictors by study",  cex=.8, pos=4)
