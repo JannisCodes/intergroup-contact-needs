@@ -6509,23 +6509,38 @@ for (i in 1:length(mdlRobustTblElements)){
   mutate(
     n = lmerTblPrep(mdlRobustTblElements[[i]][[1]], mdlRobustTblElements[[i]][[2]])$fit$N,
     m = nrow(.), 
-    dv = gsub("Raw", "", str_extract(lmerTblPrep(mdlRobustTblElements[[i]][[1]], mdlRobustTblElements[[i]][[2]])$fit$formula,".+?(?= ~)")),
-    sample = gsub("S", "Study", str_extract(lmerTblPrep(mdlRobustTblElements[[i]][[1]], mdlRobustTblElements[[i]][[2]])$fit$data, "S1|S2|S3")),
+    #dv = gsub("Dutch", "", str_extract(lmerTblPrep(mdlRobustTblElements[[i]][[1]], mdlRobustTblElements[[i]][[2]])$fit$formula,".+?(?= ~)")),
+    sample = str_match(lmerTblPrep(mdlRobustTblElements[[i]][[1]], mdlRobustTblElements[[i]][[2]])$fit$data, "Tbl(.*?)(Full|Out)")[2],
     formula = lmerTblPrep(mdlRobustTblElements[[i]][[1]], mdlRobustTblElements[[i]][[2]])$fit$formula,
     coef = gsub(":", ".", coef)
   )
   robustMetaTbl <- rbind(robustMetaTbl, lmerTblTmp)
 }
 
-robustMetaTbl %>%
-  arrange(formula, coef, sample)
+robustMetaTbl <- robustMetaTbl %>%
+  arrange(formula, match(
+    coef,
+    c(
+      "CoreNeed_zwc",
+      "OutgroupInteraction_zwc",
+      "CoreNeed_zwc.OutgroupInteraction_zwc",
+      "Autonomy_zwc",
+      "Competence_zwc",
+      "Relatedness_zwc",
+      "CoreNeed_zwc"
+    )
+  )) %>% 
+  mutate(formula = gsub(" \\+ \\(.*", "", formula))
 
-theoryMetaTblNoAllport <- theoryMetaTbl %>%
-  filter(!grepl("Allport",formula)) %>% 
-  mutate(formula = gsub(" \\+ \\(.*", "", formula)) %>%
-  arrange(formula, coef, sample)
+robustMetaContact <-
+  metaLmerOut(
+    lmerDataTbl = robustMetaTbl %>% filter(formula == "AttitudesDutch ~ CoreNeed_cwc * OutgroupInteraction"),
+    type = "FE",
+    name = "RobustContact",
+    title = "Attitudes ~ CoreNeed * Outgroup Interaction"
+  )
 
-TheoryMetaQualityNeed <-
+robustMetaSDT <-
   metaLmerOut(
     lmerDataTbl = theoryMetaTblNoAllport %>% filter(formula == "QualityRaw ~ CoreNeed"),
     type = "FE",

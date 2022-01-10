@@ -16,6 +16,7 @@ metaLmerOut <- function(lmerDataTbl, type = "FE", name, title, ...) {
         "NonOutgroupInteraction",
         "OutgroupInteraction",
         "CoreNeedZ",
+        "CoreNeed",
         "QualityZ",
         "_zwc"
       ),
@@ -25,6 +26,7 @@ metaLmerOut <- function(lmerDataTbl, type = "FE", name, title, ...) {
         "Contact X Quality",
         "Non-Outgroup Interaction",
         "Outgroup Interaction",
+        "Core Need Fulfillment",
         "Core Need Fulfillment",
         "Interaction Quality",
         ""
