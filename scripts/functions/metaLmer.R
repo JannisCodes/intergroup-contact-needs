@@ -18,7 +18,8 @@ metaLmerOut <- function(lmerDataTbl, type = "FE", name, title, ...) {
         "CoreNeedZ",
         "CoreNeed",
         "QualityZ",
-        "_zwc"
+        "_zwc",
+        "."
       ),
       replacement = c(
         "Number of Outgroup Contacts",
@@ -29,7 +30,8 @@ metaLmerOut <- function(lmerDataTbl, type = "FE", name, title, ...) {
         "Core Need Fulfillment",
         "Core Need Fulfillment",
         "Interaction Quality",
-        ""
+        "",
+        " X "
       ),
       vectorize_all = FALSE
     )
@@ -56,7 +58,7 @@ metaLmerOut <- function(lmerDataTbl, type = "FE", name, title, ...) {
       name = names
     )
   
-  # i = 1
+  # i = 2
   for (i in 1:length(var)) {
     md <- escalc(
       data = lmerDataTbl[lmerDataTbl$coef == var[i], ],
@@ -121,12 +123,15 @@ metaLmerOut <- function(lmerDataTbl, type = "FE", name, title, ...) {
             paste("CI", attributes(meta.parametric[[var[i]]]$yi)$slab, sep = ".")
           ))))
     
-    library(rqdatatable)
-    meta.parametric.sum <- natural_join(meta.parametric.sum,
-                              betaCI,
-                              by = "effect",
-                              jointype = "FULL") %>%
-      select(names(meta.parametric.sum))
+    for(r in 2:ncol(betaCI)) {
+      meta.parametric.sum[meta.parametric.sum$effect==betaCI$effect, names(betaCI[r])] <- betaCI[r]
+    }
+    # library(rqdatatable)
+    # meta.parametric.sum <- natural_join(meta.parametric.sum,
+    #                           betaCI,
+    #                           by = "effect",
+    #                           jointype = "FULL") %>%
+    #   select(names(meta.parametric.sum))
   }
   #meta.parametric
   
@@ -167,7 +172,7 @@ metaLmerOut <- function(lmerDataTbl, type = "FE", name, title, ...) {
       main = paste0("Meta Analysis: Forest Plot [Parametric] \n(", title, ")")
     ) 
     par(font = 2)
-    text(pltForest$xlim[1], c(11, 5), cex = 0.75, pos = 4, names)
+    text(pltForest$xlim[1], rev(seq(length(studies)+2, by = length(studies)+3, length.out = length(var))), cex = 0.75, pos = 4, names)
     m = 1
     for (i in length(var):1) {
       addpoly(
@@ -280,12 +285,14 @@ metaLmerOut <- function(lmerDataTbl, type = "FE", name, title, ...) {
                             sep = ""),
                       paste("CI", attributes(meta.bootstrapped[[var[i]]]$yi)$slab, sep = ".")
                     ))))
-    
-    meta.bootstrapped.sum <- natural_join(meta.bootstrapped.sum,
-                                          betaCI,
-                                          by = "effect",
-                                          jointype = "FULL") %>%
-      select(names(meta.bootstrapped.sum))
+    for(r in 2:ncol(betaCI)) {
+      meta.bootstrapped.sum[meta.bootstrapped.sum$effect==betaCI$effect, names(betaCI[r])] <- betaCI[r]
+    }
+    # meta.bootstrapped.sum <- natural_join(meta.bootstrapped.sum,
+    #                                       betaCI,
+    #                                       by = "effect",
+    #                                       jointype = "FULL") %>%
+    #   select(names(meta.bootstrapped.sum))
   }
   #meta.bootstrapped
   
@@ -319,18 +326,8 @@ metaLmerOut <- function(lmerDataTbl, type = "FE", name, title, ...) {
       mlab = "",
       main = paste0("Meta Analysis: Forest Plot [Parametric] \n(", title, ")")
     ) 
-    metafor::forest(
-      meta.boot,
-      #xlim = c(-2, 2),
-      cex = 0.75,
-      ylim = c(-1, max(rows)+4),
-      rows = rows,
-      slab = rep(c("Study 1", "Study 2", "Study 3"), length(var)),
-      mlab = "",
-      main = paste0("Meta Analysis: Forest Plot [Parametric] \n(", title, ")")
-    ) 
     par(font = 2)
-    text(pltForest$xlim[1], c(11, 5), cex = 0.75, pos = 4, names)
+    text(pltForest$xlim[1], rev(seq(length(studies)+2, by = length(studies)+3, length.out = length(var))), cex = 0.75, pos = 4, names)
     m = 1
     for (i in length(var):1) {
       addpoly(

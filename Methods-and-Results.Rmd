@@ -6526,8 +6526,7 @@ robustMetaTbl <- robustMetaTbl %>%
       "CoreNeed_zwc.OutgroupInteraction_zwc",
       "Autonomy_zwc",
       "Competence_zwc",
-      "Relatedness_zwc",
-      "CoreNeed_zwc"
+      "Relatedness_zwc"
     )
   )) %>% 
   mutate(formula = gsub(" \\+ \\(.*", "", formula))
@@ -6537,33 +6536,16 @@ robustMetaContact <-
     lmerDataTbl = robustMetaTbl %>% filter(formula == "AttitudesDutch ~ CoreNeed_cwc * OutgroupInteraction"),
     type = "FE",
     name = "RobustContact",
-    title = "Attitudes ~ CoreNeed * Outgroup Interaction"
+    title = "Robustness — Contact and Need Fulfillment"
   )
 
 robustMetaSDT <-
   metaLmerOut(
-    lmerDataTbl = theoryMetaTblNoAllport %>% filter(formula == "QualityRaw ~ CoreNeed"),
+    lmerDataTbl = robustMetaTbl %>% filter(formula == "AttitudesDutch ~ CoreNeed_cwc + Competence_cwc + Autonomy_cwc +      Relatedness_cwc"),
     type = "FE",
-    name = "TheoryQualityCore",
-    title = "QualityRaw ~ CoreNeed"
+    name = "RobustSDT",
+    title = "Robustness — Other Needs"
   )
-
-TheoryMetaAttitudeNeed <-
-  metaLmerOut(
-    lmerDataTbl = theoryMetaTblNoAllport %>% filter(formula == "Attitude ~ CoreNeed"),
-    type = "FE",
-    name = "TheoryAttitudeCore",
-    title = "Attitude ~ CoreNeed"
-  )
-
-TheoryMetaAttitudeNeedQuality <-
-  metaLmerOut(
-    lmerDataTbl = theoryMetaTblNoAllport %>% filter(formula == "Attitude ~ CoreNeed + Quality"),
-    type = "FE",
-    name = "TheoryAttitudeCoreQuality",
-    title = "Attitude ~ CoreNeed + Quality"
-  )
-
 ```
 
 
