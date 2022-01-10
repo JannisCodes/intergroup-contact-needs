@@ -5953,7 +5953,7 @@ rbind(
 ) %>%
   kbl(.,
       format = "latex",
-      caption = "Descr Full Long",
+      caption = "Full Sample: Correlation Table and Descriptive Statistics",
       booktabs = TRUE,
       align = c("l", rep("c", ncol(.) - 1))) %>%
   pack_rows("Study 1", 1, nrow(workerMlCor)) %>%
@@ -5998,7 +5998,7 @@ rbind(
 ) %>%
   kbl(.,
       format = "latex",
-      caption = "Descr Full Wide",
+      caption = "Full Sample: Correlation Table and Descriptive Statistics",
       booktabs = TRUE,
       align = c("l", rep("c", ncol(.) - 1)))  %>%
   kable_classic() %>%
@@ -6044,7 +6044,7 @@ rbind(
 ) %>%
   kbl(.,
       format = "latex",
-      caption = "Descr Out Long",
+      caption = "Intergroup Contact Sample: Correlation Table and Descriptive Statistics",
       booktabs = TRUE,
       align = c("l", rep("c", ncol(.) - 1))) %>%
   pack_rows("Study 1", 1, nrow(workerOutMlCor)) %>%
@@ -6090,7 +6090,7 @@ rbind(
 ) %>%
   kbl(.,
       format = "latex",
-      caption = "Descr Out Wide",
+      caption = "ntergroup Contact Sample: Correlation Table and Descriptive Statistics",
       booktabs = TRUE,
       align = c("l", rep("c", ncol(.) - 1))) %>%
   kable_classic() %>%
@@ -6461,7 +6461,7 @@ TheoryMetaQualityNeed <-
     lmerDataTbl = theoryMetaTblNoAllport %>% filter(formula == "QualityRaw ~ CoreNeed"),
     type = "FE",
     name = "TheoryQualityCore",
-    title = "QualityRaw ~ CoreNeed"
+    title = "Quality ~ CoreNeed"
   )
 
 TheoryMetaAttitudeNeed <-
