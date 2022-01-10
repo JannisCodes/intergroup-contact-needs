@@ -56,7 +56,7 @@ lib <- c(
   "misty",
   "sjPlot",
   "sjmisc",
-  "sjmisc"
+  "metafor"
 )
 invisible(lapply(lib, library, character.only = TRUE))
 rm(lib)
@@ -6123,11 +6123,250 @@ rbind(
 
 
 
-```{r metaGeneral, include=FALSE}
+```{r metaGeneralLm, include=FALSE}
 
 mdlTblElementsGeneralLm <- list(mdlWorker$lmAttFreqQualX,
                                 mdlStudent$lmAttFreqQualX,
                                 mdlMedical$lmAttFreqQualX)
+
+lmMetaTbl <- data.frame()
+for (i in 1:length(mdlTblElementsGeneralLm)){
+  lmTblTmp <- lmTblPrep(mdlTblElementsGeneralLm[[i]])$coeficients %>%
+  select(
+    coef,
+    B = est,
+    se,
+    lwr,
+    upr,
+    tval,
+    Rsq
+  ) %>%
+  mutate(
+    n = lmTblPrep(mdlTblElementsGeneralLm[[i]])$fit$N,
+    m = nrow(.)-1, 
+    sample = str_match(lmTblPrep(mdlTblElementsGeneralLm[[i]])$fit$data, "dt(.*?)Supp")[2],
+    coef = gsub(":", ".", coef)
+  )
+  lmMetaTbl <- rbind(lmMetaTbl, lmTblTmp)
+}
+
+lmMetaTbl <- lmMetaTbl %>% arrange(coef)
+
+# extract parameter names
+  name <- "Contact Hypothesis — Aggregate Linear Regression"
+  var <- as.character(unique(lmMetaTbl$coef))[!as.character(unique(lmMetaTbl$coef)) %in% c("(Intercept)")]
+  names <- qdap::mgsub(c("SumContactNL", "AvQuality", "SumContactNL.AvQuality"),
+                       c("Number of Outgroup Contacts","Average Interaction Quality", "Contact X Quality"), 
+                       var)
+  studies <- as.character(unique(lmMetaTbl$sample))
+  
+### Parametric Meta-Analysis
+    meta.parametric <- list()
+    meta.parametric.sum <- data.frame(effect = var, 
+                                      name = names, 
+                                      beta.Worker = NA, 
+                                      CI.Worker = NA,
+                                      beta.Student = NA, 
+                                      CI.Student = NA,
+                                      beta.Medical = NA,
+                                      CI.Medical = NA, 
+                                      RE.beta = NA,
+                                      RE.CI = NA,
+                                      RE.pval = NA,
+                                      RE.star = NA)
+
+# i = 1
+for(i in 1:length(var)){
+      md <- escalc(data = lmMetaTbl[lmMetaTbl$coef==var[i],],
+                   measure = "SPCOR",
+                   ti = tval,
+                   ni = n,
+                   mi = m,
+                   r2i = Rsq,
+                   var.names = c(paste(var[i],".yi",sep=""),paste(var[i],".vi",sep="")))
+      
+      meta.parametric[[var[i]]] <- rma(yi = get(paste(var[i],".yi",sep="")),
+                                       vi = get(paste(var[i],".vi",sep="")), 
+                                       data = md, 
+                                       method = "FE", # "REML", 
+                                       slab = sample)
+      #metafor::forest(meta.parametric[[var[i]]],
+      #                main = paste("Meta Analysis ",names[i],sep = ""))
+      
+      meta.parametric.sum$effect[i] <- var[i]
+      meta.parametric.sum$beta.Worker[i] <- meta.parametric[[var[i]]]$yi[1]
+      meta.parametric.sum$beta.Student[i] <- meta.parametric[[var[i]]]$yi[2]
+      meta.parametric.sum$beta.Medical[i] <- meta.parametric[[var[i]]]$yi[3]
+      meta.parametric.sum$CI.Worker[i] <- paste("[",                                  round(meta.parametric[[var[i]]]$yi[1]-1.96*sqrt(meta.parametric[[var[i]]]$vi[1]),2),", ",round(meta.parametric[[var[i]]]$yi[1]+1.96*sqrt(meta.parametric[[var[i]]]$vi[1]),2),"]",sep="")
+      meta.parametric.sum$CI.Student[i] <- paste("[",                                  round(meta.parametric[[var[i]]]$yi[2]-1.96*sqrt(meta.parametric[[var[i]]]$vi[2]),2),", ",round(meta.parametric[[var[i]]]$yi[2]+1.96*sqrt(meta.parametric[[var[i]]]$vi[2]),2),"]",sep="")
+      meta.parametric.sum$CI.Medical[i] <- paste("[",                                  round(meta.parametric[[var[i]]]$yi[3]-1.96*sqrt(meta.parametric[[var[i]]]$vi[3]),2),", ",round(meta.parametric[[var[i]]]$yi[3]+1.96*sqrt(meta.parametric[[var[i]]]$vi[3]),2),"]",sep="")
+      meta.parametric.sum$RE.beta[i] <- meta.parametric[[var[i]]]$b
+      meta.parametric.sum$RE.CI[i] <- paste("[",
+                                            round(meta.parametric[[var[i]]]$ci.lb, 2),
+                                            ", ", round(meta.parametric[[var[i]]]$ci.ub,2),"]", sep="")
+      meta.parametric.sum$RE.pval[i] <- meta.parametric[[var[i]]]$pval
+      meta.parametric.sum$RE.star[i] <- ifelse(meta.parametric.sum$RE.pval[i]<0.001,"***",ifelse(meta.parametric.sum$RE.pval[i]<0.01,"**",ifelse(meta.parametric.sum$RE.pval[i]<0.05,"*","")))
+}
+    #meta.parametric
+    
+    eff <- escalc(data = lmMetaTbl, 
+                  slab = coef,
+                  measure = "SPCOR",
+                  ti = tval,
+                  ni = n,
+                  mi = m,
+                  r2i = Rsq)
+    meta <- rma(yi = yi,
+                vi = vi, 
+                data = eff, 
+                method = "FE", # "REML", 
+                slab = paste(coef, sample, sep=" - "))
+
+    k <- length(var) * length(studies)
+    png(file = "Figures/forestParametricGeneralLm.png", height = 200 + 40*k^.85) 
+      metafor::forest(meta, xlim=c(-2, 2), cex=0.75, ylim=c(-1, 20), rows=c(22:20,16:14,10:8,4:2), 
+                      slab = rep(c("Study 1","Study 2", "Study 3"),length(studies)+1),
+                      mlab="", main=paste0("Meta Analysis: Forest Plot [Parametric] \n(",name,")")) # , xlab = "Standardized Beta"
+      par(font=2)
+      text(-2.05, c(17,11,5), cex=0.75, pos=4, names)
+      m=1
+      for(i in 3:1){
+        addpoly(meta.parametric[[i]], row=m, cex=0.75, mlab=paste("►FE",names[i]),)
+        m <- m+6
+      }
+      text(-2.05, 19, "Predictors by study",  cex=.8, pos=4)
+      text(2, 19, "Semi-Partial Correlation [95% CI]", cex=.8, pos=2)
+    dev.off()
+
+### Bootstrapped Meta-Analysis
+    var.boot <- var
+    names.boot <- names
+    meta.bootstrapped <- list()
+    meta.bootstrapped.sum <- data.frame(effect = var.boot, 
+                                      name = names.boot, 
+                                      beta.Worker = NA, 
+                                      CI.Worker = NA,
+                                      beta.Student = NA, 
+                                      CI.Student = NA,
+                                      beta.Medical = NA,
+                                      CI.Medical = NA, 
+                                      RE.beta = NA,
+                                      RE.CI = NA,
+                                      RE.pval = NA,
+                                      RE.star = NA)
+    
+    # i = 3
+    for(i in 1:length(var.boot)){
+      md <- escalc(data = lmMetaTbl[lmMetaTbl$coef==var.boot[i],],
+                   measure = "SPCOR",
+                   yi = B,
+                   sei = se,
+                   ni = n,
+                   mi = m,
+                   var.names = c(paste(var.boot[i],".yi",sep=""),paste(var.boot[i],".vi",sep="")))
+      
+      meta.bootstrapped[[var.boot[i]]] <- rma(yi = get(paste(var.boot[i],".yi",sep="")),
+                                              vi = get(paste(var.boot[i],".vi",sep="")),
+                                              data = md,
+                                              method = "FE",
+                                              slab = sample)
+      #metafor::forest(meta.bootstrapped[[var.boot[i]]],
+      #                main = paste("Meta Analysis ",names.boot[i],sep = ""))
+      meta.bootstrapped.sum$effect[i] <- var[i]
+      meta.bootstrapped.sum$beta.Worker[i] <-
+        meta.bootstrapped[[var[i]]]$yi[1]
+      meta.bootstrapped.sum$beta.Student[i] <-
+        meta.bootstrapped[[var[i]]]$yi[2]
+      meta.bootstrapped.sum$beta.Medical[i] <-
+        meta.bootstrapped[[var[i]]]$yi[3]
+      meta.bootstrapped.sum$CI.Worker[i] <-
+        paste(
+          "[",
+          round(meta.bootstrapped[[var[i]]]$yi[1] -
+                  1.96 * sqrt(meta.bootstrapped[[var[i]]]$vi[1]), 2),
+          ", ",
+          round(meta.bootstrapped[[var[i]]]$yi[1] + 1.96 * sqrt(meta.bootstrapped[[var[i]]]$vi[1]), 2),
+          "]",
+          sep = ""
+        )
+      meta.bootstrapped.sum$CI.Student[i] <-
+        paste(
+          "[",
+          round(meta.bootstrapped[[var[i]]]$yi[2] -
+                  1.96 * sqrt(meta.bootstrapped[[var[i]]]$vi[2]), 2),
+          ", ",
+          round(meta.bootstrapped[[var[i]]]$yi[2] + 1.96 * sqrt(meta.bootstrapped[[var[i]]]$vi[2]), 2),
+          "]",
+          sep = ""
+        )
+      meta.bootstrapped.sum$CI.Medical[i] <-
+        paste(
+          "[",
+          round(meta.bootstrapped[[var[i]]]$yi[3] -
+                  1.96 * sqrt(meta.bootstrapped[[var[i]]]$vi[3]), 2),
+          ", ",
+          round(meta.bootstrapped[[var[i]]]$yi[3] + 1.96 * sqrt(meta.bootstrapped[[var[i]]]$vi[3]), 2),
+          "]",
+          sep = ""
+        )
+      meta.bootstrapped.sum$RE.beta[i] <- meta.bootstrapped[[var[i]]]$b
+      meta.bootstrapped.sum$RE.CI[i] <- paste(
+        "[",
+        round(meta.bootstrapped[[var[i]]]$ci.lb, 2),
+        ", ",
+        round(meta.bootstrapped[[var[i]]]$ci.ub, 2),
+        "]",
+        sep = ""
+      )
+      meta.bootstrapped.sum$RE.pval[i] <- meta.bootstrapped[[var[i]]]$pval
+      meta.bootstrapped.sum$RE.star[i] <-
+        ifelse(
+          meta.bootstrapped.sum$RE.pval[i] < 0.001,
+          "***",
+          ifelse(
+            meta.bootstrapped.sum$RE.pval[i] < 0.01,
+            "**",
+            ifelse(meta.bootstrapped.sum$RE.pval[i] < 0.05, "*", "")
+          )
+        )
+    }
+    #meta.bootstrapped
+    
+    eff.boot <- escalc(data = lmMetaTbl %>% filter(coef != "(Intercept)"), 
+                       slab = coef,
+                       measure = "SPCOR",
+                       yi = B,
+                       sei = se,
+                       ni = n,
+                       mi = m)
+    meta.boot <- rma(yi = yi,
+                     vi = vi, 
+                     data = eff.boot, 
+                     method = "FE", 
+                     slab = paste(coef, sample, sep=" - "))
+
+    k <- 3*3
+    png(file = "Figures/forestBootstrappedGeneralLm.png", height = 200 + 40*k^.85)
+      metafor::forest(meta.boot, cex=0.75, xlim=c(-2, 2.5), ylim=c(-1, 20), rows=c(16:14,10:8,4:2), 
+                      slab = rep(c("Study 1","Study 2", "Study 3"),length(studies)),
+                      mlab="", main=paste0("Meta Analysis: Forest Plot [Bootstrapped] \n(",name,")")) # , xlab = "Standardized Beta")
+      par(font=2)
+      text(-2.05, c(17,11,5), cex=0.75, pos=4, names)
+      m=1
+      for(i in 3:1){
+        addpoly(meta.bootstrapped[[i]], row=m, cex=0.75, mlab=paste("►FE",names.boot[i]),)
+        m <- m+6
+      }
+      text(-2.05, 19, "Predictors by study",  cex=.8, pos=4)
+      text(2.5, 19, "Semi-Partial Correlation [95% CI]", cex=.8, pos=2)
+    dev.off()    
+    
+    
+    
+    
+    
+    
+    
 
 mdlTblElementsGeneralLmer <- list(
   c(mdlWorker$lmerInterceptAttTypeTbl, mdlWorker$lmerInterceptAttTypeTblZ),
@@ -6135,47 +6374,21 @@ mdlTblElementsGeneralLmer <- list(
   c(mdlMedical$lmerSlopesAttType, mdlMedical$lmerSlopesAttTypeZ)
   )
 
-# R2 of betas.
-# https://rdrr.io/cran/r2glmm/man/r2beta.html
-r2glmm::r2beta(
-  model = mdlWorker$lmAttFreqQualX,
-  partial = TRUE,
-  method = 'lm'
-)
 
-r2glmm::r2beta(
-  model = mdlWorker$lmerInterceptAttTypeTbl,
-  partial = TRUE,
-  # 'sgv' standardized generalized variance approach, 
-  # 'kr' (Kenward Roger approach; only with lme),
-  # 'nsj' (Nakagawa and Schielzeth approach)
-  method = 'sgv' 
-)
 
-# var = parameter name
-# https://www.rdocumentation.org/packages/metafor/versions/3.0-2/topics/escalc
-      md <- escalc(data = process[process$Parameter==var[i],],
-                   measure = "SPCOR",
-                   ti = t,
-                   ni = N,
-                   mi = m,
-                   r2i = r2,
-                   var.names = c(paste(var[i],".yi",sep=""),paste(var[i],".vi",sep="")))
-      
-      meta.parametric[[var[i]]] <- rma(yi = get(paste(var[i],".yi",sep="")),
-                                       vi = get(paste(var[i],".vi",sep="")), 
-                                       data = md, 
-                                       method = "REML", 
-                                       slab = Study)
+
+
+
+lmerTblPrep(mdlWorker$lmerInterceptAttTypeTbl, mdlWorker$lmerInterceptAttTypeTblZ)$beta
       
       
-# Alternative Meta:
-      Metaan::estmeta(
-        Beta = beta,
-        l = lowerCI,
-        u = upperCI,
-        test = "FIXED", # "RANDOM"
-      )
+# # Alternative Meta:
+#       Metaan::estmeta(
+#         Beta = beta,
+#         l = lowerCI,
+#         u = upperCI,
+#         test = "FIXED", # "RANDOM"
+#       )
 
 ```
 

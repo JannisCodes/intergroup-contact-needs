@@ -20,8 +20,26 @@ lmerTblPrep <- function (obj, objz = NULL, alpha = 0.05, ...) {
                    #ncpus = parallel::detectCores(logical = TRUE)) %>% 
     as.data.frame %>%
     tibble::rownames_to_column(., "coef")
-  coefZOut <- merge(coefZ, confZ)
-  colnames(coefZOut) <- c("coef", "est", "se", "tval", "df", "p", "lwr", "upr")
+  coefZCI <- merge(coefZ, confZ)
+  colnames(coefZCI) <- c("coef", "est", "se", "tval", "df", "p", "lwr", "upr")
+  
+  coefZR2 <- r2glmm::r2beta(
+    model = objz,
+    partial = TRUE,
+    # 'sgv' standardized generalized variance approach, 
+    # 'kr' (Kenward Roger approach; only with lme),
+    # 'nsj' (Nakagawa and Schielzeth approach)
+    method = 'sgv' 
+  ) %>%
+    as.data.frame %>%
+    select(
+      coef = Effect,
+      Rsq,
+      RsqLower = lower.CL,
+      RsqUpper = upper.CL
+    )
+  coefZOut <- merge(coefZCI, coefZR2)
+  
   coefZOut$Beta <- paste0(
     format(round(coefZOut$est, 2), nsmall = 2),
     " [", 
@@ -156,6 +174,7 @@ lmerTblPrep <- function (obj, objz = NULL, alpha = 0.05, ...) {
   
   out <- list(
     coeficients = coefOut,
+    beta = coefZOut,
     random = restat,
     fit = sumstat,
     mdlTbl = mdlTbl
@@ -167,12 +186,25 @@ lmerTblPrep <- function (obj, objz = NULL, alpha = 0.05, ...) {
 lmTblPrep <- function (obj, alpha = 0.05, ...) {
   # Summarize models
   smry <- summ(obj, confint = TRUE)
+  smrySE <- summ(obj, confint = FALSE)
   
   # Get unstandardized coefficients
-  coef <- smry$coeftable %>% 
+  coefCI <- smry$coeftable %>% 
     as.data.frame %>%
     tibble::rownames_to_column(., "coef")
-  colnames(coef) <- c("coef", "est", "lwr", "upr", "tval", "p")
+  colnames(coefCI) <- c("coef", "est", "lwr", "upr", "tval", "p")
+  
+  coefSE <- smrySE$coeftable %>% 
+    as.data.frame %>%
+    tibble::rownames_to_column(., "coef") %>%
+    select(coef, se = S.E.)
+  
+  coef <- join(
+    coefCI, 
+    coefSE,
+    by = "coef"
+  )
+  
   coef$B <- paste0(
     format(round(coef$est, 2), nsmall = 2),
     ifelse(coef$p < .0001, "****", 
@@ -192,13 +224,33 @@ lmTblPrep <- function (obj, alpha = 0.05, ...) {
     mutate(coef = Parameter) %>%
     mutate(Eta2_partial = format(round(Eta2_partial, 2), nsmall = 2))
   
+  Rsq <- r2glmm::r2beta(
+    model = obj,
+    partial = TRUE,
+    method = 'lm'
+  ) %>% 
+    as.data.frame %>%
+    select(
+      coef = Effect,
+      Rsq,
+      RsqLower = lower.CL,
+      RsqUpper = upper.CL
+    )
+  
   # Merge B and effect size
-  coefOut <- 
+  coefEta <- 
     join(
       coef %>% 
         mutate(coef = gsub('_c', '', coef)), 
        eta %>% 
         select(coef, Eta2_partial) %>% 
+        mutate(coef = gsub('_c', '', coef)),
+      by = "coef"
+    )
+  coefOut <- 
+    join(
+      coefEta, 
+      Rsq %>% 
         mutate(coef = gsub('_c', '', coef)),
       by = "coef"
     )
