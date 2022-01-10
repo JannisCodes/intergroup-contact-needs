@@ -67,6 +67,7 @@ source("./scripts/functions/themes.R")
 source("./scripts/functions/binaryCor.R")
 source("./scripts/functions/MlCorMat.R")
 source("./scripts/functions/MlTbl.R")
+source("./scripts/functions/metaLmer.R")
 
 # Markdown Options
 knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file()) # set working directory
@@ -5260,7 +5261,7 @@ mdlTblElements <- list(
   # Study 3:
   c(tblLmerS3QltSlopesCore, tblLmerS3QltSlopesCoreZ),
   c(tblLmerS3AttSlopesCore, tblLmerS3AttSlopesCoreZ),
-  c(tblLmerS3AttSlopesCoreQlt, tblLmerS3AttSlopesCoreQlt),
+  c(tblLmerS3AttSlopesCoreQlt, tblLmerS3AttSlopesCoreQltZ),
   c(tblLmerS3QltSlopesAllport, tblLmerS3QltSlopesAllportZ),
   c(tblLmerS3AttSlopesAllport, tblLmerS3AttSlopesAllportZ),
   c(tblLmerS3AttSlopesAllportQlt, tblLmerS3AttSlopesAllportQltZ),
@@ -6124,7 +6125,6 @@ rbind(
 
 
 ```{r metaGeneralLm, include=FALSE}
-
 mdlTblElementsGeneralLm <- list(mdlWorker$lmAttFreqQualX,
                                 mdlStudent$lmAttFreqQualX,
                                 mdlMedical$lmAttFreqQualX)
@@ -6360,45 +6360,194 @@ for(i in 1:length(var)){
       text(-2.05, 19, "Predictors by study",  cex=.8, pos=4)
       text(2.5, 19, "Semi-Partial Correlation [95% CI]", cex=.8, pos=2)
     dev.off()    
-    
-    
-    
-    
-    
-    
-    
+```
 
+```{r metaGeneralLmer, include=FALSE}
 mdlTblElementsGeneralLmer <- list(
   c(mdlWorker$lmerInterceptAttTypeTbl, mdlWorker$lmerInterceptAttTypeTblZ),
   c(mdlStudent$lmerSlopesAttType, mdlStudent$lmerSlopesAttTypeZ),
   c(mdlMedical$lmerSlopesAttType, mdlMedical$lmerSlopesAttTypeZ)
   )
 
+# i =1
+GeneralLmerMetaTbl <- data.frame()
+for (i in 1:length(mdlTblElementsGeneralLmer)){
+  lmerTblTmp <- lmerTblPrep(mdlTblElementsGeneralLmer[[i]][[1]], mdlTblElementsGeneralLmer[[i]][[2]])$beta %>%
+  select(
+    coef,
+    B = est,
+    se,
+    lwr,
+    upr,
+    tval,
+    Rsq
+  ) %>%
+  mutate(
+    n = lmerTblPrep(mdlTblElementsGeneralLmer[[i]][[1]], mdlTblElementsGeneralLmer[[i]][[2]])$fit$N,
+    m = nrow(.), 
+    sample = str_match(lmerTblPrep(mdlTblElementsGeneralLmer[[i]][[1]], mdlTblElementsGeneralLmer[[i]][[2]])$fit$data, "dt(.*?)Supp")[2],
+    coef = gsub(":", ".", coef)
+  )
+  GeneralLmerMetaTbl <- rbind(GeneralLmerMetaTbl, lmerTblTmp)
+}
 
-
-
-
-
-lmerTblPrep(mdlWorker$lmerInterceptAttTypeTbl, mdlWorker$lmerInterceptAttTypeTblZ)$beta
+GeneralLmerMetaTbl <- GeneralLmerMetaTbl %>% arrange(coef)
+     
+GeneralLmerMeta <- metaLmerOut(GeneralLmerMetaTbl,
+                               type = "FE",
+                               name = "GeneralLmer",
+                               title = "Contact Hypothesis — Mixed Effects Regression")
       
-      
-# # Alternative Meta:
-#       Metaan::estmeta(
-#         Beta = beta,
-#         l = lowerCI,
-#         u = upperCI,
-#         test = "FIXED", # "RANDOM"
-#       )
-
+# Alternative Meta:
+      Metaan::estmeta(
+        Beta = GeneralLmerMetaTbl$B[GeneralLmerMetaTbl$coef == "OutgroupInteraction_zwc"],
+        l = GeneralLmerMetaTbl$lwr[GeneralLmerMetaTbl$coef == "OutgroupInteraction_zwc"],
+        u = GeneralLmerMetaTbl$upr[GeneralLmerMetaTbl$coef == "OutgroupInteraction_zwc"],
+        test = "FIXED", # "RANDOM"
+      )
 ```
 
 ```{r metaTheory, include=FALSE}
+mdlTblElementsTheoryLmer <- list(
+  # Study 1:
+  c(tblLmerS1QltInterceptCore, tblLmerS1QltInterceptCoreZ),
+  c(tblLmerS1AttSlopeCore, tblLmerS1AttSlopeCoreZ),
+  c(tblLmerS1AttSlopeCoreQlt, tblLmerS1AttSlopeCoreQltZ),
+  # Study 2:
+  c(tblLmerS2QltSlopesCore, tblLmerS2QltSlopesCoreZ),
+  c(tblLmerS2AttSlopesCore, tblLmerS2AttSlopesCoreZ),
+  c(tblLmerS2AttSlopesCoreQlt, tblLmerS2AttSlopesCoreQltZ),
+  # Study 3:
+  c(tblLmerS3QltSlopesCore, tblLmerS3QltSlopesCoreZ),
+  c(tblLmerS3AttSlopesCore, tblLmerS3AttSlopesCoreZ),
+  c(tblLmerS3AttSlopesCoreQlt, tblLmerS3AttSlopesCoreQltZ),
+  c(tblLmerS3QltSlopesAllport, tblLmerS3QltSlopesAllportZ),
+  c(tblLmerS3AttSlopesAllport, tblLmerS3AttSlopesAllportZ),
+  c(tblLmerS3AttSlopesAllportQlt, tblLmerS3AttSlopesAllportQltZ),
+  c(tblLmerS3AttSlopesAllportCore, tblLmerS3AttSlopesAllportCoreZ)
+  )
 
+# i =1
+theoryMetaTbl <- data.frame()
+for (i in 1:length(mdlTblElementsTheoryLmer)){
+  lmerTblTmp <- lmerTblPrep(mdlTblElementsTheoryLmer[[i]][[1]], mdlTblElementsTheoryLmer[[i]][[2]])$beta %>%
+  select(
+    coef,
+    B = est,
+    se,
+    lwr,
+    upr,
+    tval,
+    Rsq
+  ) %>%
+  mutate(
+    n = lmerTblPrep(mdlTblElementsTheoryLmer[[i]][[1]], mdlTblElementsTheoryLmer[[i]][[2]])$fit$N,
+    m = nrow(.), 
+    dv = gsub("Raw", "", str_extract(lmerTblPrep(mdlTblElementsTheoryLmer[[i]][[1]], mdlTblElementsTheoryLmer[[i]][[2]])$fit$formula,".+?(?= ~)")),
+    sample = gsub("S", "Study", str_extract(lmerTblPrep(mdlTblElementsTheoryLmer[[i]][[1]], mdlTblElementsTheoryLmer[[i]][[2]])$fit$data, "S1|S2|S3")),
+    formula = lmerTblPrep(mdlTblElementsTheoryLmer[[i]][[1]], mdlTblElementsTheoryLmer[[i]][[2]])$fit$formula,
+    coef = gsub(":", ".", coef)
+  )
+  theoryMetaTbl <- rbind(theoryMetaTbl, lmerTblTmp)
+}
 
+theoryMetaTblNoAllport <- theoryMetaTbl %>%
+  filter(!grepl("Allport",formula)) %>% 
+  mutate(formula = gsub(" \\+ \\(.*", "", formula)) %>%
+  arrange(formula, coef, sample)
+
+TheoryMetaQualityNeed <-
+  metaLmerOut(
+    lmerDataTbl = theoryMetaTblNoAllport %>% filter(formula == "QualityRaw ~ CoreNeed"),
+    type = "FE",
+    name = "TheoryQualityCore",
+    title = "QualityRaw ~ CoreNeed"
+  )
+
+TheoryMetaAttitudeNeed <-
+  metaLmerOut(
+    lmerDataTbl = theoryMetaTblNoAllport %>% filter(formula == "Attitude ~ CoreNeed"),
+    type = "FE",
+    name = "TheoryAttitudeCore",
+    title = "Attitude ~ CoreNeed"
+  )
+
+TheoryMetaAttitudeNeedQuality <-
+  metaLmerOut(
+    lmerDataTbl = theoryMetaTblNoAllport %>% filter(formula == "Attitude ~ CoreNeed + Quality"),
+    type = "FE",
+    name = "TheoryAttitudeCoreQuality",
+    title = "Attitude ~ CoreNeed + Quality"
+  )
 ```
 
 ```{r metaRobust, include=FALSE}
+mdlRobustTblElements <- list(
+  # full
+  c(mdlWorkerLmerSlopesAttCoreInt, mdlWorkerLmerSlopesAttCoreIntZ),
+  c(mdlStudentLmerSlopesAttCoreInt, mdlStudentLmerSlopesAttCoreIntZ),
+  c(mdlMedicalLmerSlopesAttCoreInt, mdlMedicalLmerSlopesAttCoreIntZ),
+  # outgroup
+  c(mdlWorkerOutLmerSlopesCoreSdt, mdlWorkerOutLmerSlopesCoreSdtZ),
+  c(mdlStudentOutLmerSlopesCoreSdt, mdlStudentOutLmerSlopesCoreSdtZ),
+  c(mdlMedicalOutLmerSlopesCoreSdt, mdlMedicalOutLmerSlopesCoreSdtZ)
+  )
 
+# i =1
+robustMetaTbl <- data.frame()
+for (i in 1:length(mdlRobustTblElements)){
+  lmerTblTmp <- lmerTblPrep(mdlRobustTblElements[[i]][[1]], mdlRobustTblElements[[i]][[2]])$beta %>%
+  select(
+    coef,
+    B = est,
+    se,
+    lwr,
+    upr,
+    tval,
+    Rsq
+  ) %>%
+  mutate(
+    n = lmerTblPrep(mdlRobustTblElements[[i]][[1]], mdlRobustTblElements[[i]][[2]])$fit$N,
+    m = nrow(.), 
+    dv = gsub("Raw", "", str_extract(lmerTblPrep(mdlRobustTblElements[[i]][[1]], mdlRobustTblElements[[i]][[2]])$fit$formula,".+?(?= ~)")),
+    sample = gsub("S", "Study", str_extract(lmerTblPrep(mdlRobustTblElements[[i]][[1]], mdlRobustTblElements[[i]][[2]])$fit$data, "S1|S2|S3")),
+    formula = lmerTblPrep(mdlRobustTblElements[[i]][[1]], mdlRobustTblElements[[i]][[2]])$fit$formula,
+    coef = gsub(":", ".", coef)
+  )
+  robustMetaTbl <- rbind(robustMetaTbl, lmerTblTmp)
+}
+
+robustMetaTbl %>%
+  arrange(formula, coef, sample)
+
+theoryMetaTblNoAllport <- theoryMetaTbl %>%
+  filter(!grepl("Allport",formula)) %>% 
+  mutate(formula = gsub(" \\+ \\(.*", "", formula)) %>%
+  arrange(formula, coef, sample)
+
+TheoryMetaQualityNeed <-
+  metaLmerOut(
+    lmerDataTbl = theoryMetaTblNoAllport %>% filter(formula == "QualityRaw ~ CoreNeed"),
+    type = "FE",
+    name = "TheoryQualityCore",
+    title = "QualityRaw ~ CoreNeed"
+  )
+
+TheoryMetaAttitudeNeed <-
+  metaLmerOut(
+    lmerDataTbl = theoryMetaTblNoAllport %>% filter(formula == "Attitude ~ CoreNeed"),
+    type = "FE",
+    name = "TheoryAttitudeCore",
+    title = "Attitude ~ CoreNeed"
+  )
+
+TheoryMetaAttitudeNeedQuality <-
+  metaLmerOut(
+    lmerDataTbl = theoryMetaTblNoAllport %>% filter(formula == "Attitude ~ CoreNeed + Quality"),
+    type = "FE",
+    name = "TheoryAttitudeCoreQuality",
+    title = "Attitude ~ CoreNeed + Quality"
+  )
 
 ```
 
