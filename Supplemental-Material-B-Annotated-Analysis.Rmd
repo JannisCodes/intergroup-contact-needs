@@ -102,6 +102,8 @@ source("./scripts/functions/fun.panel.R")
 source("./scripts/functions/themes.R")
 source("./scripts/functions/binaryCor.R")
 source("./scripts/functions/MlCorMat.R")
+source("./scripts/functions/MlTbl.R")
+source("./scripts/functions/metaLmer.R")
 
 # Markdown Options
 knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file()) # set working directory
@@ -154,15 +156,15 @@ knitr::opts_chunk$set(
 
 <br/>
 
-<i class="fas fa-exclamation-circle"></i> Note. Multilevel effect size could be: 
-\begin{equation}
-(\#eq:MlEffectSize)
-f_b^2 = \frac{R_{ab}^2 - R_a^2}{1 - R_{ab}^2} \\
-R^2 = \frac{V_{null} - V_{model}}{V_{null}} \\
-f_b^2 = \frac{\frac{V_{null} - V_{ab}}{V_{null}} - \frac{V_{null} - V_{a}}{V_{null}}}{1 - \frac{V_{null} - V_{ab}}{V_{null}}}
-\end{equation}
+<!-- <i class="fas fa-exclamation-circle"></i> Note. Multilevel effect size could be:  -->
+<!-- \begin{equation} -->
+<!-- (\#eq:MlEffectSize) -->
+<!-- f_b^2 = \frac{R_{ab}^2 - R_a^2}{1 - R_{ab}^2} \\ -->
+<!-- R^2 = \frac{V_{null} - V_{model}}{V_{null}} \\ -->
+<!-- f_b^2 = \frac{\frac{V_{null} - V_{ab}}{V_{null}} - \frac{V_{null} - V_{a}}{V_{null}}}{1 - \frac{V_{null} - V_{ab}}{V_{null}}} -->
+<!-- \end{equation} -->
 
-<br/>
+<!-- <br/> -->
 
 # **Data Preparation**  
 
@@ -760,15 +762,62 @@ between <- df %>%
   )
 
 warning(
-  "some variable transformations (esp. _c and _z) might be across all participants (i.e., not within PP)."
+  "some variable transformations (esp. _c and _z) might be across all participants (i.e., not within PP). See next step."
 )
 
 dtWorker$full <- between
 rm(df, between)
 
+# dataframe where interaction types are recoded
+workerInteractionType <- dtWorker$full %>%
+  mutate(
+    OutgroupInteraction = as_factor(Contact_dum),
+    NonOutgroupInteraction = as_factor(inNonDutch)
+  )
+
+# Create variables centered and standardized within Participant
+# i.e., divide into trait and state
+workerWithinBetween <-
+  MlTraitState(
+    data = workerInteractionType,
+    id = "PID",
+    selection =
+      c(
+        "keyMotiveFulfilled",
+        "competence.daily.all",
+        "autonomy.daily.all",
+        "relatedness.daily.all",
+        "thermometerDutch_1",
+        "keymotive_fulfillemt_1",
+        "competence_1",
+        "autonomy_1",
+        "relatedness_1", 
+        "quality_overall_1", 
+        "OutgroupInteraction",
+        "NonOutgroupInteraction"
+      )
+  )
+
+workerOutWithinBetween <-
+  MlTraitState(
+    data = workerInteractionType %>% filter(OutgroupInteraction == "Yes"),
+    id = "PID",
+    selection =
+      c(
+        "keyMotiveFulfilled",
+        "thermometerDutch_1",
+        "keymotive_fulfillemt_1",
+        "competence_1",
+        "autonomy_1",
+        "relatedness_1", 
+        "quality_overall_1"
+      )
+  )
+
+
 # Between participants contact frequency
 workerContactFreq <- dtWorker$full %>%
-  group_by(ExternalReference) %>%
+  group_by(PID) %>%
   summarise(
     n = n(),
     SumContactNL = sum(Contact_dum),
@@ -779,13 +828,6 @@ workerContactFreq <- dtWorker$full %>%
   mutate(
     WinSumContactNL = DescTools::Winsorize(SumContactNL),
     WinSumContactNLAll = DescTools::Winsorize(SumContactNLAll)
-  )
-
-# dataframe where interaction types are recoded
-workerInteractionType <- dtWorker$full %>%
-  mutate(
-    OutgroupInteraction = as_factor(Contact_dum),
-    NonOutgroupInteraction = as_factor(inNonDutch)
   )
 
 # save cleaned data
@@ -1402,6 +1444,39 @@ seconds_to_period(round(mad(dtWorker$clean$Duration__in_seconds_)))
 
 ### Variable distributions  
 
+```{r WorkerVarDescr}
+
+
+workerMlCor <-
+  MlCorMat(
+    data = dtWorkerSupp$workerInteractionType,
+    id = "PID",
+    selection = c("keyMotiveFulfilled", "competence.daily.all", "autonomy.daily.all", "relatedness.daily.all", "quality_overall_1", "thermometerDutch_1"),
+    labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Quality", "Attitudes NL")
+  ) 
+
+workerMlCor %>%
+  kable(
+    .,
+    caption = "Worker: Multilevel Core Variable Descriptives",
+    format = "latex",
+    booktabs = TRUE,
+    linesep = linesep(c(ncol(.))),
+    align = c("l", rep("c", ncol(.) - 1))
+  ) %>%
+  footnote(
+    general = c(
+      "Upper triangle: Between-person correlations;",
+      "Lower triangle: Within-person correlations;",
+      "*** p < .001, ** p < .01,  * p < .05"
+    )
+  ) %>%
+  kable_styling(latex_options = "scale_down") %>%
+  gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
+  gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
+  save_kable("Tables/workerVarDescr.tex")
+
+```
 
 ## Contact Hypothesis
 
