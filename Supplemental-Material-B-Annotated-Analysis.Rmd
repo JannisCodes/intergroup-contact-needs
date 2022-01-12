@@ -1389,8 +1389,6 @@ The first sample we assess is the smaller sojourner study. We will sequentially 
 
 ## Data Description
 
-<i class="fas fa-exclamation-triangle"></i> Still in 'scr/workerDescriptive.R'. Needs to be merged with this document.
-
 ### Participants  
 
 ```{r workerSampleInfo}
@@ -1423,11 +1421,23 @@ workerSampleInfo <- merge(workerSampleInfo, workerOccupation)
 rm(workerOccupation)
 
 # look at frequencies of characteristics 
-table(workerSampleInfo$gender)
-table(workerSampleInfo$edu)
-table(workerSampleInfo$occupation)
-table(as.character(workerSampleInfo$nationality))
+workerSampleInfo %>% 
+  select(
+    "Number of Measurements" = dailiesN,
+    Age = age,
+    Gender = gender,
+    Education = edu,
+    Nationality = nationality,
+    Occupation = occupation
+  ) %>%
+  mutate(
+    Nationality = as.character(Nationality)
+  ) %>%
+  tbl_summary(.,
+              sort = list(everything() ~ "frequency"))
 ```
+
+For the first study, we recruited `r nrow(workerSampleInfo)` migrants using the local paid participant pool and specifically targeted non-Dutch migrants to participate in our study. Participants reported on their interactions for at least 30 days with two daily measures (capturing the morning and afternoon). With this design, we aimed at getting 50-60 measurements per participant (\textit{M} = `r format(round(mean(workerSampleInfo$dailiesN),2), nsmall=2)`, \textit{SD} = `r format(round(sd(workerSampleInfo$dailiesN),2), nsmall=2)`, \textit{total N} = `r sum(workerSampleInfo$dailiesN)`). This is a common number of measurements found in experience sampling studies and offers sufficient power to model processes within and between participants \citep[e.g., for a systematic review see][]{AanhetRot2012}. Participants were compensated for their participation with up to 34 Euros – each two Euros for pre- and post-questionnaire as well as 50 Eurocents for every experience sampling measurement occasion. The sample consisted of relatively young, educated, and western migrants from the global north ($M_{age}$ = `r format(round(mean(workerSampleInfo$age),2), nsmall=2)`, $SD_{age}$ = `r format(round(sd(workerSampleInfo$age),2), nsmall=2)`, `r nrow(workerSampleInfo %>% filter(gender == "Female"))` women, `r nrow(workerSampleInfo %>% filter(occupation == "student"))` students). The sample accurately describes one of the largest groups of migrants in the region \citep[][]{GemeenteGroningen2015}.
 
 ### Interactions  
 
@@ -1449,7 +1459,7 @@ seconds_to_period(round(mad(dtWorker$clean$Duration__in_seconds_)))
 
 workerMlCor <-
   MlCorMat(
-    data = dtWorkerSupp$workerInteractionType,
+    data = workerInteractionType,
     id = "PID",
     selection = c("keyMotiveFulfilled", "competence.daily.all", "autonomy.daily.all", "relatedness.daily.all", "quality_overall_1", "thermometerDutch_1"),
     labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Quality", "Attitudes NL")
@@ -1459,7 +1469,7 @@ workerMlCor %>%
   kable(
     .,
     caption = "Worker: Multilevel Core Variable Descriptives",
-    format = "latex",
+    format = "html",
     booktabs = TRUE,
     linesep = linesep(c(ncol(.))),
     align = c("l", rep("c", ncol(.) - 1))
@@ -1470,11 +1480,7 @@ workerMlCor %>%
       "Lower triangle: Within-person correlations;",
       "*** p < .001, ** p < .01,  * p < .05"
     )
-  ) %>%
-  kable_styling(latex_options = "scale_down") %>%
-  gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
-  gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
-  save_kable("Tables/workerVarDescr.tex")
+  )
 
 ```
 
