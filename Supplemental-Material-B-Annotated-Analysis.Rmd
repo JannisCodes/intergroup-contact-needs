@@ -1588,9 +1588,8 @@ workerAttInteractionType <- workerInteractionType %>%
     ifelse(NonOutgroupInteraction == "yes", "In", ifelse(NonOutgroupInteraction == "no", "NoIn", NA)),
     sep = ", "
   ))
-  
-as.numeric(workerInteractionType$NonOutgroupInteraction)
 
+# violin plot of attitudes by interaction type group
 ggplot(workerAttInteractionType, aes(y=Attitude, x=OutgroupInteraction, group = interaction(OutgroupInteraction, NonOutgroupInteraction), fill=NonOutgroupInteraction))+
   geom_violin(trim = T, width=.8, position = position_dodge(0.8)) +
   geom_boxplot(width=0.04,
@@ -1649,7 +1648,7 @@ ggplot(workerAttInteractionType, aes(y=Attitude, x=OutgroupInteraction, group = 
 
 
 
-
+# summarize by interaction type group
 workerContactType <- dtWorker$full %>%
   group_by(
     Contact_dum,
