@@ -1559,8 +1559,6 @@ We find that neither the number of interactions nor the number of measurement be
 
 In a next step we take into account that having an interaction with an outgroup member, does not happen in a social vacuum. Participants who indicated that they had an interaction with an outgroup member include measurement occasions during which someone either only had an interaction with an outgroup member as well as times during which a person also had interaction(s) with a non-Dutch person. Inversely, participants who indicated that they did not have an interaction with a Dutch person might either have had no interaction at all or had an interaction with a non-Dutch person. We, thus consider all possible combinations and their independent influences on outgroup attitudes.  
 
-#### OLS regression
-
 We first assess the impact of the different interaction types across all measurement points (lumping all beeps together).
 
 \begin{equation}
@@ -1736,11 +1734,99 @@ summ(
 
 We find that while controlling for interactions with non-Dutch people, outgroup attitudes were significantly higher when participants had an interaction with a Dutch person. The effect is relatively small (`r format(round(mdlWorker$lmAttInt$coefficients["OutgroupInteractionYes"], 2), nsmall=2)` points on a 0--100 scale). More importantly, however, this analysis lumps all ESM beeps from every participants together and ignores that the data is nested within participants.
 
-#### ML regression
+### Interaction Frequency and Interaction Quality
+
+In a next step we check whether the effect of outgroup interactions, in part, depends on the quality during the interactions. In this step we aggregate the within person data to remove any dependency issues. Additionally, because we can only assess interaction quality when there is an interaction, it is difficult to assess this with the interaction dummy as a within person predictor. Instead, we will use an aggregate measure of interaction quality and average interaction quality to consider the two predictors jointly.  Such an aggregation in essence mirrors the general 'past recall' approach that dominates the field. The only difference being that we aggregate data that participants recorded shortly after the actual interactions, wheras in most recall studies this aggregation is done mentally by the participant.  
+
+\begin{equation}
+(\#eq:FreqQual)
+Attitude = ContactFreq \times AverageContactQual
+\end{equation}
+
+```{r workerFreqQualCor}
+# prepare data
+workerAvFreQual <- dtWorker$full %>%
+  group_by(ExternalReference) %>%
+  summarise(
+    n = n(),
+    SumContactNL = sum(Contact_dum),
+    PercContactNL = SumContactNL / n * 100,
+    SumContactNLAll = sum(number),
+    AvAttitude = mean(thermometerDutch_1, na.rm = TRUE),
+    AvQuality = mean(quality_overall_1, na.rm = TRUE)
+  ) %>%
+  mutate(
+    WinSumContactNL = DescTools::Winsorize(SumContactNL),
+    WinSumContactNLAll = DescTools::Winsorize(SumContactNLAll),
+    SumContactNL_c = SumContactNL - mean(SumContactNL, na.rm = TRUE),
+    SumContactNLAll_c = SumContactNLAll - mean(SumContactNLAll, na.rm = TRUE),
+    AvAttitude_c = AvAttitude - mean(AvAttitude, na.rm = TRUE),
+    AvQuality_c = AvQuality - mean(AvQuality, na.rm = TRUE)
+  )
+
+# correlation panel
+pairs.panels.new(
+  workerAvFreQual %>% select(SumContactNL, SumContactNLAll, AvQuality, AvAttitude),
+  labels = c(
+    "Sum:\nNumer of beeps with Outgroup Contact (NL)",
+    "Sum:\nNumber of Outgroup Contacts (NL)",
+    "Mean:\nInteraction Quality",
+    "Mean:\nOutgroup Attitudes (NL)"
+  )
+)
+
+# correlation panel with interaction sums winsorized
+pairs.panels.new(
+  workerAvFreQual %>% select(WinSumContactNL, WinSumContactNLAll, AvQuality, AvAttitude),
+  labels = c(
+    "Sum:\nNumer of beeps with Outgroup Contact (NL)\n[Winsorized]",
+    "Sum:\nNumber of Outgroup Contacts (NL)\n[Winsorized]",
+    "Mean:\nInteraction Quality",
+    "Mean:\nOutgroup Attitudes (NL)"
+  )
+)
+```
+
+Within the data, we find a medium sized correlation between the participants' Average Interaction Quality and their Average Outgroup Attitudes. Thus within our data participants with a higher quality outgroup interactions also held more positive attitudes towards that group. However, the frequency of intergroup interactions had no meaningful correlation with either the average interaction quality or average outgroup attitudes.  
+
+```{r workerModelOlsAttFreqQual}
+# regression
+mdlWorker$lmAttFreqQualX <-
+  lm(AvAttitude ~ SumContactNL_c * AvQuality_c, data = workerAvFreQual)
+# summary(lmWorkerAttFreqQualX)
+
+summ(
+  mdlWorker$lmAttFreqQualX,
+  confint = TRUE,
+  digits = 3,
+  center = TRUE
+)
+
+mdlWorker$lmAttFreqQualXEta <-
+  effectsize::eta_squared(mdlWorker$lmAttFreqQualX, partial = TRUE)
+
+interactions::interact_plot(
+  mdlWorker$lmAttFreqQualX,
+  pred = AvQuality_c,
+  modx = SumContactNL_c,
+  interval = TRUE,
+  partial.residuals = TRUE
+)
+
+interactions::johnson_neyman(mdlWorker$lmAttFreqQualX,
+                             pred = AvQuality_c,
+                             modx = SumContactNL_c,
+                             alpha = .05)
+```
+
+We find that interaction quality is significantly related to higher outgroup attitudes (albeit with a small effect size). We also find that in our sample with an increasing number of interactions the positive effect of interaction quality becomes weaker. However, it should be noted that this is based on data aggregating all within participant nuances and is only the date of 21 people.  
+
+
+### ML regression
 
 We, thus, proceed with a multilevel analysis, which acknowledges that the measurements are nested within participants.  
 
-##### Unconditional model
+#### Unconditional model
 
 We start by creating an empty random intercept model (i.e., let the outgroup attitude intercept be different between participants; unconditional model).  
 
@@ -1834,7 +1920,7 @@ To assess the variances within and between participants we look at the ICC $\tau
 
 We find that an estimated `r format(round(mdlWorker$IccPercAttNull, 2), nsmall=2)`% of the variation in Feeling Thermometer scores is explained by between participant differences (clustering by PID). This is to say that `r format(round(mdlWorker$IccPercAttNull, 2), nsmall=2)`% of the variance in any individual report of Attitudes towards the Dutch can be explained by the properties of the individual who provided the rating. And we find that including 'participant' as a predictor adds significantly to the model.  
 
-##### random intercept with predictors  
+#### random intercept with predictors  
 
 To this random intercept model we now add the two types of interactions possible at each measurement point as contemporaneous predictors of outgroup attitudes. That is: We check whether within participants having an outgroup interaction (or a non-outgroup interaction) is associated with more positive outgroup attitudes at the same measurement point.  
 
@@ -1914,7 +2000,7 @@ We find that a random intercept model with the two interaction types as predicto
 
 TL;DR: Interaction with Dutch is great predictor, interactions with non-Dutch is not.
 
-##### random slope
+#### random slope
 
 In a next step, we check whether further letting the effect of the different interaction types vary between participants explains additional variance in outgroup attitudes (i.e., random slopes).   
 
@@ -2036,89 +2122,6 @@ ggsave(
 We find that adding the random slopes does not add significantly beyond the random intercept model. This is unusual because this might indicate the the effect is very consistent across participants. However, this might also be the case due to a small number of participants, or other measurement issues.  
 
 TL;DR: Random slopes don't add much for this super simple model.
-
-### Interaction Frequency and Interaction Quality
-
-In a final step we check whether the effect outgroup interactions, in part, depends on the quality during the interactions. Because we can only assess interaction quality when there is an interaction, it is difficult to assess this with the interaction dummy as a within person predictor. Instead, we will use an aggregate measure of interaction quality and average interaction quality to consider the two predictors jointly.  
-
-\begin{equation}
-(\#eq:FreqQual)
-Attitude = ContactFreq \times AverageContactQual
-\end{equation}
-
-```{r workerFreqQualCor}
-# prepare data
-workerAvFreQual <- dtWorker$full %>%
-  group_by(ExternalReference) %>%
-  summarise(
-    n = n(),
-    SumContactNL = sum(Contact_dum),
-    PercContactNL = SumContactNL / n * 100,
-    SumContactNLAll = sum(number),
-    AvAttitude = mean(thermometerDutch_1, na.rm = TRUE),
-    AvQuality = mean(quality_overall_1, na.rm = TRUE)
-  ) %>%
-  mutate(
-    WinSumContactNL = DescTools::Winsorize(SumContactNL),
-    WinSumContactNLAll = DescTools::Winsorize(SumContactNLAll)
-  )
-
-# correlation panel
-pairs.panels.new(
-  workerAvFreQual %>% select(SumContactNL, SumContactNLAll, AvQuality, AvAttitude),
-  labels = c(
-    "Sum:\nNumer of beeps with Outgroup Contact (NL)",
-    "Sum:\nNumber of Outgroup Contacts (NL)",
-    "Mean:\nInteraction Quality",
-    "Mean:\nOutgroup Attitudes (NL)"
-  )
-)
-
-# correlation panel with interaction sums winsorized
-pairs.panels.new(
-  workerAvFreQual %>% select(WinSumContactNL, WinSumContactNLAll, AvQuality, AvAttitude),
-  labels = c(
-    "Sum:\nNumer of beeps with Outgroup Contact (NL)\n[Winsorized]",
-    "Sum:\nNumber of Outgroup Contacts (NL)\n[Winsorized]",
-    "Mean:\nInteraction Quality",
-    "Mean:\nOutgroup Attitudes (NL)"
-  )
-)
-```
-
-Within the data, we find a medium sized correlation between the participants' Average Interaction Quality and their Average Outgroup Attitudes. Thus within our data participants with a higher quality outgroup interactions also held more positive attitudes towards that group. However, the frequency of intergroup interactions had no meaningful correlation with either the average interaction quality or average outgroup attitudes.  
-
-```{r workerModelOlsAttFreqQual}
-# regression
-mdlWorker$lmAttFreqQualX <-
-  lm(AvAttitude ~ SumContactNL * AvQuality, data = workerAvFreQual)
-# summary(lmWorkerAttFreqQualX)
-
-summ(
-  mdlWorker$lmAttFreqQualX,
-  confint = TRUE,
-  digits = 3,
-  center = TRUE
-)
-
-mdlWorker$lmAttFreqQualXEta <-
-  effectsize::eta_squared(mdlWorker$lmAttFreqQualX, partial = TRUE)
-
-interactions::interact_plot(
-  mdlWorker$lmAttFreqQualX,
-  pred = AvQuality,
-  modx = SumContactNL,
-  interval = TRUE,
-  partial.residuals = TRUE
-)
-
-interactions::johnson_neyman(mdlWorker$lmAttFreqQualX,
-                             pred = AvQuality,
-                             modx = SumContactNL,
-                             alpha = .05)
-```
-
-We find that interaction quality is significantly related to higher outgroup attitudes (albeit with a small effect size). We also find that in our sample with an increasing number of interactions the positive effect of interaction quality becomes weaker. However, it should be noted that this is based on data aggregating all within participant nuances and is only the date of 21 people.  
 
 ## Need Fulfillment
 
