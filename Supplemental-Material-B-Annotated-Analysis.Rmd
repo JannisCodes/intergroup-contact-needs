@@ -1443,11 +1443,41 @@ For the first study, we recruited `r nrow(workerSampleInfo)` migrants using the 
 
 ```{r workerInteractionInfo}
 # duration of survey should include median and MAD
-seconds_to_period(median(dtWorker$clean$Duration__in_seconds_))
-seconds_to_period(round(mad(dtWorker$clean$Duration__in_seconds_)))
+workerInteractions <- dtWorker$clean %>%
+  dplyr::select(Duration__in_seconds_) %>%
+  mutate_all(as.numeric)
 
-#workerOutIntPerc <- (sum(workerAvFreQual$SumContactNL) / nrow(workerInteractionType) * 100) %>% round(2) %>% format(nsmall=2)
-# To test the prerequisite effect of intergroup contact, every daily diary measurement started with the question “_Did you meet a Dutch person this morning [/afternoon]? (In person interaction for at least 10 minutes)_” (`r workerOutIntPerc`% of all `r nrow(workerInteractionType)` recorded Recaps included an interaction with Dutch majority members). This question is our main predictor to test whether having an intergroup contact indeed has an influence on one’s rating of the outgroup attitudes during the respective morning or afternoon (i.e., a longitudinal test of the contact hypothesis). Methodologically, this question also determined the following survey flow for the participants. If they had interactions with Dutch people, they were asked to report details on the duration, type, and quality of the interaction. If they did not have interactions with Dutch people, participants were asked to report on their desire to have an interaction – this was done to balance the duration of the two answer options to not make it more attractive for a participant to answer that they did not have an interaction.
+workerInteractions %>%
+  psych::describe(., trim = .2) %>%
+  as.data.frame %>%
+  mutate(vars = c("Duration [in seconds]"), # rownames(.),
+         na = nrow(dtWorker$clean)-n,
+         win.mean = sapply(workerInteractions,psych::winsor.mean,simplify=T),
+         win.sd = sapply(workerInteractions,psych::winsor.sd,simplify=T)) %>%
+  dplyr::select(characteristic = vars, n, na, 
+                mean, `mean win` = win.mean, `mean trim` = trimmed, median,
+                sd, `sd win` = win.sd, MAD = mad, min, max,
+                skew, kurtosis) %>%
+  kbl(., 
+      #label = "",
+      caption = "Study 1: Duration of Measurement in Seconds",
+      format = "html", 
+      #linesep = "",
+      #booktabs = T,
+      row.names = F,
+      digits = 2,
+      align = c('l', rep('c', ncol(.)-1)))  %>%
+  add_header_above(., c(" " = 3,"Centrality" = 4, "Dispersion" = 5, "Distribution" = 2)) %>%
+  footnote(general = "'na' indicates the number of measurements for which measurement duration is unknown.") %>%
+  kable_classic(full_width = F, 
+                lightable_options = "hover", 
+                html_font = "Cambria")
+
+workerInteractionType %>%
+  select(OutgroupInteraction,
+         NonOutgroupInteraction) %>%
+  tbl_summary(.,
+              sort = list(everything() ~ "frequency"))
 ```
 
 
@@ -1455,8 +1485,7 @@ seconds_to_period(round(mad(dtWorker$clean$Duration__in_seconds_)))
 ### Variable distributions  
 
 ```{r WorkerVarDescr}
-
-
+# calculate correlations and descriptives
 workerMlCor <-
   MlCorMat(
     data = workerInteractionType,
@@ -1470,17 +1499,22 @@ workerMlCor %>%
     .,
     caption = "Worker: Multilevel Core Variable Descriptives",
     format = "html",
-    booktabs = TRUE,
+    #booktabs = TRUE,
     linesep = linesep(c(ncol(.))),
     align = c("l", rep("c", ncol(.) - 1))
   ) %>%
+  pack_rows("Correlations", 1, ncol(workerMlCor)) %>%
+  pack_rows("Descriptives", ncol(workerMlCor)+1, nrow(workerMlCor)) %>%
   footnote(
     general = c(
       "Upper triangle: Between-person correlations;",
       "Lower triangle: Within-person correlations;",
       "*** p < .001, ** p < .01,  * p < .05"
     )
-  )
+  ) %>%
+  kable_classic(full_width = F, 
+                lightable_options = "hover", 
+                html_font = "Cambria")
 
 ```
 
@@ -1542,6 +1576,80 @@ Attitude = OutgroupInteraction + NonOutgroupInteraction
 
 ```{r workerInteractionTypePlt, fig.height=12}
 # between participants interaction type
+workerAttInteractionType <- workerInteractionType %>%
+  select(
+    PID,
+    OutgroupInteraction,
+    NonOutgroupInteraction,
+    Attitude = thermometerDutch_1
+  ) %>%
+  mutate(InteractionType = paste(
+    ifelse(OutgroupInteraction == "Yes", "Out", ifelse(OutgroupInteraction == "No", "NoOut", NA)),
+    ifelse(NonOutgroupInteraction == "yes", "In", ifelse(NonOutgroupInteraction == "no", "NoIn", NA)),
+    sep = ", "
+  ))
+  
+as.numeric(workerInteractionType$NonOutgroupInteraction)
+
+ggplot(workerAttInteractionType, aes(y=Attitude, x=OutgroupInteraction, group = interaction(OutgroupInteraction, NonOutgroupInteraction), fill=NonOutgroupInteraction))+
+  geom_violin(trim = T, width=.8, position = position_dodge(0.8)) +
+  geom_boxplot(width=0.04,
+               position = position_dodge(.8),
+               outlier.colour = NULL, 
+               outlier.shape = NA, 
+               notch=F, fill="black", 
+               lwd=1, color="black") + 
+  # geom_jitter(width = 0.15,
+  #            shape=18,
+  #            alpha=.2, size=1) +
+  stat_summary(fun.y=mean, 
+               geom="point", 
+               shape=16, 
+               size=1, 
+               position = position_dodge(0.8),
+               colour="white") +
+  #stat_summary(fun.data="mean_sdl",  
+  #             fun.args = list(mult=1), 
+  #             geom="pointrange", 
+  #             color = "red", 
+  #             width=.2)+
+  stat_summary(geom = "crossbar", 
+               width=0.04, 
+               fatten=0, 
+               position = position_dodge(0.8),
+               color="white", 
+               fun.data = function(x){ return(c(y=median(x), 
+                                                ymin=median(x), 
+                                                ymax=median(x))) })+
+  ylab("Outgroup Attitudes")+
+  xlab("Outgroup Interaction") +
+  ggtitle("Violin Plot:\nOutgroup Attitudes by Interaction Type")+
+  scale_y_continuous(
+    limits = c(0, 100),
+    breaks = c(0, 15, 30, 40, 50, 60, 70, 85, 100),
+    labels = c(
+      "Very cold or unfavorable feelings 0°",
+      "Quite cold and unfavorable feelings 15°",
+      "Fairly cold and unfavorable feelings 30°",
+      "A bit cold and unfavorable feelings 40°",
+      "No feeling at all 50°",
+      "A bit warm and favorable feelings 60°",
+      "Fairly warm and favorable feelings 70° ",
+      "Quite warm and favorable feelings 85° ",
+      "Very warm and favorable feelings 100° "
+    )
+  ) +
+  #coord_flip()+
+  scale_fill_brewer(palette = "Pastel2", name = "Non-Outgroup Interaction")+
+  theme_Publication()+
+  theme(strip.background =element_rect(fill="black", color="black"),
+        strip.text = element_text(colour = 'white', face="bold"))#,
+        #panel.border = element_rect(color="grey"),
+        #legend.position="none")
+
+
+
+
 workerContactType <- dtWorker$full %>%
   group_by(
     Contact_dum,
@@ -1562,8 +1670,8 @@ workerContactType <- dtWorker$full %>%
     sep = ", "
   ))
 
-# plot bar chart
-ggplot(
+# plot bar chart (alternative with less information about actual data)
+workerAttInteractionTypeBar <- ggplot(
   workerContactType,
   aes(
     y = AttitudeM,
