@@ -98,7 +98,7 @@ load("data/wrangled.RData")
 
 Based on our main hypotheses, the aim of our first study is to specifically test the general contact hypothesis, the influence of core need fulfillment, and perceived interaction quality during intergroup contacts. To this aim, we conducted an intensive longitudinal survey study with recent migrants to the Netherlands. Data was collected from May 5\textsuperscript{th} through June 6\textsuperscript{th}, 2018 (and all participants started the study within the first two days).
 
-The full surveys are available in our Online Supplementary Material A and the full data description is available in Online Supplementary Materials B. Correlations and descriptive statistics of the included variables are available in Table \ref{tab:descrFullLong} and Table \ref{tab:descrOutLong}.
+The full surveys are available in our Online Supplementary Material A and the full data description is available in Online Supplementary Materials B. Correlations and descriptive statistics of the included variables are available in Table \ref{tab:descrFullWide} and Table \ref{tab:descrOutWide}.
 
 \subsection{Methods}
 
@@ -1356,7 +1356,7 @@ In a final step, we controlled for other fundamental psychological needs during 
 
 The aim of Study 2 is similar to Study 1, as we again test the general contact hypothesis, the influence of core need fulfillment, and perceived interaction quality during intergroup contacts. However, in this second study we collected a substantially larger sample of international students who recently arrived in the Netherlands and also improved the study design (e.g., pop up explanations described later). The survey method again offers a large body of ecologically valid data on need satisfaction in real-life intergroup contact situations as these students will likely interact with the Dutch majority outgroup on a daily basis. Data was collected from November 19\textsuperscript{th}, 2018 through January 6\textsuperscript{th}, 2019.
 
-The full surveys are available in our Online Supplementary Material A and the full data description is available in Online Supplementary Materials B. Correlations and descriptive statistics of the included variables are available in Table \ref{tab:descrFullLong} and Table \ref{tab:descrOutLong}.
+The full surveys are available in our Online Supplementary Material A and the full data description is available in Online Supplementary Materials B. Correlations and descriptive statistics of the included variables are available in Table \ref{tab:descrFullWide} and Table \ref{tab:descrOutWide}.
 
 \subsection{Methods}
 
@@ -2685,7 +2685,7 @@ The aim of this final study is to extend the previous studies by additionally te
 
 For this study we specifically recruited international medical students, because they represent a particular group of migrants who face structural requirements to integrate and interact with Dutch majority outgroup members on a daily basis. As part of their educational program, the migrants are required to take language courses and interact with patients as part of their medical internships and medical residency. The extensive longitudinal survey method again offers a large body of ecologically valid data on need satisfaction in real-life intergroup contact situations. Data were collected from November 8\textsuperscript{th}, 2019 to January 10\textsuperscript{th}, 2020.
 
-The full surveys are available in our Online Supplementary Material A and the full data description is available in Online Supplementary Materials B. Correlations and descriptive statistics of the included variables are available in Tables \ref{tab:descrFullLong} and \ref{tab:descrOutLong}.
+The full surveys are available in our Online Supplementary Material A and the full data description is available in Online Supplementary Materials B. Correlations and descriptive statistics of the included variables are available in Tables \ref{tab:descrFullWide} and \ref{tab:descrOutWide}.
 
 \subsection{Methods}
 
