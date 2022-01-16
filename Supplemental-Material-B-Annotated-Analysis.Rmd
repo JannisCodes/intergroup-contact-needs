@@ -32,6 +32,8 @@ editor_options:
   chunk_output_type: console
 bibliography: references.bib
 csl: apa.csl
+header-includes:
+   - \usepackage{amsmath, nccmath}
 ---
 
 <style type="text/css">
@@ -155,6 +157,30 @@ knitr::opts_chunk$set(
 <i class="fas fa-exclamation-circle"></i> Note. Boxplots display the interquartile range (IQR, center box), and the whiskers extend 1.5*IQR from the lower and upper hinge. The white point indicates the mean and the white center line indicates the median.   
 
 <br/>
+
+<i class="fas fa-exclamation-circle"></i> Note. All multilevel assumptions are tested as usual including (e.g., for random slopes model with _j_ within person predictors):
+
+$$
+\begin{align}
+  &\textrm{Level 1 Variance:}\ e_{ti} \sim \mathcal{N}(0,\sigma^2) \\
+  &\textrm{Level 2 Variance:}\ \begin{bmatrix} u_{0i}\\ \vdots\\ u_{ji}\end{bmatrix} 
+  \sim \mathcal{N}
+  \begin{pmatrix}
+    \begin{bmatrix} 
+      0 \\ 
+      \vdots \\
+      0
+    \end{bmatrix}, 
+    \begin{bmatrix} 
+      \tau_{00}^2 &  & \\ 
+      \vdots & \ddots & \\
+      \tau_{j0} & \ldots & \tau_{jj}^2
+    \end{bmatrix}
+  \end{pmatrix}
+\end{align}
+$$
+
+</br>
 
 <!-- <i class="fas fa-exclamation-circle"></i> Note. Multilevel effect size could be:  -->
 <!-- \begin{equation} -->
@@ -1822,9 +1848,9 @@ interactions::johnson_neyman(mdlWorker$lmAttFreqQualX,
 We find that interaction quality is significantly related to higher outgroup attitudes (albeit with a small effect size). We also find that in our sample with an increasing number of interactions the positive effect of interaction quality becomes weaker. However, it should be noted that this is based on data aggregating all within participant nuances and is only the date of 21 people.  
 
 
-### ML regression
+### Multi-Level Regression
 
-We, thus, proceed with a multilevel analysis, which acknowledges that the measurements are nested within participants.  
+We then proceeded with a multilevel analysis, which also acknowledges that the measurements are nested within participants, but makes full use of the within participant variation.  
 
 #### Unconditional model
 
@@ -1832,8 +1858,13 @@ We start by creating an empty random intercept model (i.e., let the outgroup att
 
 \begin{equation}
 (\#eq:WorkerEmptyModel)
-Attitude_{ti} = \gamma_{00} + u_{0i} + e_{ti} \\
-\textrm{with}\ u_{0i} \sim \mathcal{N}(0,\tau_{00}^2)\ \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i}
+  \end{split} 
 \end{equation}
 
 ```{r workerModelMLAttNull}
@@ -1879,7 +1910,7 @@ mdlWorker$IccPercAttNull <-
 
 We then compare the random intercept model to a model without a random intercept (i.e., without levels at all).  
 
-```{r workerModelInterceptNull}
+```{r workerModelGls}
 # Create and save Model
 mdlWorker$glsAttNull  <-
   gls(thermometerDutch_1 ~ 1,
@@ -1926,8 +1957,16 @@ To this random intercept model we now add the two types of interactions possible
 
 \begin{equation}
 (\#eq:WorkerInteractionTypeModel)
-Attitude_{ti} = \gamma_{00} + \gamma_{10}OutgroupInteraction_{ti} + \gamma_{10}NonOutgroupInteraction_{ti} + u_{0i} + e_{ti} \\
-\textrm{with}\ u_{0i} \sim \mathcal{N}(0,\tau_{00}^2)\ \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}OutgroupInteraction_{ti} + \\
+                           &\ \beta_{2i}NonOutgroupInteraction_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} \\
+                      &\ \beta_{2i} = \gamma_{20}
+  \end{split} 
 \end{equation}
 
 ```{r workerModelInterceptAttType}
@@ -1950,11 +1989,8 @@ summ(
   center = TRUE
 )
 
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(thermometerDutch_1 ~ Contact_dum + inNonDutch + (1|PID),data=dtWorker$full),
-#                  method="boot",nsim=1000, parallel = "multicore",
-#                  ncpus = 4, seed = 42),
-#          "output/tables/ML-Inter-CI.csv")
+mdlWorker$lmerInterceptAttTypeCI <- 
+  confint(method = "Wald", mdlWorker$lmerInterceptAttType)
 
 # Compare new model to previous step
 anova(mdlWorker$lmeAttNull, 
@@ -2005,10 +2041,19 @@ TL;DR: Interaction with Dutch is great predictor, interactions with non-Dutch is
 In a next step, we check whether further letting the effect of the different interaction types vary between participants explains additional variance in outgroup attitudes (i.e., random slopes).   
 
 \begin{equation}
-(\#eq:RandSlopesEq)
-Attitude_{ti} = \gamma_{00} + \gamma_{10}OutgroupInteraction_{ti} + \gamma_{10}NonOutgroupInteraction_{ti} + u_{0i} + u_{1i} + e_{ti}  \\
-\textrm{with}\ \begin{bmatrix} u_{0i}\\ u_{1i}\end{bmatrix} \sim \mathcal{N}(0,\Omega_u): \Omega_u=\begin{bmatrix} \tau_{0}^2 & \\ \tau_{01} & \tau_{1}^2 \end{bmatrix} \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+(\#eq:WorkerRandomSlopes)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}OutgroupInteraction_{ti} + \\
+                           &\ \beta_{2i}NonOutgroupInteraction_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} + u_{1i} \\
+                      &\ \beta_{2i} = \gamma_{20} + u_{2i}
+  \end{split} 
 \end{equation}
+
 
 ```{r workerModelSlopesInteractionType}
 # Create and save Model (optimizer needed to reach convergence)
@@ -2033,11 +2078,9 @@ summ(
   center = TRUE
 )
 
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(model.ran0,
-#               method="boot",nsim=1000,
-#               parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-RandomSlopes-CI.csv")
+# Simple (i.e., fast) CIs
+mdlWorker$lmerSlopesAttTypeCI <- 
+  confint(method = "Wald", mdlWorker$lmerSlopesAttType)
 
 # Compare new model to previous step
 anova(mdlWorker$lmeInterceptAttType, 
@@ -2156,12 +2199,15 @@ mdlWorkerOut <-
   )
 ```
 
-<i class="fas fa-question-circle"></i> _Note to self:_ For completeness, we should probably check this against an empty model without random intercept.  
-
 \begin{equation}
 (\#eq:WorkerOutEmptyModel)
-Attitude_{ti} = \gamma_{00} + u_{0i} + e_{ti} \\
-\textrm{with}\ u_{0i} \sim \mathcal{N}(0,\tau_{00}^2)\ \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} +  e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i}
+  \end{split} 
 \end{equation}
 
 ```{r workerOutModelMLAttNull}
@@ -2208,9 +2254,15 @@ mdlWorkerOut$Att$IccPercNull <-
 We thus add the core interaction need fulfillment to the multilevel random intercept model.  
 
 \begin{equation}
-(\#eq:AttitudeNeedEq)
-Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + u_{0i} + e_{ti} \\
-\textrm{with}\ u_{0i} \sim \mathcal{N}(0,\tau_{00}^2)\ \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+(\#eq:workerOutInterceptAttNeedEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10}
+  \end{split} 
 \end{equation}
 
 ```{r workerOutModelInterceptAttCore}
@@ -2282,9 +2334,15 @@ We find that the the model with the added predictor indeed explains more varianc
 In a next step, we check whether further letting the effect of core need fulfillment vary between participants explains additional variance in outgroup attitudes (i.e., random slope).   
 
 \begin{equation}
-(\#eq:AttitudeNeedRandEq)
-Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + u_{0i} + u_{1i} + e_{ti}  \\
-\textrm{with}\ \begin{bmatrix} u_{0i}\\ u_{1i}\end{bmatrix} \sim \mathcal{N}(0,\Omega_u): \Omega_u=\begin{bmatrix} \tau_{0}^2 & \\ \tau_{01} & \tau_{1}^2 \end{bmatrix} \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+(\#eq:workerOutSlopeAttNeedEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} + u_{1i}
+  \end{split} 
 \end{equation}
 
 ```{r workerOutModelSlopesAttCore}
