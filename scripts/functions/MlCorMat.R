@@ -201,6 +201,7 @@ MlTraitState <-
     
     # for testing
     # data <- dtWorkerSupp$workerInteractionType
+    # data <- workerInteractionType
     # id <- "PID"
     # selection <- varSelection
     

@@ -1076,6 +1076,40 @@ studentOutPltIDs <-
   select(PID) %>%
   as.matrix %>%
   as.vector
+
+# Center within and between
+# divide into trait and state
+studentWithinBetween <-
+  MlTraitState(
+    data = studentInteractionType,
+    id = "PID",
+    selection =
+      c(
+        "KeyNeedFullfillment",
+        "Competence",
+        "Autonomy",
+        "Relatedness",
+        "AttitudesDutch",
+        "quality_overall",
+        "OutgroupInteraction",
+        "NonOutgroupInteraction"
+      )
+  )
+studentOutWithinBetween <-
+  MlTraitState(
+    data = studentInteractionType %>% filter(OutgroupInteraction == "Yes"),
+    id = "PID",
+    selection =
+      c(
+        "KeyNeedFullfillment",
+        "Competence",
+        "Autonomy",
+        "Relatedness",
+        "AttitudesDutch",
+        "quality_overall"
+      )
+  )
+
 ```
 
 ### Medical
@@ -2269,25 +2303,23 @@ We thus add the core interaction need fulfillment to the multilevel random inter
 # Create and save Model
 mdlWorkerOut$Att$lmeInterceptCore <-
   lme(
-    thermometerDutch_1 ~ keymotive_fulfillemt_1,
+    thermometerDutch_1 ~ keymotive_fulfillemt_1_cwc,
     random = ~ 1 | PID,
-    data = workerOutgroupInteraction
+    data = workerOutWithinBetween
   )
 
 # Get summary with p-values (Satterthwaite's method)
 summ(
-  lmer(thermometerDutch_1 ~ keymotive_fulfillemt_1 + (1 | PID), 
-       data = workerOutgroupInteraction),
+  mdlWorkerOut$Att$lmerInterceptCore <- lmer(thermometerDutch_1 ~ keymotive_fulfillemt_1_cwc + (1 | PID), 
+       data = workerOutWithinBetween),
   confint = TRUE,
   digits = 3,
-  center = TRUE
+  center = FALSE
 )
 
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(thermometerDutch_1 ~ Contact_dum + inNonDutch + (1|PID),data=workerOutgroupInteraction),
-#                  method="boot",nsim=1000, parallel = "multicore",
-#                  ncpus = 4, seed = 42),
-#          "output/tables/ML-Inter-CI.csv")
+# Generate 95% CIs
+mdlWorkerOut$Att$lmerInterceptCoreCI <- 
+  confint(method = "Wald", mdlWorkerOut$Att$lmerInterceptCore)
 
 # Compare new model to previous step
 anova(mdlWorkerOut$Att$lmeNull, 
@@ -2350,33 +2382,57 @@ In a next step, we check whether further letting the effect of core need fulfill
 mdlWorkerOut$Att$lmeSlopesCore <-
   lme(
     thermometerDutch_1 ~
-      keymotive_fulfillemt_1,
-    random = ~ 1 + keymotive_fulfillemt_1 | PID,
+      keymotive_fulfillemt_1_cwc,
+    random = ~ 1 + keymotive_fulfillemt_1_cwc | PID,
     control = lmeControl(opt = "optim"),
-    data = workerOutgroupInteraction
+    data = workerOutWithinBetween
   )
 
 # Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
 summ(
   mdlWorkerOut$Att$lmerSlopesCore <- lmer(
     thermometerDutch_1 ~
-      keymotive_fulfillemt_1 +
-      (1 + keymotive_fulfillemt_1 | PID),
-    data = workerOutgroupInteraction
+      keymotive_fulfillemt_1_cwc +
+      (1 + keymotive_fulfillemt_1_cwc | PID),
+    data = workerOutWithinBetween
   ),
   confint = TRUE,
   digits = 3,
-  center = TRUE
+  center = FALSE
 )
 
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(model.ran0,
-#               method="boot",nsim=1000,
-#               parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-RandomSlopes-CI.csv")
+# all variables standardized within PPT
+summ(
+  mdlWorkerOut$Att$lmerSlopesCoreZ <- lmer(
+    thermometerDutch_1_zwc ~
+      keymotive_fulfillemt_1_zwc +
+      (1 + keymotive_fulfillemt_1_zwc | PID),
+    data = workerOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+
+# standardized coefficients
+stdCoef.merMod(mdlWorkerOut$Att$lmerSlopesCore)
+
+# 95%CIs
+mdlWorkerOut$Att$lmerSlopesCoreCI <- 
+  confint(method = "Wald", mdlWorkerOut$Att$lmerSlopesCore)
+
+# Attempts at R^2
+r2mlm::r2mlm(mdlWorkerOut$Att$lmerSlopesCore, bargraph = TRUE)
+mitml::multilevelR2(mdlWorkerOut$Att$lmerSlopesCore)
+performance::r2(mdlWorkerOut$Att$lmerSlopesCore)
+performance::model_performance(mdlWorkerOut$Att$lmerSlopesCore)
+performance::compare_performance(mdlWorkerOut$Att$lmerNull, 
+                                 mdlWorkerOut$Att$lmerInterceptCore, 
+                                 mdlWorkerOut$Att$lmerSlopesCore)
 
 # Compare new model to previous step
-anova(mdlWorkerOut$Att$lmeInterceptCore, 
+anova(mdlWorkerOut$Att$lmeNull, 
+      mdlWorkerOut$Att$lmeInterceptCore, 
       mdlWorkerOut$Att$lmeSlopesCore) %>%
   as.data.frame() %>%
   select(-call) %>%
@@ -2424,10 +2480,10 @@ grid.arrange(
 
 # Plot prediction model
 mdlWorkerOut$Att$predSlopesCore <- 
-  workerOutgroupInteraction %>%
+  workerOutWithinBetween %>%
   select(thermometerDutch_1, session, PID) %>% 
   mutate(measure = predict(mdlWorkerOut$Att$lmeSlopesCore,
-                           workerOutgroupInteraction,
+                           workerOutWithinBetween,
                            re.form = NA
                            )
          )
@@ -2457,12 +2513,6 @@ We find that adding the random slopes does add significantly beyond the random i
 
 TL;DR: The random slope adds significantly to the prediction model.  
 
-<div class="alert alert-warning alert-dismissible fade in" role="alert">
-  <a class="close" data-dismiss="alert" aria-label="close">&times;</a>
-  <i class="fas fa-exclamation-triangle"></i> <b>Check needed: </b><br/>
-  Something is with the variances explained (between = `r format(round(mdlWorkerOut$Att$varBtwPercSlopesCore, 2),nsmall=2)`%, within = `r format(round(mdlWorkerOut$Att$varWithinPercSlopesCore, 2),nsmall=2)`%). This is when comparing the random intercepts to the random slopes model. Check with materials from Laura!!
-</div>
-
 ### Need fulfillment and Interaction Quality   
 
 Based on the assertion that the relationship between core need fulfillment and outgroup attitudes is explained by a higher perceived interaction, the core need fulfillement should also significantly predict perceived interaction quality.  
@@ -2472,33 +2522,33 @@ Based on the assertion that the relationship between core need fulfillment and o
 Given that we now have the perceived interaction quality as our outcome variable of interest we again begin with an unconditional model (i.e., empty random intercept model), to see whether there is enough variance to explain within the participants. Similarly to before this is again done within the subsample of measurements during which an outgroup interaction was reported.  
 
 \begin{equation}
-(\#eq:WorkerOutQualEmptyModel)
-Attitude_{ti} = \gamma_{00} + u_{0i} + e_{ti} \\
-\textrm{with}\ u_{0i} \sim \mathcal{N}(0,\tau_{00}^2)\ \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+(\#eq:WorkerOutQltEmptyModel)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ InteractionQuality_{ti} =  &\ \beta_{0i} +  e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i}
+  \end{split} 
 \end{equation}
 
 ```{r workerOutModelMLQltNull}
 # Create and save Model
 mdlWorkerOut$Qlt$lmerNull <-
   lme4::lmer(quality_overall_1 ~ 1 + (1 | PID), 
-             data = workerOutgroupInteraction) # use optim if it does not converge
+             data = workerOutWithinBetween) # use optim if it does not converge
+
 mdlWorkerOut$Qlt$lmeNull <-
   lme(
     quality_overall_1 ~ 1,
     random = ~ 1 | PID,
-    data = workerOutgroupInteraction,
+    data = workerOutWithinBetween,
     control = list(opt = "nlmimb")
   ) # use optim if it does not converge
 
 # Get summary with p-values (Satterthwaite's method)
 # summary(Null.Out.Qual.ML.r) #or with the lme function
-summ(mdlWorkerOut$Qlt$lmerNull, digits = 3, center = TRUE)
-
-# generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(thermometerDutch_1~1 + (1|PID),data=workerOutgroupInteraction),
-#                  method="boot",nsim=1000,
-#                  parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-Null-CI.csv")
+summ(mdlWorkerOut$Qlt$lmerNull, digits = 3)
 
 # Save variances
 mdlWorkerOut$Qlt$varNull <- 
@@ -2518,41 +2568,44 @@ mdlWorkerOut$Qlt$IccPercNull <-
 
 We again find a reasonable amount of variance within the participants.   
 
-<i class="fas fa-question-circle"></i> _Note to self:_ For completeness, we should probably check this against an empty model without random intercept. 
-
 #### random intercept with level one predictor  
 
 We again add the core interaction need fulfillment to the multilevel random intercept model.  
 
 \begin{equation}
-(\#eq:QualityNeedEq)
-InteractionQuality_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + u_{0i} + e_{ti} \\
-\textrm{with}\ u_{0i} \sim \mathcal{N}(0,\tau_{00}^2)\ \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+(\#eq:workerOutInterceptQltNeedEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ InteractionQuality_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10}
+  \end{split} 
 \end{equation}
 
 ```{r workerOutModelInterceptQltCore}
 # Create and save Model
 mdlWorkerOut$Qlt$lmeInterceptCore <-
   lme(
-    quality_overall_1 ~ keymotive_fulfillemt_1,
+    quality_overall_1 ~ keymotive_fulfillemt_1_cwc,
     random = ~ 1 | PID,
-    data = workerOutgroupInteraction
+    data = workerOutWithinBetween
   )
 
 # Get summary with p-values (Satterthwaite's method)
 summ(
-  lmer(quality_overall_1 ~ keymotive_fulfillemt_1 + (1 | PID), 
-       data = workerOutgroupInteraction),
+  mdlWorkerOut$Qlt$lmerInterceptCore <- 
+    lmer(quality_overall_1 ~ keymotive_fulfillemt_1_cwc + (1 | PID), 
+       data = workerOutWithinBetween),
   confint = TRUE,
   digits = 3,
-  center = TRUE
+  center = FALSE
 )
 
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(quality_overall_1 ~ Contact_dum + inNonDutch + (1|PID),data=workerOutgroupInteraction),
-#                  method="boot",nsim=1000, parallel = "multicore",
-#                  ncpus = 4, seed = 42),
-#          "output/tables/ML-Inter-CI.csv")
+# 95%CI
+mdlWorkerOut$Qlt$lmerInterceptCoreCI <- 
+  confint(method = "Wald", mdlWorkerOut$Qlt$lmerInterceptCore)
 
 # Compare new model to previous step
 anova(mdlWorkerOut$Qlt$lmeNull, 
@@ -2598,23 +2651,28 @@ The predictor again adds a significant amount of explained variances beyond the 
 
 As before, we check whether further letting the effect of core need fulfillment vary between participants explains additional variance in outgroup attitudes (i.e., random slope).   
 
-<!-- taken from: https://stats.idre.ucla.edu/stata/faq/how-can-i-estimate-effect-size-for-mixed/ -->
-<!-- also check: https://largescaleassessmentsineducation.springeropen.com/articles/10.1186/s40536-018-0061-2 -->
 \begin{equation}
-(\#eq:QualityNeedRandEq)
-InteractionQuality_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + u_{0i} + u_{1i} + e_{ti}  \\
-\textrm{with}\ \begin{bmatrix} u_{0i}\\ u_{1i}\end{bmatrix} \sim \mathcal{N}(0,\Omega_u): \Omega_u=\begin{bmatrix} \tau_{0}^2 & \\ \tau_{01} & \tau_{1}^2 \end{bmatrix} \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+(\#eq:workerOutSlopeQltNeedEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ InteractionQuality_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} + u_{1i}
+  \end{split} 
 \end{equation}
+
 
 ```{r workerOutModelSlopesQltCore}
 # Create and save Model (optimizer needed to reach convergence)
 mdlWorkerOut$Qlt$lmeSlopesCore <-
   lme(
     quality_overall_1 ~
-      keymotive_fulfillemt_1,
-    random = ~ 1 + keymotive_fulfillemt_1 | PID,
+      keymotive_fulfillemt_1_cwc,
+    random = ~ 1 + keymotive_fulfillemt_1_cwc | PID,
     control = lmeControl(opt = "optim"),
-    data = workerOutgroupInteraction
+    data = workerOutWithinBetween
   )
 
 # Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
@@ -2622,23 +2680,22 @@ summ(
   mdlWorkerOut$Qlt$lmerSlopesCore <-
     lmer(
       quality_overall_1 ~
-        keymotive_fulfillemt_1 +
-        (1 + keymotive_fulfillemt_1 | PID),
-      data = workerOutgroupInteraction
+        keymotive_fulfillemt_1_cwc +
+        (1 + keymotive_fulfillemt_1_cwc | PID),
+      data = workerOutWithinBetween
     ),
   confint = TRUE,
   digits = 3,
-  center = TRUE
+  center = FALSE
 )
 
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(mdlWorkerOut$Qlt$lmerSlopesCore,
-#               method="boot",nsim=1000,
-#               parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-RandomSlopes-CI.csv")
+# 95%CI
+mdlWorkerOut$Qlt$lmerSlopesCoreCI <- 
+  confint(method = "Wald", mdlWorkerOut$Qlt$lmerSlopesCore)
 
 # Compare new model to previous step
-anova(mdlWorkerOut$Qlt$lmeInterceptCore, 
+anova(mdlWorkerOut$Qlt$lmeNull, 
+      mdlWorkerOut$Qlt$lmeInterceptCore, 
       mdlWorkerOut$Qlt$lmeSlopesCore) %>%
   as.data.frame() %>%
   select(-call) %>%
@@ -2661,23 +2718,11 @@ anova(mdlWorkerOut$Qlt$lmeInterceptCore,
 # Save variances
 mdlWorkerOut$Qlt$varSlopesCore <- 
   lme4::VarCorr(mdlWorkerOut$Qlt$lmeSlopesCore)
-
-# The estimate of between-group (or Intercept variance) explained:
-# Variance Explained = 1 – (Var with Predictor/Var without Predictor)
-mdlWorkerOut$Qlt$varBtwSlopesCore <-
-  1 - (as.numeric(mdlWorkerOut$Qlt$varSlopesCore[1]) / as.numeric(mdlWorkerOut$Qlt$varInterceptCore[1]))
-mdlWorkerOut$Qlt$varBtwPercSlopesCore <-
-  (1 - (as.numeric(mdlWorkerOut$Qlt$varSlopesCore[1]) / as.numeric(mdlWorkerOut$Qlt$varInterceptCore[1]))) * 100
-# and the estimate of within-group (or residual variance) explained is:
-mdlWorkerOut$Qlt$varWithinSlopesCore <-
-  1 - (as.numeric(mdlWorkerOut$Qlt$varSlopesCore[2]) / as.numeric(mdlWorkerOut$Qlt$varInterceptCore[2]))
-mdlWorkerOut$Qlt$varWithinPercSlopesCore <-
-  (1 - (as.numeric(mdlWorkerOut$Qlt$varSlopesCore[2]) / as.numeric(mdlWorkerOut$Qlt$varInterceptCore[2]))) * 100
 ```
 
 We find that adding the random slopes does not add significantly beyond the random intercept model. This is unusual because this might indicate the the effect is very consistent across participants. However, we also see that when taking the possibility to varying slopes into account, the core need fulfillment remains a significant predictor of perceived interaction quality.  
 
-### Interaction Needs,Quality, and Attitudes  
+### Interaction Needs, Quality, and Attitudes  
 
 In our final main step, we will jointly consider the effect of core need fulfillment and perceived interaction quality on outgroup attitudes. We expect that if the relationship between core need fulfillment and outgroup attitudes is indeed explained by a higher perceived interaction quality, the interaction quality perception should assume the explained variance of the core contact need fulfillment.  
 
@@ -2686,36 +2731,43 @@ In our final main step, we will jointly consider the effect of core need fulfill
 We thus add both the core need fulfillment and perceived interaction quality to a random intercept model of outgroup attitudes.  
 
 \begin{equation}
-(\#eq:AttitudeQualityNeedEq)
-Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + \gamma_{20}InteractionQuality_{ti} + u_{0i} + e_{ti} \\
-\textrm{with}\ u_{0i} \sim \mathcal{N}(0,\tau_{00}^2)\ \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+(\#eq:workerOutInterceptAttQltNeedEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+                           &\ \beta_{2i}InteractionQuality_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} \\
+                      &\ \beta_{2i} = \gamma_{20}
+  \end{split} 
 \end{equation}
 
 ```{r workerOutModelInterceptAttCoreQlt}
 # Create and save Model
 mdlWorkerOut$Att$lmeInterceptCoreQlt <-
   lme(
-    thermometerDutch_1 ~ keymotive_fulfillemt_1 + quality_overall_1,
+    thermometerDutch_1 ~ keymotive_fulfillemt_1_cwc + quality_overall_1_cwc,
     random = ~ 1 | PID,
-    data = workerOutgroupInteraction
+    data = workerOutWithinBetween
   )
 
 # Get summary with p-values (Satterthwaite's method)
 summ(
-  lmer(
-    thermometerDutch_1 ~ keymotive_fulfillemt_1 + quality_overall_1 + (1 | PID),
-    data = workerOutgroupInteraction
+  mdlWorkerOut$Att$lmerInterceptCoreQlt <- 
+    lmer(
+    thermometerDutch_1 ~ keymotive_fulfillemt_1_cwc + quality_overall_1_cwc + (1 | PID),
+    data = workerOutWithinBetween
   ),
   confint = TRUE,
   digits = 3,
-  center = TRUE
+  center = FALSE
 )
 
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(thermometerDutch_1 ~ Contact_dum + inNonDutch + (1|PID),data=workerOutgroupInteraction),
-#                  method="boot",nsim=1000, parallel = "multicore",
-#                  ncpus = 4, seed = 42),
-#          "output/tables/ML-Inter-CI.csv")
+# 95% CI
+mdlWorkerOut$Att$lmerInterceptCoreQltCI <- 
+  confint(method = "Wald", mdlWorkerOut$Att$lmerInterceptCoreQlt)
 
 # Compare new model to previous step
 anova(
@@ -2764,42 +2816,47 @@ Unsurprisingly, the model with the two predictors adds significantly beyond the 
 We again check whether further letting the effects vary between participants explains additional variance in outgroup attitudes (i.e., random slope).   
 
 \begin{equation}
-(\#eq:AttitudeQualityNeedRandEq)
-Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + \gamma_{20}InteractionQuality_{ti} + u_{0i} + u_{1i} + e_{ti}  \\
-\textrm{with}\ \begin{bmatrix} u_{0i}\\ u_{1i}\end{bmatrix} \sim \mathcal{N}(0,\Omega_u): \Omega_u=\begin{bmatrix} \tau_{0}^2 & \\ \tau_{01} & \tau_{1}^2 \end{bmatrix} \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+(\#eq:workerOutSlopeAttQltNeedEq)
+(\#eq:WorkerRandomSlopes)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+                           &\ \beta_{2i}InteractionQuality_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} + u_{1i} \\
+                      &\ \beta_{2i} = \gamma_{20} + u_{2i}
+  \end{split} 
 \end{equation}
-
-<i class="fas fa-question-circle"></i> Check whether the omega matrix is correct should probably have as many taus as gammas.  
 
 ```{r workerOutModelSlopesAttCoreQlt}
 # Create and save Model (optimizer needed to reach convergence)
 mdlWorkerOut$Att$lmeSlopesCoreQlt <-
   lme(
     thermometerDutch_1 ~
-      keymotive_fulfillemt_1 + quality_overall_1,
-    random = ~ 1 + keymotive_fulfillemt_1 + quality_overall_1 | PID,
+      keymotive_fulfillemt_1_cwc + quality_overall_1_cwc,
+    random = ~ 1 + keymotive_fulfillemt_1_cwc + quality_overall_1_cwc | PID,
     control = lmeControl(opt = "optim"),
-    data = workerOutgroupInteraction
+    data = workerOutWithinBetween
   )
 
 # Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
 summ(
   mdlWorkerOut$Att$lmerSlopesCoreQlt <- lmer(
     thermometerDutch_1 ~
-      keymotive_fulfillemt_1 + quality_overall_1 +
-      (1 + keymotive_fulfillemt_1 + quality_overall_1 | PID),
-    data = workerOutgroupInteraction
+      keymotive_fulfillemt_1_cwc + quality_overall_1_cwc +
+      (1 + keymotive_fulfillemt_1_cwc + quality_overall_1_cwc | PID),
+    data = workerOutWithinBetween
   ),
   confint = TRUE,
   digits = 3,
-  center = TRUE
+  center = FALSE
 )
 
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(model.ran0,
-#               method="boot",nsim=1000,
-#               parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-RandomSlopes-CI.csv")
+# 95%CI
+mdlWorkerOut$Att$lmerSlopesCoreQltCI <- 
+  confint(method = "Wald", mdlWorkerOut$Att$lmerSlopesCoreQlt)
 
 # Compare new model to previous step
 anova(
@@ -2829,18 +2886,6 @@ anova(
 mdlWorkerOut$Att$varSlopesCoreQlt <- 
   lme4::VarCorr(mdlWorkerOut$Att$lmeSlopesCoreQlt)
 
-# The estimate of between-group (or Intercept variance) explained:
-# Variance Explained = 1 – (Var with Predictor/Var without Predictor)
-mdlWorkerOut$Att$varBtwSlopesCoreQlt <-
-  1 - (as.numeric(mdlWorkerOut$Att$varSlopesCoreQlt[1]) / as.numeric(mdlWorkerOut$Att$varInterceptCoreQlt[1]))
-mdlWorkerOut$Att$varBtwPercSlopesCoreQlt <-
-  (1 - (as.numeric(mdlWorkerOut$Att$varSlopesCoreQlt[1]) / as.numeric(mdlWorkerOut$Att$varInterceptCoreQlt[1]))) * 100
-# and the estimate of within-group (or residual variance) explained is:
-mdlWorkerOut$Att$varWithinSlopesCoreQlt <-
-  1 - (as.numeric(mdlWorkerOut$Att$varSlopesCoreQlt[2]) / as.numeric(mdlWorkerOut$Att$varInterceptCoreQlt[2]))
-mdlWorkerOut$Att$varWithinPercSlopesCoreQlt <-
-  (1 - (as.numeric(mdlWorkerOut$Att$varSlopesCoreQlt[2]) / as.numeric(mdlWorkerOut$Att$varInterceptCoreQlt[2]))) * 100
-
 # Assumption Checks:
 mdlWorkerOut$Att$diagSlopesCoreQlt <- 
   sjPlot::plot_model(mdlWorkerOut$Att$lmerSlopesCoreQlt, type = "diag")
@@ -2853,10 +2898,10 @@ grid.arrange(
 
 # Plot prediction model
 mdlWorkerOut$Att$predSlopesCoreQlt <- 
-  workerOutgroupInteraction %>%
+  workerOutWithinBetween %>%
   select(thermometerDutch_1, session, PID) %>% 
   mutate(measure = predict(mdlWorkerOut$Att$lmeSlopesCoreQlt,
-                           workerOutgroupInteraction,
+                           workerOutWithinBetween,
                            re.form = NA
                            )
          )
@@ -2897,36 +2942,44 @@ To make certain that the effect of core need fulfillment is specific to the inte
 Here we go back to the full dataset and add generalized situational core need fulfillment (either during an interaction or about the daytime in general) and whether an outgroup interaction happened as well as their interaction term to a random intercept model of outgroup attitudes.  
 
 \begin{equation}
-(\#eq:AttitudeNeedInteractionEq)
-Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + \gamma_{20}OutgroupInteraction_{ti} + \gamma_{30}KeyNeedFulfillXOutgroupInteraction_{ti} + u_{0i} + e_{ti} \\
-\textrm{with}\ u_{0i} \sim \mathcal{N}(0,\tau_{00}^2)\ \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
-\end{equation}
+(\#eq:workerInterceptAttIntNeedEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+                           &\ \beta_{2i}OutgroupInteraction_{ti} + \\
+                           &\ \beta_{3i}KeyNeedFulfillXOutgroupInteraction_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} \\
+                      &\ \beta_{2i} = \gamma_{20} \\
+                      &\ \beta_{3i} = \gamma_{30}
+  \end{split} 
+\end{equation} 
 
 ```{r workerModelInterceptAttCoreInt}
 # Create and save Model
 mdlWorker$lmeInterceptAttCoreInt <-
   lme(
-    thermometerDutch_1 ~ keyMotiveFulfilled * OutgroupInteraction,
+    thermometerDutch_1 ~ keyMotiveFulfilled_cwc * OutgroupInteraction,
     random =  ~ 1 | PID,
-    data = workerInteractionType
+    data = workerWithinBetween
   )
 
 # Get summary with p-values (Satterthwaite's method)
 summ(
   mdlWorker$lmerInterceptAttCoreInt <- lmer(
-    thermometerDutch_1 ~ keyMotiveFulfilled * OutgroupInteraction + (1 | PID),
-    data = workerInteractionType
+    thermometerDutch_1 ~ keyMotiveFulfilled_cwc * OutgroupInteraction + (1 | PID),
+    data = workerWithinBetween
   ),
   confint = TRUE,
   digits = 3,
-  center = TRUE
+  center = FALSE
 )
 
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(thermometerDutch_1 ~ Contact_dum + inNonDutch + (1|PID),data=dtWorker$full),
-#                  method="boot",nsim=1000, parallel = "multicore",
-#                  ncpus = 4, seed = 42),
-#          "output/tables/ML-Inter-CI.csv")
+# 95% CI
+mdlWorker$lmerInterceptAttCoreIntCI <- 
+  confint(method = "Wald", mdlWorker$lmerInterceptAttCoreInt)
 
 # Compare new model to previous step
 anova(mdlWorker$lmeAttNull, 
@@ -2975,39 +3028,47 @@ We find that the model explains significantly more variance than the empty null 
 We again check whether further letting the effects vary between participants explains additional variance in outgroup attitudes (i.e., random slope).  
 
 \begin{equation}
-(\#eq:AttitudeNeedInteractionRandEq)
-Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + \gamma_{20}OutgroupInteraction_{ti} + \gamma_{30}KeyNeedFulfillXOutgroupInteraction_{ti}  + u_{0i} + u_{1i} + e_{ti}  \\
-\textrm{with}\ \begin{bmatrix} u_{0i}\\ u_{1i}\end{bmatrix} \sim \mathcal{N}(0,\Omega_u): \Omega_u=\begin{bmatrix} \tau_{0}^2 & \\ \tau_{01} & \tau_{1}^2 \end{bmatrix} \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
-\end{equation}
+(\#eq:workerSlopesAttIntNeedEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+                           &\ \beta_{2i}OutgroupInteraction_{ti} + \\
+                           &\ \beta_{3i}KeyNeedFulfillXOutgroupInteraction_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} + u_{1i} \\
+                      &\ \beta_{2i} = \gamma_{20} + u_{2i} \\
+                      &\ \beta_{3i} = \gamma_{30} + u_{3i}
+  \end{split} 
+\end{equation} 
 
 ```{r workerModelSlopesAttCoreIntX}
 # Create and save Model (optimizer needed to reach convergence)
 mdlWorker$lmeSlopesAttCoreInt <- lme(
   thermometerDutch_1 ~
-    keyMotiveFulfilled * OutgroupInteraction,
-  random = ~ 1 + keyMotiveFulfilled + OutgroupInteraction | PID,
+    keyMotiveFulfilled_cwc * OutgroupInteraction,
+  random = ~ 1 + keyMotiveFulfilled_cwc + OutgroupInteraction | PID,
   control = lmeControl(opt = "optim"),
-  data = workerInteractionType
+  data = workerWithinBetween
 )
 
 # Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
 summ(
   mdlWorker$lmerSlopesAttCoreInt <- lmer(
     thermometerDutch_1 ~
-      keyMotiveFulfilled * OutgroupInteraction +
-      (1 + keyMotiveFulfilled + OutgroupInteraction | PID),
-    data = workerInteractionType
+      keyMotiveFulfilled_cwc * OutgroupInteraction +
+      (1 + keyMotiveFulfilled_cwc + OutgroupInteraction | PID),
+    data = workerWithinBetween
   ), 
   confint = TRUE,
   digits = 3,
-  center = TRUE
+  center = FALSE
 )
 
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(model.ran0,
-#               method="boot",nsim=1000,
-#               parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-RandomSlopes-CI.csv")
+# 95%CI
+mdlWorker$lmerSlopesAttCoreIntCI <- 
+  confint(method = "Wald", mdlWorker$lmerSlopesAttCoreInt)
 
 # Compare new model to previous step
 anova(mdlWorker$lmeAttNull, 
@@ -3037,18 +3098,6 @@ anova(mdlWorker$lmeAttNull,
 mdlWorker$varSlopesAttCoreInt <- 
   lme4::VarCorr(mdlWorker$lmeSlopesAttCoreInt)
 
-# The estimate of between-group (or Intercept variance) explained:
-# Variance Explained = 1 – (Var with Predictor/Var without Predictor)
-mdlWorker$varBtwSlopesAttCoreInt <- 
-  1 - (as.numeric(mdlWorker$varSlopesAttCoreInt[1]) / as.numeric(mdlWorker$varInterceptAttCoreInt[1]))
-mdlWorker$varBtwPercSlopesAttCoreInt <- 
-  (1 - (as.numeric(mdlWorker$varSlopesAttCoreInt[1]) / as.numeric(mdlWorker$varInterceptAttCoreInt[1]))) * 100
-# and the estimate of within-group (or residual variance) explained is:
-mdlWorker$varWithinSlopesAttCoreInt <- 
-  1 - (as.numeric(mdlWorker$varSlopesAttCoreInt[2]) / as.numeric(mdlWorker$varInterceptAttCoreInt[2]))
-mdlWorker$varWithinPercSlopesAttCoreInt <- 
-  (1 - (as.numeric(mdlWorker$varSlopesAttCoreInt[2]) / as.numeric(mdlWorker$varInterceptAttCoreInt[2]))) * 100
-
 # Assumption Checks:
 mdlWorker$diagSlopesAttCoreInt <-
   sjPlot::plot_model(mdlWorker$lmerSlopesAttCoreInt, type = "diag")
@@ -3061,10 +3110,10 @@ grid.arrange(
 
 # Plot prediction model
 mdlWorker$predSlopesAttCoreInt <- 
-  workerInteractionType %>%
+  workerWithinBetween %>%
   select(thermometerDutch_1, session, PID) %>% 
   mutate(measure = predict(mdlWorker$lmeSlopesAttCoreInt,
-                           workerInteractionType,
+                           workerWithinBetween,
                            re.form = NA
                            )
          )
@@ -3130,10 +3179,18 @@ ggplot(data = workerInteractionType,
 ## With ML structure
 # create parameters for prediction
 datNew = data.frame(
-  OutgroupInteraction = factor(rep(c("No", "Yes"), each = 21)),
-  keyMotiveFulfilled = rep(seq(-50, 50, 5), 2),
+  keyMotiveFulfilled_cwc = rep(seq(
+    round_any(min(
+      workerWithinBetween$keyMotiveFulfilled_cwc
+    ), 5, f = floor), round_any(max(
+      workerWithinBetween$keyMotiveFulfilled_cwc
+    ), 5, f = ceiling), 5
+  ), 2),
   PID = 0
-)
+) %>%
+  mutate(OutgroupInteraction = rep(c(1, 2), each = nrow(.)/2)) %>%
+  select(PID, OutgroupInteraction, keyMotiveFulfilled_cwc)
+
 
 # Predict values, clean up and calculate SE
 PI <-
@@ -3151,21 +3208,36 @@ mdlWorker$predInterceptAttCoreIntX <-
 mdlWorker$predInterceptAttCoreIntX$se <-
   (mdlWorker$predInterceptAttCoreIntX$upr - mdlWorker$predInterceptAttCoreIntX$fit) / 1.96
 rm(datNew, PI)
+mdlWorker$predInterceptAttCoreIntX$OutgroupInteractionLab <-
+  factor(
+    x = mdlWorker$predInterceptAttCoreIntX$OutgroupInteraction,
+    levels = sort(
+      unique(mdlWorker$predInterceptAttCoreIntX$OutgroupInteraction)
+    ),
+    labels = c("No", "Yes")
+  )
+
 
 # Plot predicted values with SE
 ggplot(
   mdlWorker$predInterceptAttCoreIntX,
-  aes(x = keyMotiveFulfilled,
+  aes(x = keyMotiveFulfilled_cwc,
       y = fit,
-      fill = OutgroupInteraction)
+      fill = OutgroupInteractionLab)
 )+
   #geom_point() +
-  geom_line(aes(linetype = as.factor(OutgroupInteraction)), size = 1) +
+  geom_line(aes(linetype = OutgroupInteractionLab), size = 1) +
   #facet_wrap(~PID, ncol = 6)+
   geom_ribbon(data = mdlWorker$predInterceptAttCoreIntX,
               aes(ymin = fit - se, ymax = fit + se),
               alpha = 0.3) +
-  scale_x_continuous(breaks = seq(-50, 50, 10)) +
+  scale_x_continuous(breaks = seq(
+    round_any(min(
+      workerWithinBetween$keyMotiveFulfilled_cwc
+    ), 5, f = floor), round_any(max(
+      workerWithinBetween$keyMotiveFulfilled_cwc
+    ), 5, f = ceiling), 10
+  )) +
   scale_y_continuous(limits = c(50, 100), breaks = seq(50, 100, 10)) +
   scale_linetype_manual(values = c("dashed", "solid")) +
   scale_fill_manual(values = c("darkgrey", "black")) +
@@ -3181,34 +3253,55 @@ ggplot(
 # #### Bayesian estimation !! ONLY RUN ON FINAL RENDER !! Takes forever ####
 # options(mc.cores = parallel::detectCores())  # Run many chains simultaneously
 # brmfit <- brm(
-#   thermometerDutch_1 ~ keyMotiveFulfilled * OutgroupInteraction + 
-#     (1 + keyMotiveFulfilled + OutgroupInteraction | PID),
-#   data = workerInteractionType,
+#   thermometerDutch_1 ~ keyMotiveFulfilled_cwc * OutgroupInteraction +
+#     (1 + keyMotiveFulfilled_cwc + OutgroupInteraction | PID),
+#   data = workerWithinBetween,
 #   family = gaussian,
 #   iter = 1000,
 #   chains = 4
 # )
 # 
-# # create parameters for prediction:
+# create parameters for prediction:
 # datNew = data.frame(
-#   OutgroupInteraction = rep(c("No", "Yes"), each = 101),
-#   keyMotiveFulfilled = rep(seq(-50, 50, 1), 2)
-# )
+#   keyMotiveFulfilled_cwc = rep(seq(
+#     round_any(min(
+#       workerWithinBetween$keyMotiveFulfilled_cwc
+#     ), 2, f = floor), round_any(max(
+#       workerWithinBetween$keyMotiveFulfilled_cwc
+#     ), 2, f = ceiling), 2
+#   ), 2)
+# ) %>%
+#   mutate(OutgroupInteraction = rep(c(1, 2), each = nrow(.)/2))
+# 
 # # Save predicted values and adjust names and labels
 # fitavg <-
 #   cbind(datNew,
 #         fitted(brmfit, newdata = datNew, re_formula = NA)[, -2])
 # names(fitavg)[names(fitavg) == "Estimate"] = "pred"
 # fitavg$se <- (fitavg$Q97.5 - fitavg$pred) / 1.96
+# fitavg$OutgroupInteractionLab <-
+#   factor(
+#     x = fitavg$OutgroupInteraction,
+#     levels = sort(
+#       unique(fitavg$OutgroupInteraction)
+#     ),
+#     labels = c("No", "Yes")
+#   )
 # 
 # # Plot Bayesian SE prediction interval
 # ggplot(fitavg,
-#        aes(x = keyMotiveFulfilled,
+#        aes(x = keyMotiveFulfilled_cwc,
 #            y = pred,
-#            fill = OutgroupInteraction)) +
-#   scale_x_continuous(breaks = seq(-50, 50, 10)) +
+#            fill = OutgroupInteractionLab)) +
+#   scale_x_continuous(breaks = seq(
+#     round_any(min(
+#       workerWithinBetween$keyMotiveFulfilled_cwc
+#     ), 5, f = floor), round_any(max(
+#       workerWithinBetween$keyMotiveFulfilled_cwc
+#     ), 5, f = ceiling), 10
+#   )) +
 #   scale_y_continuous(limits = c(50, 100), breaks = seq(50, 100, 10)) +
-#   geom_line(aes(linetype = OutgroupInteraction), size = 1) +
+#   geom_line(aes(linetype = OutgroupInteractionLab), size = 1) +
 #   geom_ribbon(aes(ymin = pred - se, ymax = pred + se), alpha = 0.2) +
 #   scale_linetype_manual(values = c("dashed", "solid")) +
 #   scale_fill_manual(values = c("darkgrey", "black")) +
@@ -3223,13 +3316,13 @@ ggplot(
 # 
 # # plot all overlayed posteriors:
 # pst <- posterior_samples(brmfit, "b")
-# ggplot(workerInteractionType,
-#        aes(x = keyMotiveFulfilled, y = thermometerDutch_1)) +
+# ggplot(workerWithinBetween,
+#        aes(x = keyMotiveFulfilled_cwc, y = thermometerDutch_1)) +
 #   geom_point(shape = 4, alpha = .1) +
 #   geom_tile() +
 #   geom_abline(
 #     data = pst,
-#     aes(intercept = b_Intercept, slope = b_keyMotiveFulfilled),
+#     aes(intercept = b_Intercept, slope = b_keyMotiveFulfilled_cwc),
 #     alpha = .025,
 #     size = .4
 #   ) +
@@ -3244,60 +3337,70 @@ ggplot(
 
 In a final step we check whether during the interaction the core situational need is a meaningful predictor even when taking other fundamental psychological needs into account. We focus on the three commonly considered self determination needs: competence, autonomy, and relatedness.  
 
-##### random intercept with level ome predictors  
+##### random intercept with level oe predictors  
 
 We add the core need fulfillment with the three self determination needs to a random intercept model of outgroup attitudes.  
 
 \begin{equation}
-(\#eq:AttitudeNeedSdtEq)
-Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + \gamma_{20}Autonomy_{ti} + \gamma_{30}Competence_{ti} + \gamma_{40}Relatedness_{ti} + u_{0i} + e_{ti} \\
-\textrm{with}\ u_{0i} \sim \mathcal{N}(0,\tau_{00}^2)\ \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
-\end{equation}
+(\#eq:workerInterceptAttNeedSdtEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+                           &\ \beta_{2i}Autonomy_{ti} + \\
+                           &\ \beta_{3i}Competence_{ti} + \\
+                           &\ \beta_{4i}Relatedness_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} \\
+                      &\ \beta_{2i} = \gamma_{20} \\
+                      &\ \beta_{3i} = \gamma_{30} \\
+                      &\ \beta_{4i} = \gamma_{40}
+  \end{split} 
+\end{equation} 
 
 ```{r workerOutModelInterceptAttCoreSdt}
 # Create and save Model
 mdlWorkerOut$Att$lmeInterceptCoreSdt <-
   lme(
-    thermometerDutch_1 ~ keymotive_fulfillemt_1 + competence_1 + autonomy_1 + relatedness_1,
+    thermometerDutch_1 ~ keymotive_fulfillemt_1_cwc + competence_1_cwc + autonomy_1_cwc + relatedness_1_cwc,
     random = ~ 1 | PID,
-    data = workerOutgroupInteraction,
+    data = workerOutWithinBetween,
     na.action = na.exclude
   )
 
 # Get summary with p-values (Satterthwaite's method)
 summ(
   mdlWorkerOut$Att$lmerInterceptCoreSdt <- lmer(
-    thermometerDutch_1 ~ keymotive_fulfillemt_1 + competence_1 + autonomy_1 + relatedness_1 + (1 | PID),
-    data = workerOutgroupInteraction
+    thermometerDutch_1 ~ keymotive_fulfillemt_1_cwc + competence_1_cwc + autonomy_1_cwc + relatedness_1_cwc + (1 | PID),
+    data = workerOutWithinBetween
   ),
   confint = TRUE,
   digits = 3,
-  center = TRUE
+  center = FALSE
 )
 
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(thermometerDutch_1 ~ Contact_dum + inNonDutch + (1|PID),data=workerOutgroupInteraction),
-#                  method="boot",nsim=1000, parallel = "multicore",
-#                  ncpus = 4, seed = 42),
-#          "output/tables/ML-Inter-CI.csv")
+# 95% CI
+mdlWorkerOut$Att$lmerInterceptCoreSdtCI <- 
+  confint(method = "Wald", mdlWorkerOut$Att$lmerInterceptCoreSdt)
 
 # To be compared against a model with only the self determination theory needs
 mdlWorkerOut$Att$lmeInterceptSdt <-
   lme(
-    thermometerDutch_1 ~ competence_1 + autonomy_1 + relatedness_1,
+    thermometerDutch_1 ~ competence_1_cwc + autonomy_1_cwc + relatedness_1_cwc,
     random = ~ 1 | PID,
-    data = workerOutgroupInteraction,
+    data = workerOutWithinBetween,
     na.action = na.exclude
   )
 
 summ(
   mdlWorkerOut$Att$lmerInterceptSdt <- lmer(
-    thermometerDutch_1 ~ competence_1 + autonomy_1 + relatedness_1 + (1 | PID),
-    data = workerOutgroupInteraction
+    thermometerDutch_1 ~ competence_1_cwc + autonomy_1_cwc + relatedness_1_cwc + (1 | PID),
+    data = workerOutWithinBetween
   ),
   confint = TRUE,
   digits = 3,
-  center = TRUE
+  center = FALSE
 )
 
 # Compare new model to previous steps
@@ -3327,18 +3430,6 @@ rm(lmeInterceptCoreRed)
 # Save variances
 mdlWorkerOut$Att$varInterceptCoreSdt <-
   lme4::VarCorr(mdlWorkerOut$Att$lmeInterceptCoreSdt)
-
-# The estimate of between-group (or Intercept variance) explained:
-# Variance Explained = 1 – (Var with Predictor/Var without Predictor)
-mdlWorkerOut$Att$varBtwInterceptCoreSdt <- 
-  1 - (as.numeric(mdlWorkerOut$Att$varInterceptCoreSdt[1]) / as.numeric(mdlWorkerOut$Att$varInterceptCore[1]))
-mdlWorkerOut$Att$varBtwPercInterceptCoreSdt <- 
-  (1 - (as.numeric(mdlWorkerOut$Att$varInterceptCoreSdt[1]) / as.numeric(mdlWorkerOut$Att$varInterceptCore[1]))) * 100
-# and the estimate of within-group (or residual variance) explained is:
-mdlWorkerOut$Att$varWithinInterceptCoreSdt <-
-  1 - (as.numeric(mdlWorkerOut$Att$varInterceptCoreSdt[2]) / as.numeric(mdlWorkerOut$Att$varInterceptCore[2]))
-mdlWorkerOut$Att$varWithinPercInterceptCoreSdt <-
-  (1 - (as.numeric(mdlWorkerOut$Att$varInterceptCoreSdt[2]) / as.numeric(mdlWorkerOut$Att$varInterceptCore[2]))) * 100
 ```
 
 We compare the models of the core need and the SDT need fulfillments to a model that only includes the SDT needs. We find that the core need adds significantly above the SDT needs. We find that next to relatedness, the core need explains the most variance and compared to the model with only the SDT needs, the core need fulfillment flexibly takes on some of the explained variance of all of the three fundamental needs (i.e., reduction in SDT beta weights). 
@@ -3348,20 +3439,32 @@ We compare the models of the core need and the SDT need fulfillments to a model 
 We again check whether further letting the effects vary between participants explains additional variance in outgroup attitudes (i.e., random slope).  
 
 \begin{equation}
-(\#eq:AttitudeNeedSdtRandEq)
-Attitude_{ti} = \\gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + \gamma_{20}Autonomy_{ti} + \gamma_{30}Competence_{ti} + \gamma_{40}Relatedness_{ti} + u_{0i} + u_{1i} + e_{ti}  \\
-\textrm{with}\ \begin{bmatrix} u_{0i}\\ u_{1i}\end{bmatrix} \sim \mathcal{N}(0,\Omega_u): \Omega_u=\begin{bmatrix} \tau_{0}^2 & \\ \tau_{01} & \tau_{1}^2 \end{bmatrix} \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
-\end{equation}
+(\#eq:workerSlopesAttNeedSdtEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+                           &\ \beta_{2i}Autonomy_{ti} + \\
+                           &\ \beta_{3i}Competence_{ti} + \\
+                           &\ \beta_{4i}Relatedness_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} + u_{1i} \\
+                      &\ \beta_{2i} = \gamma_{20} + u_{2i} \\
+                      &\ \beta_{3i} = \gamma_{30} + u_{3i} \\
+                      &\ \beta_{4i} = \gamma_{40} + u_{4i}
+  \end{split} 
+\end{equation} 
 
 ```{r workerOutModelSlopesAttCoreSdt}
 # Create and save Model (optimizer needed to reach convergence)
 mdlWorkerOut$Att$lmeSlopesCoreSdt <-
   lme(
     thermometerDutch_1 ~
-      keymotive_fulfillemt_1 + competence_1 + autonomy_1 + relatedness_1,
-    random = ~ 1 + keymotive_fulfillemt_1 + competence_1 + autonomy_1 + relatedness_1 | PID,
+       keymotive_fulfillemt_1_cwc + competence_1_cwc + autonomy_1_cwc + relatedness_1_cwc,
+    random = ~ 1 +  keymotive_fulfillemt_1_cwc + competence_1_cwc + autonomy_1_cwc + relatedness_1_cwc | PID,
     control = lmeControl(opt = "optim"),
-    data = workerOutgroupInteraction,
+    data = workerOutWithinBetween,
     na.action = na.exclude
   )
 
@@ -3369,23 +3472,22 @@ mdlWorkerOut$Att$lmeSlopesCoreSdt <-
 summ(
   mdlWorkerOut$Att$lmerSlopesCoreSdt <- lmer(
     thermometerDutch_1 ~
-      keymotive_fulfillemt_1 + competence_1 + autonomy_1 + relatedness_1 +
-      (1 + keymotive_fulfillemt_1 + competence_1 + autonomy_1 + relatedness_1 | PID),
-    data = workerOutgroupInteraction
+       keymotive_fulfillemt_1_cwc + competence_1_cwc + autonomy_1_cwc + relatedness_1_cwc +
+      (1 +  keymotive_fulfillemt_1_cwc + competence_1_cwc + autonomy_1_cwc + relatedness_1_cwc | PID),
+    data = workerOutWithinBetween
   ),
   confint = TRUE,
   digits = 3,
-  center = TRUE
+  center = FALSE
 )
 
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(model.ran0,
-#               method="boot",nsim=1000,
-#               parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-RandomSlopes-CI.csv")
+# 95% CI
+mdlWorkerOut$Att$lmerSlopesCoreSdtCI <- 
+  confint(method = "Wald", mdlWorkerOut$Att$lmerSlopesCoreSdt)
 
 # Compare new model to previous step
-anova(mdlWorkerOut$Att$lmeInterceptCoreSdt, 
+anova(mdlWorkerOut$Att$lmeInterceptSdt,
+      mdlWorkerOut$Att$lmeInterceptCoreSdt, 
       mdlWorkerOut$Att$lmeSlopesCoreSdt) %>%
   as.data.frame() %>%
   select(-call) %>%
@@ -3409,18 +3511,6 @@ anova(mdlWorkerOut$Att$lmeInterceptCoreSdt,
 mdlWorkerOut$Att$varSlopesCoreSdt <- 
   lme4::VarCorr(mdlWorkerOut$Att$lmeSlopesCoreSdt)
 
-# The estimate of between-group (or Intercept variance) explained:
-# Variance Explained = 1 – (Var with Predictor/Var without Predictor)
-mdlWorkerOut$Att$varBtwSlopesCoreSdt <-
-  1 - (as.numeric(mdlWorkerOut$Att$varSlopesCoreSdt[1]) / as.numeric(mdlWorkerOut$Att$varInterceptCoreSdt[1]))
-mdlWorkerOut$Att$varBtwPercSlopesCoreSdt <-
-  (1 - (as.numeric(mdlWorkerOut$Att$varSlopesCoreSdt[1]) / as.numeric(mdlWorkerOut$Att$varInterceptCoreSdt[1]))) * 100
-# and the estimate of within-group (or residual variance) explained is:
-mdlWorkerOut$Att$varWithinSlopesCoreSdt <-
-  1 - (as.numeric(mdlWorkerOut$Att$varSlopesCoreSdt[2]) / as.numeric(mdlWorkerOut$Att$varInterceptCoreSdt[2]))
-mdlWorkerOut$Att$varWithinPercSlopesCoreSdt <-
-  (1 - (as.numeric(mdlWorkerOut$Att$varSlopesCoreSdt[2]) / as.numeric(mdlWorkerOut$Att$varInterceptCoreSdt[2]))) * 100
-
 # Assumption Checks:
 mdlWorkerOut$Att$diagSlopesCoreSdt <- 
   sjPlot::plot_model(mdlWorkerOut$Att$lmerSlopesCoreSdt, type = "diag")
@@ -3433,11 +3523,11 @@ grid.arrange(
 
 # Plot prediction model
 mdlWorkerOut$Att$predSlopesCoreSdt <- 
-  workerOutgroupInteraction %>%
+  workerOutWithinBetween %>%
   filter(!is.na(autonomy_1)) %>%
   select(thermometerDutch_1, session, PID, autonomy_1) %>% 
   mutate(measure = predict(mdlWorkerOut$Att$lmeSlopesCoreSdt,
-                           workerOutgroupInteraction %>% filter(!is.na(autonomy_1)),
+                           workerOutWithinBetween %>% filter(!is.na(autonomy_1)),
                            re.form = NA
                            )
          )
@@ -3484,7 +3574,156 @@ We will test our main hypotheses for this study in a sequential manner.
 
 ## Data Description
 
-<i class="fas fa-exclamation-triangle"></i> Still in 'scr/studentDescriptive.R'. Needs to be merged with this document.
+### Participants  
+
+```{r studentSampleInfo}
+# summarize participant characteristics
+studentSampleInfo <- 
+  dtStudents$full %>%
+  mutate(gender = as.factor(ifelse(.$Gender == 1, "women", ifelse(.$Gender == 2, "man", ifelse(.$Gender == 3, "other", NA))))) %>%
+  group_by(PID) %>%
+  summarise(
+    dailiesN = n(), 
+    morningN = sum(periodMA=="morning"),
+    afternoonN = sum(periodMA=="afternoon"),
+    age = age,
+    gender = gender,
+    nationality = nationality
+  ) %>%
+  distinct
+
+# look at frequencies of characteristics 
+studentSampleInfo %>% 
+  ungroup %>%
+  select(
+    "Number of Measurements" = dailiesN,
+    Age = age,
+    Gender = gender,
+    Nationality = nationality
+  ) %>%
+  mutate(
+    Nationality = as.character(Nationality)
+  ) %>%
+  tbl_summary(.,
+              sort = list(everything() ~ "frequency"))
+```
+
+
+### Interactions  
+
+```{r studentInteractionInfo}
+# duration of survey should include median and MAD
+studentInteractions <- dtStudents$full %>%
+  dplyr::select(created.daily, ended.daily) %>%
+  mutate_all(ymd_hms) %>%
+  mutate(duration = as.numeric(ended.daily-created.daily)) %>%
+  select(duration)
+
+studentInteractions %>%
+  as.data.frame %>%
+  psych::describe(., trim = .2) %>%
+  as.data.frame %>%
+  mutate(vars = c("Duration [in seconds]"), # rownames(.),
+         na = nrow(dtStudents$full)-n,
+         win.mean = sapply(studentInteractions,psych::winsor.mean,simplify=T),
+         win.sd = sapply(studentInteractions,psych::winsor.sd,simplify=T)) %>%
+  dplyr::select(characteristic = vars, n, na, 
+                mean, `mean win` = win.mean, `mean trim` = trimmed, median,
+                sd, `sd win` = win.sd, MAD = mad, min, max,
+                skew, kurtosis) %>%
+  kbl(., 
+      #label = "",
+      caption = "Study 2: Duration of Measurement in Seconds",
+      format = "html", 
+      #linesep = "",
+      #booktabs = T,
+      row.names = F,
+      digits = 2,
+      align = c('l', rep('c', ncol(.)-1)))  %>%
+  add_header_above(., c(" " = 3,"Centrality" = 4, "Dispersion" = 5, "Distribution" = 2)) %>%
+  footnote(general = "'na' indicates the number of measurements for which measurement duration is unknown.") %>%
+  kable_classic(full_width = F, 
+                lightable_options = "hover", 
+                html_font = "Cambria")
+
+studentInteractionType %>%
+  select(OutgroupInteraction,
+         NonOutgroupInteraction) %>%
+  tbl_summary(.,
+              sort = list(everything() ~ "frequency"))
+```
+
+
+
+### Variable distributions  
+
+```{r studentVarDescr}
+# calculate correlations and descriptives
+studentMlCor <-
+  MlCorMat(
+    data = studentInteractionType,
+    id = "PID",
+    selection = c("KeyNeedFullfillment", "Competence", "Autonomy", "Relatedness", "quality_overall", "AttitudesDutch"),
+    labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Quality", "Attitudes NL")
+  ) 
+
+studentMlCor %>%
+  kable(
+    .,
+    caption = "Student: Multilevel Core Variable Descriptives",
+    format = "html",
+    #booktabs = TRUE,
+    linesep = linesep(c(ncol(.))),
+    align = c("l", rep("c", ncol(.) - 1))
+  ) %>%
+  pack_rows("Correlations", 1, ncol(studentMlCor)) %>%
+  pack_rows("Descriptives", ncol(studentMlCor)+1, nrow(studentMlCor)) %>%
+  footnote(
+    general = c(
+      "Upper triangle: Between-person correlations;",
+      "Lower triangle: Within-person correlations;",
+      "*** p < .001, ** p < .01,  * p < .05"
+    )
+  ) %>%
+  kable_classic(full_width = F, 
+                lightable_options = "hover", 
+                html_font = "Cambria")
+
+```
+
+```{r studentOutVarDescr}
+# calculate correlations and descriptives
+studentOutMlCor <-
+  MlCorMat(
+    data = studentInteractionType %>% filter(OutgroupInteraction == "Yes"),
+    id = "PID",
+    selection = c("KeyNeedFullfillment", "Competence", "Autonomy", "Relatedness", "quality_overall", "AttitudesDutch"),
+    labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Quality", "Attitudes NL")
+  ) 
+
+studentOutMlCor %>%
+  kable(
+    .,
+    caption = "Student: Multilevel Core Variable Descriptives (Outgroup Contact Only)",
+    format = "html",
+    #booktabs = TRUE,
+    linesep = linesep(c(ncol(.))),
+    align = c("l", rep("c", ncol(.) - 1))
+  ) %>%
+  pack_rows("Correlations", 1, ncol(studentMlCor)) %>%
+  pack_rows("Descriptives", ncol(studentMlCor)+1, nrow(studentMlCor)) %>%
+  footnote(
+    general = c(
+      "Upper triangle: Between-person correlations;",
+      "Lower triangle: Within-person correlations;",
+      "*** p < .001, ** p < .01,  * p < .05"
+    )
+  ) %>%
+  kable_classic(full_width = F, 
+                lightable_options = "hover", 
+                html_font = "Cambria")
+
+```
 
 ## Contact Hypothesis
 
@@ -3527,14 +3766,12 @@ We find that both the number of interactions and the number of measurement beeps
 
 In a next step we take into account that having an interaction with an outgroup member, does not happen in a social vacuum. Participants who indicated that they had an interaction with an outgroup member include measurement occasions during which someone either only had an interaction with an outgroup member as well as times during which a person also had interaction(s) with a non-Dutch person. Inversely, participants who indicated that they did not have an interaction with a Dutch person might either have had no interaction at all or had an interaction with a non-Dutch person. We, thus consider all possible combinations and their independent influences on outgroup attitudes.  
 
-#### OLS regression
 
 We first assess the impact of the different interaction types across all measurement points (lumping all beeps together).
 
 \begin{equation}
 (\#eq:studentIntTypeQual)
-\mu_{i,0utgroupInteraction} > \mu_{i,IngroupInteraction}  \\
-Attitude = OutgroupInteraction \times NonOutgroupInteraction
+Attitude = OutgroupInteraction + NonOutgroupInteraction
 \end{equation}
 
 
@@ -3545,6 +3782,78 @@ Attitude = OutgroupInteraction \times NonOutgroupInteraction
 </div>
 
 ```{r studentInteractionTypePlt, fig.height=12}
+# between participants interaction type
+studentAttInteractionType <- studentInteractionType %>%
+  select(
+    PID,
+    OutgroupInteraction,
+    NonOutgroupInteraction,
+    Attitude = AttitudesDutch
+  ) %>%
+  mutate(InteractionType = paste(
+    ifelse(OutgroupInteraction == "Yes", "Out", ifelse(OutgroupInteraction == "No", "NoOut", NA)),
+    ifelse(NonOutgroupInteraction == "Yes", "In", ifelse(NonOutgroupInteraction == "No", "NoIn", NA)),
+    sep = ", "
+  ))
+
+# violin plot of attitudes by interaction type group
+ggplot(studentAttInteractionType, aes(y=Attitude, x=OutgroupInteraction, group = interaction(OutgroupInteraction, NonOutgroupInteraction), fill=NonOutgroupInteraction))+
+  geom_violin(trim = T, width=.8, position = position_dodge(0.8)) +
+  geom_boxplot(width=0.04,
+               position = position_dodge(.8),
+               outlier.colour = NULL, 
+               outlier.shape = NA, 
+               notch=F, fill="black", 
+               lwd=1, color="black") + 
+  # geom_jitter(width = 0.15,
+  #            shape=18,
+  #            alpha=.2, size=1) +
+  stat_summary(fun.y=mean, 
+               geom="point", 
+               shape=16, 
+               size=1, 
+               position = position_dodge(0.8),
+               colour="white") +
+  #stat_summary(fun.data="mean_sdl",  
+  #             fun.args = list(mult=1), 
+  #             geom="pointrange", 
+  #             color = "red", 
+  #             width=.2)+
+  stat_summary(geom = "crossbar", 
+               width=0.04, 
+               fatten=0, 
+               position = position_dodge(0.8),
+               color="white", 
+               fun.data = function(x){ return(c(y=median(x), 
+                                                ymin=median(x), 
+                                                ymax=median(x))) })+
+  ylab("Outgroup Attitudes")+
+  xlab("Outgroup Interaction") +
+  ggtitle("Violin Plot:\nOutgroup Attitudes by Interaction Type")+
+  scale_y_continuous(
+    limits = c(0, 100),
+    breaks = c(0, 15, 30, 40, 50, 60, 70, 85, 100),
+    labels = c(
+      "Very cold or unfavorable feelings 0°",
+      "Quite cold and unfavorable feelings 15°",
+      "Fairly cold and unfavorable feelings 30°",
+      "A bit cold and unfavorable feelings 40°",
+      "No feeling at all 50°",
+      "A bit warm and favorable feelings 60°",
+      "Fairly warm and favorable feelings 70° ",
+      "Quite warm and favorable feelings 85° ",
+      "Very warm and favorable feelings 100° "
+    )
+  ) +
+  #coord_flip()+
+  scale_fill_brewer(palette = "Pastel2", name = "Non-Outgroup Interaction")+
+  theme_Publication()+
+  theme(strip.background =element_rect(fill="black", color="black"),
+        strip.text = element_text(colour = 'white', face="bold"))#,
+        #panel.border = element_rect(color="grey"),
+        #legend.position="none")
+
+
 # between participants interaction type
 studentContactType <- studentInteractionType %>%
   group_by(
@@ -3561,8 +3870,8 @@ studentContactType <- studentInteractionType %>%
   ) %>%
   ungroup()
 
-# plot bar chart
-ggplot(
+# plot bar chart (alternative with less information about actual data)
+studentAttInteractionTypeBar <- ggplot(
   studentContactType,
   aes(
     y = AttitudeM,
@@ -3628,18 +3937,102 @@ summ(
 
 We find that while controlling for interactions with non-Dutch people, outgroup attitudes were significantly higher when participants had an interaction with a Dutch person. The effect is of a medium size (`r format(round(mdlStudent$lmAttInt$coefficients["OutgroupInteractionYes"], 2), nsmall=2)` points on a 0--100 scale). However, this analysis lumps all ESM beeps from every participants together and ignores that the data is nested within participants.
 
-#### ML Regression with interaction term  
+### Interaction Frequency and Interaction Quality
+
+In a final step we check whether the effect outgroup interactions, in part, depends on the quality during the interactions. Because we can only assess interaction quality when there is an interaction, it is difficult to assess this with the interaction dummy as a within person predictor. Instead, we will use an aggregate measure of interaction quality and average interaction quality to consider the two predictors jointly.  
+
+\begin{equation}
+(\#eq:studentFreqQual)
+Attitude = ContactFreq \times AverageContactQual
+\end{equation}
+
+```{r studentFreqQualCor}
+# correlation panel
+pairs.panels.new(
+  studentContactFreq %>% select(SumContactNL, SumContactNLAll, AvQuality, AvAttitude),
+  labels = c(
+    "Sum:\nNumer of beeps with Outgroup Contact (NL)",
+    "Sum:\nNumber of Outgroup Contacts (NL)",
+    "Mean:\nInteraction Quality",
+    "Mean:\nOutgroup Attitudes (NL)"
+  )
+)
+
+# correlation panel with interaction sums winsorized
+pairs.panels.new(
+  studentContactFreq %>% select(WinSumContactNL, WinSumContactNLAll, AvQuality, AvAttitude),
+  labels = c(
+    "Sum:\nNumer of beeps with Outgroup Contact (NL)\n[Winsorized]",
+    "Sum:\nNumber of Outgroup Contacts (NL)\n[Winsorized]",
+    "Mean:\nInteraction Quality",
+    "Mean:\nOutgroup Attitudes (NL)"
+  )
+)
+```
+
+Within the data, we find no significant correlation between the participants' Average Interaction Quality and their Average Outgroup Attitudes. Thus, within our data participants with a higher quality outgroup interactions did not hold more positive attitudes towards that group. However, the frequency of intergroup interactions had a meaningful correlation with both the average interaction quality or average outgroup attitudes.   
+
+```{r studentModelOlsAttFreqQual}
+# center remaining 
+studentContactFreq <-
+  studentContactFreq %>%
+  mutate(
+    SumContactNL_c = SumContactNL - mean(SumContactNL, na.rm = TRUE),
+    SumContactNLAll_c = SumContactNLAll - mean(SumContactNLAll, na.rm = TRUE),
+    AvAttitude_c = AvAttitude - mean(AvAttitude, na.rm = TRUE),
+    AvQuality_c = AvQuality - mean(AvQuality, na.rm = TRUE)
+  )
+
+# regression
+mdlStudent$lmAttFreqQualX <-
+  lm(AvAttitude ~ SumContactNL_c * AvQuality_c, data = studentContactFreq)
+
+summ(
+  mdlStudent$lmAttFreqQualX,
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+
+# Partial Eta Squared
+mdlStudent$lmAttFreqQualXEta <-
+  effectsize::eta_squared(mdlStudent$lmAttFreqQualX, partial = TRUE)
+
+
+# Interaction Plots
+interactions::interact_plot(
+  mdlStudent$lmAttFreqQualX,
+  pred = SumContactNL_c,
+  modx = AvQuality_c,
+  interval = TRUE,
+  partial.residuals = TRUE
+)
+
+interactions::johnson_neyman(mdlStudent$lmAttFreqQualX,
+                             pred = SumContactNL_c,
+                             modx = AvQuality_c,
+                             alpha = .05)
+```
+
+We find that in our student sample there is only a relationship between the number of outgroup contacts but no significant effect of average perceived contact quality. Nor do we find that in this sample the impact of the number of interactions is moderated by the average contact quality. This is not entirely consistent with the sojourner sample, where average contact quality did have a meaningful effect on outgroup attitudes. This effect is not necessarily surprising given that the variables aggregate all within person variation and there were substantially more measurements where participants did not have an interaction (but reported their outgroup attitudes) than measurements that followed an outgroup contact.  
+
+### Multilevel Regression  
 
 We, thus, proceed with a multilevel analysis, which acknowledges that the measurements are nested within participants.  
 
-##### Unconditional model  
+#### Unconditional model  
 
 We start by creating an empty random intercept model (i.e., let the outgroup attitude intercept be different between participants; unconditional model).  
 
 \begin{equation}
 (\#eq:studentEmptyModel)
-Attitude_{ti} = \gamma_{00} + u_{0i} + e_{ti} \\
-\textrm{with}\ u_{0i} \sim \mathcal{N}(0,\tau_{00}^2)\ \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i}
+  \end{split} 
 \end{equation}
 
 ```{r studentModelMLAttNull}
@@ -3659,13 +4052,7 @@ mdlStudent$lmeAttNull <-
 
 # Get summary with p-values (Satterthwaite's method)
 # summary(mdlStudent$lmerAttNull) #or with the lme function
-summ(mdlStudent$lmerAttNull, digits = 3, center = TRUE)
-
-# generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(AttitudesDutch~1 + (1|PID),data=dtStudent$full),
-#                  method="boot",nsim=1000,
-#                  parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-Null-CI.csv")
+summ(mdlStudent$lmerAttNull, digits = 3)
 
 # Save variances
 mdlStudent$varAttNull <- 
@@ -3726,14 +4113,22 @@ To assess the variances within and between participants we look at the ICC $\tau
 
 We find that an estimated `r format(round(mdlStudent$IccPercAttNull, 2), nsmall=2)`% of the variation in Feeling Thermometer scores is explained by between participant differences (clustering by PID). This is to say that `r format(round(mdlStudent$IccPercAttNull, 2), nsmall=2)`% of the variance in any individual report of Attitudes towards the Dutch can be explained by the properties of the individual who provided the rating. And we find that including 'participant' as a predictor adds significantly to the model.  
 
-##### random intercept with predictors  
+#### random intercept with predictors  
 
 To this random intercept model we now add the two types of interactions possible at each measurement point as contemporaneous predictors of outgroup attitudes. That is: We check whether within participants having an outgroup interaction (or a non-outgroup interaction) is associated with more positive outgroup attitudes at the same measurement point.  
 
 \begin{equation}
 (\#eq:StudentInteractionTypeModel)
-Attitude_{ti} = \gamma_{00} + \gamma_{10}OutgroupInteraction_{ti} + \gamma_{10}NonOutgroupInteraction_{ti} + u_{0i} + e_{ti} \\
-\textrm{with}\ u_{0i} \sim \mathcal{N}(0,\tau_{00}^2)\ \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}OutgroupInteraction_{ti} + \\
+                           &\ \beta_{2i}NonOutgroupInteraction_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} \\
+                      &\ \beta_{2i} = \gamma_{20}
+  \end{split} 
 \end{equation}
 
 ```{r studentModelInterceptAttType}
@@ -3747,7 +4142,7 @@ mdlStudent$lmeInterceptAttType <-
 
 # Get summary with p-values (Satterthwaite's method)
 summ(
-  lmer(
+  mdlStudent$lmerInterceptAttType <- lmer(
     AttitudesDutch ~ OutgroupInteraction + NonOutgroupInteraction + (1 | PID),
     data = studentInteractionType
   ),
@@ -3756,11 +4151,9 @@ summ(
   center = TRUE
 )
 
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(AttitudesDutch ~ Contact_dum + inNonDutch + (1|PID),data=studentInteractionType),
-#                  method="boot",nsim=1000, parallel = "multicore",
-#                  ncpus = 4, seed = 42),
-#          "output/tables/ML-Inter-CI.csv")
+# 95%CI
+mdlStudent$lmerInterceptAttTypeCI <- 
+  confint(method = "Wald", mdlStudent$lmerInterceptAttType)
 
 # Compare new model to previous step
 anova(mdlStudent$lmeAttNull, 
@@ -3806,14 +4199,22 @@ We find that a random intercept model with the two interaction types as predicto
 
 TL;DR: Interaction with Dutch is great predictor, interactions with non-Dutch is not.
 
-##### random slope
+#### random slope
 
 In a next step, we check whether further letting the effect of the different interaction types vary between participants explains additional variance in outgroup attitudes (i.e., random slopes).   
 
 \begin{equation}
-(\#eq:RandSlopesEq)
-Attitude_{ti} = \gamma_{00} + \gamma_{10}OutgroupInteraction_{ti} + \gamma_{10}NonOutgroupInteraction_{ti} + u_{0i} + u_{1i} + e_{ti}  \\
-\textrm{with}\ \begin{bmatrix} u_{0i}\\ u_{1i}\end{bmatrix} \sim \mathcal{N}(0,\Omega_u): \Omega_u=\begin{bmatrix} \tau_{0}^2 & \\ \tau_{01} & \tau_{1}^2 \end{bmatrix} \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+(\#eq:studentRandomSlopes)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}OutgroupInteraction_{ti} + \\
+                           &\ \beta_{2i}NonOutgroupInteraction_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} + u_{1i} \\
+                      &\ \beta_{2i} = \gamma_{20} + u_{2i}
+  \end{split} 
 \end{equation}
 
 ```{r studentModelSlopesInteractionType}
@@ -3835,18 +4236,16 @@ summ(
     data = studentInteractionType
   ), 
   confint = TRUE,
-  digits = 3,
-  center = TRUE
+  digits = 3
 )
 
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(model.ran0,
-#               method="boot",nsim=1000,
-#               parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-RandomSlopes-CI.csv")
+# 95%CI
+mdlStudent$lmerSlopesAttTypeCI <- 
+  confint(method = "Wald", mdlStudent$lmerSlopesAttType)
 
 # Compare new model to previous step
-anova(mdlStudent$lmeInterceptAttType, 
+anova(mdlStudent$lmeAttNull,
+      mdlStudent$lmeInterceptAttType, 
       mdlStudent$lmeSlopesAttType) %>%
   as.data.frame() %>%
   select(-call) %>%
@@ -3871,18 +4270,6 @@ anova(mdlStudent$lmeInterceptAttType,
 # Save variances
 mdlStudent$varSlopesAttType <- 
   lme4::VarCorr(mdlStudent$lmeSlopesAttType)
-
-# The estimate of between-group (or Intercept variance) explained:
-# Variance Explained = 1 – (Var with Predictor/Var without Predictor)
-mdlStudent$varBtwSlopesAttType <- 
-  1 - (as.numeric(mdlStudent$varSlopesAttType[1]) / as.numeric(mdlStudent$varInterceptAttType[1]))
-mdlStudent$varBtwPercSlopesAttType <- 
-  (1 - (as.numeric(mdlStudent$varSlopesAttType[1]) / as.numeric(mdlStudent$varInterceptAttType[1]))) * 100
-# and the estimate of within-group (or residual variance) explained is:
-mdlStudent$varWithinSlopesAttType <- 
-  1 - (as.numeric(mdlStudent$varSlopesAttType[2]) / as.numeric(mdlStudent$varInterceptAttType[2]))
-mdlStudent$varWithinPercSlopesAttType <- 
-  (1 - (as.numeric(mdlStudent$varSlopesAttType[2]) / as.numeric(mdlStudent$varInterceptAttType[2]))) * 100
 
 # Assumption Checks:
 mdlStudent$diagSlopesAttType <-
@@ -3930,70 +4317,6 @@ We find that adding the random slopes does add significantly beyond the random i
 
 TL;DR: Random slopes adds significantly.  
 
-### Interaction Frequency and Interaction Quality
-
-In a final step we check whether the effect outgroup interactions, in part, depends on the quality during the interactions. Because we can only assess interaction quality when there is an interaction, it is difficult to assess this with the interaction dummy as a within person predictor. Instead, we will use an aggregate measure of interaction quality and average interaction quality to consider the two predictors jointly.  
-
-\begin{equation}
-(\#eq:FreqQual)
-Attitude = ContactFreq \times AverageContactQual
-\end{equation}
-
-```{r studentFreqQualCor}
-# correlation panel
-pairs.panels.new(
-  studentContactFreq %>% select(SumContactNL, SumContactNLAll, AvQuality, AvAttitude),
-  labels = c(
-    "Sum:\nNumer of beeps with Outgroup Contact (NL)",
-    "Sum:\nNumber of Outgroup Contacts (NL)",
-    "Mean:\nInteraction Quality",
-    "Mean:\nOutgroup Attitudes (NL)"
-  )
-)
-
-# correlation panel with interaction sums winsorized
-pairs.panels.new(
-  studentContactFreq %>% select(WinSumContactNL, WinSumContactNLAll, AvQuality, AvAttitude),
-  labels = c(
-    "Sum:\nNumer of beeps with Outgroup Contact (NL)\n[Winsorized]",
-    "Sum:\nNumber of Outgroup Contacts (NL)\n[Winsorized]",
-    "Mean:\nInteraction Quality",
-    "Mean:\nOutgroup Attitudes (NL)"
-  )
-)
-```
-
-Within the data, we find no significant correlation between the participants' Average Interaction Quality and their Average Outgroup Attitudes. Thus, within our data participants with a higher quality outgroup interactions did not hold more positive attitudes towards that group. However, the frequency of intergroup interactions had a meaningful correlation with both the average interaction quality or average outgroup attitudes.   
-
-```{r studentModelOlsAttFreqQual}
-# regression
-mdlStudent$lmAttFreqQualX <-
-  lm(AvAttitude ~ SumContactNL * AvQuality, data = studentContactFreq)
-# summary(mdlStudent$lmAttFreqQualX)
-
-summ(
-  mdlStudent$lmAttFreqQualX,
-  confint = TRUE,
-  digits = 3,
-  center = TRUE
-)
-
-interactions::interact_plot(
-  mdlStudent$lmAttFreqQualX,
-  pred = SumContactNL,
-  modx = AvQuality,
-  interval = TRUE,
-  partial.residuals = TRUE
-)
-
-interactions::johnson_neyman(mdlStudent$lmAttFreqQualX,
-                             pred = SumContactNL,
-                             modx = AvQuality,
-                             alpha = .05)
-```
-
-We find that in our student sample there is only a relationship between the number of outgroup contacts but no significant effect of average perceived contact quality. Nor do we find that in this sample the impact of the number of interactions is moderated by the average contact quality. This is not entirely consistent with the sojourner sample, where average contact quality did have a meaningful effect on outgroup attitudes. This effect is not necessarily surprising given that the variables aggregate all within person variation and there were substantially more measurements where participants did not have an interaction (but reported their outgroup attitudes) than measurements that followed an outgroup contact.  
-
 ## Need Fulfillment  
 
 The main proposal of our article is that the success of an outgroup interaction might be explained by whether or not the interaction fulfilled the person's core situational need. This should, in turn, be due to a higher perceived interaction quality. We will this sequentially test whether the fulfillment of the core need during an interaction is (1) related to more positive outgroup attitudes, (2) higher perceived interaction quality, and (3) whether the variance explained by the core need is assumed by the perceived interaction quality if considered jointly.     
@@ -4027,19 +4350,24 @@ mdlStudentOut <-
   )
 ```
 
-<i class="fas fa-question-circle"></i> _Note to self:_ For completeness, we should probably check this against an empty model without random intercept.  
-
 \begin{equation}
-(\#eq:studentOutEmptyModel)
-Attitude_{ti} = \gamma_{00} + u_{0i} + e_{ti} \\
-\textrm{with}\ u_{0i} \sim \mathcal{N}(0,\tau_{00}^2)\ \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+(\#eq:studentOutAttEmptyModel)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} +  e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i}
+  \end{split} 
 \end{equation}
+
 
 ```{r studentOutModelMLAttNull}
 # Create and save Model
 mdlStudentOut$Att$lmerNull <-
   lme4::lmer(AttitudesDutch ~ 1 + (1 | PID), 
              data = studentOutgroupInteraction) # use optim if it does not converge
+
 mdlStudentOut$Att$lmeNull <-
   lme(
     AttitudesDutch ~ 1,
@@ -4051,12 +4379,6 @@ mdlStudentOut$Att$lmeNull <-
 # Get summary with p-values (Satterthwaite's method)
 # summary(Null.Out.ML.r) #or with the lme function
 summ(mdlStudentOut$Att$lmerNull, digits = 3, center = TRUE)
-
-# generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(AttitudesDutch~1 + (1|PID),data=studentOutgroupInteraction),
-#                  method="boot",nsim=1000,
-#                  parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-Null-CI.csv")
 
 # Save variances
 mdlStudentOut$Att$varNull <- 
@@ -4076,37 +4398,42 @@ mdlStudentOut$Att$IccPercNull <-
 
 #### random intercept with level one predictors
 
-We thus add the core interaction need fulfillment to the multilevel random intercept model.  
+We then add the core interaction need fulfillment to the multilevel random intercept model.  
 
 \begin{equation}
-(\#eq:AttitudeNeedEq)
-Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + u_{0i} + e_{ti} \\
-\textrm{with}\ u_{0i} \sim \mathcal{N}(0,\tau_{00}^2)\ \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+(\#eq:studentOutInterceptAttNeedEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10}
+  \end{split} 
 \end{equation}
 
 ```{r studentOutModelInterceptAttCore}
 # Create and save Model
 mdlStudentOut$Att$lmeInterceptCore <-
   lme(
-    AttitudesDutch ~ KeyNeedFullfillment,
+    AttitudesDutch ~ KeyNeedFullfillment_cwc,
     random = ~ 1 | PID,
-    data = studentOutgroupInteraction
+    data = studentOutWithinBetween
   )
+
 
 # Get summary with p-values (Satterthwaite's method)
 summ(
-  lmer(AttitudesDutch ~ KeyNeedFullfillment + (1 | PID), 
-       data = studentOutgroupInteraction),
+  lmer(AttitudesDutch ~ KeyNeedFullfillment_cwc + (1 | PID), 
+       data = studentOutWithinBetween),
   confint = TRUE,
   digits = 3,
   center = TRUE
 )
 
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(AttitudesDutch ~ Contact_dum + inNonDutch + (1|PID),data=studentOutgroupInteraction),
-#                  method="boot",nsim=1000, parallel = "multicore",
-#                  ncpus = 4, seed = 42),
-#          "output/tables/ML-Inter-CI.csv")
+# 95%CI
+mdlStudentOut$Att$lmerInterceptCoreCI <- 
+  confint(method = "Wald", mdlStudentOut$Att$lmerInterceptCore)
 
 # Compare new model to previous step
 anova(mdlStudentOut$Att$lmeNull, 
@@ -4150,12 +4477,18 @@ We find that the the model with the added predictor indeed explains more varianc
 
 #### random slope
 
-In a next step, we check whether further letting the effect of core need fulfillment vary between participants explains additional variance in outgroup attitudes (i.e., random slope).   
+In a next step, we check whether further letting the effect of core need fulfillment vary between participants explains additional variance in outgroup attitudes (i.e., random slope).  
 
 \begin{equation}
-(\#eq:AttitudeNeedRandEq)
-Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + u_{0i} + u_{1i} + e_{ti}  \\
-\textrm{with}\ \begin{bmatrix} u_{0i}\\ u_{1i}\end{bmatrix} \sim \mathcal{N}(0,\Omega_u): \Omega_u=\begin{bmatrix} \tau_{0}^2 & \\ \tau_{01} & \tau_{1}^2 \end{bmatrix} \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+(\#eq:studentOutSlopeAttNeedEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} + u_{1i}
+  \end{split} 
 \end{equation}
 
 ```{r studentOutModelSlopesAttCore}
@@ -4163,34 +4496,58 @@ Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + u_{0i} + u_{1i} +
 mdlStudentOut$Att$lmeSlopesCore <-
   lme(
     AttitudesDutch ~
-      KeyNeedFullfillment,
-    random = ~ 1 + KeyNeedFullfillment | PID,
+      KeyNeedFullfillment_cwc,
+    random = ~ 1 + KeyNeedFullfillment_cwc | PID,
     control = lmeControl(opt = "optim"),
-    data = studentOutgroupInteraction
+    data = studentOutWithinBetween
   )
 
 # Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
 summ(
   mdlStudentOut$Att$lmerSlopesCore <- lmer(
     AttitudesDutch ~
-      KeyNeedFullfillment +
-      (1 + KeyNeedFullfillment | PID),
-    data = studentOutgroupInteraction
+      KeyNeedFullfillment_cwc +
+      (1 + KeyNeedFullfillment_cwc | PID),
+    data = studentOutWithinBetween
   ),
   confint = TRUE,
   digits = 3,
-  center = TRUE
+  center = FALSE
 )
 
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(model.ran0,
-#               method="boot",nsim=1000,
-#               parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-RandomSlopes-CI.csv")
+# all variables standardized within PPT
+summ(
+  mdlStudentOut$Att$lmerSlopesCoreZ <- lmer(
+    AttitudesDutch_zwc ~
+      KeyNeedFullfillment_zwc +
+      (1 + KeyNeedFullfillment_zwc | PID),
+    data = studentOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+
+# standardized coefficients
+stdCoef.merMod(mdlStudentOut$Att$lmerSlopesCore)
+
+# 95%CIs
+mdlStudentOut$Att$lmerSlopesCoreCI <- 
+  confint(method = "Wald", mdlStudentOut$Att$lmerSlopesCore)
+
+# Attempts at R^2
+r2mlm::r2mlm(mdlStudentOut$Att$lmerSlopesCore, bargraph = TRUE)
+mitml::multilevelR2(mdlStudentOut$Att$lmerSlopesCore)
+performance::r2(mdlStudentOut$Att$lmerSlopesCore)
+performance::model_performance(mdlStudentOut$Att$lmerSlopesCore)
+performance::compare_performance(mdlStudentOut$Att$lmerNull, 
+                                 mdlStudentOut$Att$lmerInterceptCore, 
+                                 mdlStudentOut$Att$lmerSlopesCore)
 
 # Compare new model to previous step
-anova(mdlStudentOut$Att$lmeInterceptCore, 
-      mdlStudentOut$Att$lmeSlopesCore) %>%
+anova(mdlStudentOut$Att$lmeNull, 
+      mdlStudentOut$Att$lmeInterceptCore, 
+      mdlStudentOut$Att$lmeSlopesCore)  %>%
   as.data.frame() %>%
   select(-call) %>%
   mutate(
@@ -4213,18 +4570,6 @@ anova(mdlStudentOut$Att$lmeInterceptCore,
 mdlStudentOut$Att$varSlopesCore <- 
   lme4::VarCorr(mdlStudentOut$Att$lmeSlopesCore)
 
-# The estimate of between-group (or Intercept variance) explained:
-# Variance Explained = 1 – (Var with Predictor/Var without Predictor)
-mdlStudentOut$Att$varBtwSlopesCore <-
-  1 - (as.numeric(mdlStudentOut$Att$varSlopesCore[1]) / as.numeric(mdlStudentOut$Att$varInterceptCore[1]))
-mdlStudentOut$Att$varBtwPercSlopesCore <-
-  (1 - (as.numeric(mdlStudentOut$Att$varSlopesCore[1]) / as.numeric(mdlStudentOut$Att$varInterceptCore[1]))) * 100
-# and the estimate of within-group (or residual variance) explained is:
-mdlStudentOut$Att$varWithinSlopesCore <-
-  1 - (as.numeric(mdlStudentOut$Att$varSlopesCore[2]) / as.numeric(mdlStudentOut$Att$varInterceptCore[2]))
-mdlStudentOut$Att$varWithinPercSlopesCore <-
-  (1 - (as.numeric(mdlStudentOut$Att$varSlopesCore[2]) / as.numeric(mdlStudentOut$Att$varInterceptCore[2]))) * 100
-
 # Assumption Checks:
 mdlStudentOut$Att$diagSlopesCore <- 
   sjPlot::plot_model(mdlStudentOut$Att$lmerSlopesCore, type = "diag")
@@ -4237,10 +4582,10 @@ grid.arrange(
 
 # Plot prediction model
 mdlStudentOut$Att$predSlopesCore <- 
-  studentOutgroupInteraction %>%
+  studentOutWithinBetween %>%
   select(AttitudesDutch, TIDnum, PID) %>% 
   mutate(measure = predict(mdlStudentOut$Att$lmeSlopesCore,
-                           studentOutgroupInteraction,
+                           studentOutWithinBetween,
                            re.form = NA
                            )
          )
@@ -4271,12 +4616,6 @@ We find that adding the random slopes does add significantly beyond the random i
 
 TL;DR: The random slope adds significantly to the prediction model.  
 
-<div class="alert alert-warning alert-dismissible fade in" role="alert">
-  <a class="close" data-dismiss="alert" aria-label="close">&times;</a>
-  <i class="fas fa-exclamation-triangle"></i> <b>Check needed: </b><br/>
-  Something is with the variances explained (between = `r format(round(mdlStudentOut$Att$varBtwPercSlopesCore, 2),nsmall=2)`%, within = `r format(round(mdlStudentOut$Att$varWithinPercSlopesCore, 2),nsmall=2)`%). This is when comparing the random intercepts to the random slopes model. Check with materials from Laura!!
-</div>
-
 ### Need fulfillment and Interaction Quality   
 
 Based on the assertion that the relationship between core need fulfillment and outgroup attitudes is explained by a higher perceived interaction, the core need fulfillment should also significantly predict perceived interaction quality.  
@@ -4286,33 +4625,32 @@ Based on the assertion that the relationship between core need fulfillment and o
 Given that we now have the perceived interaction quality as our outcome variable of interest we again begin with an unconditional model (i.e., empty random intercept model), to see whether there is enough variance to explain within the participants. Similarly to before this is again done within the subsample of measurements during which an outgroup interaction was reported.  
 
 \begin{equation}
-(\#eq:studentOutQualEmptyModel)
-InteractionQuality_{ti} = \gamma_{00} + u_{0i} + e_{ti} \\
-\textrm{with}\ u_{0i} \sim \mathcal{N}(0,\tau_{00}^2)\ \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+(\#eq:studentOutQltEmptyModel)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ InteractionQuality_{ti} =  &\ \beta_{0i} +  e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i}
+  \end{split} 
 \end{equation}
 
 ```{r studentOutModelMLQltNull}
 # Create and save Model
 mdlStudentOut$Qlt$lmerNull <-
   lme4::lmer(quality_overall ~ 1 + (1 | PID), 
-             data = studentOutgroupInteraction) # use optim if it does not converge
+             data = studentOutWithinBetween) # use optim if it does not converge
 mdlStudentOut$Qlt$lmeNull <-
   lme(
     quality_overall ~ 1,
     random = ~ 1 | PID,
-    data = studentOutgroupInteraction,
+    data = studentOutWithinBetween,
     control = list(opt = "nlmimb")
   ) # use optim if it does not converge
 
 # Get summary with p-values (Satterthwaite's method)
 # summary(Null.Out.Qual.ML.r) #or with the lme function
 summ(mdlStudentOut$Qlt$lmerNull, digits = 3, center = TRUE)
-
-# generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(AttitudesDutch~1 + (1|PID),data=studentOutgroupInteraction),
-#                  method="boot",nsim=1000,
-#                  parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-Null-CI.csv")
 
 # Save variances
 mdlStudentOut$Qlt$varNull <- 
@@ -4332,41 +4670,44 @@ mdlStudentOut$Qlt$IccPercNull <-
 
 We again find a reasonable amount of variance within the participants.   
 
-<i class="fas fa-question-circle"></i> _Note to self:_ For completeness, we should probably check this against an empty model without random intercept. 
-
 #### random intercept with level one predictor  
 
 We again add the core interaction need fulfillment to the multilevel random intercept model.  
 
 \begin{equation}
-(\#eq:QualityNeedEq)
-InteractionQuality_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + u_{0i} + e_{ti} \\
-\textrm{with}\ u_{0i} \sim \mathcal{N}(0,\tau_{00}^2)\ \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+(\#eq:studentOutInterceptQltNeedEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ InteractionQuality_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10}
+  \end{split} 
 \end{equation}
 
 ```{r studentOutModelInterceptQltCore}
 # Create and save Model
 mdlStudentOut$Qlt$lmeInterceptCore <-
   lme(
-    quality_overall ~ KeyNeedFullfillment,
+    quality_overall ~ KeyNeedFullfillment_cwc,
     random = ~ 1 | PID,
-    data = studentOutgroupInteraction
+    data = studentOutWithinBetween
   )
 
 # Get summary with p-values (Satterthwaite's method)
 summ(
-  mdlStudentOut$Qlt$lmerInterceptCore <- lmer(quality_overall ~ KeyNeedFullfillment + (1 | PID), 
-       data = studentOutgroupInteraction),
+  mdlStudentOut$Qlt$lmerInterceptCore <- 
+    lmer(quality_overall ~ KeyNeedFullfillment_cwc + (1 | PID), 
+       data = studentOutWithinBetween),
   confint = TRUE,
   digits = 3,
-  center = TRUE
+  center = FALSE
 )
 
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(quality_overall ~ Contact_dum + inNonDutch + (1|PID),data=studentOutgroupInteraction),
-#                  method="boot",nsim=1000, parallel = "multicore",
-#                  ncpus = 4, seed = 42),
-#          "output/tables/ML-Inter-CI.csv")
+# 95%CI
+mdlStudentOut$Qlt$lmerInterceptCoreCI <- 
+  confint(method = "Wald", mdlStudentOut$Qlt$lmerInterceptCore)
 
 # Compare new model to previous step
 anova(mdlStudentOut$Qlt$lmeNull, 
@@ -4413,9 +4754,15 @@ The predictor again adds a significant amount of explained variances beyond the 
 As before, we check whether further letting the effect of core need fulfillment vary between participants explains additional variance in outgroup attitudes (i.e., random slope).   
 
 \begin{equation}
-(\#eq:QualityNeedRandEq)
-InteractionQuality_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + u_{0i} + u_{1i} + e_{ti}  \\
-\textrm{with}\ \begin{bmatrix} u_{0i}\\ u_{1i}\end{bmatrix} \sim \mathcal{N}(0,\Omega_u): \Omega_u=\begin{bmatrix} \tau_{0}^2 & \\ \tau_{01} & \tau_{1}^2 \end{bmatrix} \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+(\#eq:studentOutSlopeQltNeedEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ InteractionQuality_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} + u_{1i}
+  \end{split} 
 \end{equation}
 
 ```{r studentOutModelSlopesQltCore}
@@ -4423,10 +4770,10 @@ InteractionQuality_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + u_{0i} 
 mdlStudentOut$Qlt$lmeSlopesCore <-
   lme(
     quality_overall ~
-      KeyNeedFullfillment,
-    random = ~ 1 + KeyNeedFullfillment | PID,
+      KeyNeedFullfillment_cwc,
+    random = ~ 1 + KeyNeedFullfillment_cwc | PID,
     control = lmeControl(opt = "optim"),
-    data = studentOutgroupInteraction
+    data = studentOutWithinBetween
   )
 
 # Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
@@ -4434,23 +4781,22 @@ summ(
   mdlStudentOut$Qlt$lmerSlopesCore <-
     lmer(
       quality_overall ~
-        KeyNeedFullfillment +
-        (1 + KeyNeedFullfillment | PID),
-      data = studentOutgroupInteraction
+        KeyNeedFullfillment_cwc +
+        (1 + KeyNeedFullfillment_cwc | PID),
+      data = studentOutWithinBetween
     ),
   confint = TRUE,
   digits = 3,
-  center = TRUE
+  center = FALSE
 )
 
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(mdlStudentOut$Qlt$lmerSlopesCore,
-#               method="boot",nsim=1000,
-#               parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-RandomSlopes-CI.csv")
+# 95%CI
+mdlStudentOut$Qlt$lmerSlopesCoreCI <- 
+  confint(method = "Wald", mdlStudentOut$Qlt$lmerSlopesCore)
 
 # Compare new model to previous step
-anova(mdlStudentOut$Qlt$lmeInterceptCore, 
+anova(mdlStudentOut$Qlt$lmeNull, 
+      mdlStudentOut$Qlt$lmeInterceptCore, 
       mdlStudentOut$Qlt$lmeSlopesCore) %>%
   as.data.frame() %>%
   select(-call) %>%
@@ -4474,18 +4820,6 @@ anova(mdlStudentOut$Qlt$lmeInterceptCore,
 mdlStudentOut$Qlt$varSlopesCore <- 
   lme4::VarCorr(mdlStudentOut$Qlt$lmeSlopesCore)
 
-# The estimate of between-group (or Intercept variance) explained:
-# Variance Explained = 1 – (Var with Predictor/Var without Predictor)
-mdlStudentOut$Qlt$varBtwSlopesCore <-
-  1 - (as.numeric(mdlStudentOut$Qlt$varSlopesCore[1]) / as.numeric(mdlStudentOut$Qlt$varInterceptCore[1]))
-mdlStudentOut$Qlt$varBtwPercSlopesCore <-
-  (1 - (as.numeric(mdlStudentOut$Qlt$varSlopesCore[1]) / as.numeric(mdlStudentOut$Qlt$varInterceptCore[1]))) * 100
-# and the estimate of within-group (or residual variance) explained is:
-mdlStudentOut$Qlt$varWithinSlopesCore <-
-  1 - (as.numeric(mdlStudentOut$Qlt$varSlopesCore[2]) / as.numeric(mdlStudentOut$Qlt$varInterceptCore[2]))
-mdlStudentOut$Qlt$varWithinPercSlopesCore <-
-  (1 - (as.numeric(mdlStudentOut$Qlt$varSlopesCore[2]) / as.numeric(mdlStudentOut$Qlt$varInterceptCore[2]))) * 100
-
 # Assumption Checks:
 mdlStudentOut$Qlt$diagSlopesCore <-
   sjPlot::plot_model(mdlStudentOut$Qlt$lmerSlopesCore, type = "diag")
@@ -4498,10 +4832,10 @@ grid.arrange(
 
 # Plot prediction model
 mdlStudentOut$Qlt$predSlopesCore <- 
-  studentOutgroupInteraction %>%
+  studentOutWithinBetween %>%
   select(AttitudesDutch, TIDnum, PID) %>% 
   mutate(measure = predict(mdlStudentOut$Qlt$lmeSlopesCore,
-                           studentOutgroupInteraction,
+                           studentOutWithinBetween,
                            re.form = NA
                            )
          )
@@ -4530,7 +4864,7 @@ ggsave(
 
 We find that adding the random slopes does add significantly beyond the random intercept model.   
 
-### Interaction Needs,Quality, and Attitudes  
+### Interaction Needs, Quality, and Attitudes  
 
 In our final main step, we will jointly consider the effect of core need fulfillment and perceived interaction quality on outgroup attitudes. We expect that if the relationship between core need fulfillment and outgroup attitudes is indeed explained by a higher perceived interaction quality, the interaction quality perception should assume the explained variance of the core contact need fulfillment.  
 
@@ -4539,36 +4873,42 @@ In our final main step, we will jointly consider the effect of core need fulfill
 We thus add both the core need fulfillment and perceived interaction quality to a random intercept model of outgroup attitudes.  
 
 \begin{equation}
-(\#eq:AttitudeQualityNeedEq)
-Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + \gamma_{20}InteractionQuality_{ti} + u_{0i} + e_{ti} \\
-\textrm{with}\ u_{0i} \sim \mathcal{N}(0,\tau_{00}^2)\ \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+(\#eq:studentOutInterceptAttQltNeedEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+                           &\ \beta_{2i}InteractionQuality_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} \\
+                      &\ \beta_{2i} = \gamma_{20}
+  \end{split} 
 \end{equation}
 
 ```{r studentOutModelInterceptAttCoreQlt}
 # Create and save Model
 mdlStudentOut$Att$lmeInterceptCoreQlt <-
   lme(
-    AttitudesDutch ~ KeyNeedFullfillment + quality_overall,
+    AttitudesDutch ~ KeyNeedFullfillment_cwc + quality_overall_cwc,
     random = ~ 1 | PID,
-    data = studentOutgroupInteraction
+    data = studentOutWithinBetween
   )
 
 # Get summary with p-values (Satterthwaite's method)
 summ(
   lmer(
-    AttitudesDutch ~ KeyNeedFullfillment + quality_overall + (1 | PID),
-    data = studentOutgroupInteraction
+    AttitudesDutch ~ KeyNeedFullfillment_cwc + quality_overall_cwc + (1 | PID),
+    data = studentOutWithinBetween
   ),
   confint = TRUE,
   digits = 3,
-  center = TRUE
+  center = FALSE
 )
 
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(AttitudesDutch ~ Contact_dum + inNonDutch + (1|PID),data=studentOutgroupInteraction),
-#                  method="boot",nsim=1000, parallel = "multicore",
-#                  ncpus = 4, seed = 42),
-#          "output/tables/ML-Inter-CI.csv")
+# 95%CI
+mdlStudentOut$Att$lmerInterceptCoreQltCI <- 
+  confint(method = "Wald", mdlStudentOut$Att$lmerInterceptCoreQlt)
 
 # Compare new model to previous step
 anova(
@@ -4617,9 +4957,18 @@ Unsurprisingly, the model with the two predictors adds significantly beyond the 
 We again check whether further letting the effects vary between participants explains additional variance in outgroup attitudes (i.e., random slope).   
 
 \begin{equation}
-(\#eq:AttitudeQualityNeedRandEq)
-Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + \gamma_{20}InteractionQuality_{ti} + u_{0i} + u_{1i} + e_{ti}  \\
-\textrm{with}\ \begin{bmatrix} u_{0i}\\ u_{1i}\end{bmatrix} \sim \mathcal{N}(0,\Omega_u): \Omega_u=\begin{bmatrix} \tau_{0}^2 & \\ \tau_{01} & \tau_{1}^2 \end{bmatrix} \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
+(\#eq:workerOutSlopeAttQltNeedEq)
+(\#eq:WorkerRandomSlopes)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+                           &\ \beta_{2i}InteractionQuality_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} + u_{1i} \\
+                      &\ \beta_{2i} = \gamma_{20} + u_{2i}
+  \end{split} 
 \end{equation}
 
 ```{r studentOutModelSlopesAttCoreQlt}
@@ -4627,30 +4976,28 @@ Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + \gamma_{20}Intera
 mdlStudentOut$Att$lmeSlopesCoreQlt <-
   lme(
     AttitudesDutch ~
-      KeyNeedFullfillment + quality_overall,
-    random = ~ 1 + KeyNeedFullfillment + quality_overall | PID,
+      KeyNeedFullfillment_cwc + quality_overall_cwc,
+    random = ~ 1 + KeyNeedFullfillment_cwc + quality_overall_cwc | PID,
     control = lmeControl(opt = "optim"),
-    data = studentOutgroupInteraction
+    data = studentOutWithinBetween
   )
 
 # Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
 summ(
   mdlStudentOut$Att$lmerSlopesCoreQlt <- lmer(
     AttitudesDutch ~
-      KeyNeedFullfillment + quality_overall +
-      (1 + KeyNeedFullfillment + quality_overall | PID),
-    data = studentOutgroupInteraction
+      KeyNeedFullfillment_cwc + quality_overall_cwc +
+      (1 + KeyNeedFullfillment_cwc + quality_overall_cwc | PID),
+    data = studentOutWithinBetween
   ),
   confint = TRUE,
   digits = 3,
-  center = TRUE
+  center = FALSE
 )
 
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(model.ran0,
-#               method="boot",nsim=1000,
-#               parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-RandomSlopes-CI.csv")
+# 95%CI
+mdlStudentOut$Att$lmerSlopesCoreQltCI <- 
+  confint(method = "Wald", mdlStudentOut$Att$lmerSlopesCoreQlt)
 
 # Compare new model to previous step
 anova(
@@ -4680,18 +5027,6 @@ anova(
 mdlStudentOut$Att$varSlopesCoreQlt <- 
   lme4::VarCorr(mdlStudentOut$Att$lmeSlopesCoreQlt)
 
-# The estimate of between-group (or Intercept variance) explained:
-# Variance Explained = 1 – (Var with Predictor/Var without Predictor)
-mdlStudentOut$Att$varBtwSlopesCoreQlt <-
-  1 - (as.numeric(mdlStudentOut$Att$varSlopesCoreQlt[1]) / as.numeric(mdlStudentOut$Att$varInterceptCoreQlt[1]))
-mdlStudentOut$Att$varBtwPercSlopesCoreQlt <-
-  (1 - (as.numeric(mdlStudentOut$Att$varSlopesCoreQlt[1]) / as.numeric(mdlStudentOut$Att$varInterceptCoreQlt[1]))) * 100
-# and the estimate of within-group (or residual variance) explained is:
-mdlStudentOut$Att$varWithinSlopesCoreQlt <-
-  1 - (as.numeric(mdlStudentOut$Att$varSlopesCoreQlt[2]) / as.numeric(mdlStudentOut$Att$varInterceptCoreQlt[2]))
-mdlStudentOut$Att$varWithinPercSlopesCoreQlt <-
-  (1 - (as.numeric(mdlStudentOut$Att$varSlopesCoreQlt[2]) / as.numeric(mdlStudentOut$Att$varInterceptCoreQlt[2]))) * 100
-
 # Assumption Checks:
 mdlStudentOut$Att$diagSlopesCoreQlt <- 
   sjPlot::plot_model(mdlStudentOut$Att$lmerSlopesCoreQlt, type = "diag")
@@ -4704,10 +5039,10 @@ grid.arrange(
 
 # Plot prediction model
 mdlStudentOut$Att$predSlopesCoreQlt <- 
-  studentOutgroupInteraction %>%
+  studentOutWithinBetween %>%
   select(AttitudesDutch, TIDnum, PID) %>% 
   mutate(measure = predict(mdlStudentOut$Att$lmeSlopesCoreQlt,
-                           studentOutgroupInteraction,
+                           studentOutWithinBetween,
                            re.form = NA
                            )
          )
@@ -4749,36 +5084,44 @@ To make certain that the effect of core need fulfillment is specific to the inte
 Here we go back to the full dataset and add generalized situational core need fulfillment (either during an interaction or about the daytime in general) and whether an outgroup interaction happened as well as their interaction term to a random intercept model of outgroup attitudes.  
 
 \begin{equation}
-(\#eq:AttitudeNeedInteractionEq)
-Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + \gamma_{20}OutgroupInteraction_{ti} + \gamma_{30}KeyNeedFulfillXOutgroupInteraction_{ti} + u_{0i} + e_{ti} \\
-\textrm{with}\ u_{0i} \sim \mathcal{N}(0,\tau_{00}^2)\ \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
-\end{equation}
+(\#eq:studentInterceptAttIntNeedEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+                           &\ \beta_{2i}OutgroupInteraction_{ti} + \\
+                           &\ \beta_{3i}KeyNeedFulfillXOutgroupInteraction_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} \\
+                      &\ \beta_{2i} = \gamma_{20} \\
+                      &\ \beta_{3i} = \gamma_{30}
+  \end{split} 
+\end{equation} 
 
 ```{r studentModelInterceptAttCoreInt}
 # Create and save Model
 mdlStudent$lmeInterceptAttCoreInt <-
   lme(
-    AttitudesDutch ~ KeyNeedFullfillment * OutgroupInteraction,
+    AttitudesDutch ~ KeyNeedFullfillment_cwc * OutgroupInteraction,
     random =  ~ 1 | PID,
-    data = studentInteractionType
+    data = studentWithinBetween
   )
 
 # Get summary with p-values (Satterthwaite's method)
 summ(
   mdlStudent$lmerInterceptAttCoreInt <- lmer(
-    AttitudesDutch ~ KeyNeedFullfillment * OutgroupInteraction + (1 | PID),
-    data = studentInteractionType
+    AttitudesDutch ~ KeyNeedFullfillment_cwc * OutgroupInteraction + (1 | PID),
+    data = studentWithinBetween
   ),
   confint = TRUE,
   digits = 3,
-  center = TRUE
+  center = FALSE
 )
 
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(AttitudesDutch ~ Contact_dum + inNonDutch + (1|PID),data=studentInteractionType),
-#                  method="boot",nsim=1000, parallel = "multicore",
-#                  ncpus = 4, seed = 42),
-#          "output/tables/ML-Inter-CI.csv")
+# 95%CI
+mdlStudent$lmerInterceptAttCoreIntCI <- 
+  confint(method = "Wald", mdlStudent$lmerInterceptAttCoreInt)
 
 # Compare new model to previous step
 anova(mdlStudent$lmeAttNull, 
@@ -4827,39 +5170,47 @@ We find that the model explains significantly more variance than the empty null 
 We again check whether further letting the effects vary between participants explains additional variance in outgroup attitudes (i.e., random slope).  
 
 \begin{equation}
-(\#eq:AttitudeNeedInteractionRandEq)
-Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + \gamma_{20}OutgroupInteraction_{ti} + \gamma_{30}KeyNeedFulfillXOutgroupInteraction_{ti}  + u_{0i} + u_{1i} + e_{ti}  \\
-\textrm{with}\ \begin{bmatrix} u_{0i}\\ u_{1i}\end{bmatrix} \sim \mathcal{N}(0,\Omega_u): \Omega_u=\begin{bmatrix} \tau_{0}^2 & \\ \tau_{01} & \tau_{1}^2 \end{bmatrix} \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
-\end{equation}
+(\#eq:studentSlopesAttIntNeedEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+                           &\ \beta_{2i}OutgroupInteraction_{ti} + \\
+                           &\ \beta_{3i}KeyNeedFulfillXOutgroupInteraction_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} + u_{1i} \\
+                      &\ \beta_{2i} = \gamma_{20} + u_{2i} \\
+                      &\ \beta_{3i} = \gamma_{30} + u_{3i}
+  \end{split} 
+\end{equation} 
 
 ```{r studentModelSlopesAttCoreIntX}
 # Create and save Model (optimizer needed to reach convergence)
 mdlStudent$lmeSlopesAttCoreInt <- lme(
   AttitudesDutch ~
-    KeyNeedFullfillment * OutgroupInteraction,
-  random = ~ 1 + KeyNeedFullfillment + OutgroupInteraction | PID,
+    KeyNeedFullfillment_cwc * OutgroupInteraction,
+  random = ~ 1 + KeyNeedFullfillment_cwc + OutgroupInteraction | PID,
   control = lmeControl(opt = "optim"),
-  data = studentInteractionType
+  data = studentWithinBetween
 )
 
 # Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
 summ(
   mdlStudent$lmerSlopesAttCoreInt <- lmer(
     AttitudesDutch ~
-      KeyNeedFullfillment * OutgroupInteraction +
-      (1 + KeyNeedFullfillment + OutgroupInteraction | PID),
-    data = studentInteractionType
+      KeyNeedFullfillment_cwc * OutgroupInteraction +
+      (1 + KeyNeedFullfillment_cwc + OutgroupInteraction | PID),
+    data = studentWithinBetween
   ), 
   confint = TRUE,
   digits = 3,
-  center = TRUE
+  center = FALSE
 )
 
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(model.ran0,
-#               method="boot",nsim=1000,
-#               parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-RandomSlopes-CI.csv")
+# 95%CI
+mdlStudent$lmerSlopesAttCoreIntCI <- 
+  confint(method = "Wald", mdlStudent$lmerSlopesAttCoreInt)
 
 # Compare new model to previous step
 anova(mdlStudent$lmeAttNull, 
@@ -4889,18 +5240,6 @@ anova(mdlStudent$lmeAttNull,
 mdlStudent$varSlopesAttCoreInt <- 
   lme4::VarCorr(mdlStudent$lmeSlopesAttCoreInt)
 
-# The estimate of between-group (or Intercept variance) explained:
-# Variance Explained = 1 – (Var with Predictor/Var without Predictor)
-mdlStudent$varBtwSlopesAttCoreInt <- 
-  1 - (as.numeric(mdlStudent$varSlopesAttCoreInt[1]) / as.numeric(mdlStudent$varInterceptAttCoreInt[1]))
-mdlStudent$varBtwPercSlopesAttCoreInt <- 
-  (1 - (as.numeric(mdlStudent$varSlopesAttCoreInt[1]) / as.numeric(mdlStudent$varInterceptAttCoreInt[1]))) * 100
-# and the estimate of within-group (or residual variance) explained is:
-mdlStudent$varWithinSlopesAttCoreInt <- 
-  1 - (as.numeric(mdlStudent$varSlopesAttCoreInt[2]) / as.numeric(mdlStudent$varInterceptAttCoreInt[2]))
-mdlStudent$varWithinPercSlopesAttCoreInt <- 
-  (1 - (as.numeric(mdlStudent$varSlopesAttCoreInt[2]) / as.numeric(mdlStudent$varInterceptAttCoreInt[2]))) * 100
-
 # Assumption Checks:
 mdlStudent$diagSlopesAttCoreInt <-
   sjPlot::plot_model(mdlStudent$lmerSlopesAttCoreInt, type = "diag")
@@ -4913,10 +5252,10 @@ grid.arrange(
 
 # Plot prediction model
 mdlStudent$predSlopesAttCoreInt <- 
-  studentInteractionType %>%
+  studentWithinBetween %>%
   select(AttitudesDutch, TIDnum, PID) %>% 
   mutate(measure = predict(mdlStudent$lmeSlopesAttCoreInt,
-                           studentInteractionType,
+                           studentWithinBetween,
                            re.form = NA
                            )
          )
@@ -4980,13 +5319,22 @@ ggplot(data = studentInteractionType,
   theme_Publication() +
   theme(legend.position = "bottom",
         legend.key.size = unit(1, "cm"))
+
 ## With ML structure
 # create parameters for prediction
 datNew = data.frame(
-  OutgroupInteraction = factor(rep(c("No", "Yes"), each = 21)),
-  KeyNeedFullfillment = rep(seq(0, 100, 5), 2),
+  KeyNeedFullfillment_cwc = rep(seq(
+    round_any(min(
+      studentWithinBetween$KeyNeedFullfillment_cwc
+    ), 5, f = floor), round_any(max(
+      studentWithinBetween$KeyNeedFullfillment_cwc
+    ), 5, f = ceiling), 5
+  ), 2),
   PID = 0
-)
+) %>%
+  mutate(OutgroupInteraction = rep(c(1, 2), each = nrow(.)/2)) %>%
+  select(PID, OutgroupInteraction, KeyNeedFullfillment_cwc)
+
 
 # Predict values, clean up and calculate SE
 PI <-
@@ -5004,21 +5352,36 @@ mdlStudent$predInterceptAttCoreIntX <-
 mdlStudent$predInterceptAttCoreIntX$se <-
   (mdlStudent$predInterceptAttCoreIntX$upr - mdlStudent$predInterceptAttCoreIntX$fit) / 1.96
 rm(datNew, PI)
+mdlStudent$predInterceptAttCoreIntX$OutgroupInteractionLab <-
+  factor(
+    x = mdlStudent$predInterceptAttCoreIntX$OutgroupInteraction,
+    levels = sort(
+      unique(mdlStudent$predInterceptAttCoreIntX$OutgroupInteraction)
+    ),
+    labels = c("No", "Yes")
+  )
+
 
 # Plot predicted values with SE
 ggplot(
   mdlStudent$predInterceptAttCoreIntX,
-  aes(x = KeyNeedFullfillment,
+  aes(x = KeyNeedFullfillment_cwc,
       y = fit,
-      fill = OutgroupInteraction)
+      fill = OutgroupInteractionLab)
 )+
   #geom_point() +
-  geom_line(aes(linetype = as.factor(OutgroupInteraction)), size = 1) +
+  geom_line(aes(linetype = OutgroupInteractionLab), size = 1) +
   #facet_wrap(~PID, ncol = 6)+
   geom_ribbon(data = mdlStudent$predInterceptAttCoreIntX,
               aes(ymin = fit - se, ymax = fit + se),
               alpha = 0.3) +
-  scale_x_continuous(breaks = seq(0, 100, 10)) +
+  scale_x_continuous(breaks = seq(
+    round_any(min(
+      studentWithinBetween$KeyNeedFullfillment_cwc
+    ), 5, f = floor), round_any(max(
+      studentWithinBetween$KeyNeedFullfillment_cwc
+    ), 5, f = ceiling), 10
+  )) +
   scale_y_continuous(limits = c(50, 100), breaks = seq(50, 100, 10)) +
   scale_linetype_manual(values = c("dashed", "solid")) +
   scale_fill_manual(values = c("darkgrey", "black")) +
@@ -5034,9 +5397,9 @@ ggplot(
 # #### Bayesian estimation !! ONLY RUN ON FINAL RENDER !! Takes forever ####
 # options(mc.cores = parallel::detectCores())  # Run many chains simultaneously
 # brmfit <- brm(
-#   AttitudesDutch ~ KeyNeedFullfillment * OutgroupInteraction + 
-#     (1 + KeyNeedFullfillment + OutgroupInteraction | PID),
-#   data = studentInteractionType,
+#   AttitudesDutch ~ KeyNeedFullfillment_cwc * OutgroupInteraction +
+#     (1 + KeyNeedFullfillment_cwc + OutgroupInteraction | PID),
+#   data = studentWithinBetween,
 #   family = gaussian,
 #   iter = 1000,
 #   chains = 4
@@ -5044,24 +5407,45 @@ ggplot(
 # 
 # # create parameters for prediction:
 # datNew = data.frame(
-#   OutgroupInteraction = rep(c("No", "Yes"), each = 101),
-#   KeyNeedFullfillment = rep(seq(0, 100, 1), 2)
-# )
+#   KeyNeedFullfillment_cwc = rep(seq(
+#     round_any(min(
+#       studentWithinBetween$KeyNeedFullfillment_cwc
+#     ), 2, f = floor), round_any(max(
+#       studentWithinBetween$KeyNeedFullfillment_cwc
+#     ), 2, f = ceiling), 2
+#   ), 2)
+# ) %>%
+#   mutate(OutgroupInteraction = rep(c(1, 2), each = nrow(.)/2))
+# 
 # # Save predicted values and adjust names and labels
 # fitavg <-
 #   cbind(datNew,
 #         fitted(brmfit, newdata = datNew, re_formula = NA)[, -2])
 # names(fitavg)[names(fitavg) == "Estimate"] = "pred"
 # fitavg$se <- (fitavg$Q97.5 - fitavg$pred) / 1.96
+# fitavg$OutgroupInteractionLab <-
+#   factor(
+#     x = fitavg$OutgroupInteraction,
+#     levels = sort(
+#       unique(fitavg$OutgroupInteraction)
+#     ),
+#     labels = c("No", "Yes")
+#   )
 # 
 # # Plot Bayesian SE prediction interval
 # ggplot(fitavg,
-#        aes(x = KeyNeedFullfillment,
+#        aes(x = KeyNeedFullfillment_cwc,
 #            y = pred,
-#            fill = OutgroupInteraction)) +
-#   scale_x_continuous(breaks = seq(0, 100, 10)) +
+#            fill = OutgroupInteractionLab)) +
+#   scale_x_continuous(breaks = seq(
+#     round_any(min(
+#       studentWithinBetween$KeyNeedFullfillment_cwc
+#     ), 5, f = floor), round_any(max(
+#       studentWithinBetween$KeyNeedFullfillment_cwc
+#     ), 5, f = ceiling), 10
+#   )) +
 #   scale_y_continuous(limits = c(50, 100), breaks = seq(50, 100, 10)) +
-#   geom_line(aes(linetype = OutgroupInteraction), size = 1) +
+#   geom_line(aes(linetype = OutgroupInteractionLab), size = 1) +
 #   geom_ribbon(aes(ymin = pred - se, ymax = pred + se), alpha = 0.2) +
 #   scale_linetype_manual(values = c("dashed", "solid")) +
 #   scale_fill_manual(values = c("darkgrey", "black")) +
@@ -5074,23 +5458,23 @@ ggplot(
 #   ) +
 #   theme_Publication()
 # 
-# # plot all overlayed posteriors:
-# pst <- posterior_samples(brmfit, "b")
-# ggplot(studentInteractionType,
-#        aes(x = KeyNeedFullfillment, y = AttitudesDutch)) +
-#   geom_point(shape = 4, alpha = .1) +
-#   geom_tile() +
-#   geom_abline(
-#     data = pst,
-#     aes(intercept = b_Intercept, slope = b_KeyNeedFullfillment),
-#     alpha = .025,
-#     size = .4
-#   ) +
-#   labs(title = "slope Posteriors",
-#        x = "Fulfillment Core Need",
-#        y = "Outgroup Attitudes (NL)") +
-#   theme_Publication()
-# rm(datNew, brmfit, fitavg, pst)
+# # # plot all overlayed posteriors:
+# # pst <- posterior_samples(brmfit, "b")
+# # ggplot(studentWithinBetween,
+# #        aes(x = KeyNeedFullfillment_cwc, y = AttitudesDutch)) +
+# #   geom_point(shape = 4, alpha = .1) +
+# #   geom_tile() +
+# #   geom_abline(
+# #     data = pst,
+# #     aes(intercept = b_Intercept, slope = b_KeyNeedFullfillment_cwc),
+# #     alpha = .025,
+# #     size = .4
+# #   ) +
+# #   labs(title = "slope Posteriors",
+# #        x = "Fulfillment Core Need",
+# #        y = "Outgroup Attitudes (NL)") +
+# #   theme_Publication()
+# # rm(datNew, brmfit, fitavg, pst)
 ```
 
 The plots indicate that especially once we take the nested data structure into account we can see a substantially stronger effect of core need fulfillment on outgroup attitudes during outgroup contacts than without outgroup contacts.  
@@ -5099,56 +5483,66 @@ The plots indicate that especially once we take the nested data structure into a
 
 In a final step we check whether during the interaction the core situational need is a meaningful predictor even when taking other fundamental psychological needs into account. We focus on the three commonly considered self determination needs: competence, autonomy, and relatedness.  
 
-##### random intercept with level ome predictors  
+##### random intercept with level one predictors  
 
 We add the core need fulfillment with the three self determination needs to a random intercept model of outgroup attitudes.  
 
 \begin{equation}
-(\#eq:AttitudeNeedSdtEq)
-Attitude_{ti} = \gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + \gamma_{20}Autonomy_{ti} + \gamma_{30}Competence_{ti} + \gamma_{40}Relatedness_{ti} + u_{0i} + e_{ti} \\
-\textrm{with}\ u_{0i} \sim \mathcal{N}(0,\tau_{00}^2)\ \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
-\end{equation}
+(\#eq:studentInterceptAttNeedSdtEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+                           &\ \beta_{2i}Autonomy_{ti} + \\
+                           &\ \beta_{3i}Competence_{ti} + \\
+                           &\ \beta_{4i}Relatedness_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} \\
+                      &\ \beta_{2i} = \gamma_{20} \\
+                      &\ \beta_{3i} = \gamma_{30} \\
+                      &\ \beta_{4i} = \gamma_{40}
+  \end{split} 
+\end{equation} 
 
 ```{r studentOutModelInterceptAttCoreSdt}
 # Create and save Model
 mdlStudentOut$Att$lmeInterceptCoreSdt <-
   lme(
-    AttitudesDutch ~ KeyNeedFullfillment + Competence + Autonomy + RelatednessInteraction,
+    AttitudesDutch ~ KeyNeedFullfillment_cwc + Competence_cwc + Autonomy_cwc + Relatedness_cwc,
     random = ~ 1 | PID,
-    data = studentOutgroupInteraction,
+    data = studentOutWithinBetween,
     na.action = na.exclude
   )
 
 # Get summary with p-values (Satterthwaite's method)
 summ(
   mdlStudentOut$Att$lmerInterceptCoreSdt <- lmer(
-    AttitudesDutch ~ KeyNeedFullfillment + Competence + Autonomy + RelatednessInteraction + (1 | PID),
-    data = studentOutgroupInteraction
+    AttitudesDutch ~ KeyNeedFullfillment_cwc + Competence_cwc + Autonomy_cwc + Relatedness_cwc + (1 | PID),
+    data = studentOutWithinBetween
   ),
   confint = TRUE,
   digits = 3,
-  center = TRUE
+  center = FALSE
 )
 
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(lmer(AttitudesDutch ~ Contact_dum + inNonDutch + (1|PID),data=studentOutgroupInteraction),
-#                  method="boot",nsim=1000, parallel = "multicore",
-#                  ncpus = 4, seed = 42),
-#          "output/tables/ML-Inter-CI.csv")
+# 95%CI
+mdlStudentOut$Att$lmerInterceptCoreSdtCI <- 
+  confint(method = "Wald", mdlStudentOut$Att$lmerInterceptCoreSdt)
 
 # To be compared against a model with only SDT needs
 mdlStudentOut$Att$lmeInterceptSdt <-
   lme(
-    AttitudesDutch ~ Competence + Autonomy + RelatednessInteraction,
+    AttitudesDutch ~ Competence_cwc + Autonomy_cwc + Relatedness_cwc,
     random = ~ 1 | PID,
-    data = studentOutgroupInteraction,
+    data = studentOutWithinBetween,
     na.action = na.exclude
   )
 
 summ(
   mdlStudentOut$Att$lmerInterceptSdt <- lmer(
-    AttitudesDutch ~ Competence + Autonomy + RelatednessInteraction + (1 | PID),
-    data = studentOutgroupInteraction
+    AttitudesDutch ~ Competence_cwc + Autonomy_cwc + Relatedness_cwc + (1 | PID),
+    data = studentOutWithinBetween
   ),
   confint = TRUE,
   digits = 3,
@@ -5183,18 +5577,6 @@ anova(
 # Save variances
 mdlStudentOut$Att$varInterceptCoreSdt <-
   lme4::VarCorr(mdlStudentOut$Att$lmeInterceptCoreSdt)
-
-# The estimate of between-group (or Intercept variance) explained:
-# Variance Explained = 1 – (Var with Predictor/Var without Predictor)
-mdlStudentOut$Att$varBtwInterceptCoreSdt <- 
-  1 - (as.numeric(mdlStudentOut$Att$varInterceptCoreSdt[1]) / as.numeric(mdlStudentOut$Att$varInterceptCore[1]))
-mdlStudentOut$Att$varBtwPercInterceptCoreSdt <- 
-  (1 - (as.numeric(mdlStudentOut$Att$varInterceptCoreSdt[1]) / as.numeric(mdlStudentOut$Att$varInterceptCore[1]))) * 100
-# and the estimate of within-group (or residual variance) explained is:
-mdlStudentOut$Att$varWithinInterceptCoreSdt <-
-  1 - (as.numeric(mdlStudentOut$Att$varInterceptCoreSdt[2]) / as.numeric(mdlStudentOut$Att$varInterceptCore[2]))
-mdlStudentOut$Att$varWithinPercInterceptCoreSdt <-
-  (1 - (as.numeric(mdlStudentOut$Att$varInterceptCoreSdt[2]) / as.numeric(mdlStudentOut$Att$varInterceptCore[2]))) * 100
 ```
 
 We find that the the model with the added predictor indeed explains more variance in outgroup attitudes than the unconditional model and we find that adding the core need adds further explained variance --- beyond the self determination needs. Looking at the individual coefficients, we find that the situational core need relates significantly to outgroup attitudes, that it is a stronger predictor than any of the self determination theory needs and that it assumes some of the variance explained by the self determination theory needs (when compared to a model without the core need). 
@@ -5204,17 +5586,25 @@ We find that the the model with the added predictor indeed explains more varianc
 We again check whether further letting the effects vary between participants explains additional variance in outgroup attitudes (i.e., random slope).  
 
 \begin{equation}
-(\#eq:AttitudeNeedSdtRandEq)
-Attitude_{ti} = \\gamma_{00} + \gamma_{10}KeyNeedFulfill_{ti} + \gamma_{20}Autonomy_{ti} + \gamma_{30}Competence_{ti} + \gamma_{40}Relatedness_{ti} + u_{0i} + u_{1i} + e_{ti}  \\
-\textrm{with}\ \begin{bmatrix} u_{0i}\\ u_{1i}\end{bmatrix} \sim \mathcal{N}(0,\Omega_u): \Omega_u=\begin{bmatrix} \tau_{0}^2 & \\ \tau_{01} & \tau_{1}^2 \end{bmatrix} \textrm{and}\ e_{ti} \sim \mathcal{N}(0,\sigma^2)
-\end{equation}
+(\#eq:studentSlopesAttNeedSdtEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+                           &\ \beta_{2i}Autonomy_{ti} + \\
+                           &\ \beta_{3i}Competence_{ti} + \\
+                           &\ \beta_{4i}Relatedness_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} + u_{1i} \\
+                      &\ \beta_{2i} = \gamma_{20} + u_{2i} \\
+                      &\ \beta_{3i} = \gamma_{30} + u_{3i} \\
+                      &\ \beta_{4i} = \gamma_{40} + u_{4i}
+  \end{split} 
+\end{equation} 
 
 ```{r studentOutModelSlopesAttCoreSdt}
-# Check Correlations 
-studentOutgroupInteraction %>% 
-  select(AttitudesDutch, KeyNeedFullfillment, Competence, Autonomy, RelatednessInteraction) %>%
-  pairs.panels.new
-
+# Reduced dataset if no variance in responses
 studentRed <- 
   studentOutgroupInteraction %>% 
   # select(PID, AttitudesDutch, KeyNeedFullfillment, Competence, Autonomy, RelatednessInteraction) %>%
@@ -5256,40 +5646,36 @@ studentRed2 <-
 # For some all cor = 1 or -1
 # Removing these PPTs or their measurement beeps doesn't help
 # However, removing eithe the Core Need, Autonomy, or Relatedness from the random slopes lets the model converge
-# --> looks like there is an overfitting issue? But why does it work in lmer?
 # FOR NOW: Autonomy removed from random slopes because weakest predictor
 mdlStudentOut$Att$lmeSlopesCoreSdt <-
   nlme::lme(
     AttitudesDutch ~
-      KeyNeedFullfillment + Competence + Autonomy + RelatednessInteraction,
-    random = ~ 1 + KeyNeedFullfillment + Competence + RelatednessInteraction | PID, # Autonomy + 
-    #method = "ML",
-    #control = lmeControl(opt = "optim", optimMethod = "L-BFGS-B"),
+      KeyNeedFullfillment_cwc + Competence_cwc + Autonomy_cwc + Relatedness_cwc,
+    random = ~ 1 + KeyNeedFullfillment_cwc + Competence_cwc + Relatedness_cwc | PID, # Autonomy_cwc + 
     control = lmeControl(opt = "optim", maxIter = 100, msMaxIter = 100),
-    data = studentOutgroupInteraction
+    data = studentOutWithinBetween
   )
 
 # Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
 summ(
   mdlStudentOut$Att$lmerSlopesCoreSdt <- lmer(
     AttitudesDutch ~
-      KeyNeedFullfillment + Competence + Autonomy + RelatednessInteraction +
-      (1 + KeyNeedFullfillment + Competence + Autonomy + RelatednessInteraction | PID),
-    data = studentOutgroupInteraction
+      KeyNeedFullfillment_cwc + Competence_cwc + Autonomy_cwc + Relatedness_cwc +
+      (1 + KeyNeedFullfillment_cwc + Competence_cwc + Autonomy_cwc + Relatedness_cwc | PID),
+    data = studentOutWithinBetween
   ),
   confint = TRUE,
   digits = 3,
-  center = TRUE
+  center = FALSE
 )
 
-# Generate 95% parametric bootstrap CIs (and save them as a csv-file):
-# write.csv(confint(model.ran0,
-#               method="boot",nsim=1000,
-#               parallel = "multicore", ncpus = 4, seed = 42),
-#          "output/tables/ML-RandomSlopes-CI.csv")
+# 95%CI
+mdlStudentOut$Att$lmerSlopesCoreSdtCI <- 
+  confint(method = "Wald", mdlStudentOut$Att$lmerSlopesCoreSdt)
 
 # Compare new model to previous step
-anova(mdlStudentOut$Att$lmeInterceptCoreSdt, 
+anova(mdlStudentOut$Att$lmeInterceptSdt,
+      mdlStudentOut$Att$lmeInterceptCoreSdt, 
       mdlStudentOut$Att$lmeSlopesCoreSdt) %>%
   as.data.frame() %>%
   select(-call) %>%
@@ -5313,18 +5699,6 @@ anova(mdlStudentOut$Att$lmeInterceptCoreSdt,
 mdlStudentOut$Att$varSlopesCoreSdt <- 
   lme4::VarCorr(mdlStudentOut$Att$lmeSlopesCoreSdt)
 
-# The estimate of between-group (or Intercept variance) explained:
-# Variance Explained = 1 – (Var with Predictor/Var without Predictor)
-mdlStudentOut$Att$varBtwSlopesCoreSdt <-
-  1 - (as.numeric(mdlStudentOut$Att$varSlopesCoreSdt[1]) / as.numeric(mdlStudentOut$Att$varInterceptCoreSdt[1]))
-mdlStudentOut$Att$varBtwPercSlopesCoreSdt <-
-  (1 - (as.numeric(mdlStudentOut$Att$varSlopesCoreSdt[1]) / as.numeric(mdlStudentOut$Att$varInterceptCoreSdt[1]))) * 100
-# and the estimate of within-group (or residual variance) explained is:
-mdlStudentOut$Att$varWithinSlopesCoreSdt <-
-  1 - (as.numeric(mdlStudentOut$Att$varSlopesCoreSdt[2]) / as.numeric(mdlStudentOut$Att$varInterceptCoreSdt[2]))
-mdlStudentOut$Att$varWithinPercSlopesCoreSdt <-
-  (1 - (as.numeric(mdlStudentOut$Att$varSlopesCoreSdt[2]) / as.numeric(mdlStudentOut$Att$varInterceptCoreSdt[2]))) * 100
-
 # Assumption Checks:
 mdlStudentOut$Att$diagSlopesCoreSdt <- 
   sjPlot::plot_model(mdlStudentOut$Att$lmerSlopesCoreSdt, type = "diag")
@@ -5337,10 +5711,10 @@ grid.arrange(
 
 # Plot prediction model
 mdlStudentOut$Att$predSlopesCoreSdt <- 
-  studentOutgroupInteraction %>%
+  studentOutWithinBetween %>%
   select(AttitudesDutch, TIDnum, PID) %>% 
   mutate(measure = predict(mdlStudentOut$Att$lmeSlopesCoreSdt,
-                           studentOutgroupInteraction,
+                           studentOutWithinBetween,
                            re.form = NA
                            )
          )
@@ -5371,6 +5745,10 @@ We find that adding the random slopes does add significantly beyond the random i
 
 # **Young Medical Professional Sample**
 
+## Data Description
+
+### Participants  
+
 ```{r medicalSampleInfo}
 # extract demographic information from eligibility questionnaire
 medicalDemographicSupp <- 
@@ -5394,15 +5772,75 @@ medicalSampleInfo <-
   distinct
 
 # look at frequencies of characteristics 
-table(medicalSampleInfo$age)
-table(medicalSampleInfo$gender)
-table(as.character(medicalSampleInfo$nationality))
+medicalSampleInfo %>% 
+  ungroup %>%
+  select(
+    "Number of Measurements" = dailiesN,
+    Age = age,
+    Gender = gender,
+    Nationality = nationality
+  ) %>%
+  mutate(
+    Nationality = as.character(Nationality)
+  ) %>%
+  tbl_summary(.,
+              sort = list(everything() ~ "frequency"))
 ```
 
+
+### Interactions  
+
+```{r medicalInteractionInfo}
+# duration of survey should include median and MAD
+medicalInteractions <- dtMedical$full %>%
+  dplyr::select(created.daily, ended.daily) %>%
+  mutate_all(ymd_hms) %>%
+  mutate(duration = as.numeric(ended.daily-created.daily)) %>%
+  select(duration)
+
+medicalInteractions %>%
+  as.data.frame %>%
+  psych::describe(., trim = .2) %>%
+  as.data.frame %>%
+  mutate(vars = c("Duration [in seconds]"), # rownames(.),
+         na = nrow(dtStudents$full)-n,
+         win.mean = sapply(studentInteractions,psych::winsor.mean,simplify=T),
+         win.sd = sapply(studentInteractions,psych::winsor.sd,simplify=T)) %>%
+  dplyr::select(characteristic = vars, n, na, 
+                mean, `mean win` = win.mean, `mean trim` = trimmed, median,
+                sd, `sd win` = win.sd, MAD = mad, min, max,
+                skew, kurtosis) %>%
+  kbl(., 
+      #label = "",
+      caption = "Study 2: Duration of Measurement in Seconds",
+      format = "html", 
+      #linesep = "",
+      #booktabs = T,
+      row.names = F,
+      digits = 2,
+      align = c('l', rep('c', ncol(.)-1)))  %>%
+  add_header_above(., c(" " = 3,"Centrality" = 4, "Dispersion" = 5, "Distribution" = 2)) %>%
+  footnote(general = "'na' indicates the number of measurements for which measurement duration is unknown.") %>%
+  kable_classic(full_width = F, 
+                lightable_options = "hover", 
+                html_font = "Cambria")
+
+dtMedical$full %>%
+  select(OutgroupInteraction,
+         NonOutgroupInteraction) %>%
+  tbl_summary(.,
+              sort = list(everything() ~ "frequency"))
+```
+
+
+
+### Variable distributions  
+
 ```{r medicalVarDescr}
+# calculate correlations and descriptives
 medicalMlCor <-
   MlCorMat(
-    data = dtMedical$full,
+    data = dtMedical$ful,
     id = "PID",
     selection = c("KeyNeedFulfillment", "Competence", "Autonomy", "Relatedness", "AllportsCondition", "qualityOverall", "AttitudesDutch"),
     labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Allport", "Quality", "Attitudes NL")
@@ -5411,55 +5849,71 @@ medicalMlCor <-
 medicalMlCor %>%
   kable(
     .,
-    caption = "Medical: Multilevel Core Variable Descriptives",
+    caption = "Study 3: Multilevel Core Variable Descriptives",
     format = "html",
-    booktabs = TRUE,
+    #booktabs = TRUE,
     linesep = linesep(c(ncol(.))),
     align = c("l", rep("c", ncol(.) - 1))
   ) %>%
+  pack_rows("Correlations", 1, ncol(medicalMlCor)) %>%
+  pack_rows("Descriptives", ncol(medicalMlCor)+1, nrow(medicalMlCor)) %>%
   footnote(
     general = c(
       "Upper triangle: Between-person correlations;",
-      "Lower triangle: Within-person coorelations;",
+      "Lower triangle: Within-person correlations;",
       "*** p < .001, ** p < .01,  * p < .05"
     )
-  )
+  ) %>%
+  kable_classic(full_width = F, 
+                lightable_options = "hover", 
+                html_font = "Cambria")
+
 ```
 
 ```{r medicalOutVarDescr}
+# calculate correlations and descriptives
 medicalOutMlCor <-
   MlCorMat(
     data = dtMedical$full %>% filter(OutgroupInteraction == "Yes"),
     id = "PID",
     selection = c("KeyNeedFulfillment", "Competence", "Autonomy", "Relatedness", "AllportsCondition", "qualityOverall", "AttitudesDutch"),
     labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Allport", "Quality", "Attitudes NL")
-  )
+  ) 
 
 medicalOutMlCor %>%
   kable(
     .,
-    caption = "Medical: Multilevel Core Variable Descriptives (Outgroup Contact Only)",
+    caption = "Study 3: Multilevel Core Variable Descriptives (Outgroup Contact Only)",
     format = "html",
-    booktabs = TRUE,
+    #booktabs = TRUE,
     linesep = linesep(c(ncol(.))),
     align = c("l", rep("c", ncol(.) - 1))
   ) %>%
+  pack_rows("Correlations", 1, ncol(medicalOutMlCor)) %>%
+  pack_rows("Descriptives", ncol(medicalOutMlCor)+1, nrow(medicalOutMlCor)) %>%
   footnote(
     general = c(
       "Upper triangle: Between-person correlations;",
-      "Lower triangle: Within-person coorelations;",
+      "Lower triangle: Within-person correlations;",
       "*** p < .001, ** p < .01,  * p < .05"
     )
-  ) 
+  ) %>%
+  kable_classic(full_width = F, 
+                lightable_options = "hover", 
+                html_font = "Cambria")
 
-# misty::multilevel.descript(dtStudentsSupp$studentWithinBetween$keyMotiveFulfilled, cluster = dtStudentsSupp$studentWithinBetween$PID)
 ```
 
-After receiving ethical approval from the University of Groningen, we recruited `r nrow(medicalSampleInfo)` international medical students using a contacts within the University Medical Department and specifically targeted non-Dutch students, who had recently arrived in the Netherlands. Participants reported on their interactions for at least 30 days with two daily measures (capturing the morning and afternoon). With this design, we aimed at getting 50-60 measurements per participant (*M* = `r format(round(mean(medicalSampleInfo$dailiesN),2), nsmall=2)`, *SD* = `r format(round(sd(medicalSampleInfo$dailiesN),2), nsmall=2)`, *total N* = `r sum(medicalSampleInfo$dailiesN)`). As with the previous study this should offer sufficient power to model processes within participants and will lend stronger weight to between-participant results. Participants were compensated for their participation with partial course credits --- depending on their participation. The sample consisted of relatively young migrants, who were mostly from the global north ($M_{age}$ = `r format(round(mean(medicalSampleInfo$age),2), nsmall=2)`, $SD_{age}$ = `r format(round(sd(medicalSampleInfo$age),2), nsmall=2)`, `r nrow(medicalSampleInfo %>% filter(gender == "women"))` women). The sample fairly accurately describes the local population of international students.
+## Contact Hypothesis
 
-The study procedure mirrored the setup of studies one and two, in that it consisted of pre-, daily diary-, and post-measurement. The participants were invited for daily diary measurements twice a day (at 12 pm and 7pm) for 30 days (*median duration* = `r seconds_to_period(median(difftime(dtMedical$clean$ended.daily, dtMedical$clean$created.daily, units = "secs"), na.rm=TRUE)) %>% as.character`, *MAD duration* = `r seconds_to_period(round(mad(difftime(dtMedical$clean$ended.daily, dtMedical$clean$created.daily, units = "secs"), na.rm=TRUE))) %>% as.character`).  General compliance was high (`r format(round(sum(medicalSampleInfo$dailiesN)/(nrow(medicalSampleInfo)*62)*100,2), nsmall=2)`% filled daily diary surveys for 31 days or more NEED TO RE-CHECK THIS). The response rates were approximately equal during mornings (*n* = `r sum(medicalSampleInfo$morningN)`) and afternoons (*n* = `r sum(medicalSampleInfo$afternoonN)`). All key variables in for this study were part of the short daily diary surveys. 
-The measurement of intergroup contacts was identical to study two. The participants recorded between `r medicalContactFreq$SumContactNL[medicalContactFreq$SumContactNL > 0] %>% min`--`r medicalContactFreq$SumContactNL %>% max` interactions with Dutch outgroup members
-(`r medicalContactFreq$PercContactNL[medicalContactFreq$PercContactNL > 0] %>% min %>% round(2) %>% format(nsmall=2)`--`r medicalContactFreq$PercContactNL %>% max %>% round(2) %>% format(nsmall=2)`% of individual daily diary measurements; `r (sum(medicalContactFreq$SumContactNL) / nrow(dtMedical$full) * 100) %>% round(2) %>% format(nsmall=2)`% of all `r nrow(dtMedical$full)` daily diary responses). 
+### Interaction Frequency and Attitudes
+
+To test the impact of the overall number of interactions, we hope to find a significant relationship between the number of interactions a participant had and the average outgroup attitude.  
+
+\begin{equation}
+(\#eq:medicalFreqQualR)
+r_{ContactFrequency, OutgroupAttitudes} \neq 0
+\end{equation}
 
 ```{r medicalFreqAttCor}
 medicalContactFreq <-
@@ -5494,14 +5948,135 @@ pairs.panels.new(
 )
 ```
 
-## Contact Hypothesis
+We find that neither the number of interactions nor the number of measurement beeps with an interaction are significantly related with the average outgroup attitudes. This is to say that within our data, participants with more outgroup interactions did have significantly more positive outgroup attitudes. However, we did find a significant correlation between the participants' Average Interaction Quality and their Average Outgroup Attitudes.  
 
-We tested the most general contact hypothesis in two steps. First, we assessed whether more intergroup interactions were related to to more positive outgroup attitudes. Second, we tested whether a potential positive effect on outgroup attitudes depended on the interaction quality (jointly with the number of interactions). We find no significant correlation between intergroup contact and average outgroup attitudes --- for neither the total number of outgroup interactions (*r* = `r cor(medicalContactFreq$SumContactNLAll, medicalContactFreq$AvAttitude) %>% round(2) %>% format(nsmall=2)`, *p* = `r cor.test(medicalContactFreq$SumContactNLAll, medicalContactFreq$AvAttitude)$p.value %>% round(3) %>% format(nsmall=3)`) and the number of measurement beeps with an interaction (*r* = `r cor(medicalContactFreq$SumContactNL, medicalContactFreq$AvAttitude) %>% round(2) %>% format(nsmall=2)`, *p* = `r cor.test(medicalContactFreq$SumContactNL, medicalContactFreq$AvAttitude)$p.value %>% round(3) %>% format(nsmall=3)`). This is to say that within our data, participants with more outgroup interactions did not have significantly more positive or negative outgroup attitudes. This is again consistent with the results we found in the first study but inconsitent with the significant relationship we find in the second study. 
+### Outgroup Attitudes by Interaction Type
 
-```{r medicalModelOlsAttFreqQual}
+In a next step we take into account that having an interaction with an outgroup member, does not happen in a social vacuum. Participants who indicated that they had an interaction with an outgroup member include measurement occasions during which someone either only had an interaction with an outgroup member as well as times during which a person also had interaction(s) with a non-Dutch person. Inversely, participants who indicated that they did not have an interaction with a Dutch person might either have had no interaction at all or had an interaction with a non-Dutch person. We, thus consider all possible combinations and their independent influences on outgroup attitudes.  
+
+
+We first assess the impact of the different interaction types across all measurement points (lumping all beeps together).
+
+\begin{equation}
+(\#eq:medicalIntTypeQual)
+Attitude = OutgroupInteraction + NonOutgroupInteraction
+\end{equation}
+
+
+<div class="alert alert-info alert-dismissible fade in" role="alert">
+  <a class="close" data-dismiss="alert" aria-label="close">&times;</a>
+  <i class="fas fa-info-circle"></i> <b>Note: </b><br/>
+  This step ignores the nested nature of the data (and consequently, response sets between participants). However, a purely cross-sectional approach with retrospective evaluations is common within the field and the analysis here offers a first cross-sectional insight (even with the independence assumption violated).
+</div>
+
+```{r medicalInteractionTypePlt, fig.height=12}
+# between participants interaction type
+medicalAttInteractionType <- dtMedical$full %>%
+  select(
+    PID,
+    OutgroupInteraction,
+    NonOutgroupInteraction,
+    Attitude = AttitudesDutch
+  ) %>%
+  mutate(InteractionType = paste(
+    ifelse(OutgroupInteraction == "Yes", "Out", ifelse(OutgroupInteraction == "No", "NoOut", NA)),
+    ifelse(NonOutgroupInteraction == "Yes", "In", ifelse(NonOutgroupInteraction == "No", "NoIn", NA)),
+    sep = ", "
+  )) %>%
+  filter(
+    !is.na(NonOutgroupInteraction),
+    !is.na(Attitude)
+  )
+
+# violin plot of attitudes by interaction type group
+ggplot(medicalAttInteractionType, aes(y=Attitude, x=OutgroupInteraction, group = interaction(OutgroupInteraction, NonOutgroupInteraction), fill=NonOutgroupInteraction))+
+  geom_violin(trim = T, width=.8, position = position_dodge(0.8)) +
+  geom_boxplot(width=0.04,
+               position = position_dodge(.8),
+               outlier.colour = NULL, 
+               outlier.shape = NA, 
+               notch=F, fill="black", 
+               lwd=1, color="black") + 
+  # geom_jitter(width = 0.15,
+  #            shape=18,
+  #            alpha=.2, size=1) +
+  stat_summary(fun.y=mean, 
+               geom="point", 
+               shape=16, 
+               size=1, 
+               position = position_dodge(0.8),
+               colour="white") +
+  #stat_summary(fun.data="mean_sdl",  
+  #             fun.args = list(mult=1), 
+  #             geom="pointrange", 
+  #             color = "red", 
+  #             width=.2)+
+  stat_summary(geom = "crossbar", 
+               width=0.04, 
+               fatten=0, 
+               position = position_dodge(0.8),
+               color="white", 
+               fun.data = function(x){ return(c(y=median(x), 
+                                                ymin=median(x), 
+                                                ymax=median(x))) })+
+  ylab("Outgroup Attitudes")+
+  xlab("Outgroup Interaction") +
+  ggtitle("Violin Plot:\nOutgroup Attitudes by Interaction Type")+
+  scale_y_continuous(
+    limits = c(0, 100),
+    breaks = c(0, 15, 30, 40, 50, 60, 70, 85, 100),
+    labels = c(
+      "Very cold or unfavorable feelings 0°",
+      "Quite cold and unfavorable feelings 15°",
+      "Fairly cold and unfavorable feelings 30°",
+      "A bit cold and unfavorable feelings 40°",
+      "No feeling at all 50°",
+      "A bit warm and favorable feelings 60°",
+      "Fairly warm and favorable feelings 70° ",
+      "Quite warm and favorable feelings 85° ",
+      "Very warm and favorable feelings 100° "
+    )
+  ) +
+  #coord_flip()+
+  scale_fill_brewer(palette = "Pastel2", name = "Non-Outgroup Interaction")+
+  theme_Publication()+
+  theme(strip.background =element_rect(fill="black", color="black"),
+        strip.text = element_text(colour = 'white', face="bold"))#,
+        #panel.border = element_rect(color="grey"),
+        #legend.position="none")
+```
+
+```{r medicalModelOlsInteractionType}
 # create list to store Worker models
 mdlMedical <- list()
 
+# regression
+mdlMedical$lmAttInt <-
+  lm(AttitudesDutch ~ OutgroupInteraction * NonOutgroupInteraction,
+    data = dtMedical$full
+  )
+# summary(lmstudentAttInteraction)
+
+summ(
+  mdlMedical$lmAttInt,
+  confint = TRUE,
+  digits = 3,
+  center = TRUE
+)
+```
+
+We find that while controlling for interactions with non-Dutch people, outgroup attitudes were significantly higher when participants had an interaction with a Dutch person. The effect is of a medium size (`r format(round(mdlMedical$lmAttInt$coefficients["OutgroupInteractionYes"], 2), nsmall=2)` points on a 0--100 scale). However, this analysis lumps all ESM beeps from every participants together and ignores that the data is nested within participants.
+
+### Interaction Frequency and Interaction Quality
+
+In a next step we check whether the effect outgroup interactions, in part, depends on the quality during the interactions. Because we can only assess interaction quality when there is an interaction, it is difficult to assess this with the interaction dummy as a within person predictor. Instead, we will use an aggregate measure of interaction quality and average interaction quality to consider the two predictors jointly.  
+
+\begin{equation}
+(\#eq:studentFreqQual)
+Attitude = ContactFreq \times AverageContactQual
+\end{equation}
+
+```{r medicalModelOlsAttFreqQual}
 # regression
 mdlMedical$lmAttFreqQualX <-
   lm(AvAttitude ~ SumContactNL_c * AvQuality_c, data = medicalContactFreq)
@@ -5529,7 +6104,26 @@ interactions::johnson_neyman(mdlMedical$lmAttFreqQualX,
                              alpha = .05)
 ```
 
-However, we do find a significant correlation between the participants' Average Interaction Quality and their Average Outgroup Attitudes (*r* = `r cor(medicalContactFreq$AvQuality, medicalContactFreq$AvAttitude) %>% round(2) %>% format(nsmall=2)`, *p* = `r cor.test(medicalContactFreq$AvQuality, medicalContactFreq$AvAttitude)$p.value %>% round(3) %>% format(nsmall=3)`). Thus, when considering the number of interactions and average interaction quality jointly in a linear regression, we only find a main effect of average perceived interaction quality on predict outgroup attitudes (*b* = `r coef(summary(mdlMedical$lmAttFreqQualX))["AvQuality_c","Estimate"] %>% round(2) %>% format(nsmall=2)`, *t*(`r mdlMedical$lmAttFreqQualX$df.residual`) = `r coef(summary(mdlMedical$lmAttFreqQualX))["AvQuality_c","t value"] %>% round(2) %>% format(nsmall=2)`, *p* = `r coef(summary(mdlMedical$lmAttFreqQualX))["AvQuality_c","Pr(>|t|)"] %>% round(3) %>% format(nsmall=3)`, $\eta_p^2$ = `r mdlMedical$lmAttFreqQualXEta %>% filter(Parameter == "AvQuality_c") %>% select(Eta2_partial) %>% as.numeric %>% round(2) %>% format(nsmall=2)`). Given the missing aggregate relationship between number of interactions and outgroup attitudes, we find no significant effect of interactions themselves nor do we find a significant interaction effect. This result mirrors that of study one but is inconsistent with the second study. But again this inconsistency is not necessarily surprising given that the variables aggregate all within person variation and there were substantially more measurements where participants did not have an interaction (but reported their outgroup attitudes) than measurements that followed an outgroup contact.  
+We find that in the medical sample there is only a relationship between outgroup attitudes and average perceived contact quality but not the number of outgroup contacts. Nor do we find that in this sample the impact of the number of interactions is moderated by the average contact quality. 
+
+### Multilevel Regression  
+
+We, then, proceed with a multilevel analysis, which inherently acknowledges that the measurements are nested within participants.  
+
+#### Unconditional model  
+
+We start by creating an empty random intercept model (i.e., let the outgroup attitude intercept be different between participants; unconditional model).  
+
+\begin{equation}
+(\#eq:medicalEmptyModel)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i}
+  \end{split} 
+\end{equation}
 
 ```{r medicalModelMLAttNull}
 # Create and save Model
@@ -5572,13 +6166,34 @@ mdlMedical$IccPercAttNull <-
   ((as.numeric(mdlMedical$varAttNullType[1]) / (as.numeric(mdlMedical$varAttNullType[1]) + as.numeric(mdlMedical$varAttNullType[2])))) * 100
 ```
 
+
+We find that an estimated `r format(round(mdlMedical$IccPercAttNull, 2), nsmall=2)`% of the variation in Feeling Thermometer scores is explained by between participant differences (clustering by PID). This is to say that `r format(round(mdlMedical$IccPercAttNull, 2), nsmall=2)`% of the variance in any individual report of Attitudes towards the Dutch can be explained by the properties of the individual who provided the rating. And we find that including 'participant' as a predictor adds significantly to the model.  
+
+#### random intercept with predictors  
+
+To this random intercept model we now add the two types of interactions possible at each measurement point as contemporaneous predictors of outgroup attitudes. That is: We check whether within participants having an outgroup interaction (or a non-outgroup interaction) is associated with more positive outgroup attitudes at the same measurement point.  
+
+\begin{equation}
+(\#eq:medicalInteractionTypeModel)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}OutgroupInteraction_{ti} + \\
+                           &\ \beta_{2i}NonOutgroupInteraction_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} \\
+                      &\ \beta_{2i} = \gamma_{20}
+  \end{split} 
+\end{equation}
+
 ```{r medicalModelInterceptAttType, include = FALSE}
 # Create and save Model
 mdlMedical$lmeInterceptAttType <-
   lme(
     AttitudesDutch ~ OutgroupInteraction + NonOutgroupInteraction,
     random =  ~ 1 | PID,
-    na.action=na.omit,
+    na.action = na.omit,
     data = dtMedical$full
   )
 
@@ -5592,6 +6207,7 @@ summ(
   digits = 3
 )
 
+# 95%CI
 mdlMedical$lmerInterceptAttTypeCI <- 
   confint(method = "Wald", mdlMedical$lmerInterceptAttType)
 
@@ -5623,6 +6239,28 @@ mdlMedical$varInterceptAttType <-
   lme4::VarCorr(mdlMedical$lmeInterceptAttType)
 ```
 
+We find that a random intercept model with the two interaction types as predictors explains significantly more variance then an empty random intercept model. Looking at the individual coefficients, we find that having an outgroup interaction is indeed associated with significantly more positive outgroup attitudes, while having an interaction with a non-Dutch person does not significantly relate to more positive or negative attitudes towards the Dutch.  
+
+TL;DR: Interaction with Dutch is great predictor, interactions with non-Dutch is not.
+
+#### random slope
+
+In a next step, we check whether further letting the effect of the different interaction types vary between participants explains additional variance in outgroup attitudes (i.e., random slopes).   
+
+\begin{equation}
+(\#eq:medicalRandomSlopes)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}OutgroupInteraction_{ti} + \\
+                           &\ \beta_{2i}NonOutgroupInteraction_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} + u_{1i} \\
+                      &\ \beta_{2i} = \gamma_{20} + u_{2i}
+  \end{split} 
+\end{equation}
+
 ```{r medicalModelSlopesInteractionType}
 # Create and save Model (optimizer needed to reach convergence)
 mdlMedical$lmeSlopesAttType <- lme(
@@ -5646,6 +6284,7 @@ summ(
   digits = 3
 )
 
+# 95%CI
 mdlMedical$lmerSlopesAttTypeCI <- 
   confint(method = "Wald", mdlMedical$lmerSlopesAttType)
 
@@ -5723,9 +6362,33 @@ ggsave(
 )
 ```
 
-We additionally used a multilevel regression to check whether having an interaction with an outgroup member had a situational (i.e., contemporaneous) effect within the participants. We find that having an outgroup interaction is indeed associated with significantly more positive outgroup attitudes within the participants (random slopes model; `r MlCoeffHtml(lmeMdl = mdlMedical$lmeSlopesAttType, lmerCI = mdlMedical$lmerSlopesAttTypeCI, varName = "OutgroupInteractionYes")`), even after controlling for having an interaction with a non-Dutch (which did not relate to outgroup attitudes independently). Thus, in our third dataset we find some mixed results, outgroup contacts are not significantly related to outgroup attitudes on aggregate between participants and this effect is also not suppressed by a average interaction quality (i.e., no interaction effect). However, while the aggregate data is partly inconsistent with the first two studies, the within person contemoranous effect of intergroup contact is consistent across all three studies.  
+We find that adding the random slopes does add significantly beyond the random intercept model. The individual regression coefficients remain the same in their interpretation.
+
+TL;DR: Random slopes adds significantly. Outgroup interactions still good predictors of contemporaneous outgroup attitudes.  
 
 ## Allport's Conditions
+
+We begin our main analysis by outgroup attitudes after an intergroup contact are indeed explained by whether or not Allport's conditions were fulfilled. This should, in turn, be due to a higher perceived interaction quality. We will this sequentially test whether the fulfillment of the core need during an interaction is (1) related to more positive outgroup attitudes, (2) higher perceived interaction quality, and (3) whether the variance explained by the core need is assumed by the perceived interaction quality if considered jointly.     
+
+### Allport and Attitudes  
+
+In a first step we, thus, test the relationship between outgroup attitudes and the fulfillment of the core situational need during the interaction.  
+
+
+##### Unconditional model  
+
+We again start by creating an empty random intercept model (i.e., let the outgroup attitude intercept be different between participants; unconditional model). This is again confined to the outgroup interaction sub-sample.
+
+\begin{equation}
+(\#eq:medicalOutEmptyModel)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} +  e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i}
+  \end{split} 
+\end{equation}
 
 ```{r medicalOutModelMLAttNull}
 # create empty list to organize models
@@ -5739,6 +6402,7 @@ mdlMedicalOut <-
 mdlMedicalOut$Att$lmerNull <-
   lme4::lmer(AttitudesDutch ~ 1 + (1 | PID),
              data = medicalOutWithinBetween) # use optim if it does not converge
+
 mdlMedicalOut$Att$lmeNull <-
   lme(
     AttitudesDutch ~ 1,

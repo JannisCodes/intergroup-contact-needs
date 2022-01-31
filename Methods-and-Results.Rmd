@@ -693,8 +693,9 @@ ggsave(
 mdlWorkerOut$Qlt$lmerNull <-
   lme4::lmer(quality_overall_1 ~ 1 + (1 | PID), 
              data = dtWorkerSupp$workerOutWithinBetween) # use optim if it does not converge
+
 mdlWorkerOut$Qlt$lmeNull <-
-  mdlWorkerOut$Qlt$lmeNull <-lme(
+  mdlWorkerOut$Qlt$lmeNull <- lme(
     quality_overall_1 ~ 1,
     random = ~ 1 | PID,
     data = dtWorkerSupp$workerOutWithinBetween,
@@ -743,6 +744,7 @@ summ(
   center = FALSE
 )
 
+# 95%CI
 mdlWorkerOut$Qlt$lmerInterceptCoreCI <- 
   confint(method = "Wald", mdlWorkerOut$Qlt$lmerInterceptCore)
 
@@ -797,6 +799,7 @@ summ(
   center = FALSE
 )
 
+# 95%CI
 mdlWorkerOut$Qlt$lmerSlopesCoreCI <- 
   confint(method = "Wald", mdlWorkerOut$Qlt$lmerSlopesCore)
 
@@ -847,6 +850,7 @@ summ(
   digits = 3
 )
 
+# 95% CI
 mdlWorkerOut$Att$lmerInterceptCoreQltCI <- 
   confint(method = "Wald", mdlWorkerOut$Att$lmerInterceptCoreQlt)
 
@@ -901,6 +905,7 @@ summ(
   digits = 3
 )
 
+# 95%CI
 mdlWorkerOut$Att$lmerSlopesCoreQltCI <- 
   confint(method = "Wald", mdlWorkerOut$Att$lmerSlopesCoreQlt)
 
@@ -998,6 +1003,7 @@ summ(
   digits = 3
 )
 
+# 95%CI
 mdlWorker$lmerInterceptAttCoreIntCI <- 
   confint(method = "Wald", mdlWorker$lmerInterceptAttCoreInt)
 
