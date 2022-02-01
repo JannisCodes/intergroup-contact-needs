@@ -2817,7 +2817,6 @@ We again check whether further letting the effects vary between participants exp
 
 \begin{equation}
 (\#eq:workerOutSlopeAttQltNeedEq)
-(\#eq:WorkerRandomSlopes)
   \begin{split}
     \textrm{Level 1:} &
       \begin{aligned}[t]
@@ -4424,7 +4423,8 @@ mdlStudentOut$Att$lmeInterceptCore <-
 
 # Get summary with p-values (Satterthwaite's method)
 summ(
-  lmer(AttitudesDutch ~ KeyNeedFullfillment_cwc + (1 | PID), 
+  mdlStudentOut$Att$lmerInterceptCore <- 
+    lmer(AttitudesDutch ~ KeyNeedFullfillment_cwc + (1 | PID), 
        data = studentOutWithinBetween),
   confint = TRUE,
   digits = 3,
@@ -4897,7 +4897,7 @@ mdlStudentOut$Att$lmeInterceptCoreQlt <-
 
 # Get summary with p-values (Satterthwaite's method)
 summ(
-  lmer(
+  mdlStudentOut$Att$lmerInterceptCoreQlt <- lmer(
     AttitudesDutch ~ KeyNeedFullfillment_cwc + quality_overall_cwc + (1 | PID),
     data = studentOutWithinBetween
   ),
@@ -4957,8 +4957,7 @@ Unsurprisingly, the model with the two predictors adds significantly beyond the 
 We again check whether further letting the effects vary between participants explains additional variance in outgroup attitudes (i.e., random slope).   
 
 \begin{equation}
-(\#eq:workerOutSlopeAttQltNeedEq)
-(\#eq:WorkerRandomSlopes)
+(\#eq:studentOutSlopeAttQltNeedEq)
   \begin{split}
     \textrm{Level 1:} &
       \begin{aligned}[t]
@@ -6432,6 +6431,22 @@ mdlMedicalOut$Att$IccPercNull <-
   ((as.numeric(mdlMedicalOut$Att$varNull[1]) / (as.numeric(mdlMedicalOut$Att$varNull[1]) + as.numeric(mdlMedicalOut$Att$varNull[2])))) * 100
 ```
 
+#### random intercept with level one predictors
+
+We then add the interaction-specific measure of how much Allport's conditions were fulfilled to the multilevel random intercept model.  
+
+\begin{equation}
+(\#eq:medicalOutInterceptAttAllportEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}Allport_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10}
+  \end{split} 
+\end{equation}
+
 ```{r medicalOutModelInterceptAttAllport}
 # Create and save Model
 mdlMedicalOut$Att$lmeInterceptAllport <-
@@ -6482,6 +6497,24 @@ anova(mdlMedicalOut$Att$lmeNull,
 mdlMedicalOut$Att$varInterceptAllport <-
   lme4::VarCorr(mdlMedicalOut$Att$lmeInterceptAllport)
 ```
+
+We find that the the model with the added predictor indeed explains more variance in outgroup attitudes than the unconditional model. Looking at the individual coefficients, we find that the the fulfillment of Allport's conditions relates significantly to outgroup attitudes.   
+
+#### random slope
+
+In a next step, we check whether further letting the effect of Allport's conditions vary between participants explains additional variance in outgroup attitudes (i.e., random slope).  
+
+\begin{equation}
+(\#eq:medicalSlopeAttAllportEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}Allport_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} + u_{1i}
+  \end{split} 
+\end{equation}
 
 ```{r medicalOutModelSlopesAttAllport}
 # Create and save Model (optimizer needed to reach convergence)
@@ -6606,6 +6639,30 @@ ggsave(
 )
 ```
 
+We find that adding the random slopes does add significantly beyond the random intercept model. We also find that Allport's conditions remains a strong predictor (even when letting the influence vary between participants).  
+
+TL;DR: The random slope adds significantly to the prediction model.  
+
+### Allport and Interaction Quality   
+
+Based on the assertion that the relationship between Allport's conditions and outgroup attitudes is explained by a higher perceived interaction, Allport's conditions should also significantly predict perceived interaction quality.  
+
+##### Unconditional model
+
+Given that we now have the perceived interaction quality as our outcome variable of interest we again begin with an unconditional model (i.e., empty random intercept model), to see whether there is enough variance to explain within the participants. Similarly to before this is again done within the subsample of measurements during which an outgroup interaction was reported.  
+
+\begin{equation}
+(\#eq:medicalOutQltEmptyModel)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ InteractionQuality_{ti} =  &\ \beta_{0i} +  e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i}
+  \end{split} 
+\end{equation}
+
+
 ```{r medicalOutModelMLQltNull}
 # Create and save Model
 mdlMedicalOut$Qlt$lmerNull <-
@@ -6639,6 +6696,22 @@ mdlMedicalOut$Qlt$IccNull <-
 mdlMedicalOut$Qlt$IccPercNull <-
   ((as.numeric(mdlMedicalOut$Qlt$varNull[1]) / (as.numeric(mdlMedicalOut$Qlt$varNull[1]) + as.numeric(mdlMedicalOut$Qlt$varNull[2])))) * 100
 ```
+
+#### random intercept with level one predictors
+
+We then add the fulfillment of Allport's conditions to the multilevel random intercept model.  
+
+\begin{equation}
+(\#eq:medicalOutInterceptQltAllportEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}Allport_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10}
+  \end{split} 
+\end{equation}
 
 ```{r medicalOutModelInterceptQltAllport}
 # Create and save Model
@@ -6690,6 +6763,24 @@ anova(mdlMedicalOut$Qlt$lmeNull,
 mdlMedicalOut$Qlt$varInterceptAllport <-
   lme4::VarCorr(mdlMedicalOut$Qlt$lmeInterceptAllport)
 ```
+
+We find that the the model with the added predictor indeed explains more variance in outgroup attitudes than the unconditional model. Looking at the individual coefficients, we find that the the fulfillment of Allport's conditions relates significantly to perceived interaction quality.   
+
+#### random slope
+
+In a next step, we check whether further letting the effect of Allport's conditions vary between participants explains additional variance in outgroup attitudes (i.e., random slope).  
+
+\begin{equation}
+(\#eq:medicalSlopeQltAllportEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}Allport_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} + u_{1i}
+  \end{split} 
+\end{equation}
 
 ```{r medicalOutModelSlopesQltAllport}
 # Create and save Model (optimizer needed to reach convergence)
@@ -6790,6 +6881,33 @@ ggsave(
 
 ```
 
+We find that adding the random slopes does add significantly beyond the random intercept model. We also find that Allport's conditions remains a strong predictor (even when letting the influence vary between participants).  
+
+TL;DR: The random slope adds significantly to the prediction model.  
+
+### Allport, Quality, and Attitudes  
+
+In our final main step, we will jointly consider the effect of Allport's conditions and perceived interaction quality on outgroup attitudes. We expect that if the relationship between Allport's conditions and outgroup attitudes is indeed explained by a higher perceived interaction quality, the interaction quality perception should assume the explained variance by the fulfillment of Allport's conditions.  
+
+#### random intercept with level one predictors  
+
+We thus add both Allport's conditions and perceived interaction quality to a random intercept model of outgroup attitudes.  
+
+\begin{equation}
+(\#eq:medicalOutInterceptAttQltAllportEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}Allport_{ti} + \\
+                           &\ \beta_{2i}InteractionQuality_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} \\
+                      &\ \beta_{2i} = \gamma_{20}
+  \end{split} 
+\end{equation}
+
+
 ```{r medicalOutModelInterceptAttAllportQlt}
 # Create and save Model
 mdlMedicalOut$Att$lmeInterceptAllportQlt <-
@@ -6841,6 +6959,26 @@ anova(
 mdlMedicalOut$Att$varInterceptAllportQlt <-
   lme4::VarCorr(mdlMedicalOut$Att$lmeInterceptAllportQlt)
 ```
+
+Unsurprisingly, the model with the two predictors adds significantly beyond the empty unconditional model. However, more importantly, looking at the coefficients, we find that the effect of Allport's conditions is indeed is indeed strongly reduced and the variance is explained by the perceived interaction quality. Notably in this sample, the reduction of variance explained is not a much as we saw with core need fulfillment in previous studies.  
+
+#### random slope
+
+We again check whether further letting the effects vary between participants explains additional variance in outgroup attitudes (i.e., random slope).   
+
+\begin{equation}
+(\#eq:medicalOutSlopeAttQltAllportEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}Allport_{ti} + \\
+                           &\ \beta_{2i}InteractionQuality_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} + u_{1i} \\
+                      &\ \beta_{2i} = \gamma_{20} + u_{2i}
+  \end{split} 
+\end{equation}
 
 ```{r medicalOutModelSlopesAttAllportQlt}
 # Create and save Model (optimizer needed to reach convergence)
@@ -6943,9 +7081,31 @@ ggsave(
 )
 ```
 
-We sequentially tested whether the fulfillment of Allport's Contact Conditions was (1) related to more positive outgroup attitudes, (2) higher perceived interaction quality, and (3) whether the variance explained by Allport's Conditions is assumed by the perceived interaction quality if considered jointly. We find that in the multilevel models, the fulfillment of Allport's Conditions during outgroup contacts was associated with more positive outgroup attitudes (random slopes model; `r MlCoeffHtml(lmeMdl = mdlMedicalOut$Att$lmeSlopesAllport, lmerCI = mdlMedicalOut$Att$lmerSlopesAllportCI, varName = "AllportsCondition_cwc")`) and also predicted higher perceived interaction quality (random slopes model; `r MlCoeffHtml(lmeMdl = mdlMedicalOut$Qlt$lmeSlopesAllport, lmerCI = mdlMedicalOut$Qlt$lmerSlopesAllportCI, varName = "AllportsCondition_cwc")`). However, if we consider the influences of Allport's Conditions and interaction quality on outgroup attitudes jointly, we find that perceived interaction quality is a substantially stronger predictor (random slopes mode; `r MlCoeffHtml(lmeMdl = mdlMedicalOut$Att$lmeSlopesAllportQlt, lmerCI = mdlMedicalOut$Att$lmerSlopesAllportQltCI, varName = "qualityOverall_cwc")`) and the unique variance explained by Allport's Conditions was less than half of its original effect size (`r MlCoeffHtml(lmeMdl = mdlMedicalOut$Att$lmeSlopesAllportQlt, lmerCI = mdlMedicalOut$Att$lmerSlopesAllportQltCI, varName = "AllportsCondition_cwc")`). These results indicate that in this dataset the the fulfillment of Allport's conditions had a significant influence on outgroup attitudes and this effect is likely in parts explained by its effect through perceived interaction quality. 
+When we consider the influences of Allport's Conditions and interaction quality on outgroup attitudes jointly, we find that perceived interaction quality is a substantially stronger predictor and the unique variance explained by Allport's Conditions was less than half of its original effect size.
 
 ## Need Fulfillment
+
+The main focus of our proposal is again the assessment of how much positive outgroup attitudes might be explained by whether or not an intergroup interaction fulfilled the person's core situational need. As with the previous two studies we also check to what extend this effect goes through perceived interaction quality.
+
+### Need fulfillment and Attitudes  
+
+In a first step we, again, test the relationship between outgroup attitudes and the fulfillment of the core situational need during the interaction.  
+
+#### random intercept with level one predictors
+
+We jump right in with the random intercept model because we have already assessed the unconditional model when we tested the influence of Allport's conditions on outgroup attitudes. We thus add the core interaction need fulfillment to the multilevel random intercept model.  
+
+\begin{equation}
+(\#eq:medicalOutInterceptAttNeedEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10}
+  \end{split} 
+\end{equation}
 
 ```{r medicalOutModelInterceptAttCore}
 # Create and save Model
@@ -6997,6 +7157,24 @@ anova(mdlMedicalOut$Att$lmeNull,
 mdlMedicalOut$Att$varInterceptCore <-
   lme4::VarCorr(mdlMedicalOut$Att$lmeInterceptCore)
 ```
+
+We find that the the model with the added predictor indeed explains more variance in outgroup attitudes than the unconditional model. Looking at the individual coefficients, we find that the situational core need relates significantly to outgroup attitudes.  
+
+#### random slope
+
+In a next step, we check whether further letting the effect of core need fulfillment vary between participants explains additional variance in outgroup attitudes (i.e., random slope).  
+
+\begin{equation}
+(\#eq:medicalOutSlopeAttNeedEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} + u_{1i}
+  \end{split} 
+\end{equation}
 
 ```{r medicalOutModelSlopesAttCore}
 # Create and save Model (optimizer needed to reach convergence)
@@ -7124,6 +7302,30 @@ ggsave(
 )
 ```
 
+We find that adding the random slopes does add significantly beyond the random intercept model. We also find that the core need remains a strong predictor (even when letting the influence vary between participants).  
+
+TL;DR: The random slope adds significantly to the prediction model.  
+
+### Need fulfillment and Interaction Quality   
+
+Based on the assertion that the relationship between core need fulfillment and outgroup attitudes is explained by a higher perceived interaction, the core need fulfillment should also significantly predict perceived interaction quality.  
+
+#### random intercept with level one predictor  
+
+We again do not need to calculate an unconditional model for the perceived interaction quality outcome variable because we have already done so for the previous assessment of Allport's conditions. So we add the core interaction need fulfillment to the multilevel random intercept model.  
+
+\begin{equation}
+(\#eq:medicalOutInterceptQltNeedEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ InteractionQuality_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10}
+  \end{split} 
+\end{equation}
+
 ```{r medicalOutModelInterceptQltCore}
 # Create and save Model
 mdlMedicalOut$Qlt$lmeInterceptCore <-
@@ -7174,6 +7376,24 @@ anova(mdlMedicalOut$Qlt$lmeNull,
 mdlMedicalOut$Qlt$varInterceptCore <-
   lme4::VarCorr(mdlMedicalOut$Qlt$lmeInterceptCore)
 ```
+
+The predictor again adds a significant amount of explained variances beyond the empty model and looking at the slope coefficient, we find that the situational core need fulfillment relates significantly to perceived interaction quality. 
+
+#### random slope
+
+As before, we check whether further letting the effect of core need fulfillment vary between participants explains additional variance in outgroup attitudes (i.e., random slope).   
+
+\begin{equation}
+(\#eq:medicalOutSlopeQltNeedEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ InteractionQuality_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} + u_{1i}
+  \end{split} 
+\end{equation}
 
 ```{r medicalOutModelSlopesQltCore}
 # Create and save Model (optimizer needed to reach convergence)
@@ -7276,6 +7496,30 @@ ggsave(
 )
 ```
 
+We find that adding the random slopes does add significantly beyond the random intercept model and situation key need fulfillment remains a meaningful predictor of outgroup attitudes.   
+
+### Interaction Needs, Quality, and Attitudes  
+
+In our final main step, we will jointly consider the effect of core need fulfillment and perceived interaction quality on outgroup attitudes. We expect that if the relationship between core need fulfillment and outgroup attitudes is indeed explained by a higher perceived interaction quality, the interaction quality perception should assume the explained variance of the core contact need fulfillment.  
+
+#### random intercept with level one predictors  
+
+We thus add both the core need fulfillment and perceived interaction quality to a random intercept model of outgroup attitudes.  
+
+\begin{equation}
+(\#eq:medicalOutInterceptAttQltNeedEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+                           &\ \beta_{2i}InteractionQuality_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} \\
+                      &\ \beta_{2i} = \gamma_{20}
+  \end{split} 
+\end{equation}
+
 ```{r medicalOutModelInterceptAttCoreQlt}
 # Create and save Model
 mdlMedicalOut$Att$lmeInterceptCoreQlt <-
@@ -7297,6 +7541,7 @@ summ(
   digits = 3
 )
 
+# 95%CI
 mdlMedicalOut$Att$lmerInterceptCoreQltCI <- 
   confint(method = "Wald", mdlMedicalOut$Att$lmerInterceptCoreQlt)
 
@@ -7327,6 +7572,26 @@ anova(
 mdlMedicalOut$Att$varInterceptCoreQlt <-
   lme4::VarCorr(mdlMedicalOut$Att$lmeInterceptCoreQlt)
 ```
+
+Unsurprisingly, the model with the two predictors adds significantly beyond the empty unconditional model. However, more importantly, looking at the coefficients, we find that the effect of core need fulfillment indeed is indeed strongly reduced and the variance is explained by the perceived interaction quality. However, similar to the equivalent analysis of Allport's conditions and interaction quality, the effect of need fulfillment remains a significant predictor of outgroup attitudes when controlling for perceived interaction quality.  
+
+#### random slope
+
+We again check whether further letting the effects vary between participants explains additional variance in outgroup attitudes (i.e., random slope).   
+
+\begin{equation}
+(\#eq:medicalOutSlopeAttQltNeedEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+                           &\ \beta_{2i}InteractionQuality_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} + u_{1i} \\
+                      &\ \beta_{2i} = \gamma_{20} + u_{2i}
+  \end{split} 
+\end{equation}
 
 ```{r medicalOutModelSlopesAttCoreQlt}
 # Create and save Model (optimizer needed to reach convergence)
@@ -7429,9 +7694,15 @@ ggsave(
 )
 ```
 
-We again sequentially tested whether the fulfillment of the core need during an interaction was (1) related to more positive outgroup attitudes, (2) higher perceived interaction quality, and (3) whether the variance explained by the core need is assumed by the perceived interaction quality if considered jointly. We find that in the multilevel models, the fulfillment of core need fulfillment during outgroup contacts was associated with more positive outgroup attitudes (random slopes model; `r MlCoeffHtml(lmeMdl = mdlMedicalOut$Att$lmeSlopesCore, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreCI, varName = "KeyNeedFulfillment_cwc")`) and also predicted higher perceived interaction quality (random slopes model; `r MlCoeffHtml(lmeMdl = mdlMedicalOut$Qlt$lmeSlopesCore, lmerCI = mdlMedicalOut$Qlt$lmerSlopesCoreCI, varName = "KeyNeedFulfillment_cwc")`). However, if we consider the influences of core need fulfillment and interaction quality on outgroup attitudes jointly, we find that perceived interaction quality is a substantially stronger predictor (random slopes mode; `r MlCoeffHtml(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreQlt, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreQltCI, varName = "qualityOverall_cwc")`) and the unique variance explained by core need fulfillment was roughly half of its original effect size (`r MlCoeffHtml(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreQlt, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreQltCI, varName = "KeyNeedFulfillment_cwc")`). These results indicate that in this dataset the the fulfillment of core situational needs had a significant influence on outgroup attitudes and this effect is likely in parts explained by its effect through perceived interaction quality. 
+The random slopes add significant explained variance to the model. When we consider the influences of core need fulfillment and interaction quality on outgroup attitudes jointly, we find that perceived interaction quality is a substantially stronger predictor and the unique variance explained by core need fulfillment was roughly half of its original effect size.
 
 ## Compare Fulfillment of Core Need and Allport's Conditions
+
+To compare the models using either Allport's conditions or the core need fulfillment to predict outgroup attitudes, we first assess relative model performance indices (i.e., Akaike information criterion, and Bayesian information criterion), and then consider the two predictors in a joint model to see whether the two approaches predict the same variance in outgroup attitudes.
+
+### Model fit parameters
+
+For the model fit parameters we look at the AIC, BIC, pseudo R^2^s, the ICC, RMSE, and Sigma. 
 
 ```{r AllportVsCore}
 # Compare new model to previous step
@@ -7465,6 +7736,30 @@ performance::compare_performance(
   mdlMedicalOut$Att$lmerSlopesCore
 )
 ```
+
+When comparing the model selection indices we find that the fulfillment of the situation core need, indeed performs slightly better than the model using Allport's conditions. 
+
+### Joint model  
+
+We then consider the two predictors in a joint model to see whether the two approaches predict the same variance in outgroup attitudes.  
+
+#### random intercept model
+
+We begin by adding both the core need fulfillment and Allport's conditions to a random intercept model of outgroup attitudes.  
+
+\begin{equation}
+(\#eq:medicalOutInterceptAttNeedAllportEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+                           &\ \beta_{2i}Allport_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} \\
+                      &\ \beta_{2i} = \gamma_{20}
+  \end{split} 
+\end{equation}
 
 ```{r medicalOutModelInterceptAttCoreAllport}
 # Create and save Model
@@ -7519,6 +7814,26 @@ mdlMedicalOut$Att$varInterceptCoreAllport <-
   lme4::VarCorr(mdlMedicalOut$Att$lmeInterceptCoreAllport)
 ```
 
+For the random intercept model we find that the fulfillment of situational core needs adds significant explained variance beyond a model that only includes Allport's conditions. When looking at the regression parameters in the joint model we additionally find that the fulfillment of core situational needs is ever so slightly a stronger predictor of outgroup attitudes.  
+
+#### random slope
+
+We again check whether further letting the effects vary between participants explains additional variance in outgroup attitudes (i.e., random slope).   
+
+\begin{equation}
+(\#eq:medicalOutSlopeAttNeedAllportEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+                           &\ \beta_{2i}Allport_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} + u_{1i} \\
+                      &\ \beta_{2i} = \gamma_{20} + u_{2i}
+  \end{split} 
+\end{equation}
+
 ```{r medicalOutModelSlopesAttCoreAllport}
 # Create and save Model (optimizer needed to reach convergence)
 mdlMedicalOut$Att$lmeSlopesCoreAllport <-
@@ -7543,6 +7858,7 @@ summ(
   digits = 3
 )
 
+# 95%CI
 mdlMedicalOut$Att$lmerSlopesCoreAllportCI <- 
   confint(method = "Wald", mdlMedicalOut$Att$lmerSlopesCoreAllport)
 
@@ -7619,12 +7935,38 @@ ggsave(
 )
 ```
 
-To compare the models using either Allport's conditions or the core need fulfillment to predict outgroup attitudes, we first assess relative model performance indices (i.e., Akaike information criterion, and Bayesian information criterion), and then consider the two predictors in a joint model to see whether the two approaches predict the same variance in outgroup attitudes. When comparing the model selection indices we find that the fulfillment of the situation core need, indeed performs slightly better than the model using Allport's conditions ($AIC_{CoreNeed}$ `r AIC(mdlMedicalOut$Att$lmerSlopesCore)` < `r AIC(mdlMedicalOut$Att$lmerSlopesAllport)` $AIC_{Allport}$, and $BIC_{CoreNeed}$ `r BIC(mdlMedicalOut$Att$lmerSlopesCore)` < `r BIC(mdlMedicalOut$Att$lmerSlopesAllport)` $BIC_{Allport}$). Additionally, when considering the predictors jointly, we find that both significantly predict outgroup attitudes with similar sized regression parameters (random slopes model; Allport's Conditions: `r MlCoeffHtml(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreAllport, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreAllportCI, varName = "AllportsCondition_cwc")`, Core Need: `r MlCoeffHtml(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreAllport, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreAllportCI, varName = "KeyNeedFulfillment_cwc")`). This indicates that, although both Allport's conditions and the core need fulfillment seem to (in part) work through perceived interaction quality, they explain different aspects of the variance in outgroup attitudes and do not constitute one another.  
+Again, the random slopes add significantly to the model. When considering the predictors jointly in the random slopes model, we find that both significantly predict outgroup attitudes with similar sized regression parameters. This indicates that, although both Allport's conditions and the core need fulfillment seem to (in part) work through perceived interaction quality, they explain different aspects of the variance in outgroup attitudes and do not constitute one another.  
 
 ## Robustness
 
-```{r medicalModelAttNullInt}
-# Create and save Model
+To build further confidence in our results, we assess a few additional models that might offer alternative explanations of the effects we find.  
+
+#### Interaction Type  
+
+To make certain that the effect of core need fulfillment is specific to the interaction we compare the the effect to fulfillment of the situation core need when no outgroup interaction took place.  
+
+##### random intercept   
+
+Here we go back to the full dataset and add generalized situational core need fulfillment (either during an interaction or about the daytime in general) and whether an outgroup interaction happened as well as their interaction term to a random intercept model of outgroup attitudes.  
+
+\begin{equation}
+(\#eq:medicalInterceptAttIntNeedEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+                           &\ \beta_{2i}OutgroupInteraction_{ti} + \\
+                           &\ \beta_{3i}KeyNeedFulfillXOutgroupInteraction_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} \\
+                      &\ \beta_{2i} = \gamma_{20} \\
+                      &\ \beta_{3i} = \gamma_{30}
+  \end{split} 
+\end{equation} 
+
+```{r medicalModelInterceptAttCoreInt}
+# Create and save empty model for comparison
 mdlMedical$lmerAttNullInt <-
   lme4::lmer(AttitudesDutch ~ 1 + (1 | PID),
              data = dtMedical$full %>%
@@ -7645,11 +7987,8 @@ mdlMedical$lmeAttNullInt <-
   ) # use optim if it does not converge
 
 # Get summary with p-values (Satterthwaite's method)
-# summary(mdlMedical$lmerAttNull) #or with the lme function
-summ(mdlMedical$lmerAttNullInt, digits = 3)
-```
+#summ(mdlMedical$lmerAttNullInt, digits = 3)
 
-```{r medicalModelInterceptAttCoreInt}
 # Create and save Model
 mdlMedical$lmeInterceptAttCoreInt <-
   lme(
@@ -7669,6 +8008,7 @@ summ(
   digits = 3
 )
 
+# 95%CI
 mdlMedical$lmerInterceptAttCoreIntCI <- 
   confint(method = "Wald", mdlMedical$lmerInterceptAttCoreInt)
 
@@ -7699,6 +8039,28 @@ anova(mdlMedical$lmeAttNullInt,
 mdlMedical$varInterceptAttCoreInt <- 
   lme4::VarCorr(mdlMedical$lmeInterceptAttCoreInt)
 ```
+
+We find that the model explains significantly more variance than the empty null model. However, more interestingly, looking at the coefficients, we find that, as seen earlier, having an outgroup interaction has a strong effect on outgroup attitudes. Importantly, we find that there is no main effect of key need fulfillment by itself but the effect is qualified by a significant interaction effect of core need fulfillment and outgroup contact. This indicates that it is not simply key need fulfillment in general --- but especially key need fulfillment during an outgroup contact that predicts more positive outgroup attitudes.  
+
+##### random slope
+
+We again check whether further letting the effects vary between participants explains additional variance in outgroup attitudes (i.e., random slope).  
+
+\begin{equation}
+(\#eq:medicalSlopesAttIntNeedEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+                           &\ \beta_{2i}OutgroupInteraction_{ti} + \\
+                           &\ \beta_{3i}KeyNeedFulfillXOutgroupInteraction_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} + u_{1i} \\
+                      &\ \beta_{2i} = \gamma_{20} + u_{2i} \\
+                      &\ \beta_{3i} = \gamma_{30} + u_{3i}
+  \end{split} 
+\end{equation} 
 
 ```{r medicalModelSlopesAttCoreIntX}
 # Create and save Model (optimizer needed to reach convergence)
@@ -7799,7 +8161,228 @@ ggsave(
 )
 ```
 
-We again checked for alternative models to the core need fulfillment. First, when considering generalized situational core need fulfillment together with whether an intergroup contact took place, we find that there is no significant main effect of core need fulfillment (random slopes model; `r MlCoeffHtml(lmeMdl = mdlMedical$lmeSlopesAttCoreInt, lmerCI = mdlMedical$lmerSlopesAttCoreIntCI, varName = "KeyNeedFulfillment_cwc")`) but a stronger interaction effect of core need fulfillment and outgroup contact (`r MlCoeffHtml(lmeMdl = mdlMedical$lmeSlopesAttCoreInt, lmerCI = mdlMedical$lmerSlopesAttCoreIntCI, varName = "KeyNeedFulfillment_cwc:OutgroupInteractionYes")`). Together with a significant main effect of having an outgroup contact (`r MlCoeffHtml(lmeMdl = mdlMedical$lmeSlopesAttCoreInt, lmerCI = mdlMedical$lmerSlopesAttCoreIntCI, varName = "OutgroupInteractionYes")`), this indicates that it is not key need fulfillment in general --- but key need fulfillment during an outgroup contact that predicts more positive outgroup attitudes. This finding is consistent with the results of the previous studies.
+We find that adding the random slopes does add significantly beyond the random intercept model. We also see that when taking the possibility to varying slopes into account, the coefficient interpretations remains consistent (i.e., outgroup contact and its interaction with core need fulfillment remain important predictors of positive outgroup attitudes).  
+
+##### Plot Interaction   
+
+Before we move on, we shortly illustrate the interaction effect of how the effect of core need fulfillment differed by whether an outgroup contact took place or not. To this end we illustrate (1) the raw data points (without taking the nested nature into account), as well as a plot of the model predicted values and their prediction interval (taking the nested structure into account based; similar to an interaction plot).  
+
+```{r medicalModelInterceptAttCoreIntPlt}
+# visualize interaction
+## Without ML structure
+ggplot(data = dtMedical$full,
+       aes(x = KeyNeedFulfillment,
+           y = AttitudesDutch,
+           fill = OutgroupInteraction)) +
+  #geom_point()+
+  geom_smooth(method = 'lm',
+              aes(linetype = OutgroupInteraction),
+              color = "black") +
+  #facet_wrap(~PID, ncol = 6)+
+  scale_linetype_manual(values = c("dashed", "solid")) +
+  scale_fill_manual(values = c("darkgrey", "black")) +
+  #scale_colour_manual(values=c("grey20", "black"), name="Intergroup Contact")+
+  scale_y_continuous(
+    limits = c(50, 100),
+    breaks = seq(50, 100, by = 10),
+    position = "left"
+  ) +
+  scale_x_continuous(limits = c(0, 100), breaks = seq(0, 100, by = 10)) +
+  labs(
+    title = "Without ML stucture",
+    x = "Fulfillment Core Need",
+    y = "Outgroup Attitudes",
+    fill = "Intergroup Contact",
+    linetype = "Intergroup Contact"
+  ) +
+  theme_Publication() +
+  theme(legend.position = "bottom",
+        legend.key.size = unit(1, "cm"))
+
+## With ML structure
+# create parameters for prediction
+datNew = data.frame(
+  KeyNeedFulfillment_cwc = rep(seq(
+    round_any(min(
+      dtMedical$full$KeyNeedFulfillment_cwc %>% na.omit
+    ), 5, f = floor), round_any(max(
+      dtMedical$full$KeyNeedFulfillment_cwc %>% na.omit
+    ), 5, f = ceiling), 5
+  ), 2),
+  PID = 0
+) %>%
+  mutate(OutgroupInteraction = rep(c("No", "Yes"), each = nrow(.)/2)) %>%
+  select(PID, OutgroupInteraction, KeyNeedFulfillment_cwc)
+
+
+# Predict values, clean up and calculate SE
+PI <-
+  merTools::predictInterval(
+    merMod = mdlMedical$lmerSlopesAttCoreInt,
+    newdata = datNew,
+    level = 0.95,
+    stat = "mean",
+    type = "linear.prediction",
+    include.resid.var = F,
+    fix.intercept.variance = F
+  )
+mdlMedical$predInterceptAttCoreIntX <- 
+  cbind(datNew, PI)
+mdlMedical$predInterceptAttCoreIntX$se <-
+  (mdlMedical$predInterceptAttCoreIntX$upr - mdlMedical$predInterceptAttCoreIntX$fit) / 1.96
+rm(datNew, PI)
+mdlMedical$predInterceptAttCoreIntX$OutgroupInteractionLab <-
+  factor(
+    x = mdlMedical$predInterceptAttCoreIntX$OutgroupInteraction,
+    levels = sort(
+      unique(mdlMedical$predInterceptAttCoreIntX$OutgroupInteraction)
+    ),
+    labels = c("No", "Yes")
+  )
+
+
+# Plot predicted values with SE
+ggplot(
+  mdlMedical$predInterceptAttCoreIntX,
+  aes(x = KeyNeedFulfillment_cwc,
+      y = fit,
+      fill = OutgroupInteractionLab)
+)+
+  #geom_point() +
+  geom_line(aes(linetype = OutgroupInteractionLab), size = 1) +
+  #facet_wrap(~PID, ncol = 6)+
+  geom_ribbon(data = mdlMedical$predInterceptAttCoreIntX,
+              aes(ymin = fit - se, ymax = fit + se),
+              alpha = 0.3) +
+  scale_x_continuous(breaks = seq(
+    round_any(min(
+      studentWithinBetween$KeyNeedFullfillment_cwc
+    ), 5, f = floor), round_any(max(
+      studentWithinBetween$KeyNeedFullfillment_cwc
+    ), 5, f = ceiling), 10
+  )) +
+  scale_y_continuous(limits = c(50, 100), breaks = seq(50, 100, 10)) +
+  scale_linetype_manual(values = c("dashed", "solid")) +
+  scale_fill_manual(values = c("darkgrey", "black")) +
+  labs(
+    x = "Fulfillment Core Need",
+    y = "Outgroup Attitude (NL)",
+    fill = "Intergroup Contact",
+    linetype = "Intergroup Contact",
+    title = "Based on Model Predictions"
+  ) +
+  theme_Publication()
+
+# #### Bayesian estimation !! ONLY RUN ON FINAL RENDER !! Takes forever ####
+# options(mc.cores = parallel::detectCores())  # Run many chains simultaneously
+# brmfit <- brm(
+#   AttitudesDutch ~ KeyNeedFulfillment_cwc * OutgroupInteraction +
+#     (1 + KeyNeedFulfillment_cwc + OutgroupInteraction | PID),
+#   data = dtMedical$full,
+#   family = gaussian,
+#   iter = 1000,
+#   chains = 4
+# )
+# 
+# # create parameters for prediction:
+# datNew = data.frame(
+#   KeyNeedFulfillment_cwc = rep(seq(
+#     round_any(min(
+#       dtMedical$full$KeyNeedFulfillment_cwc %>% na.omit
+#     ), 2, f = floor), round_any(max(
+#       dtMedical$full$KeyNeedFulfillment_cwc %>% na.omit
+#     ), 2, f = ceiling), 2
+#   ), 2)
+# ) %>%
+#   mutate(OutgroupInteraction = rep(c("No", "Yes"), each = nrow(.)/2))
+# 
+# # Save predicted values and adjust names and labels
+# fitavg <-
+#   cbind(datNew,
+#         fitted(brmfit, newdata = datNew, re_formula = NA)[, -2])
+# names(fitavg)[names(fitavg) == "Estimate"] = "pred"
+# fitavg$se <- (fitavg$Q97.5 - fitavg$pred) / 1.96
+# fitavg$OutgroupInteractionLab <-
+#   factor(
+#     x = fitavg$OutgroupInteraction,
+#     levels = sort(
+#       unique(fitavg$OutgroupInteraction)
+#     ),
+#     labels = c("No", "Yes")
+#   )
+# 
+# # Plot Bayesian SE prediction interval
+# ggplot(fitavg,
+#        aes(x = KeyNeedFulfillment_cwc,
+#            y = pred,
+#            fill = OutgroupInteractionLab)) +
+#   scale_x_continuous(breaks = seq(
+#     round_any(min(
+#       dtMedical$full$KeyNeedFulfillment_cwc %>% na.omit
+#     ), 5, f = floor), round_any(max(
+#       dtMedical$full$KeyNeedFulfillment_cwc %>% na.omit
+#     ), 5, f = ceiling), 10
+#   )) +
+#   scale_y_continuous(limits = c(50, 100), breaks = seq(50, 100, 10)) +
+#   geom_line(aes(linetype = OutgroupInteractionLab), size = 1) +
+#   geom_ribbon(aes(ymin = pred - se, ymax = pred + se), alpha = 0.2) +
+#   scale_linetype_manual(values = c("dashed", "solid")) +
+#   scale_fill_manual(values = c("darkgrey", "black")) +
+#   labs(
+#     x = "Fulfillment Core Need",
+#     y = "Outgroup Attitude (NL)",
+#     fill = "Intergroup Contact",
+#     linetype = "Intergroup Contact",
+#     title = "Based on Bayesian Prediction Interval"
+#   ) +
+#   theme_Publication()
+# 
+# # # plot all overlayed posteriors:
+# # pst <- posterior_samples(brmfit, "b")
+# # ggplot(dtMedical$full,
+# #        aes(x = KeyNeedFulfillment_cwc, y = AttitudesDutch)) +
+# #   geom_point(shape = 4, alpha = .1) +
+# #   geom_tile() +
+# #   geom_abline(
+# #     data = pst,
+# #     aes(intercept = b_Intercept, slope = b_KeyNeedFulfillment_cwc),
+# #     alpha = .025,
+# #     size = .4
+# #   ) +
+# #   labs(title = "slope Posteriors",
+# #        x = "Fulfillment Core Need",
+# #        y = "Outgroup Attitudes (NL)") +
+# #   theme_Publication()
+# # rm(datNew, brmfit, fitavg, pst)
+```
+
+The plots indicate that especially once we take the nested data structure into account we can see a substantially stronger effect of core need fulfillment on outgroup attitudes during outgroup contacts than without outgroup contacts.  
+
+#### Other psychological needs
+
+In a final step we check whether during the interaction the core situational need is a meaningful predictor even when taking other fundamental psychological needs into account. We focus on the three commonly considered self determination needs: competence, autonomy, and relatedness.  
+
+##### random intercept with level one predictors  
+
+We add the core need fulfillment with the three self determination needs to a random intercept model of outgroup attitudes.  
+
+\begin{equation}
+(\#eq:medicalInterceptAttNeedSdtEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+                           &\ \beta_{2i}Autonomy_{ti} + \\
+                           &\ \beta_{3i}Competence_{ti} + \\
+                           &\ \beta_{4i}Relatedness_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} \\
+                      &\ \beta_{2i} = \gamma_{20} \\
+                      &\ \beta_{3i} = \gamma_{30} \\
+                      &\ \beta_{4i} = \gamma_{40}
+  \end{split} 
+\end{equation} 
 
 ```{r medicalOutModelInterceptAttCoreSdt}
 # Create and save Model
@@ -7867,6 +8450,31 @@ mdlMedicalOut$Att$varInterceptCoreSdt <-
   lme4::VarCorr(mdlMedicalOut$Att$lmeInterceptCoreSdt)
 ```
 
+We find that the the model with the added predictor indeed explains more variance in outgroup attitudes than the unconditional model and we find that adding the core need adds further explained variance --- beyond the self determination needs. Looking at the individual coefficients, we find that the situational core need relates significantly to outgroup attitudes, that it is a stronger predictor than any of the self determination theory needs and that it assumes some of the variance explained by the self determination theory needs (when compared to a model without the core need). 
+
+##### random slope  
+
+We again check whether further letting the effects vary between participants explains additional variance in outgroup attitudes (i.e., random slope).  
+
+\begin{equation}
+(\#eq:medicalSlopesAttNeedSdtEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+                           &\ \beta_{2i}Autonomy_{ti} + \\
+                           &\ \beta_{3i}Competence_{ti} + \\
+                           &\ \beta_{4i}Relatedness_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} + u_{1i} \\
+                      &\ \beta_{2i} = \gamma_{20} + u_{2i} \\
+                      &\ \beta_{3i} = \gamma_{30} + u_{3i} \\
+                      &\ \beta_{4i} = \gamma_{40} + u_{4i}
+  \end{split} 
+\end{equation} 
+
+
 ```{r medicalOutModelSlopesAttCoreSdt}
 # Create and save Model (optimizer needed to reach convergence)
 mdlMedicalOut$Att$lmeSlopesCoreSdt <-
@@ -7891,6 +8499,7 @@ summ(
   digits = 3
 )
 
+# 95%CI
 mdlMedicalOut$Att$lmerSlopesCoreSdtCI <- 
   confint(method = "Wald", mdlMedicalOut$Att$lmerSlopesCoreSdt)
 
@@ -8035,7 +8644,7 @@ medicalSdtCompP <-
 medicalSdtCompChiSq <- paste0("$chi^2$(", medicalSdtCompDf, ", <i>N</i> = ", medicalSdtCompN, ") = ", medicalSdtCompChi, ", <i>p</i> ", medicalSdtCompP)
 ```
 
-In a final step we again checked whether during the interaction the core situational need remains a meaningful predictor even when taking other fundamental psychological needs into account. We find that the core need adds significantly above a model with only the self determination theory needs (random slopes models; `r medicalSdtCompChiSq`). We find that the core need explains the most variance in outgroup attitudes after an outgroup contact (`r MlCoeffHtml(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreSdt, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreSdtCI, varName = "KeyNeedFulfillment_cwc")`). When compared to the model with only the SDT needs, the core need fulfillment flexibly takes on some of the explained variance of all of the three fundamental needs. However, similar to the previous study, in this large sample relatedness (`r MlCoeffHtml(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreSdt, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreSdtCI, varName = "Relatedness_cwc")`), competence (`r MlCoeffHtml(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreSdt, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreSdtCI, varName = "Competence_cwc")`) and autonomy (`r MlCoeffHtml(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreSdt, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreSdtCI, varName = "Autonomy_cwc")`) each predicted positive outgroup attitudes independently. However, the regression coefficient is three times as large for the core need fulfillment (with all scaling being equal). 
+When compared to the model with only the SDT needs, the core need fulfillment flexibly takes on some of the explained variance of all of the three fundamental needs. However, similar to the previous study, in this large sample relatedness, competence, and autonomy each predicted positive outgroup attitudes independently. However, the regression coefficient is three times as large for the core need fulfillment (with all scaling being equal). 
 
 # **Export for Methods and Results**  
 
