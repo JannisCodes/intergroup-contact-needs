@@ -1057,6 +1057,7 @@ summ(
   digits = 3
 )
 
+# 95%CI
 mdlWorker$lmerSlopesAttCoreIntCI <- 
   confint(method = "Wald", mdlWorker$lmerSlopesAttCoreInt)
 
@@ -1644,6 +1645,7 @@ summ(
   digits = 3
 )
 
+# 95%CI
 mdlStudent$lmerInterceptAttTypeCI <- 
   confint(method = "Wald", mdlStudent$lmerInterceptAttType)
 
@@ -1696,6 +1698,8 @@ summ(
   digits = 3
 )
 
+
+# 95%CI
 mdlStudent$lmerSlopesAttTypeCI <- 
   confint(method = "Wald", mdlStudent$lmerSlopesAttType)
 
@@ -1832,6 +1836,7 @@ summ(
   center = FALSE
 )
 
+# 95%CI
 mdlStudentOut$Att$lmerInterceptCoreCI <- 
   confint(method = "Wald", mdlStudentOut$Att$lmerInterceptCore)
 
@@ -2035,6 +2040,7 @@ summ(
   center = FALSE
 )
 
+# 95%CI
 mdlStudentOut$Qlt$lmerInterceptCoreCI <- 
   confint(method = "Wald", mdlStudentOut$Qlt$lmerInterceptCore)
 
@@ -2088,6 +2094,7 @@ summ(
   center = FALSE
 )
 
+# 95%CI
 mdlStudentOut$Qlt$lmerSlopesCoreCI <- 
   confint(method = "Wald", mdlStudentOut$Qlt$lmerSlopesCore)
 
@@ -2180,6 +2187,7 @@ summ(
   digits = 3
 )
 
+# 95%CI
 mdlStudentOut$Att$lmerInterceptCoreQltCI <- 
   confint(method = "Wald", mdlStudentOut$Att$lmerInterceptCoreQlt)
 
@@ -2234,6 +2242,7 @@ summ(
   digits = 3
 )
 
+# 95%CI
 mdlStudentOut$Att$lmerSlopesCoreQltCI <- 
   confint(method = "Wald", mdlStudentOut$Att$lmerSlopesCoreQlt)
 
@@ -2331,6 +2340,7 @@ summ(
   digits = 3
 )
 
+# 95%CI
 mdlStudent$lmerInterceptAttCoreIntCI <- 
   confint(method = "Wald", mdlStudent$lmerInterceptAttCoreInt)
 
@@ -2383,6 +2393,7 @@ summ(
   digits = 3
 )
 
+# 95%CI
 mdlStudent$lmerSlopesAttCoreIntCI <- 
   confint(method = "Wald", mdlStudent$lmerSlopesAttCoreInt)
 
@@ -2478,6 +2489,10 @@ summ(
   digits = 3
 )
 
+# 95%CI
+mdlStudentOut$Att$lmerInterceptCoreSdtCI <- 
+  confint(method = "Wald", mdlStudentOut$Att$lmerInterceptCoreSdt)
+
 # To be compared against a model with only the self determination theory needs
 mdlStudentOut$Att$lmeInterceptSdt <-
   lme(
@@ -2498,6 +2513,7 @@ summ(
 
 # Compare new model to previous steps
 anova(
+  mdlStudentOut$Att$lmeNull,
   mdlStudentOut$Att$lmeInterceptSdt,
   mdlStudentOut$Att$lmeInterceptCoreSdt
   ) %>%
@@ -2548,6 +2564,7 @@ summ(
   digits = 3
 )
 
+# 95%CI
 mdlStudentOut$Att$lmerSlopesCoreSdtCI <- 
   confint(method = "Wald", mdlStudentOut$Att$lmerSlopesCoreSdt)
 
