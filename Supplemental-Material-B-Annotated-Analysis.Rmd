@@ -94,7 +94,8 @@ lib <- c(
   "stringi",
   "reshape2",
   "lubridate",
-  "purrr"
+  "purrr",
+  "metafor"
 )
 invisible(lapply(lib, library, character.only = TRUE))
 rm(lib)
@@ -1040,7 +1041,7 @@ studentContactFreq <- dtStudents$full %>%
 # dataframe where interaction types are recoded
 studentInteractionType <- dtStudents$full %>%
   mutate(
-    NonDutchContact = replace_na(NonDutchContact, 2), # make second non-Dutch countable
+    NonDutchContact = tidyr::replace_na(NonDutchContact, 2), # make second non-Dutch countable
     NonDutchContact = NonDutchContact*-1+2 # recode (yes = 1 -> 1, no = 2 -> 0)
   ) %>%
   mutate(
@@ -1372,7 +1373,25 @@ medicalOutWithinBetween <-
       )
   )
 
-df <-
+medicalWithinBetween <-
+  MlTraitState(
+    data = df,
+    id = "PID",
+    selection =
+      c(
+        "KeyNeedFulfillment",
+        "Competence",
+        "Autonomy",
+        "Relatedness",
+        "AllportsCondition",
+        "AttitudesDutch",
+        "qualityOverall",
+        "OutgroupInteraction",
+        "NonOutgroupInteraction"
+      )
+  )
+
+df <- # keep only for compatibility of old framgents
   MlTraitState(
     data = df,
     id = "PID",
@@ -8645,6 +8664,826 @@ medicalSdtCompChiSq <- paste0("$chi^2$(", medicalSdtCompDf, ", <i>N</i> = ", med
 ```
 
 When compared to the model with only the SDT needs, the core need fulfillment flexibly takes on some of the explained variance of all of the three fundamental needs. However, similar to the previous study, in this large sample relatedness, competence, and autonomy each predicted positive outgroup attitudes independently. However, the regression coefficient is three times as large for the core need fulfillment (with all scaling being equal). 
+
+# **Forest Plots of Main Analyses**  
+
+## Contact Hypothesis  
+
+### Aggregate Data  
+
+summary of regression results from the aggregated contact and interaction quality data.  
+
+```{r metaGeneralLm, include=FALSE}
+mdlTblElementsGeneralLm <- list(mdlWorker$lmAttFreqQualX,
+                                mdlStudent$lmAttFreqQualX,
+                                mdlMedical$lmAttFreqQualX)
+
+lmMetaTbl <- data.frame()
+for (i in 1:length(mdlTblElementsGeneralLm)){
+  lmTblTmp <- lmTblPrep(mdlTblElementsGeneralLm[[i]])$coeficients %>%
+  select(
+    coef,
+    B = est,
+    se,
+    lwr,
+    upr,
+    tval,
+    Rsq
+  ) %>%
+  mutate(
+    n = lmTblPrep(mdlTblElementsGeneralLm[[i]])$fit$N,
+    m = nrow(.)-1, 
+    sample = str_match(lmTblPrep(mdlTblElementsGeneralLm[[i]])$fit$data, "worker|student|medical"),
+    coef = gsub(":", ".", coef)
+  )
+  lmMetaTbl <- rbind(lmMetaTbl, lmTblTmp)
+}
+
+lmMetaTbl <- lmMetaTbl %>% arrange(coef)
+
+# extract parameter names
+  name <- "Contact Hypothesis — Aggregate Linear Regression"
+  var <- as.character(unique(lmMetaTbl$coef))[!as.character(unique(lmMetaTbl$coef)) %in% c("(Intercept)")]
+  names <- qdap::mgsub(c("SumContactNL", "AvQuality", "SumContactNL.AvQuality"),
+                       c("Number of Outgroup Contacts","Average Interaction Quality", "Contact X Quality"), 
+                       var)
+  studies <- as.character(unique(lmMetaTbl$sample))
+  
+### Parametric Meta-Analysis
+    meta.parametric <- list()
+    meta.parametric.sum <- data.frame(effect = var, 
+                                      name = names, 
+                                      beta.Worker = NA, 
+                                      CI.Worker = NA,
+                                      beta.Student = NA, 
+                                      CI.Student = NA,
+                                      beta.Medical = NA,
+                                      CI.Medical = NA, 
+                                      RE.beta = NA,
+                                      RE.CI = NA,
+                                      RE.pval = NA,
+                                      RE.star = NA)
+
+# i = 1
+for(i in 1:length(var)){
+      md <- escalc(data = lmMetaTbl[lmMetaTbl$coef==var[i],],
+                   measure = "SPCOR",
+                   ti = tval,
+                   ni = n,
+                   mi = m,
+                   r2i = Rsq,
+                   var.names = c(paste(var[i],".yi",sep=""),paste(var[i],".vi",sep="")))
+      
+      meta.parametric[[var[i]]] <- rma(yi = get(paste(var[i],".yi",sep="")),
+                                       vi = get(paste(var[i],".vi",sep="")), 
+                                       data = md, 
+                                       method = "FE", # "REML", 
+                                       slab = sample)
+      #metafor::forest(meta.parametric[[var[i]]],
+      #                main = paste("Meta Analysis ",names[i],sep = ""))
+      
+      meta.parametric.sum$effect[i] <- var[i]
+      meta.parametric.sum$beta.Worker[i] <- meta.parametric[[var[i]]]$yi[1]
+      meta.parametric.sum$beta.Student[i] <- meta.parametric[[var[i]]]$yi[2]
+      meta.parametric.sum$beta.Medical[i] <- meta.parametric[[var[i]]]$yi[3]
+      meta.parametric.sum$CI.Worker[i] <- paste("[",                                  round(meta.parametric[[var[i]]]$yi[1]-1.96*sqrt(meta.parametric[[var[i]]]$vi[1]),2),", ",round(meta.parametric[[var[i]]]$yi[1]+1.96*sqrt(meta.parametric[[var[i]]]$vi[1]),2),"]",sep="")
+      meta.parametric.sum$CI.Student[i] <- paste("[",                                  round(meta.parametric[[var[i]]]$yi[2]-1.96*sqrt(meta.parametric[[var[i]]]$vi[2]),2),", ",round(meta.parametric[[var[i]]]$yi[2]+1.96*sqrt(meta.parametric[[var[i]]]$vi[2]),2),"]",sep="")
+      meta.parametric.sum$CI.Medical[i] <- paste("[",                                  round(meta.parametric[[var[i]]]$yi[3]-1.96*sqrt(meta.parametric[[var[i]]]$vi[3]),2),", ",round(meta.parametric[[var[i]]]$yi[3]+1.96*sqrt(meta.parametric[[var[i]]]$vi[3]),2),"]",sep="")
+      meta.parametric.sum$RE.beta[i] <- meta.parametric[[var[i]]]$b
+      meta.parametric.sum$RE.CI[i] <- paste("[",
+                                            round(meta.parametric[[var[i]]]$ci.lb, 2),
+                                            ", ", round(meta.parametric[[var[i]]]$ci.ub,2),"]", sep="")
+      meta.parametric.sum$RE.pval[i] <- meta.parametric[[var[i]]]$pval
+      meta.parametric.sum$RE.star[i] <- ifelse(meta.parametric.sum$RE.pval[i]<0.001,"***",ifelse(meta.parametric.sum$RE.pval[i]<0.01,"**",ifelse(meta.parametric.sum$RE.pval[i]<0.05,"*","")))
+}
+    #meta.parametric
+    
+    eff <- escalc(data = lmMetaTbl, 
+                  slab = coef,
+                  measure = "SPCOR",
+                  ti = tval,
+                  ni = n,
+                  mi = m,
+                  r2i = Rsq)
+    meta <- rma(yi = yi,
+                vi = vi, 
+                data = eff, 
+                method = "FE", # "REML", 
+                slab = paste(coef, sample, sep=" - "))
+
+    k <- length(var) * length(studies)
+    #png(file = "Figures/forestParametricGeneralLm.png", height = 200 + 40*k^.85) 
+      metafor::forest(meta, xlim=c(-2, 2), cex=0.75, ylim=c(-1, 20), rows=c(22:20,16:14,10:8,4:2), 
+                      slab = rep(c("Study 1","Study 2", "Study 3"),length(studies)+1),
+                      mlab="", main=paste0("Meta Analysis: Forest Plot [Parametric] \n(",name,")")) # , xlab = "Standardized Beta"
+      par(font=2)
+      text(-2.05, c(17,11,5), cex=0.75, pos=4, names)
+      m=1
+      for(i in 3:1){
+        addpoly(meta.parametric[[i]], row=m, cex=0.75, mlab="► Fixed Effect")
+        m <- m+6
+      }
+      text(-2.05, 19, "Predictors by study",  cex=.8, pos=4)
+      text(2, 19, "Semi-Partial Correlation [95% CI]", cex=.8, pos=2)
+    #dev.off()
+
+### Bootstrapped Meta-Analysis
+    var.boot <- var
+    names.boot <- names
+    meta.bootstrapped <- list()
+    meta.bootstrapped.sum <- data.frame(effect = var.boot, 
+                                      name = names.boot, 
+                                      beta.Worker = NA, 
+                                      CI.Worker = NA,
+                                      beta.Student = NA, 
+                                      CI.Student = NA,
+                                      beta.Medical = NA,
+                                      CI.Medical = NA, 
+                                      RE.beta = NA,
+                                      RE.CI = NA,
+                                      RE.pval = NA,
+                                      RE.star = NA)
+    
+    # i = 3
+    for(i in 1:length(var.boot)){
+      md <- escalc(data = lmMetaTbl[lmMetaTbl$coef==var.boot[i],],
+                   measure = "SPCOR",
+                   yi = B,
+                   sei = se,
+                   ni = n,
+                   mi = m,
+                   var.names = c(paste(var.boot[i],".yi",sep=""),paste(var.boot[i],".vi",sep="")))
+      
+      meta.bootstrapped[[var.boot[i]]] <- rma(yi = get(paste(var.boot[i],".yi",sep="")),
+                                              vi = get(paste(var.boot[i],".vi",sep="")),
+                                              data = md,
+                                              method = "FE",
+                                              slab = sample)
+      #metafor::forest(meta.bootstrapped[[var.boot[i]]],
+      #                main = paste("Meta Analysis ",names.boot[i],sep = ""))
+      meta.bootstrapped.sum$effect[i] <- var[i]
+      meta.bootstrapped.sum$beta.Worker[i] <-
+        meta.bootstrapped[[var[i]]]$yi[1]
+      meta.bootstrapped.sum$beta.Student[i] <-
+        meta.bootstrapped[[var[i]]]$yi[2]
+      meta.bootstrapped.sum$beta.Medical[i] <-
+        meta.bootstrapped[[var[i]]]$yi[3]
+      meta.bootstrapped.sum$CI.Worker[i] <-
+        paste(
+          "[",
+          round(meta.bootstrapped[[var[i]]]$yi[1] -
+                  1.96 * sqrt(meta.bootstrapped[[var[i]]]$vi[1]), 2),
+          ", ",
+          round(meta.bootstrapped[[var[i]]]$yi[1] + 1.96 * sqrt(meta.bootstrapped[[var[i]]]$vi[1]), 2),
+          "]",
+          sep = ""
+        )
+      meta.bootstrapped.sum$CI.Student[i] <-
+        paste(
+          "[",
+          round(meta.bootstrapped[[var[i]]]$yi[2] -
+                  1.96 * sqrt(meta.bootstrapped[[var[i]]]$vi[2]), 2),
+          ", ",
+          round(meta.bootstrapped[[var[i]]]$yi[2] + 1.96 * sqrt(meta.bootstrapped[[var[i]]]$vi[2]), 2),
+          "]",
+          sep = ""
+        )
+      meta.bootstrapped.sum$CI.Medical[i] <-
+        paste(
+          "[",
+          round(meta.bootstrapped[[var[i]]]$yi[3] -
+                  1.96 * sqrt(meta.bootstrapped[[var[i]]]$vi[3]), 2),
+          ", ",
+          round(meta.bootstrapped[[var[i]]]$yi[3] + 1.96 * sqrt(meta.bootstrapped[[var[i]]]$vi[3]), 2),
+          "]",
+          sep = ""
+        )
+      meta.bootstrapped.sum$RE.beta[i] <- meta.bootstrapped[[var[i]]]$b
+      meta.bootstrapped.sum$RE.CI[i] <- paste(
+        "[",
+        round(meta.bootstrapped[[var[i]]]$ci.lb, 2),
+        ", ",
+        round(meta.bootstrapped[[var[i]]]$ci.ub, 2),
+        "]",
+        sep = ""
+      )
+      meta.bootstrapped.sum$RE.pval[i] <- meta.bootstrapped[[var[i]]]$pval
+      meta.bootstrapped.sum$RE.star[i] <-
+        ifelse(
+          meta.bootstrapped.sum$RE.pval[i] < 0.001,
+          "***",
+          ifelse(
+            meta.bootstrapped.sum$RE.pval[i] < 0.01,
+            "**",
+            ifelse(meta.bootstrapped.sum$RE.pval[i] < 0.05, "*", "")
+          )
+        )
+    }
+    #meta.bootstrapped
+    
+    eff.boot <- escalc(data = lmMetaTbl %>% filter(coef != "(Intercept)"), 
+                       slab = coef,
+                       measure = "SPCOR",
+                       yi = B,
+                       sei = se,
+                       ni = n,
+                       mi = m)
+    meta.boot <- rma(yi = yi,
+                     vi = vi, 
+                     data = eff.boot, 
+                     method = "FE", 
+                     slab = paste(coef, sample, sep=" - "))
+
+    k <- 3*3
+    #png(file = "Figures/forestBootstrappedGeneralLm.png", height = 200 + 40*k^.85)
+      metafor::forest(meta.boot, cex=0.75, xlim=c(-2, 2.5), ylim=c(-1, 20), rows=c(16:14,10:8,4:2), 
+                      slab = rep(c("Study 1","Study 2", "Study 3"),length(studies)),
+                      mlab="", main=paste0("Meta Analysis: Forest Plot [Bootstrapped] \n(",name,")")) # , xlab = "Standardized Beta")
+      par(font=2)
+      text(-2.05, c(17,11,5), cex=0.75, pos=4, names)
+      m=1
+      for(i in 3:1){
+        addpoly(meta.bootstrapped[[i]], row=m, cex=0.75, mlab="► Fixed Effect")
+        m <- m+6
+      }
+      text(-2.05, 19, "Predictors by study",  cex=.8, pos=4)
+      text(2.5, 19, "Semi-Partial Correlation [95% CI]", cex=.8, pos=2)
+    #dev.off()    
+```
+
+### Multilevel Analysis
+
+summary of mixed models results of the contemporaneous contact effects.
+
+```{r metaGeneralLmer, include=FALSE}
+# lme
+# Study 1: 
+workerWithinBetween$AttitudesDutch <- workerWithinBetween$thermometerDutch_1
+mdlWorker$lmerInterceptAttTypeTbl <- lmer(
+    AttitudesDutch ~ OutgroupInteraction + NonOutgroupInteraction + (1 | PID),
+    data = workerWithinBetween
+  )
+workerWithinBetween$AttitudesDutch_zwc <- workerWithinBetween$thermometerDutch_1
+mdlWorker$lmerInterceptAttTypeTblZ <- lmer(
+    AttitudesDutch_zwc ~ OutgroupInteraction_zwc + NonOutgroupInteraction_zwc + (1 | PID),
+    data = workerWithinBetween
+  )
+# Study 2:
+mdlStudent$lmerSlopesAttType <- lmer(
+    AttitudesDutch ~
+      OutgroupInteraction + NonOutgroupInteraction +
+      (1 + OutgroupInteraction + NonOutgroupInteraction | PID),
+    data = studentWithinBetween
+  )
+mdlStudent$lmerSlopesAttTypeZ <- lmer(
+    AttitudesDutch_zwc ~
+      OutgroupInteraction_zwc + NonOutgroupInteraction_zwc +
+      (1 + OutgroupInteraction_zwc + NonOutgroupInteraction_zwc | PID),
+    data = studentWithinBetween
+  )
+# Study 3:
+mdlMedical$lmerSlopesAttType <- lmer(
+    AttitudesDutch ~
+      OutgroupInteraction + NonOutgroupInteraction +
+      (1 + OutgroupInteraction + NonOutgroupInteraction | PID),
+    data = medicalWithinBetween
+  )
+mdlMedical$lmerSlopesAttTypeZ <- lmer(
+    AttitudesDutch_zwc ~
+      OutgroupInteraction_zwc + NonOutgroupInteraction_zwc +
+      (1 + OutgroupInteraction_zwc + NonOutgroupInteraction_zwc | PID),
+    data = medicalWithinBetween
+  )
+
+mdlTblElementsGeneralLmer <- list(
+  c(mdlWorker$lmerInterceptAttTypeTbl, mdlWorker$lmerInterceptAttTypeTblZ),
+  c(mdlStudent$lmerSlopesAttType, mdlStudent$lmerSlopesAttTypeZ),
+  c(mdlMedical$lmerSlopesAttType, mdlMedical$lmerSlopesAttTypeZ)
+  )
+
+# i =1
+GeneralLmerMetaTbl <- data.frame()
+for (i in 1:length(mdlTblElementsGeneralLmer)){
+  lmerTblTmp <- lmerTblPrep(mdlTblElementsGeneralLmer[[i]][[1]], mdlTblElementsGeneralLmer[[i]][[2]])$beta %>%
+  select(
+    coef,
+    B = est,
+    se,
+    lwr,
+    upr,
+    tval,
+    Rsq
+  ) %>%
+  mutate(
+    n = lmerTblPrep(mdlTblElementsGeneralLmer[[i]][[1]], mdlTblElementsGeneralLmer[[i]][[2]])$fit$N,
+    m = nrow(.), 
+    sample = str_match(lmerTblPrep(mdlTblElementsGeneralLmer[[i]][[1]], mdlTblElementsGeneralLmer[[i]][[2]])$fit$data, "worker|student|medical"),
+    coef = gsub(":", ".", coef)
+  )
+  GeneralLmerMetaTbl <- rbind(GeneralLmerMetaTbl, lmerTblTmp)
+}
+
+GeneralLmerMetaTbl <- GeneralLmerMetaTbl %>% arrange(coef)
+     
+GeneralLmerMeta <- metaLmerOut(GeneralLmerMetaTbl,
+                               type = "FE",
+                               name = "GeneralLmer",
+                               title = "Contact Hypothesis — Mixed Effects Regression")
+      
+# Alternative Meta:
+      Metaan::estmeta(
+        Beta = GeneralLmerMetaTbl$B[GeneralLmerMetaTbl$coef == "OutgroupInteraction_zwc"],
+        l = GeneralLmerMetaTbl$lwr[GeneralLmerMetaTbl$coef == "OutgroupInteraction_zwc"],
+        u = GeneralLmerMetaTbl$upr[GeneralLmerMetaTbl$coef == "OutgroupInteraction_zwc"],
+        test = "FIXED", # "RANDOM"
+      )
+```
+
+## Core Need Fulfillment   
+
+(a) Core Need Fulfillment predicting Interaction Quality.   
+(b) Core Need Fulfillment predicting Outgroup Attitudes.   
+(c) Core Need Fulfillment and Interaction Quality predicting Outgroup Attitudes.   
+
+```{r metaTheory, include=FALSE}
+# collect relevant models
+# Study 1:
+# Rename variables for consistency
+tblDtS1Needs <- workerOutWithinBetween %>%
+  select(
+    Attitude = thermometerDutch_1,
+    AttitudeZ = thermometerDutch_1_zwc,
+    CoreNeed = keymotive_fulfillemt_1_cwc,
+    CoreNeedZ = keymotive_fulfillemt_1_zwc,
+    QualityRaw = quality_overall_1,
+    Quality = quality_overall_1_cwc,
+    QualityZ = quality_overall_1_zwc,
+    PID = PID
+  )
+# Quality ~ CoreNeed
+tblLmerS1QltInterceptCore <- lmer(
+  QualityRaw ~ CoreNeed + (1 | PID),
+  data = tblDtS1Needs
+)
+tblLmerS1QltInterceptCoreZ <- lmer(
+  QualityZ ~ CoreNeedZ + (1 | PID),
+  data = tblDtS1Needs
+)
+# Attitude ~ CoreNeed
+tblLmerS1AttSlopeCore <- lmer(
+  Attitude ~ CoreNeed + (1 + CoreNeed | PID),
+  data = tblDtS1Needs
+)
+tblLmerS1AttSlopeCoreZ <- lmer(
+  AttitudeZ ~ CoreNeedZ + (1 + CoreNeedZ | PID),
+  data = tblDtS1Needs
+)
+# Attitude ~ CoreNeed + Quality
+tblLmerS1AttSlopeCoreQlt <- lmer(
+  Attitude ~ CoreNeed + Quality + (1 + CoreNeed + Quality | PID),
+  data = tblDtS1Needs
+)
+tblLmerS1AttSlopeCoreQltZ <- lmer(
+  AttitudeZ ~ CoreNeedZ + QualityZ + (1 + CoreNeedZ + QualityZ | PID),
+  data = tblDtS1Needs
+)
+
+
+# Study 2:
+# Rename variables for consistency
+tblDtS2Needs <- studentOutWithinBetween %>%
+  select(
+    Attitude = AttitudesDutch,
+    AttitudeZ = AttitudesDutch_zwc,
+    CoreNeed = KeyNeedFullfillment_cwc,
+    CoreNeedZ = KeyNeedFullfillment_zwc,
+    QualityRaw = quality_overall,
+    Quality = quality_overall_cwc,
+    QualityZ = quality_overall_zwc,
+    PID = PID
+  )
+# Quality ~ CoreNeed
+tblLmerS2QltSlopesCore <- lmer(
+  QualityRaw ~ CoreNeed + (1 + CoreNeed | PID),
+  data = tblDtS2Needs
+)
+tblLmerS2QltSlopesCoreZ <- lmer(
+  QualityZ~ CoreNeedZ + (1 + CoreNeedZ | PID),
+  data = tblDtS2Needs
+)
+# Attitude ~ CoreNeed
+tblLmerS2AttSlopesCore <- lmer(
+  Attitude ~ CoreNeed + (1 + CoreNeed | PID),
+  data = tblDtS2Needs
+)
+tblLmerS2AttSlopesCoreZ <- lmer(
+  AttitudeZ ~ CoreNeedZ + (1 + CoreNeedZ | PID),
+  data = tblDtS2Needs
+)
+# Attitude ~ CoreNeed + Quality
+tblLmerS2AttSlopesCoreQlt <- lmer(
+  Attitude ~ CoreNeed + Quality + (1 + CoreNeed + Quality | PID),
+  data = tblDtS2Needs,
+  control = lmerControl(optimizer="bobyqa", optCtrl=list(maxfun=2e5))
+)
+tblLmerS2AttSlopesCoreQltZ <- lmer(
+  AttitudeZ ~ CoreNeedZ + QualityZ + (1 + CoreNeedZ + QualityZ | PID),
+  data = tblDtS2Needs,
+  control = lmerControl(optimizer="bobyqa", optCtrl=list(maxfun=2e5))
+)
+
+
+# Study 3:
+# Rename variables for consistency
+tblDtS3Needs <- medicalOutWithinBetween %>%
+  select(
+    Attitude = AttitudesDutch,
+    AttitudeZ = AttitudesDutch_zwc,
+    CoreNeed = KeyNeedFulfillment_cwc,
+    CoreNeedZ = KeyNeedFulfillment_zwc,
+    Allport = AllportsCondition_cwc,
+    AllportZ = AllportsCondition_zwc,
+    QualityRaw = qualityOverall,
+    Quality = qualityOverall_cwc,
+    QualityZ = qualityOverall_zwc,
+    PID = PID
+  )
+# Quality ~ CoreNeed
+tblLmerS3QltSlopesCore <- lmer(
+  QualityRaw ~ CoreNeed + (1 + CoreNeed | PID),
+  data = tblDtS3Needs
+)
+tblLmerS3QltSlopesCoreZ <- lmer(
+  QualityZ ~ CoreNeedZ + (1 + CoreNeedZ | PID),
+  data = tblDtS3Needs
+)
+# Attitude ~ CoreNeed
+tblLmerS3AttSlopesCore <- lmer(
+  Attitude ~ CoreNeed + (1 + CoreNeed | PID),
+  data = tblDtS3Needs
+)
+tblLmerS3AttSlopesCoreZ <- lmer(
+  AttitudeZ ~ CoreNeedZ + (1 + CoreNeedZ | PID),
+  data = tblDtS3Needs
+)
+# Attitude ~ CoreNeed + Quality
+tblLmerS3AttSlopesCoreQlt <- lmer(
+  Attitude ~ CoreNeed + Quality + (1 + CoreNeed + Quality | PID),
+  data = tblDtS3Needs,
+  control = lmerControl(optimizer="bobyqa", optCtrl=list(maxfun=2e5))
+)
+tblLmerS3AttSlopesCoreQltZ <- lmer(
+  AttitudeZ ~ CoreNeedZ + QualityZ + (1 + CoreNeedZ + QualityZ | PID),
+  data = tblDtS3Needs,
+  control = lmerControl(optimizer="bobyqa", optCtrl=list(maxfun=2e5))
+)
+# Quality ~ Allport
+tblLmerS3QltSlopesAllport <- lmer(
+  QualityRaw ~ Allport + (1 + Allport | PID),
+  data = tblDtS3Needs
+)
+tblLmerS3QltSlopesAllportZ <- lmer(
+  QualityZ ~ AllportZ + (1 + AllportZ | PID),
+  data = tblDtS3Needs
+)
+# Attitude ~ Allport
+tblLmerS3AttSlopesAllport <- lmer(
+  Attitude ~ Allport + (1 + Allport | PID),
+  data = tblDtS3Needs
+)
+tblLmerS3AttSlopesAllportZ <- lmer(
+  AttitudeZ ~ AllportZ + (1 + AllportZ | PID),
+  data = tblDtS3Needs
+)
+# Attitude ~ Allport + Quality
+tblLmerS3AttSlopesAllportQlt <- lmer(
+  Attitude ~ Allport + Quality + (1 + Allport + Quality | PID),
+  data = tblDtS3Needs,
+  control = lmerControl(optimizer="bobyqa", optCtrl=list(maxfun=2e5))
+)
+tblLmerS3AttSlopesAllportQltZ <- lmer(
+  AttitudeZ ~ AllportZ + QualityZ + (1 + AllportZ + QualityZ | PID),
+  data = tblDtS3Needs,
+  control = lmerControl(optimizer="bobyqa", optCtrl=list(maxfun=2e5))
+)
+# Attitude ~ Allport + CoreNeed
+tblLmerS3AttSlopesAllportCore <- lmer(
+  Attitude ~ CoreNeed + Allport + (1 + CoreNeed + Allport | PID),
+  data = tblDtS3Needs
+)
+tblLmerS3AttSlopesAllportCoreZ <- lmer(
+  AttitudeZ ~ CoreNeedZ + AllportZ + (1 + CoreNeedZ + AllportZ | PID),
+  data = tblDtS3Needs
+)
+
+
+mdlTblElementsTheoryLmer <- list(
+  # Study 1:
+  c(tblLmerS1QltInterceptCore, tblLmerS1QltInterceptCoreZ),
+  c(tblLmerS1AttSlopeCore, tblLmerS1AttSlopeCoreZ),
+  c(tblLmerS1AttSlopeCoreQlt, tblLmerS1AttSlopeCoreQltZ),
+  # Study 2:
+  c(tblLmerS2QltSlopesCore, tblLmerS2QltSlopesCoreZ),
+  c(tblLmerS2AttSlopesCore, tblLmerS2AttSlopesCoreZ),
+  c(tblLmerS2AttSlopesCoreQlt, tblLmerS2AttSlopesCoreQltZ),
+  # Study 3:
+  c(tblLmerS3QltSlopesCore, tblLmerS3QltSlopesCoreZ),
+  c(tblLmerS3AttSlopesCore, tblLmerS3AttSlopesCoreZ),
+  c(tblLmerS3AttSlopesCoreQlt, tblLmerS3AttSlopesCoreQltZ),
+  c(tblLmerS3QltSlopesAllport, tblLmerS3QltSlopesAllportZ),
+  c(tblLmerS3AttSlopesAllport, tblLmerS3AttSlopesAllportZ),
+  c(tblLmerS3AttSlopesAllportQlt, tblLmerS3AttSlopesAllportQltZ),
+  c(tblLmerS3AttSlopesAllportCore, tblLmerS3AttSlopesAllportCoreZ)
+  )
+
+# i =1
+theoryMetaTbl <- data.frame()
+for (i in 1:length(mdlTblElementsTheoryLmer)){
+  lmerTblTmp <- lmerTblPrep(mdlTblElementsTheoryLmer[[i]][[1]], mdlTblElementsTheoryLmer[[i]][[2]])$beta %>%
+  select(
+    coef,
+    B = est,
+    se,
+    lwr,
+    upr,
+    tval,
+    Rsq
+  ) %>%
+  mutate(
+    n = lmerTblPrep(mdlTblElementsTheoryLmer[[i]][[1]], mdlTblElementsTheoryLmer[[i]][[2]])$fit$N,
+    m = nrow(.), 
+    dv = gsub("Raw", "", str_extract(lmerTblPrep(mdlTblElementsTheoryLmer[[i]][[1]], mdlTblElementsTheoryLmer[[i]][[2]])$fit$formula,".+?(?= ~)")),
+    sample = gsub("S", "Study", str_extract(lmerTblPrep(mdlTblElementsTheoryLmer[[i]][[1]], mdlTblElementsTheoryLmer[[i]][[2]])$fit$data, "S1|S2|S3")),
+    formula = lmerTblPrep(mdlTblElementsTheoryLmer[[i]][[1]], mdlTblElementsTheoryLmer[[i]][[2]])$fit$formula,
+    coef = gsub(":", ".", coef)
+  )
+  theoryMetaTbl <- rbind(theoryMetaTbl, lmerTblTmp)
+}
+
+theoryMetaTblNoAllport <- theoryMetaTbl %>%
+  filter(!grepl("Allport",formula)) %>% 
+  mutate(formula = gsub(" \\+ \\(.*", "", formula)) %>%
+  arrange(formula, coef, sample)
+
+TheoryMetaQualityNeed <-
+  metaLmerOut(
+    lmerDataTbl = theoryMetaTblNoAllport %>% filter(formula == "QualityRaw ~ CoreNeed"),
+    type = "FE",
+    name = "TheoryQualityCore",
+    title = "Quality ~ CoreNeed"
+  )
+
+TheoryMetaAttitudeNeed <-
+  metaLmerOut(
+    lmerDataTbl = theoryMetaTblNoAllport %>% filter(formula == "Attitude ~ CoreNeed"),
+    type = "FE",
+    name = "TheoryAttitudeCore",
+    title = "Attitude ~ CoreNeed"
+  )
+
+TheoryMetaAttitudeNeedQuality <-
+  metaLmerOut(
+    lmerDataTbl = theoryMetaTblNoAllport %>% filter(formula == "Attitude ~ CoreNeed + Quality"),
+    type = "FE",
+    name = "TheoryAttitudeCoreQuality",
+    title = "Attitude ~ CoreNeed + Quality"
+  )
+```
+
+## Robustness Analyses  
+
+(a) Need Fulfillment and Intergroup Contact predicting Outgroup Attitudes (full sample).  
+(b) Core Need Fulfillment predicting Outgroup Attitudes, while controlling for self-determination theory needs (intergroup contact sample).  
+
+```{r metaRobust, include=FALSE}
+# Full Sample
+# Study 1:
+robustTblWorkerFull <- 
+  workerWithinBetween %>%
+  select(
+    AttitudesDutch = thermometerDutch_1,
+    AttitudesDutch_zwc = thermometerDutch_1_zwc,
+    CoreNeed_cwc = keyMotiveFulfilled_cwc,
+    CoreNeed_zwc = keyMotiveFulfilled_zwc,
+    OutgroupInteraction = OutgroupInteraction,
+    OutgroupInteraction_zwc = OutgroupInteraction_zwc,
+    PID = PID
+  )
+mdlWorkerLmerSlopesAttCoreInt <- lmer(
+    AttitudesDutch ~
+      CoreNeed_cwc * OutgroupInteraction +
+      (1 + CoreNeed_cwc + OutgroupInteraction | PID),
+    data = robustTblWorkerFull
+  )
+mdlWorkerLmerSlopesAttCoreIntZ <- lmer(
+    AttitudesDutch_zwc ~
+      CoreNeed_zwc * OutgroupInteraction_zwc +
+      (1 + CoreNeed_zwc + OutgroupInteraction_zwc | PID),
+    data = robustTblWorkerFull
+  )
+#Study 2:
+robustTblStudentFull <- 
+  studentWithinBetween %>%
+  select(
+    AttitudesDutch = AttitudesDutch,
+    AttitudesDutch_zwc = AttitudesDutch_zwc,
+    CoreNeed_cwc = KeyNeedFullfillment_cwc,
+    CoreNeed_zwc = KeyNeedFullfillment_zwc,
+    OutgroupInteraction = OutgroupInteraction,
+    OutgroupInteraction_zwc = OutgroupInteraction_zwc, 
+    PID = PID
+  )
+mdlStudentLmerSlopesAttCoreInt <- lmer(
+    AttitudesDutch ~
+      CoreNeed_cwc * OutgroupInteraction +
+      (1 + CoreNeed_cwc + OutgroupInteraction | PID),
+    data = robustTblStudentFull
+  )
+mdlStudentLmerSlopesAttCoreIntZ <- lmer(
+    AttitudesDutch_zwc ~
+      CoreNeed_zwc * OutgroupInteraction_zwc +
+      (1 + CoreNeed_zwc + OutgroupInteraction_zwc | PID),
+    data = robustTblStudentFull
+  )
+#Study 3:
+robustTblMedicalFull <- 
+  medicalWithinBetween %>%
+  select(
+    AttitudesDutch = AttitudesDutch,
+    AttitudesDutch_zwc = AttitudesDutch_zwc,
+    CoreNeed_cwc = KeyNeedFulfillment_cwc,
+    CoreNeed_zwc = KeyNeedFulfillment_zwc,
+    OutgroupInteraction = OutgroupInteraction,
+    OutgroupInteraction_zwc = OutgroupInteraction_zwc, 
+    PID = PID
+  )
+mdlMedicalLmerSlopesAttCoreInt <- lmer(
+    AttitudesDutch ~
+      CoreNeed_cwc * OutgroupInteraction +
+      (1 + CoreNeed_cwc + OutgroupInteraction | PID),
+    #data = dtMedical$full
+    data = robustTblMedicalFull
+  )
+mdlMedicalLmerSlopesAttCoreIntZ <- lmer(
+    AttitudesDutch_zwc ~
+      CoreNeed_zwc * OutgroupInteraction_zwc +
+      (1 + CoreNeed_zwc + OutgroupInteraction_zwc | PID),
+    #data = dtMedical$full
+    data = robustTblMedicalFull
+  )
+
+# SDT
+# Study 1:
+robustTblWorkerOut <- 
+  workerOutWithinBetween %>%
+  select(
+    AttitudesDutch = thermometerDutch_1,
+    AttitudesDutch_zwc = thermometerDutch_1_zwc,
+    CoreNeed_cwc = keymotive_fulfillemt_1_cwc,
+    CoreNeed_zwc = keymotive_fulfillemt_1_zwc,
+    Competence_cwc = competence_1_cwc,
+    Competence_zwc = competence_1_zwc,
+    Autonomy_cwc = autonomy_1_cwc,
+    Autonomy_zwc = autonomy_1_zwc,
+    Relatedness_cwc = relatedness_1_cwc,
+    Relatedness_zwc = relatedness_1_zwc,
+    PID = PID
+  )
+mdlWorkerOutLmerSlopesCoreSdt <- lmer(
+    AttitudesDutch ~
+      CoreNeed_cwc + Competence_cwc + Autonomy_cwc + Relatedness_cwc +
+      (1 + CoreNeed_cwc + Competence_cwc + Autonomy_cwc + Relatedness_cwc | PID),
+    data = robustTblWorkerOut
+  )
+mdlWorkerOutLmerSlopesCoreSdtZ <- lmer(
+    AttitudesDutch_zwc ~
+      CoreNeed_zwc + Competence_zwc + Autonomy_zwc + Relatedness_zwc +
+      (1 + CoreNeed_zwc + Competence_zwc + Autonomy_zwc + Relatedness_zwc | PID),
+    data = robustTblWorkerOut
+  )
+# Study 2:
+robustTblStudentOut <- 
+  studentOutWithinBetween %>%
+  select(
+    AttitudesDutch = AttitudesDutch,
+    AttitudesDutch_zwc = AttitudesDutch_zwc,
+    CoreNeed_cwc = KeyNeedFullfillment_cwc,
+    CoreNeed_zwc = KeyNeedFullfillment_zwc,
+    Competence_cwc = Competence_cwc,
+    Competence_zwc = Competence_zwc,
+    Autonomy_cwc = Autonomy_cwc,
+    Autonomy_zwc = Autonomy_zwc,
+    Relatedness_cwc = Relatedness_cwc,
+    Relatedness_zwc = Relatedness_zwc,
+    PID = PID
+  )
+mdlStudentOutLmerSlopesCoreSdt <- lmer(
+    AttitudesDutch ~
+      CoreNeed_cwc + Competence_cwc + Autonomy_cwc + Relatedness_cwc +
+      (1 + CoreNeed_cwc + Competence_cwc + Autonomy_cwc + Relatedness_cwc | PID),
+    data = robustTblStudentOut
+  )
+mdlStudentOutLmerSlopesCoreSdtZ <- lmer(
+    AttitudesDutch_zwc ~
+      CoreNeed_zwc + Competence_zwc + Autonomy_zwc + Relatedness_zwc +
+      (1 + CoreNeed_zwc + Competence_zwc + Autonomy_zwc + Relatedness_zwc | PID),
+    data = robustTblStudentOut
+  )
+# Study 3:
+robustTblMedicalOut <- 
+  medicalOutWithinBetween %>%
+  select(
+    AttitudesDutch = AttitudesDutch,
+    AttitudesDutch_zwc = AttitudesDutch_zwc,
+    CoreNeed_cwc = KeyNeedFulfillment_cwc,
+    CoreNeed_zwc = KeyNeedFulfillment_zwc,
+    Competence_cwc = Competence_cwc,
+    Competence_zwc = Competence_zwc,
+    Autonomy_cwc = Autonomy_cwc,
+    Autonomy_zwc = Autonomy_zwc,
+    Relatedness_cwc = Relatedness_cwc,
+    Relatedness_zwc = Relatedness_zwc,
+    PID = PID
+  )
+mdlMedicalOutLmerSlopesCoreSdt <- lmer(
+    AttitudesDutch ~
+      CoreNeed_cwc + Competence_cwc + Autonomy_cwc + Relatedness_cwc +
+      (1 + CoreNeed_cwc + Competence_cwc + Autonomy_cwc + Relatedness_cwc | PID),
+    data = robustTblMedicalOut
+  )
+mdlMedicalOutLmerSlopesCoreSdtZ <- lmer(
+    AttitudesDutch_zwc ~
+      CoreNeed_zwc + Competence_zwc + Autonomy_zwc + Relatedness_zwc +
+      (1 + CoreNeed_zwc + Competence_zwc + Autonomy_zwc + Relatedness_zwc | PID),
+    data = robustTblMedicalOut
+  )
+
+
+mdlRobustTblElements <- list(
+  # full
+  c(mdlWorkerLmerSlopesAttCoreInt, mdlWorkerLmerSlopesAttCoreIntZ),
+  c(mdlStudentLmerSlopesAttCoreInt, mdlStudentLmerSlopesAttCoreIntZ),
+  c(mdlMedicalLmerSlopesAttCoreInt, mdlMedicalLmerSlopesAttCoreIntZ),
+  # outgroup
+  c(mdlWorkerOutLmerSlopesCoreSdt, mdlWorkerOutLmerSlopesCoreSdtZ),
+  c(mdlStudentOutLmerSlopesCoreSdt, mdlStudentOutLmerSlopesCoreSdtZ),
+  c(mdlMedicalOutLmerSlopesCoreSdt, mdlMedicalOutLmerSlopesCoreSdtZ)
+  )
+
+# i =1
+robustMetaTbl <- data.frame()
+for (i in 1:length(mdlRobustTblElements)){
+  lmerTblTmp <- lmerTblPrep(mdlRobustTblElements[[i]][[1]], mdlRobustTblElements[[i]][[2]])$beta %>%
+  select(
+    coef,
+    B = est,
+    se,
+    lwr,
+    upr,
+    tval,
+    Rsq
+  ) %>%
+  mutate(
+    n = lmerTblPrep(mdlRobustTblElements[[i]][[1]], mdlRobustTblElements[[i]][[2]])$fit$N,
+    m = nrow(.), 
+    #dv = gsub("Dutch", "", str_extract(lmerTblPrep(mdlRobustTblElements[[i]][[1]], mdlRobustTblElements[[i]][[2]])$fit$formula,".+?(?= ~)")),
+    sample = str_match(lmerTblPrep(mdlRobustTblElements[[i]][[1]], mdlRobustTblElements[[i]][[2]])$fit$data, "Tbl(.*?)(Full|Out)")[2],
+    formula = lmerTblPrep(mdlRobustTblElements[[i]][[1]], mdlRobustTblElements[[i]][[2]])$fit$formula,
+    coef = gsub(":", ".", coef)
+  )
+  robustMetaTbl <- rbind(robustMetaTbl, lmerTblTmp)
+}
+
+robustMetaTbl <- robustMetaTbl %>%
+  arrange(formula, match(
+    coef,
+    c(
+      "CoreNeed_zwc",
+      "OutgroupInteraction_zwc",
+      "CoreNeed_zwc.OutgroupInteraction_zwc",
+      "Autonomy_zwc",
+      "Competence_zwc",
+      "Relatedness_zwc"
+    )
+  )) %>% 
+  mutate(formula = gsub(" \\+ \\(.*", "", formula))
+
+robustMetaContact <-
+  metaLmerOut(
+    lmerDataTbl = robustMetaTbl %>% filter(formula == "AttitudesDutch ~ CoreNeed_cwc * OutgroupInteraction"),
+    type = "FE",
+    name = "RobustContact",
+    title = "Robustness — Contact and Need Fulfillment"
+  )
+
+robustMetaSDT <-
+  metaLmerOut(
+    lmerDataTbl = robustMetaTbl %>% filter(formula == "AttitudesDutch ~ CoreNeed_cwc + Competence_cwc + Autonomy_cwc +      Relatedness_cwc"),
+    type = "FE",
+    name = "RobustSDT",
+    title = "Robustness — Other Needs"
+  )
+```                                                                     
 
 # **Export for Methods and Results**  
 
