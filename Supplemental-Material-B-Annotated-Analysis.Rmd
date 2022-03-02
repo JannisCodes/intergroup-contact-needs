@@ -2526,6 +2526,26 @@ ggsave(
   units = "cm",
   device = "png"
 )
+
+ggplot(data = workerOutWithinBetween,
+       aes(y = thermometerDutch_1, x = keymotive_fulfillemt_1, col = as.factor(PID))) +
+  geom_point(size = 1) + # change size and colour
+  labs(y = "Outgroup Attitudes", 
+       x = "Key Need Fulfillment",
+       ) + # rename axes
+  scale_y_continuous(limits = c(0, 100),
+                     breaks = c(0, 20, 40, 60, 80, 100)) + # y axis limits/range (0, 100), break points
+  #scale_x_continuous(limits = c(90, 130)) + # x axis limits/range
+  #geom_smooth(method = 'lm', se = F, aes(group = as.factor(PID))) + # fit linear regression line
+  geom_smooth(method = 'lm', se = F, aes(group = 1), col = "red", linetype = "longdash") +
+  geom_line(stat="smooth", 
+            method = "lm", 
+            formula = y ~ x,
+            size = 1,
+            alpha = 0.5) +
+  theme_Publication() +
+  theme(legend.position = "none")
+
 ```
 
 We find that adding the random slopes does add significantly beyond the random intercept model. We also find that the core need remains a strong predictor (even when letting the influence vary between participants).  
@@ -2737,6 +2757,24 @@ anova(mdlWorkerOut$Qlt$lmeNull,
 # Save variances
 mdlWorkerOut$Qlt$varSlopesCore <- 
   lme4::VarCorr(mdlWorkerOut$Qlt$lmeSlopesCore)
+
+ggplot(data = workerOutWithinBetween,
+       aes(y = quality_overall_1, x = keymotive_fulfillemt_1, col = as.factor(PID))) +
+  geom_point(size = 1) + # change size and colour
+  labs(y = "Interaction Quality", 
+       x = "Key Need Fulfillment",
+       ) + # rename axes
+  scale_y_continuous(limits = c(-50, 50)) + # y axis limits/range (0, 100), break points
+  #scale_x_continuous(limits = c(90, 130)) + # x axis limits/range
+  #geom_smooth(method = 'lm', se = F, aes(group = as.factor(PID))) + # fit linear regression line
+  geom_smooth(method = 'lm', se = F, aes(group = 1), col = "red", linetype = "longdash") +
+  geom_line(stat="smooth", 
+            method = "lm", 
+            formula = y ~ x,
+            size = 1,
+            alpha = 0.5) +
+  theme_Publication() +
+  theme(legend.position = "none")
 ```
 
 We find that adding the random slopes does not add significantly beyond the random intercept model. This is unusual because this might indicate the the effect is very consistent across participants. However, we also see that when taking the possibility to varying slopes into account, the core need fulfillment remains a significant predictor of perceived interaction quality.  
@@ -4629,6 +4667,24 @@ ggsave(
   units = "cm",
   device = "png"
 )
+
+ggplot(data = studentOutWithinBetween,
+       aes(y = AttitudesDutch, x = KeyNeedFullfillment, group = as.factor(PID))) +
+  geom_point(size = 1, alpha = .2, position = position_jitter(width = 3, height = 3)) + # change size and colour
+  labs(y = "Outgroup Attitudes", 
+       x = "Key Need Fulfillment",
+       ) + # rename axes
+  scale_y_continuous(limits = c(0, 100)) + # y axis limits/range (0, 100), break points
+  #scale_x_continuous(limits = c(90, 130)) + # x axis limits/range
+  #geom_smooth(method = 'lm', se = F, aes(group = as.factor(PID))) + # fit linear regression line
+  geom_line(stat="smooth", 
+            method = "lm", 
+            formula = y ~ x,
+            size = 1,
+            alpha = 0.33) +
+  geom_smooth(method = 'lm', se = F, aes(group = 1), col = "red") +
+  theme_Publication() +
+  theme(legend.position = "none")
 ```
 
 We find that adding the random slopes does add significantly beyond the random intercept model. We also find that the core need remains a strong predictor (even when letting the influence vary between participants).  
@@ -4879,6 +4935,24 @@ ggsave(
   units = "cm",
   device = "png"
 )
+
+ggplot(data = studentOutWithinBetween,
+       aes(y = quality_overall, x = KeyNeedFullfillment, group = as.factor(PID))) +
+  geom_point(size = 1, alpha = .2, position = position_jitter(width = 3, height = 3)) + # change size and colour
+  labs(y = "Interaction Quality", 
+       x = "Key Need Fulfillment",
+       ) + # rename axes
+  scale_y_continuous(limits = c(0, 100)) + # y axis limits/range (0, 100), break points
+  #scale_x_continuous(limits = c(90, 130)) + # x axis limits/range
+  #geom_smooth(method = 'lm', se = F, aes(group = as.factor(PID))) + # fit linear regression line
+  geom_line(stat="smooth", 
+            method = "lm", 
+            formula = y ~ x,
+            size = 1,
+            alpha = 0.33) +
+  geom_smooth(method = 'lm', se = F, aes(group = 1), col = "red") +
+  theme_Publication() +
+  theme(legend.position = "none")
 ```
 
 We find that adding the random slopes does add significantly beyond the random intercept model.   
@@ -6656,6 +6730,24 @@ ggsave(
   units = "cm",
   device = "png"
 )
+
+ggplot(data = medicalOutWithinBetween,
+       aes(y = AttitudesDutch, x = AllportsCondition, group = as.factor(PID))) +
+  geom_point(size = 1, alpha = .15, position = position_jitter(width = 3, height = 3)) + # change size and colour
+  labs(y = "Outgroup Attitude", 
+       x = "Fulfillment Allport's Conditions",
+       ) + # rename axes
+  scale_y_continuous(limits = c(0, 100)) + # y axis limits/range (0, 100), break points
+  #scale_x_continuous(limits = c(90, 130)) + # x axis limits/range
+  #geom_smooth(method = 'lm', se = F, aes(group = as.factor(PID))) + # fit linear regression line
+  geom_line(stat="smooth", 
+            method = "lm", 
+            formula = y ~ x,
+            size = 1,
+            alpha = 0.33) +
+  geom_smooth(method = 'lm', se = F, aes(group = 1), col = "red") +
+  theme_Publication() +
+  theme(legend.position = "none")
 ```
 
 We find that adding the random slopes does add significantly beyond the random intercept model. We also find that Allport's conditions remains a strong predictor (even when letting the influence vary between participants).  
@@ -6898,6 +6990,23 @@ ggsave(
   device = "png"
 )
 
+ggplot(data = medicalOutWithinBetween,
+       aes(y = qualityOverall, x = AllportsCondition, group = as.factor(PID))) +
+  geom_point(size = 1, alpha = .15, position = position_jitter(width = 3, height = 3)) + # change size and colour
+  labs(y = "Interaction Quality", 
+       x = "Fulfillment Allport's Conditions",
+       ) + # rename axes
+  scale_y_continuous(limits = c(0, 100)) + # y axis limits/range (0, 100), break points
+  #scale_x_continuous(limits = c(90, 130)) + # x axis limits/range
+  #geom_smooth(method = 'lm', se = F, aes(group = as.factor(PID))) + # fit linear regression line
+  geom_line(stat="smooth", 
+            method = "lm", 
+            formula = y ~ x,
+            size = 1,
+            alpha = 0.33) +
+  geom_smooth(method = 'lm', se = F, aes(group = 1), col = "red") +
+  theme_Publication() +
+  theme(legend.position = "none")
 ```
 
 We find that adding the random slopes does add significantly beyond the random intercept model. We also find that Allport's conditions remains a strong predictor (even when letting the influence vary between participants).  
@@ -7319,6 +7428,24 @@ ggsave(
   units = "cm",
   device = "png"
 )
+
+ggplot(data = medicalOutWithinBetween,
+       aes(y = AttitudesDutch, x = KeyNeedFulfillment, group = as.factor(PID))) +
+  geom_point(size = 1, alpha = .15, position = position_jitter(width = 3, height = 3)) + # change size and colour
+  labs(y = "Outgroup Attitudes", 
+       x = "Keyneed Fulfillment",
+       ) + # rename axes
+  scale_y_continuous(limits = c(0, 100)) + # y axis limits/range (0, 100), break points
+  #scale_x_continuous(limits = c(90, 130)) + # x axis limits/range
+  #geom_smooth(method = 'lm', se = F, aes(group = as.factor(PID))) + # fit linear regression line
+  geom_line(stat="smooth", 
+            method = "lm", 
+            formula = y ~ x,
+            size = 1,
+            alpha = 0.33) +
+  geom_smooth(method = 'lm', se = F, aes(group = 1), col = "red") +
+  theme_Publication() +
+  theme(legend.position = "none")
 ```
 
 We find that adding the random slopes does add significantly beyond the random intercept model. We also find that the core need remains a strong predictor (even when letting the influence vary between participants).  
@@ -7513,6 +7640,24 @@ ggsave(
   units = "cm",
   device = "png"
 )
+
+ggplot(data = medicalOutWithinBetween,
+       aes(y = qualityOverall, x = KeyNeedFulfillment, group = as.factor(PID))) +
+  geom_point(size = 1, alpha = .15, position = position_jitter(width = 3, height = 3)) + # change size and colour
+  labs(y = "Interaction Quality", 
+       x = "Keyneed Fulfillment",
+       ) + # rename axes
+  scale_y_continuous(limits = c(0, 100)) + # y axis limits/range (0, 100), break points
+  #scale_x_continuous(limits = c(90, 130)) + # x axis limits/range
+  #geom_smooth(method = 'lm', se = F, aes(group = as.factor(PID))) + # fit linear regression line
+  geom_line(stat="smooth", 
+            method = "lm", 
+            formula = y ~ x,
+            size = 1,
+            alpha = 0.33) +
+  geom_smooth(method = 'lm', se = F, aes(group = 1), col = "red") +
+  theme_Publication() +
+  theme(legend.position = "none")
 ```
 
 We find that adding the random slopes does add significantly beyond the random intercept model and situation key need fulfillment remains a meaningful predictor of outgroup attitudes.   
@@ -9248,7 +9393,7 @@ TheoryMetaAttitudeNeedQuality <-
 
 ![Core Need Fulfillment predicting Interaction Quality.](Figures/forestParametricFETheoryQualityCore.png)
 
-![ore Need Fulfillment predicting Outgroup Attitudes.](Figures/forestParametricFETheoryAttitudeCore.png)
+![Core Need Fulfillment predicting Outgroup Attitudes.](Figures/forestParametricFETheoryAttitudeCore.png)
 
 ![Core Need Fulfillment and Interaction Quality predicting Outgroup Attitudes.](Figures/forestParametricFETheoryAttitudeCoreQuality.png)
 
