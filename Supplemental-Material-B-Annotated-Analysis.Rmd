@@ -8671,8 +8671,6 @@ When compared to the model with only the SDT needs, the core need fulfillment fl
 
 ### Aggregate Data  
 
-summary of regression results from the aggregated contact and interaction quality data.  
-
 ```{r metaGeneralLm, include=FALSE}
 mdlTblElementsGeneralLm <- list(mdlWorker$lmAttFreqQualX,
                                 mdlStudent$lmAttFreqQualX,
@@ -8911,9 +8909,9 @@ for(i in 1:length(var)){
     #dev.off()    
 ```
 
-### Multilevel Analysis
+![Summary of regression results from the aggregated contact and interaction quality data.](Figures/forestParametricGeneralLm.png)
 
-summary of mixed models results of the contemporaneous contact effects.
+### Multilevel Analysis   
 
 ```{r metaGeneralLmer, include=FALSE}
 # lme
@@ -8999,11 +8997,9 @@ GeneralLmerMeta <- metaLmerOut(GeneralLmerMetaTbl,
       )
 ```
 
-## Core Need Fulfillment   
+![Summary of mixed models results of the contemporaneous contact effects.](Figures/forestParametricFEGeneralLmer.png)
 
-(a) Core Need Fulfillment predicting Interaction Quality.   
-(b) Core Need Fulfillment predicting Outgroup Attitudes.   
-(c) Core Need Fulfillment and Interaction Quality predicting Outgroup Attitudes.   
+## Core Need Fulfillment   
 
 ```{r metaTheory, include=FALSE}
 # collect relevant models
@@ -9250,10 +9246,13 @@ TheoryMetaAttitudeNeedQuality <-
   )
 ```
 
-## Robustness Analyses  
+![Core Need Fulfillment predicting Interaction Quality.](Figures/forestParametricFETheoryQualityCore.png)
 
-(a) Need Fulfillment and Intergroup Contact predicting Outgroup Attitudes (full sample).  
-(b) Core Need Fulfillment predicting Outgroup Attitudes, while controlling for self-determination theory needs (intergroup contact sample).  
+![ore Need Fulfillment predicting Outgroup Attitudes.](Figures/forestParametricFETheoryAttitudeCore.png)
+
+![Core Need Fulfillment and Interaction Quality predicting Outgroup Attitudes.](Figures/forestParametricFETheoryAttitudeCoreQuality.png)
+
+## Robustness Analyses  
 
 ```{r metaRobust, include=FALSE}
 # Full Sample
@@ -9484,6 +9483,11 @@ robustMetaSDT <-
     title = "Robustness — Other Needs"
   )
 ```                                                                     
+
+![Need Fulfillment and Intergroup Contact predicting Outgroup Attitudes (full sample).](Figures/forestParametricFERobustContact.png)
+
+![Core Need Fulfillment predicting Outgroup Attitudes, while controlling for self-determination theory needs (intergroup contact sample).](Figures/forestParametricFERobustSDT.png)
+
 
 # **Export for Methods and Results**  
 
