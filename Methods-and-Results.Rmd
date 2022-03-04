@@ -6195,12 +6195,20 @@ lmMetaTbl <- lmMetaTbl %>% arrange(coef)
     meta.parametric.sum <- data.frame(effect = var, 
                                       name = names, 
                                       beta.Worker = NA, 
+                                      lwr.Worker = NA, 
+                                      upr.Worker = NA, 
                                       CI.Worker = NA,
                                       beta.Student = NA, 
+                                      lwr.Student = NA, 
+                                      upr.Student = NA, 
                                       CI.Student = NA,
                                       beta.Medical = NA,
+                                      lwr.Medical = NA,
+                                      upr.Medical = NA,
                                       CI.Medical = NA, 
                                       RE.beta = NA,
+                                      lwr.RE = NA,
+                                      upr.RE = NA,
                                       RE.CI = NA,
                                       RE.pval = NA,
                                       RE.star = NA)
@@ -6227,17 +6235,36 @@ for(i in 1:length(var)){
       meta.parametric.sum$beta.Worker[i] <- meta.parametric[[var[i]]]$yi[1]
       meta.parametric.sum$beta.Student[i] <- meta.parametric[[var[i]]]$yi[2]
       meta.parametric.sum$beta.Medical[i] <- meta.parametric[[var[i]]]$yi[3]
+      
+      meta.parametric.sum$lwr.Worker[i] <- meta.parametric[[var[i]]]$yi[1]-1.96*sqrt(meta.parametric[[var[i]]]$vi[1])
+      meta.parametric.sum$lwr.Student[i] <- meta.parametric[[var[i]]]$yi[2]-1.96*sqrt(meta.parametric[[var[i]]]$vi[2])
+      meta.parametric.sum$lwr.Medical[i] <- meta.parametric[[var[i]]]$yi[3]-1.96*sqrt(meta.parametric[[var[i]]]$vi[3])
+      
+      meta.parametric.sum$upr.Worker[i] <- meta.parametric[[var[i]]]$yi[1]+1.96*sqrt(meta.parametric[[var[i]]]$vi[1])
+      meta.parametric.sum$upr.Student[i] <- meta.parametric[[var[i]]]$yi[2]+1.96*sqrt(meta.parametric[[var[i]]]$vi[2])
+      meta.parametric.sum$upr.Medical[i] <- meta.parametric[[var[i]]]$yi[3]+1.96*sqrt(meta.parametric[[var[i]]]$vi[3])
+      
       meta.parametric.sum$CI.Worker[i] <- paste("[",                                  round(meta.parametric[[var[i]]]$yi[1]-1.96*sqrt(meta.parametric[[var[i]]]$vi[1]),2),", ",round(meta.parametric[[var[i]]]$yi[1]+1.96*sqrt(meta.parametric[[var[i]]]$vi[1]),2),"]",sep="")
       meta.parametric.sum$CI.Student[i] <- paste("[",                                  round(meta.parametric[[var[i]]]$yi[2]-1.96*sqrt(meta.parametric[[var[i]]]$vi[2]),2),", ",round(meta.parametric[[var[i]]]$yi[2]+1.96*sqrt(meta.parametric[[var[i]]]$vi[2]),2),"]",sep="")
       meta.parametric.sum$CI.Medical[i] <- paste("[",                                  round(meta.parametric[[var[i]]]$yi[3]-1.96*sqrt(meta.parametric[[var[i]]]$vi[3]),2),", ",round(meta.parametric[[var[i]]]$yi[3]+1.96*sqrt(meta.parametric[[var[i]]]$vi[3]),2),"]",sep="")
+      
       meta.parametric.sum$RE.beta[i] <- meta.parametric[[var[i]]]$b
+      meta.parametric.sum$lwr.RE[i] <- meta.parametric[[var[i]]]$ci.lb
+      meta.parametric.sum$upr.RE[i] <- meta.parametric[[var[i]]]$ci.ub
       meta.parametric.sum$RE.CI[i] <- paste("[",
                                             round(meta.parametric[[var[i]]]$ci.lb, 2),
                                             ", ", round(meta.parametric[[var[i]]]$ci.ub,2),"]", sep="")
       meta.parametric.sum$RE.pval[i] <- meta.parametric[[var[i]]]$pval
       meta.parametric.sum$RE.star[i] <- ifelse(meta.parametric.sum$RE.pval[i]<0.001,"***",ifelse(meta.parametric.sum$RE.pval[i]<0.01,"**",ifelse(meta.parametric.sum$RE.pval[i]<0.05,"*","")))
+      
 }
     #meta.parametric
+    
+    meta.parametric.plt.data <- meta.parametric.sum
+    
+    meta.parametric.sum <- meta.parametric.sum %>%
+      select(-starts_with("lwr"),
+             -starts_with("upr"))
     
     eff <- escalc(data = lmMetaTbl, 
                   slab = coef,
@@ -6267,6 +6294,33 @@ for(i in 1:length(var)){
       text(-2.05, 19, "Predictors by study",  cex=.8, pos=4)
       text(2, 19, "Semi-Partial Correlation [95% CI]", cex=.8, pos=2)
     dev.off()
+    
+    meta.parametric.plt.data <- data.table(meta.parametric.plt.data) %>% 
+        mutate(
+          beta.RE = RE.beta,
+          CI.RE = RE.CI,
+          pval.RE = RE.pval,
+          star.RE = RE.star
+        ) %>%
+      select(-starts_with("RE."))
+    
+    meta.parametric.plt.widedata <- data.table::melt.data.table(
+      data = meta.parametric.plt.data,
+      id.vars = c("effect", "name"),
+      measure.vars = patterns(
+        beta = "beta",
+        lwr = "lwr",
+        upr = "upr",
+        CI = "CI",
+        pval = "pval",
+        star = "star"
+      ),
+      variable = "sample" # sample info missing
+    )
+    
+    
+    
+    
 
 ### Bootstrapped Meta-Analysis
     var.boot <- var
