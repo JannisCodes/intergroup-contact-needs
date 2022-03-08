@@ -6244,9 +6244,9 @@ for(i in 1:length(var)){
       meta.parametric.sum$upr.Student[i] <- meta.parametric[[var[i]]]$yi[2]+1.96*sqrt(meta.parametric[[var[i]]]$vi[2])
       meta.parametric.sum$upr.Medical[i] <- meta.parametric[[var[i]]]$yi[3]+1.96*sqrt(meta.parametric[[var[i]]]$vi[3])
       
-      meta.parametric.sum$CI.Worker[i] <- paste("[",                                  round(meta.parametric[[var[i]]]$yi[1]-1.96*sqrt(meta.parametric[[var[i]]]$vi[1]),2),", ",round(meta.parametric[[var[i]]]$yi[1]+1.96*sqrt(meta.parametric[[var[i]]]$vi[1]),2),"]",sep="")
-      meta.parametric.sum$CI.Student[i] <- paste("[",                                  round(meta.parametric[[var[i]]]$yi[2]-1.96*sqrt(meta.parametric[[var[i]]]$vi[2]),2),", ",round(meta.parametric[[var[i]]]$yi[2]+1.96*sqrt(meta.parametric[[var[i]]]$vi[2]),2),"]",sep="")
-      meta.parametric.sum$CI.Medical[i] <- paste("[",                                  round(meta.parametric[[var[i]]]$yi[3]-1.96*sqrt(meta.parametric[[var[i]]]$vi[3]),2),", ",round(meta.parametric[[var[i]]]$yi[3]+1.96*sqrt(meta.parametric[[var[i]]]$vi[3]),2),"]",sep="")
+      meta.parametric.sum$CI.Worker[i] <- paste("[", sprintf("%0.2f", round(meta.parametric[[var[i]]]$yi[1]-1.96*sqrt(meta.parametric[[var[i]]]$vi[1]),2)),", ", sprintf("%0.2f", round(meta.parametric[[var[i]]]$yi[1]+1.96*sqrt(meta.parametric[[var[i]]]$vi[1]),2)),"]",sep="")
+      meta.parametric.sum$CI.Student[i] <- paste("[", sprintf("%0.2f", round(meta.parametric[[var[i]]]$yi[2]-1.96*sqrt(meta.parametric[[var[i]]]$vi[2]),2)),", ", sprintf("%0.2f", round(meta.parametric[[var[i]]]$yi[2]+1.96*sqrt(meta.parametric[[var[i]]]$vi[2]),2)),"]",sep="")
+      meta.parametric.sum$CI.Medical[i] <- paste("[", sprintf("%0.2f", round(meta.parametric[[var[i]]]$yi[3]-1.96*sqrt(meta.parametric[[var[i]]]$vi[3]),2)),", ", sprintf("%0.2f", round(meta.parametric[[var[i]]]$yi[3]+1.96*sqrt(meta.parametric[[var[i]]]$vi[3]),2)),"]",sep="")
       
       meta.parametric.sum$RE.beta[i] <- meta.parametric[[var[i]]]$b
       meta.parametric.sum$lwr.RE[i] <- meta.parametric[[var[i]]]$ci.lb
@@ -6272,7 +6272,13 @@ for(i in 1:length(var)){
                   ti = tval,
                   ni = n,
                   mi = m,
-                  r2i = Rsq)
+                  r2i = Rsq)  %>%
+    mutate(effLwr = yi - 1.96 * sqrt(vi),
+           effUpr = yi + 1.96 * sqrt(vi),
+           effCI = paste("[", format(round(effLwr, 2), nsmall = 2), ", ", format(round(effUpr, 2), nsmall = 2), "]", sep = ""),
+           name = strLabFix(coef),
+           study = strStudyFix(sample))
+    
     meta <- rma(yi = yi,
                 vi = vi, 
                 data = eff, 
@@ -6280,7 +6286,7 @@ for(i in 1:length(var)){
                 slab = paste(coef, sample, sep=" - "))
 
     k <- length(var) * length(studies)
-    png(file = "Figures/forestParametricGeneralLm.png", height = 200 + 40*k^.85) 
+    png(file = "Figures/forestParametricGeneralLmOld.png", height = 200 + 40*k^.85) 
       metafor::forest(meta, xlim=c(-2, 2), cex=0.75, ylim=c(-1, 20), rows=c(22:20,16:14,10:8,4:2), 
                       slab = rep(c("Study 1","Study 2", "Study 3"),length(studies)+1),
                       mlab="", main=paste0("Meta Analysis: Forest Plot [Parametric] \n(",name,")")) # , xlab = "Standardized Beta"
@@ -6304,23 +6310,135 @@ for(i in 1:length(var)){
         ) %>%
       select(-starts_with("RE."))
     
-    meta.parametric.plt.widedata <- data.table::melt.data.table(
-      data = meta.parametric.plt.data,
-      id.vars = c("effect", "name"),
-      measure.vars = patterns(
-        beta = "beta",
-        lwr = "lwr",
-        upr = "upr",
-        CI = "CI",
-        pval = "pval",
-        star = "star"
-      ),
-      variable = "sample" # sample info missing
+  library(splitstackshape)
+    meta.parametric.plt.longdata <-
+      merged.stack(
+        meta.parametric.plt.data,
+        var.stubs = c("beta", "lwr", "upr", "CI", "pval", "star"),
+        sep = "."
+      ) %>%
+      rename(sample = .time_1) %>%
+      mutate(sample = gsub('Worker', 'Study 1',
+                      gsub('Student', 'Study 2',
+                      gsub('Medical', 'Study 3', sample)
+                           ))) %>%
+    arrange(match(effect, c("SumContactNL", "AvQuality", "SumContactNL.AvQuality")), 
+            match(sample, c("Study 1", "Study 2", "Study 3", "RE")))
+  
+    alpha <- 0.05
+    
+  meta.parametric.plt.longdata2 <- meta.parametric.plt.longdata %>%
+    mutate(
+      index = as.integer(sapply(seq(from = 2, by=6, length.out = 3), seq, length.out=4)),
+      vi = ((upr - lwr)/(2 * qnorm(alpha/2, lower.tail = FALSE)))^2,
+      wi = 1/sqrt(vi),
+      psize = wi/sum(wi, na.rm = TRUE),
+      psize2 = (psize - min(psize, na.rm = TRUE))/(max(psize, na.rm = TRUE) - min(psize, na.rm = TRUE)),
+      psize3 = (psize2 * 1) + 0.5
     )
-    
-    
-    
-    
+  
+  polyDat <- data.frame(
+    y = c(
+      meta.parametric.plt.longdata2$index[meta.parametric.plt.longdata2$sample == "RE"],
+      meta.parametric.plt.longdata2$index[meta.parametric.plt.longdata2$sample == "RE"] - .25,
+      meta.parametric.plt.longdata2$index[meta.parametric.plt.longdata2$sample == "RE"],
+      meta.parametric.plt.longdata2$index[meta.parametric.plt.longdata2$sample == "RE"] + .25
+    ),
+    x = c(
+      meta.parametric.plt.longdata2$lwr[meta.parametric.plt.longdata2$sample == "RE"],
+      meta.parametric.plt.longdata2$beta[meta.parametric.plt.longdata2$sample == "RE"],
+      meta.parametric.plt.longdata2$upr[meta.parametric.plt.longdata2$sample == "RE"],
+      meta.parametric.plt.longdata2$beta[meta.parametric.plt.longdata2$sample == "RE"]
+    ),
+    lab = rep(paste("RE", 1:3), 4)
+  )
+  
+  lab <- lapply(unique(meta.parametric.plt.longdata2$name), append, c(unique(meta.parametric.plt.longdata2$sample), "")) %>% unlist 
+          
+  plot1 <- ggplot() +
+    geom_point(
+      data = meta.parametric.plt.longdata2[sample != "RE",],
+      aes(y = index, x = beta),
+      shape = 15,
+      size = meta.parametric.plt.longdata2[sample != "RE", psize3] * 3
+    ) +
+    geom_errorbarh(data = meta.parametric.plt.longdata2[sample != "RE",],
+                   aes(y = index, xmin = lwr, xmax = upr),
+                   height = 0.25) +
+    geom_polygon(data = polyDat, 
+                 mapping = aes(x = x, y = y, group = lab)) +
+    geom_vline(
+      xintercept = 0,
+      color = "black",
+      linetype = "dashed",
+      cex = 0.5,
+      alpha = 1
+    ) +
+    scale_y_continuous(
+      name = "",
+      expand  = expansion(add = 1),
+      breaks = seq(lab),
+      labels = lab,
+      trans = "reverse"
+    ) +
+    scale_x_continuous(
+      limits = c(-1, 1),
+      breaks = seq(-1, 1, 0.5),
+      expand = c(0, 0)
+    ) +
+    xlab("Semi-Partial Correlation (95% CI)") +
+    ggtitle("Predictors by Study") +
+    theme_Publication() +
+    theme(
+      plot.title = element_text(hjust = 0, size=12, face = "bold"),
+      plot.title.position = "plot",
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(),
+      axis.line.y = element_blank(),
+      axis.ticks.y = element_blank(),
+      axis.text.y = element_text(size = 12, colour = "black", hjust=0, face = rep(c("bold", rep("plain", 5)),3)),
+      axis.line.x = element_line(colour = "black"),
+      axis.text.x.bottom = element_text(size = 12, colour = "black"),
+      axis.title.x = element_text(size = 12, colour = "black")
+    )
+
+## Estiamte and CI table
+  tab1 <- ggplot(meta.parametric.plt.longdata2, aes(y = lab)) +
+    ylab(NULL) + xlab("  ") +
+    labs(title = "space") +
+    geom_text(aes(
+      y = rev(index),
+      x = 1,
+      label = paste(sprintf("%0.2f", round(beta, digits = 2)), CI)
+    ),
+    size = 4,
+    hjust = 1) + 
+    scale_x_continuous(
+      limits = c(-1, 1)
+    ) +
+    ggtitle("Estimate [95% CI]") +
+    theme_Publication() +
+    theme(
+      plot.title = element_text(hjust = 1, size = 12),
+      axis.line = element_blank(),
+      axis.text.x = element_text(color = "white"),
+      axis.text.y = element_blank(),
+      axis.ticks = element_blank(),
+      axis.title.y = element_blank(),
+      legend.position = "none",
+      panel.background = element_blank(),
+      panel.border = element_blank(),
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(),
+      plot.background = element_blank()
+    )
+  
+grid.arrange(plot1, tab1, layout_matrix = matrix(c(1,1,1,2), nrow = 1))
+
+png(file = "Figures/forestParametricGeneralLm.png", width = 700) 
+  grid.arrange(plot1, tab1, layout_matrix = matrix(c(1,1,1,2), nrow = 1))
+dev.off()
+
 
 ### Bootstrapped Meta-Analysis
     var.boot <- var
@@ -6482,13 +6600,25 @@ GeneralLmerMeta <- metaLmerOut(GeneralLmerMetaTbl,
                                name = "GeneralLmer",
                                title = "Contact Hypothesis — Mixed Effects Regression")
       
-# Alternative Meta:
-      Metaan::estmeta(
-        Beta = GeneralLmerMetaTbl$B[GeneralLmerMetaTbl$coef == "OutgroupInteraction_zwc"],
-        l = GeneralLmerMetaTbl$lwr[GeneralLmerMetaTbl$coef == "OutgroupInteraction_zwc"],
-        u = GeneralLmerMetaTbl$upr[GeneralLmerMetaTbl$coef == "OutgroupInteraction_zwc"],
-        test = "FIXED", # "RANDOM"
-      )
+```
+
+```{generalForestPltComb}
+effGeneral <- rbind(
+  eff %>%
+    filter(coef != "(Intercept)") %>%
+    mutate(analysis = "(A) Aggregate Linear Regression",
+           metaId = paste(coef, analysis, sep = ".")),
+  GeneralLmerMeta$eff %>%
+    mutate(analysis = "(B) Mixed Effects Regression",
+           metaId = paste(coef, analysis, sep = "."))
+)
+
+metaSubForest(effGeneral, 
+              title = "Meta Analysis: Forest Plot Contact Hypothesis \n[Parametric]",
+              filename = "GeneralComb_WeirdScale",
+              addAbove = 5,
+              width = 600,
+              height = 600)
 ```
 
 ```{r metaTheory, include=FALSE}
@@ -6565,6 +6695,28 @@ TheoryMetaAttitudeNeedQuality <-
   )
 ```
 
+```{theoryForestPltComb}
+effTheory <- rbind(
+  TheoryMetaQualityNeed$eff %>%
+    filter(coef != "(Intercept)") %>%
+    mutate(analysis = "(A) Quality ~ Core Need",
+           metaId = paste(coef, analysis, sep = ".")),
+  TheoryMetaAttitudeNeed$eff %>%
+    mutate(analysis = "(B) Attitude ~ Core Need",
+           metaId = paste(coef, analysis, sep = ".")),
+  TheoryMetaAttitudeNeedQuality$eff %>%
+    mutate(analysis = "(C) Attitude ~ Core Need + Quality",
+           metaId = paste(coef, analysis, sep = "."))
+)
+
+metaSubForest(effTheory, 
+              title = "Meta Analysis: Forest Plot Core Need Fulfillment \n[Parametric]",
+              filename = "TheoryComb",
+              addAbove = 0,
+              width = 600,
+              height = 600)
+```
+
 ```{r metaRobust, include=FALSE}
 mdlRobustTblElements <- list(
   # full
@@ -6630,4 +6782,23 @@ robustMetaSDT <-
     name = "RobustSDT",
     title = "Robustness — Other Needs"
   )
+```
+
+```{robustForestPltComb}
+effRobust <- rbind(
+  robustMetaContact$eff %>%
+    filter(coef != "(Intercept)") %>%
+    mutate(analysis = "(A) Contact and Need Fulfillment",
+           metaId = paste(coef, analysis, sep = ".")),
+  robustMetaSDT$eff %>%
+    mutate(analysis = "(B) Other Needs",
+           metaId = paste(coef, analysis, sep = "."))
+)
+
+metaSubForest(effRobust, 
+              title = "Meta Analysis: Forest Plot Robustness Analysis \n[Parametric]",
+              filename = "RobustnessComb",
+              addAbove = 17,
+              width = 600,
+              height = 800)
 ```
