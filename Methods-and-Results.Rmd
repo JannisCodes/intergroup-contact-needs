@@ -6602,7 +6602,7 @@ GeneralLmerMeta <- metaLmerOut(GeneralLmerMetaTbl,
       
 ```
 
-```{generalForestPltComb}
+```{generalForestPltComb, include=FALSE}
 effGeneral <- rbind(
   eff %>%
     filter(coef != "(Intercept)") %>%
@@ -6695,7 +6695,7 @@ TheoryMetaAttitudeNeedQuality <-
   )
 ```
 
-```{theoryForestPltComb}
+```{theoryForestPltComb, include=FALSE}
 effTheory <- rbind(
   TheoryMetaQualityNeed$eff %>%
     filter(coef != "(Intercept)") %>%
@@ -6784,7 +6784,7 @@ robustMetaSDT <-
   )
 ```
 
-```{robustForestPltComb}
+```{robustForestPltComb, include=FALSE}
 effRobust <- rbind(
   robustMetaContact$eff %>%
     filter(coef != "(Intercept)") %>%
