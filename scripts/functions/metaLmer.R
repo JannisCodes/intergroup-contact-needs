@@ -509,7 +509,7 @@ metaSubForest <- function(effects, title = "", addAbove = 0, filename = NULL, wi
   forestGeneral <- forest(
     metaGeneral,
     cex = 0.75,
-    ylim = c(-1, max(unlist(index)) + addAbove),
+    ylim = c(-1, max(unlist(studyIndex)) + addAbove),
     # alim = c(-1, 1), # only for General Pt.1
     # xlim = c(-2, 2), # only for General Pt.1
     # xlab = NULL, # only for General Pt.1
