@@ -6790,7 +6790,7 @@ robustMetaSDT <-
   )
 ```
 
-```{robustForestPltComb, include=FALSE}
+```{r robustForestPltComb, include=FALSE}
 effRobust <- rbind(
   robustMetaContact$eff %>%
     filter(coef != "(Intercept)") %>%
@@ -6807,4 +6807,221 @@ metaSubForest(effRobust,
               addAbove = 17,
               width = 600,
               height = 800)
+```
+
+
+```{r OsfExport, include=FALSE}
+# export individual minimal CSV files 
+# STUDY 1:
+write.csv(
+  dtWorkerSupp$workerInteractionType %>%
+    select(
+      "PID",
+      "keyMotiveFulfilled",
+      "competence.daily.all",
+      "autonomy.daily.all",
+      "relatedness.daily.all",
+      "thermometerDutch_1",
+      "keymotive_fulfillemt_1",
+      "competence_1",
+      "autonomy_1",
+      "relatedness_1",
+      "quality_overall_1",
+      "OutgroupInteraction",
+      "NonOutgroupInteraction"
+    ),
+  file = "OSF Files/Data/Study1_minimal.csv"
+)
+
+#STUDY 2:
+write.csv(
+  dtStudentSupp$studentInteractionType %>%
+    select(
+      "PID",
+      "TIDnum",
+      "KeyNeedFullfillment",
+      "Competence",
+      "Autonomy",
+      "Relatedness",
+      "AttitudesDutch",
+      "quality_overall",
+      "OutgroupInteraction",
+      "NonOutgroupInteraction"
+    ),
+  file = "OSF Files/Data/Study2_minimal.csv"
+)
+
+# STUDY 3:
+write.csv(
+  dtMedicalSupp$medicalWithinBetween %>%
+    select(
+      "PID",
+      "TIDnum",
+      "OutgroupInteraction",
+      "NonOutgroupInteraction",
+      "AttitudesDutch",
+      "qualityOverall",
+      "AllportsCondition",
+      "KeyNeedFulfillment",
+      "Competence",
+      "Autonomy",
+      "Relatedness"
+    ),
+  file = "OSF Files/Data/Study3_minimal.csv"
+)
+
+
+# export joint minimal data as RData file 
+# create environment for joint export
+osfExport <- new.env()
+
+# STUDY 1:
+osfExport$dtWorkerSupp$workerInteractionType <- dtWorkerSupp$workerInteractionType %>%
+  select(
+    "PID",
+    "keyMotiveFulfilled",
+    "competence.daily.all",
+    "autonomy.daily.all",
+    "relatedness.daily.all",
+    "thermometerDutch_1",
+    "keymotive_fulfillemt_1",
+    "competence_1",
+    "autonomy_1",
+    "relatedness_1", 
+     "quality_overall_1", 
+    "OutgroupInteraction",
+    "NonOutgroupInteraction"
+  )
+
+osfExport$dtWorker$full <- dtWorker$full %>%
+  select(
+    "PID",
+    "thermometerDutch_1"
+  )
+
+osfExport$dtWorkerSupp$workerAvFreQual <- dtWorkerSupp$workerAvFreQual
+
+
+#STUDY 2:
+osfExport$dtStudentSupp$studentInteractionType <- dtStudentSupp$studentInteractionType %>%
+  select(
+    "PID",
+    "TIDnum", 
+    "KeyNeedFullfillment",
+    "Competence",
+    "Autonomy",
+    "Relatedness",
+    "AttitudesDutch",
+    "quality_overall",
+    "OutgroupInteraction",
+    "NonOutgroupInteraction"
+  )
+
+osfExport$dtStudents$full <- dtStudents$full %>%
+  select(
+    "PID",
+    "AttitudesDutch"
+  )
+
+osfExport$dtStudentSupp$studentOutgroupInteraction <- dtStudentSupp$studentOutgroupInteraction %>%
+  select(
+    "PID",
+    "AttitudesDutch"
+  )
+
+osfExport$dtStudentSupp$studentContactFreq <- dtStudentSupp$studentContactFreq
+
+osfExport$dtStudentSupp$studentPltIDs <- dtStudentSupp$studentPltIDs
+
+osfExport$dtStudentSupp$studentOutPltIDs <- dtStudentSupp$studentOutPltIDs
+
+
+# STUDY 3:
+osfExport$dtMedicalSupp$medicalWithinBetween <- dtMedicalSupp$medicalWithinBetween %>%
+  select(
+    "PID",
+    "TIDnum",
+    "OutgroupInteraction",
+    "OutgroupInteraction_cwc",
+    "OutgroupInteraction_zwc",
+    "NonOutgroupInteraction",
+    "NonOutgroupInteraction_cwc",
+    "NonOutgroupInteraction_zwc",
+    "AttitudesDutch",
+    "AttitudesDutch_cwc",
+    "AttitudesDutch_zwc",
+    "qualityOverall",
+    "qualityOverall_cwc",
+    "qualityOverall_zwc",
+    "AllportsCondition",
+    "AllportsCondition_cwc",
+    "AllportsCondition_zwc",
+    "KeyNeedFulfillment",
+    "KeyNeedFulfillment_cwc",
+    "KeyNeedFulfillment_zwc",
+    "Competence",
+    "Competence_cwc",
+    "Competence_zwc",
+    "Autonomy",
+    "Autonomy_cwc", 
+    "Autonomy_zwc", 
+    "Relatedness",
+    "Relatedness_cwc",
+    "Relatedness_zwc"
+  )
+
+osfExport$dtMedicalSupp$medicalOutWithinBetween <- dtMedicalSupp$medicalOutWithinBetween %>%
+  select(
+    "PID",
+    "TIDnum",
+    "AttitudesDutch",
+    "AttitudesDutch_cwc",
+    "AttitudesDutch_zwc",
+    "qualityOverall",
+    "qualityOverall_cwc",
+    "qualityOverall_zwc",
+    "AllportsCondition",
+    "AllportsCondition_cwc",
+    "AllportsCondition_zwc",
+    "KeyNeedFulfillment",
+    "KeyNeedFulfillment_cwc",
+    "KeyNeedFulfillment_zwc",
+    "Competence",
+    "Competence_cwc",
+    "Competence_zwc",
+    "Autonomy",
+    "Autonomy_cwc", 
+    "Autonomy_zwc", 
+    "Relatedness",
+    "Relatedness_cwc",
+    "Relatedness_zwc"
+  )
+
+osfExport$dtMedical$full <- dtMedical$full %>% 
+  select(
+    "PID",
+    "TIDnum",
+    "AttitudesDutch",
+    "OutgroupInteraction", 
+    "NonOutgroupInteraction",
+    "KeyNeedFulfillment",
+    "KeyNeedFulfillment_cwc",
+    "Competence",
+    "Autonomy", 
+    "Relatedness", 
+    "AllportsCondition", 
+    "qualityOverall"
+  )
+
+osfExport$dtMedicalSupp$medicalContactFreq <- dtMedicalSupp$medicalContactFreq
+
+osfExport$dtMedicalSupp$medicalPltIDs <- dtMedicalSupp$medicalPltIDs
+
+osfExport$dtMedicalSupp$medicalOutPltIDs <- dtMedicalSupp$medicalOutPltIDs
+
+
+# Export all relevant data for OSF
+save(list = ls(osfExport),
+     envir = osfExport,
+     file = "OSF Files/Data/wrangled.RData")
 ```
