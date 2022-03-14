@@ -2,18 +2,17 @@
 title: "Supplemental Information B: Full Annotated Analysis and Reproducible Code"
 subtitle: "Suppplemental Material for 'Psychological Needs During Intergroup Contact [working title]'"
 author:
-- Jannis Kreienkamp^1,2^
-- Maximilian Agostini^1,2^
-- Laura Bringmann^1,2^
-- Peter de Jonge^1,2^
-- Kai Epstude^1,2^
-- ^1^University of Groningen, Department of Psychology
-- ^2^Author order to be discussed; currently alphabetic by last name
+- ██████ ██████████^1^
+- ██████████ ████████^1^
+- █████ █████████^1^
+- █████ ██ █████^1^
+- ███ ███████^1^
+- ^1^██████████ ██ █████████, Department of Psychology
 - "Author Information:"
-- "Correspondence concerning this article should be addressed to Jannis Kreienkamp, Department of Psychology, University of Groningen, Grote Kruisstraat 2/1, 9712 TS Groningen (The Netherlands).  E-mail: <a href='mailto:j.kreienkamp@rug.nl'>j.kreienkamp@rug.nl</a>"
+- "Correspondence concerning this article should be addressed to ██████ ██████████, ██████████ ██ ██████████, █████████ ██ ██████████, █████ ██████████ ███, ████ ██ █████████ ████████████████. E-mail: █████████████████"
 - 'The main manuscript is available at <a href="https://www.doi.org/ToBePublished" target="_blank">doi.org/ToBePublished</a>'
-- 'The data repository for this manuscript is available at <a href="https://osf.io" target="_blank">OSF link goes here</a>'
-- 'The GitHub repository for this manuscript is available at <a href="https://janniscodes.github.io/intergroup-contact-needs/" target="_blank">janniscodes.github.io/intergroup-contact-needs/</a>'
+- 'The data repository for this manuscript is available at <a href="https://osf.io/pr9zs/?view_only=1ea47bb646694632a764dead807ef970" target="_blank">https://osf.io/pr9zs/?view_only=1ea47bb646694632a764dead807ef970</a>'
+- 'The GitHub repository for this manuscript is available at <a href="https://github.com/maskedForPeerReview" target="_blank">github.com/maskedForPeerReview</a>'
 date: "Last updated: `r format(Sys.time(), '%d %B, %Y')`"
 output: 
   bookdown::html_document2:
