@@ -6151,12 +6151,7 @@ rbind(
 ```
 
 
-\input{Tables/descrFullWide}
-\input{Tables/descrOutWide}
 
-\input{Tables/mdlContactGeneralLong}
-\input{Tables/mdlTheorylong}
-\input{Tables/mdlRobustlong}
 
 <!-- FIGURES: -->
 
