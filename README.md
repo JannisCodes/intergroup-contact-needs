@@ -1,4 +1,4 @@
-# Needs in Intergroup Contact
+# Psychological Needs During Intergroup Contact: Three Experience Sampling Studies
 
 Welcome to the GitHub Repository for the 'Psychological Needs During Intergroup Contact' Project.
 
