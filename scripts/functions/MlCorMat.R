@@ -275,7 +275,7 @@ MlCoeffLatex <- function(lmeMdl = NULL, lmerCI = NULL, varName = NULL) {
   if (is.null(lmerCI)) {
     paste0(
       "\\textit{b} = ", b, 
-      ", \\textit{t}(", df, ") = ", t,
+      ", \\textit{t}(", format(df, big.mark=","), ") = ", t,
       ", \\textit{p} ", p
     )
   } else {
@@ -284,7 +284,7 @@ MlCoeffLatex <- function(lmeMdl = NULL, lmerCI = NULL, varName = NULL) {
     
     paste0(
       "\\textit{b} = ", b, 
-      ", \\textit{t}(", df, ") = ", t,
+      ", \\textit{t}(", format(df, big.mark=","), ") = ", t,
       ", \\textit{p} ", p,
       ", \\textit{95\\%CI}[", CIlwr, ", ", CIupr, "]"
     )
@@ -300,7 +300,7 @@ MlCoeffHtml <- function(lmeMdl = NULL, lmerCI = NULL, varName = NULL) {
   if (is.null(lmerCI)) {
     paste0(
       "<i>b</i> = ", b, 
-      ", <i>t</i>(", df, ") = ", t,
+      ", <i>t</i>(", format(df, big.mark=","), ") = ", t,
       ", <i>p</i> ", p
     )
   } else {
@@ -309,7 +309,7 @@ MlCoeffHtml <- function(lmeMdl = NULL, lmerCI = NULL, varName = NULL) {
     
     paste0(
       "<i>b</i> = ", b, 
-      ", <i>t</i>(", df, ") = ", t,
+      ", <i>t</i>(", format(df, big.mark=","), ") = ", t,
       ", <i>p</i> ", p,
       ", <i>95%CI</i>[", CIlwr, ", ", CIupr, "]"
     )
