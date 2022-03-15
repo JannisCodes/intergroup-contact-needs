@@ -1,6 +1,6 @@
 ---
 title: "Supplemental Information A: Full Annotated Analysis and Reproducible Code"
-subtitle: "Suppplemental Material for 'Psychological Needs During Intergroup Contact: Three Experience Sampling Studies'"
+subtitle: "Supplemental Material for 'Psychological Needs During Intergroup Contact: Three Experience Sampling Studies'"
 author:
 - ██████ ██████████^1^
 - ██████████ ████████^1^
