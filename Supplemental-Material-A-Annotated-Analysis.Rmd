@@ -2049,7 +2049,7 @@ We find that an estimated `r format(round(mdlWorker$IccPercAttNull, 2), nsmall=2
 
 #### random intercept with predictors  
 
-To this random intercept model we now add the two types of interactions possible at each measurement point as contemporaneous predictors of outgroup attitudes. That is: We check whether within participants having an outgroup interaction (or a non-outgroup interaction) is associated with more positive outgroup attitudes at the same measurement point.  
+To this random intercept model we now add the two types of interactions possible at each measurement point as contemporaneous predictors of outgroup attitudes. That is: We check whether within participants having an outgroup interaction (or a non-outgroup interaction) is associated with more positive outgroup attitudes at the same measurement point. Following the suggestion of [Yaremych et al. (2021)](https://psycnet.apa.org/doiLanding?doi=10.1037%2Fmet0000434), the two categorical predictors are centered within participants. We, additionally, reintroduce the means per participant to fully disentangle the within-person and between-person effects.
 
 \begin{equation}
 (\#eq:WorkerInteractionTypeModel)
@@ -2059,7 +2059,7 @@ To this random intercept model we now add the two types of interactions possible
         \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}OutgroupInteraction_{ti} + \\
                            &\ \beta_{2i}NonOutgroupInteraction_{ti} + e_{ti}
       \end{aligned} \\
-    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + \gamma_{01}MeanOutgroupInteraction_{i} + \gamma_{02}MeanNonOutgroupInteraction_{i} + u_{0i} \\
                       &\ \beta_{1i} = \gamma_{10} \\
                       &\ \beta_{2i} = \gamma_{20}
   \end{split} 
@@ -2143,7 +2143,7 @@ In a next step, we check whether further letting the effect of the different int
         \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}OutgroupInteraction_{ti} + \\
                            &\ \beta_{2i}NonOutgroupInteraction_{ti} + e_{ti}
       \end{aligned} \\
-    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + \gamma_{01}MeanOutgroupInteraction_{i} + \gamma_{02}MeanNonOutgroupInteraction_{i} + u_{0i} \\
                       &\ \beta_{1i} = \gamma_{10} + u_{1i} \\
                       &\ \beta_{2i} = \gamma_{20} + u_{2i}
   \end{split} 
@@ -2169,8 +2169,7 @@ summ(
     data = workerInteractionType
   ), 
   confint = TRUE,
-  digits = 3,
-  center = TRUE
+  digits = 3
 )
 
 # Simple (i.e., fast) CIs
@@ -4223,7 +4222,7 @@ To this random intercept model we now add the two types of interactions possible
         \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}OutgroupInteraction_{ti} + \\
                            &\ \beta_{2i}NonOutgroupInteraction_{ti} + e_{ti}
       \end{aligned} \\
-    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + \gamma_{01}MeanOutgroupInteraction_{i} + \gamma_{02}MeanNonOutgroupInteraction_{i} + u_{0i} \\
                       &\ \beta_{1i} = \gamma_{10} \\
                       &\ \beta_{2i} = \gamma_{20}
   \end{split} 
@@ -4308,7 +4307,7 @@ In a next step, we check whether further letting the effect of the different int
         \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}OutgroupInteraction_{ti} + \\
                            &\ \beta_{2i}NonOutgroupInteraction_{ti} + e_{ti}
       \end{aligned} \\
-    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + \gamma_{01}MeanOutgroupInteraction_{i} + \gamma_{02}MeanNonOutgroupInteraction_{i} + u_{0i} \\
                       &\ \beta_{1i} = \gamma_{10} + u_{1i} \\
                       &\ \beta_{2i} = \gamma_{20} + u_{2i}
   \end{split} 
@@ -6314,7 +6313,7 @@ To this random intercept model we now add the two types of interactions possible
         \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}OutgroupInteraction_{ti} + \\
                            &\ \beta_{2i}NonOutgroupInteraction_{ti} + e_{ti}
       \end{aligned} \\
-    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + \gamma_{01}MeanOutgroupInteraction_{i} + \gamma_{02}MeanNonOutgroupInteraction_{i} + u_{0i} \\
                       &\ \beta_{1i} = \gamma_{10} \\
                       &\ \beta_{2i} = \gamma_{20}
   \end{split} 
@@ -6388,7 +6387,7 @@ In a next step, we check whether further letting the effect of the different int
         \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}OutgroupInteraction_{ti} + \\
                            &\ \beta_{2i}NonOutgroupInteraction_{ti} + e_{ti}
       \end{aligned} \\
-    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + \gamma_{01}MeanOutgroupInteraction_{i} + \gamma_{02}MeanNonOutgroupInteraction_{i} + u_{0i} \\
                       &\ \beta_{1i} = \gamma_{10} + u_{1i} \\
                       &\ \beta_{2i} = \gamma_{20} + u_{2i}
   \end{split} 
