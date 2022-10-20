@@ -6087,6 +6087,10 @@ rbind(
 ```
 
 ```{r descrOutLong, include=FALSE}
+#
+#       OLD!!
+#
+
 # Outgroup Interaction Sample Descriptives Table
 rbind(
   workerOutMlCor %>%
@@ -6126,6 +6130,14 @@ rbind(
 
 
 ```{r descrOutWide, include=FALSE}
+allOutMlCor <-
+  MlCorMat(
+    data = dtAll$mlAll %>% filter(OutgroupInteraction == "Yes"),
+    id = "ID",
+    selection = c("KeyNeedFullfillment", "Competence", "Autonomy", "Relatedness", "qualityOverall", "AttitudesDutch"),
+    labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Quality", "Attitudes NL")
+  )
+
 # Outgroup Interaction Sample Descriptives Table --- wider version
 rbind(
   workerOutMlCor %>%
@@ -6135,6 +6147,7 @@ rbind(
     add_column(Allport = "",
                .before = "Grand Mean"),
   studentOutMlCor %>%
+    select(names(workerOutMlCor)) %>%
     t %>%
     as.data.frame %>%
     rownames_to_column(., "Variable") %>%
@@ -6144,7 +6157,14 @@ rbind(
     select(names(workerOutMlCor), "Allport") %>%
     t %>%
     as.data.frame %>%
-    rownames_to_column(., "Variable")
+    rownames_to_column(., "Variable"),
+  allOutMlCor %>%
+    select(names(workerOutMlCor)) %>%
+    t %>%
+    as.data.frame %>%
+    rownames_to_column(., "Variable") %>%
+    add_column(Allport = "",
+               .before = "Grand Mean")
 ) %>%
   kbl(.,
       format = "latex",
@@ -6165,6 +6185,8 @@ rbind(
             sum(ncol(workerOutMlCor), ncol(studentOutMlCor))) %>%
   pack_rows("Study 3", sum(ncol(workerOutMlCor), ncol(studentOutMlCor)) + 1,  
             sum(ncol(workerOutMlCor), ncol(studentOutMlCor), ncol(medicalOutMlCor))) %>% 
+  pack_rows("Across Studies", sum(ncol(workerOutMlCor), ncol(studentOutMlCor), ncol(medicalOutMlCor)) + 1,  
+            sum(ncol(workerOutMlCor), ncol(studentOutMlCor), ncol(medicalOutMlCor), ncol(allOutMlCor))) %>% 
   footnote(
     general = c(
       "Upper triangle: Between-person correlations;",
