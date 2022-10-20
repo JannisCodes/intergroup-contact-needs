@@ -9722,7 +9722,12 @@ allMlS1 <- workerInteractionType %>%
     PID,
     AttitudesDutch = thermometerDutch_1,
     OutgroupInteraction,
-    NonOutgroupInteraction
+    NonOutgroupInteraction,
+    KeyNeedFullfillment = keyMotiveFulfilled,
+    qualityOverall = quality_overall_1,
+    Competence = competence.daily.all, 
+    Autonomy = autonomy.daily.all, 
+    Relatedness = relatedness.daily.all
   ) %>%
   mutate(study = "S1")
 allMlS2 <- studentInteractionType %>%
@@ -9730,7 +9735,12 @@ allMlS2 <- studentInteractionType %>%
     PID,
     AttitudesDutch,
     OutgroupInteraction,
-    NonOutgroupInteraction
+    NonOutgroupInteraction,
+    KeyNeedFullfillment, 
+    qualityOverall = quality_overall,
+    Competence, 
+    Autonomy, 
+    Relatedness
   ) %>%
   mutate(study = "S2")
 allMlS3 <- dtMedical$full %>%
@@ -9738,7 +9748,12 @@ allMlS3 <- dtMedical$full %>%
     PID,
     AttitudesDutch,
     OutgroupInteraction,
-    NonOutgroupInteraction
+    NonOutgroupInteraction,
+    KeyNeedFullfillment = KeyNeedFulfillment, 
+    qualityOverall,
+    Competence, 
+    Autonomy, 
+    Relatedness
   ) %>%
   mutate(study = "S3")
 

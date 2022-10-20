@@ -145,16 +145,17 @@ MlCorMat <-
       `ICC(1)` =
         misty::multilevel.icc(
           data %>% select(selection),
-          cluster = data$PID,
+          cluster = data[[id]],
           type = 1
         ),
       `ICC(2)` =
         misty::multilevel.icc(
           data %>% select(selection),
-          cluster = data$PID,
+          cluster = data[[id]],
           type = 2
         )
     )
+    
     
     for (i in 1:length(selection)) {
       dataRed <- 

@@ -92,6 +92,8 @@ knitr::opts_chunk$set(
 
 ```{r import, include=FALSE}
 load("data/wrangled.RData")
+# remove accidental surplus to avoid conflicts
+# rm(list = ls(pattern = "mdl|medicalSdtComp"))
 ```
 
 \section{Study 1}
@@ -5969,6 +5971,15 @@ mdlTblRobustShort
 
 
 ```{r descrFullLong, include=FALSE}
+allMlCor <-
+  MlCorMat(
+    data = dtAll$mlAll, #%>% filter(OutgroupInteraction == "Yes"),
+    id = "ID",
+    selection = c("KeyNeedFullfillment", "Competence", "Autonomy", "Relatedness", "qualityOverall", "AttitudesDutch"),
+    labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Quality", "Attitudes NL")
+  )
+
+
 # Full Sample Descriptives Table [longer format (Descriptives below correlations)]
 rbind(
   workerMlCor %>%
@@ -5980,7 +5991,11 @@ rbind(
     mutate(Allport = ""),
   medicalMlCor %>%
     select(names(workerMlCor), "Allport") %>%
-    rownames_to_column(., "Variable")
+    rownames_to_column(., "Variable"),
+  allMlCor %>%
+    select(names(workerMlCor)) %>%
+    rownames_to_column(., "Variable") %>%
+    mutate(Allport = "")
 ) %>%
   kbl(.,
       format = "latex",
@@ -5992,6 +6007,8 @@ rbind(
             sum(nrow(workerMlCor), nrow(studentMlCor))) %>%
   pack_rows("Study 3", sum(nrow(workerMlCor), nrow(studentMlCor)) + 1,  
             sum(nrow(workerMlCor), nrow(studentMlCor), nrow(medicalMlCor))) %>%
+  pack_rows("Across Studies", sum(nrow(workerMlCor), nrow(studentMlCor), nrow(medicalMlCor)) + 1,  
+            sum(nrow(workerMlCor), nrow(studentMlCor), nrow(medicalMlCor), nrow(allMlCor))) %>%
   gsub("\\hspace{1em}Grand Mean", "\\addlinespace\n\\hspace{1em}Grand Mean", ., fixed = TRUE) %>% # fix table position
   footnote(
     general = c(
@@ -6016,6 +6033,7 @@ rbind(
     add_column(Allport = "",
                .before = "Grand Mean"),
   studentMlCor %>%
+    select(names(workerMlCor)) %>%
     t %>%
     as.data.frame %>%
     rownames_to_column(., "Variable") %>%
@@ -6025,7 +6043,14 @@ rbind(
     select(names(workerMlCor), "Allport") %>%
     t %>%
     as.data.frame %>%
-    rownames_to_column(., "Variable")
+    rownames_to_column(., "Variable"),
+  allMlCor %>%
+    select(names(workerMlCor)) %>%
+    t %>%
+    as.data.frame %>%
+    rownames_to_column(., "Variable") %>%
+    add_column(Allport = "",
+               .before = "Grand Mean")
 ) %>%
   kbl(.,
       format = "latex",
@@ -6045,7 +6070,9 @@ rbind(
   pack_rows("Study 2", ncol(workerMlCor) + 1,
             sum(ncol(workerMlCor), ncol(studentMlCor))) %>%
   pack_rows("Study 3", sum(ncol(workerMlCor), ncol(studentMlCor)) + 1,  
-            sum(ncol(workerMlCor), ncol(studentMlCor), ncol(medicalMlCor))) %>% # fix table position
+            sum(ncol(workerMlCor), ncol(studentMlCor), ncol(medicalMlCor))) %>%
+  pack_rows("Across Studies", sum(ncol(workerMlCor), ncol(studentMlCor), ncol(medicalMlCor)) + 1,  
+            sum(ncol(workerMlCor), ncol(studentMlCor), ncol(medicalMlCor), ncol(allMlCor))) %>% # fix table position
   footnote(
     general = c(
       "Upper triangle: Between-person correlations;",
@@ -6610,10 +6637,12 @@ effGeneral <- rbind(
   eff %>%
     filter(coef != "(Intercept)") %>%
     mutate(analysis = "(A) Aggregate Linear Regression",
-           metaId = paste(coef, analysis, sep = ".")),
+           metaId = paste(coef, analysis, sep = ".")) %>%
+    as.data.frame,
   GeneralLmerMeta$eff %>%
     mutate(analysis = "(B) Mixed Effects Regression",
-           metaId = paste(coef, analysis, sep = "."))
+           metaId = paste(coef, analysis, sep = ".")) %>%
+    as.data.frame
 )
 
 metaSubForest(effGeneral, 
@@ -6792,10 +6821,12 @@ effRobust <- rbind(
   robustMetaContact$eff %>%
     filter(coef != "(Intercept)") %>%
     mutate(analysis = "(A) Contact and Need Fulfillment",
-           metaId = paste(coef, analysis, sep = ".")),
+           metaId = paste(coef, analysis, sep = ".")) %>%
+    as.data.frame,
   robustMetaSDT$eff %>%
     mutate(analysis = "(B) Other Needs",
-           metaId = paste(coef, analysis, sep = "."))
+           metaId = paste(coef, analysis, sep = ".")) %>%
+    as.data.frame
 )
 
 metaSubForest(effRobust, 
