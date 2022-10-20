@@ -799,7 +799,21 @@ workerInteractionType <- dtWorker$full %>%
   mutate(
     OutgroupInteraction = as_factor(Contact_dum),
     NonOutgroupInteraction = as_factor(inNonDutch)
-  )
+  )  %>%
+  mutate(
+    OutgroupInteractionNum = as.numeric(as.factor(OutgroupInteraction))-1,
+    NonOutgroupInteractionNum = as.numeric(as.factor(NonOutgroupInteraction))-1
+  ) %>%
+  group_by(PID) %>%
+  mutate(
+    # Center ( https://quantpsy.org/pubs/yaremych_preacher_hedeker_(in.press).pdf )
+    OutgroupInteractionC = scale(OutgroupInteractionNum, center = TRUE, scale = FALSE)[,1],
+    NonOutgroupInteractionC = scale(NonOutgroupInteractionNum, center = TRUE, scale = FALSE)[,1], 
+    # Mean
+    OutgroupInteractionM = mean(OutgroupInteractionNum, na.rm = TRUE),
+    NonOutgroupInteractionM = mean(NonOutgroupInteractionNum, na.rm = TRUE)
+  ) %>%
+  ungroup
 
 # Create variables centered and standardized within Participant
 # i.e., divide into trait and state
@@ -1054,7 +1068,21 @@ studentInteractionType <- dtStudents$full %>%
       levels = c(0, 1),
       labels = c("No", "Yes")
     )
-  )
+  ) %>%
+  mutate(
+    OutgroupInteractionNum = as.numeric(as.factor(OutgroupInteraction))-1,
+    NonOutgroupInteractionNum = as.numeric(as.factor(NonOutgroupInteraction))-1
+  ) %>%
+  group_by(PID) %>%
+  mutate(
+    # Center ( https://quantpsy.org/pubs/yaremych_preacher_hedeker_(in.press).pdf )
+    OutgroupInteractionC = scale(OutgroupInteractionNum, center = TRUE, scale = FALSE)[,1],
+    NonOutgroupInteractionC = scale(NonOutgroupInteractionNum, center = TRUE, scale = FALSE)[,1], 
+    # Mean
+    OutgroupInteractionM = mean(OutgroupInteractionNum, na.rm = TRUE),
+    NonOutgroupInteractionM = mean(NonOutgroupInteractionNum, na.rm = TRUE)
+  ) %>%
+  ungroup
 
 # select a subset of IDs to display in plots
 studentPltIDs <-
@@ -1161,7 +1189,21 @@ df <- df %>%
       levels = c(0, 1),
       labels = c("No", "Yes")
     )
-  )
+  ) %>%
+  mutate(
+    OutgroupInteractionNum = as.numeric(as.factor(OutgroupInteraction))-1,
+    NonOutgroupInteractionNum = as.numeric(as.factor(NonOutgroupInteraction))-1
+  ) %>%
+  group_by(PID) %>%
+  mutate(
+    # Center ( https://quantpsy.org/pubs/yaremych_preacher_hedeker_(in.press).pdf )
+    OutgroupInteractionC = scale(OutgroupInteractionNum, center = TRUE, scale = FALSE)[,1],
+    NonOutgroupInteractionC = scale(NonOutgroupInteractionNum, center = TRUE, scale = FALSE)[,1], 
+    # Mean
+    OutgroupInteractionM = mean(OutgroupInteractionNum, na.rm = TRUE),
+    NonOutgroupInteractionM = mean(NonOutgroupInteractionNum, na.rm = TRUE)
+  ) %>%
+  ungroup
 
 
 
@@ -1814,14 +1856,14 @@ We find that while controlling for interactions with non-Dutch people, outgroup 
 
 ### Interaction Frequency and Interaction Quality
 
-In a next step we check whether the effect of outgroup interactions, in part, depends on the quality during the interactions. In this step we aggregate the within person data to remove any dependency issues. Additionally, because we can only assess interaction quality when there is an interaction, it is difficult to assess this with the interaction dummy as a within person predictor. Instead, we will use an aggregate measure of interaction quality and average interaction quality to consider the two predictors jointly.  Such an aggregation in essence mirrors the general 'past recall' approach that dominates the field. The only difference being that we aggregate data that participants recorded shortly after the actual interactions, wheras in most recall studies this aggregation is done mentally by the participant.  
+In a next step we check whether the effect of outgroup interactions, in part, depends on the quality during the interactions. In this step we aggregate the within person data to remove any dependency issues. Additionally, because we can only assess interaction quality when there is an interaction, it is difficult to assess this with the interaction dummy as a within person predictor. Instead, we will use an aggregate measure of interaction quality and average interaction quality to consider the two predictors jointly.  Such an aggregation in essence mirrors the general 'past recall' approach that dominates the field. The only difference being that we aggregate data that participants recorded shortly after the actual interactions, whereas in most recall studies this aggregation is done mentally by the participant.  
 
 \begin{equation}
 (\#eq:FreqQual)
 Attitude = ContactFreq \times AverageContactQual
 \end{equation}
 
-```{r workerFreqQualCor}
+```{r workerFreqQualCorPrep}
 # prepare data
 workerAvFreQual <- dtWorker$full %>%
   group_by(ExternalReference) %>%
@@ -1841,7 +1883,9 @@ workerAvFreQual <- dtWorker$full %>%
     AvAttitude_c = AvAttitude - mean(AvAttitude, na.rm = TRUE),
     AvQuality_c = AvQuality - mean(AvQuality, na.rm = TRUE)
   )
+```
 
+```{r WorkerFreqQualCor}
 # correlation panel
 pairs.panels.new(
   workerAvFreQual %>% select(SumContactNL, SumContactNLAll, AvQuality, AvAttitude),
@@ -2025,7 +2069,7 @@ To this random intercept model we now add the two types of interactions possible
 # Create and save Model
 mdlWorker$lmeInterceptAttType <-
   lme(
-    thermometerDutch_1 ~ OutgroupInteraction + NonOutgroupInteraction,
+    thermometerDutch_1 ~ OutgroupInteractionC + NonOutgroupInteractionC + OutgroupInteractionM + NonOutgroupInteractionM,
     random =  ~ 1 | PID,
     data = workerInteractionType
   )
@@ -2033,12 +2077,11 @@ mdlWorker$lmeInterceptAttType <-
 # Get summary with p-values (Satterthwaite's method)
 summ(
   mdlWorker$lmerInterceptAttType <- lmer(
-    thermometerDutch_1 ~ OutgroupInteraction + NonOutgroupInteraction + (1 | PID),
+    thermometerDutch_1 ~ OutgroupInteractionC + NonOutgroupInteractionC + OutgroupInteractionM + NonOutgroupInteractionM + (1 | PID),
     data = workerInteractionType
   ),
   confint = TRUE,
-  digits = 3,
-  center = TRUE
+  digits = 3
 )
 
 mdlWorker$lmerInterceptAttTypeCI <- 
@@ -2111,8 +2154,8 @@ In a next step, we check whether further letting the effect of the different int
 # Create and save Model (optimizer needed to reach convergence)
 mdlWorker$lmeSlopesAttType <- lme(
   thermometerDutch_1 ~
-    OutgroupInteraction + NonOutgroupInteraction,
-  random = ~ 1 + OutgroupInteraction + NonOutgroupInteraction | PID,
+    OutgroupInteractionC + NonOutgroupInteractionC + OutgroupInteractionM + NonOutgroupInteractionM,
+  random = ~ 1 + OutgroupInteractionC + NonOutgroupInteractionC | PID,
   control = lmeControl(opt = "optim"),
   data = workerInteractionType
 )
@@ -2121,8 +2164,8 @@ mdlWorker$lmeSlopesAttType <- lme(
 summ(
   mdlWorker$lmerSlopesAttType <- lmer(
     thermometerDutch_1 ~
-      OutgroupInteraction + NonOutgroupInteraction +
-      (1 + OutgroupInteraction + NonOutgroupInteraction | PID),
+      OutgroupInteractionC + NonOutgroupInteractionC + OutgroupInteractionM + NonOutgroupInteractionM +
+      (1 + OutgroupInteractionC + NonOutgroupInteractionC | PID),
     data = workerInteractionType
   ), 
   confint = TRUE,
@@ -4190,7 +4233,7 @@ To this random intercept model we now add the two types of interactions possible
 # Create and save Model
 mdlStudent$lmeInterceptAttType <-
   lme(
-    AttitudesDutch ~ OutgroupInteraction + NonOutgroupInteraction,
+    AttitudesDutch ~ OutgroupInteractionC + NonOutgroupInteractionC + OutgroupInteractionM + NonOutgroupInteractionM,
     random =  ~ 1 | PID,
     data = studentInteractionType
   )
@@ -4198,12 +4241,11 @@ mdlStudent$lmeInterceptAttType <-
 # Get summary with p-values (Satterthwaite's method)
 summ(
   mdlStudent$lmerInterceptAttType <- lmer(
-    AttitudesDutch ~ OutgroupInteraction + NonOutgroupInteraction + (1 | PID),
+    AttitudesDutch ~ OutgroupInteractionC + NonOutgroupInteractionC + OutgroupInteractionM + NonOutgroupInteractionM + (1 | PID),
     data = studentInteractionType
   ),
   confint = TRUE,
-  digits = 3,
-  center = TRUE
+  digits = 3
 )
 
 # 95%CI
@@ -4276,8 +4318,8 @@ In a next step, we check whether further letting the effect of the different int
 # Create and save Model (optimizer needed to reach convergence)
 mdlStudent$lmeSlopesAttType <- lme(
   AttitudesDutch ~
-    OutgroupInteraction + NonOutgroupInteraction,
-  random = ~ 1 + OutgroupInteraction + NonOutgroupInteraction | PID,
+    OutgroupInteractionC + NonOutgroupInteractionC + OutgroupInteractionM + NonOutgroupInteractionM,
+  random = ~ 1 + OutgroupInteractionC + NonOutgroupInteractionC | PID,
   control = lmeControl(opt = "optim"),
   data = studentInteractionType
 )
@@ -4286,8 +4328,8 @@ mdlStudent$lmeSlopesAttType <- lme(
 summ(
   mdlStudent$lmerSlopesAttType <- lmer(
     AttitudesDutch ~
-      OutgroupInteraction + NonOutgroupInteraction +
-      (1 + OutgroupInteraction + NonOutgroupInteraction | PID),
+      OutgroupInteractionC + NonOutgroupInteractionC + OutgroupInteractionM + NonOutgroupInteractionM +
+      (1 + OutgroupInteractionC + NonOutgroupInteractionC | PID),
     data = studentInteractionType
   ), 
   confint = TRUE,
@@ -6282,7 +6324,7 @@ To this random intercept model we now add the two types of interactions possible
 # Create and save Model
 mdlMedical$lmeInterceptAttType <-
   lme(
-    AttitudesDutch ~ OutgroupInteraction + NonOutgroupInteraction,
+    AttitudesDutch ~ OutgroupInteractionC + NonOutgroupInteractionC + OutgroupInteractionM + NonOutgroupInteractionM,
     random =  ~ 1 | PID,
     na.action = na.omit,
     data = dtMedical$full
@@ -6291,7 +6333,7 @@ mdlMedical$lmeInterceptAttType <-
 # Get summary with p-values (Satterthwaite's method)
 summ(
   mdlMedical$lmerInterceptAttType <- lmer(
-    AttitudesDutch ~ OutgroupInteraction + NonOutgroupInteraction + (1 | PID),
+    AttitudesDutch ~ OutgroupInteractionC + NonOutgroupInteractionC + OutgroupInteractionM + NonOutgroupInteractionM + (1 | PID),
     data = dtMedical$full
   ),
   confint = TRUE,
@@ -6356,8 +6398,8 @@ In a next step, we check whether further letting the effect of the different int
 # Create and save Model (optimizer needed to reach convergence)
 mdlMedical$lmeSlopesAttType <- lme(
   AttitudesDutch ~
-    OutgroupInteraction + NonOutgroupInteraction,
-  random = ~ 1 + OutgroupInteraction + NonOutgroupInteraction | PID,
+    OutgroupInteractionC + NonOutgroupInteractionC + OutgroupInteractionM + NonOutgroupInteractionM,
+  random = ~ 1 + OutgroupInteractionC + NonOutgroupInteractionC | PID,
   control = lmeControl(opt = "optim"),
   na.action = na.omit,
   data = dtMedical$full
@@ -6367,8 +6409,8 @@ mdlMedical$lmeSlopesAttType <- lme(
 summ(
   mdlMedical$lmerSlopesAttType <- lmer(
     AttitudesDutch ~
-      OutgroupInteraction + NonOutgroupInteraction +
-      (1 + OutgroupInteraction + NonOutgroupInteraction | PID),
+      OutgroupInteractionC + NonOutgroupInteractionC + OutgroupInteractionM + NonOutgroupInteractionM +
+      (1 + OutgroupInteractionC + NonOutgroupInteractionC | PID),
     data = dtMedical$full
   ), 
   confint = TRUE,
@@ -8809,6 +8851,7 @@ medicalSdtCompChiSq <- paste0("$chi^2$(", medicalSdtCompDf, ", <i>N</i> = ", med
 
 When compared to the model with only the SDT needs, the core need fulfillment flexibly takes on some of the explained variance of all of the three fundamental needs. However, similar to the previous study, in this large sample relatedness, competence, and autonomy each predicted positive outgroup attitudes independently. However, the regression coefficient is three times as large for the core need fulfillment (with all scaling being equal). 
 
+
 # **Forest Plots of Main Analyses**  
 
 ## Contact Hypothesis  
@@ -9632,6 +9675,439 @@ robustMetaSDT <-
 
 ![Core Need Fulfillment predicting Outgroup Attitudes, while controlling for self-determination theory needs (intergroup contact sample).](Figures/forestParametricFERobustSDT.png)
 
+
+# **General Contact Hypothesis Test across Studies**  
+
+Because between-person analyses were individually underpowered, we also combined the three data sets for a global test of of the general contact hypothesis. These analyses should in practice mirror the results of the meta analysis estimates from the forest plots above. However, given the availability of the full data, this approach offers additional support for the general effects and should clear up discrepancies between studies.
+
+Two analyses: 
+
+1. Linear regression of within-person aggregated data (while controlling for study). This mirrors the most common measurement/conceptualization in cross-section literature and is the only option of including the effects of both the interaction and the interaction quality (because interaction quality ratings are only available for measurements following an interaction).
+2. Multilevel regression to check for a general contact effect (while controlling for study). This addresses whether a the positive effect on outgroup attitudes is unique to outgroup interactions --- as opposed to being a general social embeddedness effect.
+
+## Linear Regression Contact Fequency and -Quality
+
+We begin with the liner ordinary least squares regression. For this purpose, we merge the three aggregated data sets. We assess the regression effects, while controlling for the possible effects of study-specific differences. To include the study-membership as a control variable, we use the student sample (Study 2) as the reference group because it is both the largest and the most homogeneous study.
+
+```{r OLS regression across the three studies}
+avS1 <- workerAvFreQual %>%
+  select(
+    -ExternalReference
+  ) %>%
+  mutate(
+    PID = c(1:nrow(.)),
+    study = "S1"
+  ) %>%
+  select(PID, everything())
+avS2 <- studentContactFreq %>%
+  mutate(
+    study = "S2"
+  )
+avS3 <- medicalContactFreq %>%
+  mutate(
+    study = "S3"
+  )
+
+avAll <- bind_rows(avS1, avS2, avS3) %>%
+  mutate(ID = c(1:nrow(.)))
+
+avAll$study2 <- relevel(as.factor(avAll$study),"S2")
+
+lmAllAttFreqQualX <-
+  lm(
+    AvAttitude ~ SumContactNL_c * AvQuality_c + SumContactNL_c * study2 + AvQuality_c * study2,
+    data = avAll
+  )
+
+summ(
+  lmAllAttFreqQualX,
+  confint = TRUE,
+  digits = 3
+)
+
+```
+
+## Multilevel Regression Interaction Types 
+
+We also replicate the basic contact type analysis across all three studies. This analysis should again mirror the estimates from the forest plots but should offer additional evidence for a set of analyses that has seen relatively heterogenity across the three studies (also given the differing number of outgroup interactions).
+
+One additional complication of this model is the three level structure because timepoints are nested within participants, who are nested within studies. This also brings up the question on which level we would expect and should model random slopes. We chose a three-step approach:
+
+1. Random Intercepts
+2. Random Slopes Person Level
+3. Random Slopes Person- and Study Level
+
+Theoretically, we see the random slopes at the person-level as the most important test (i.e., Step 2). This step still "controls for" the study-nestedness as part of the random intercepts, while the random slopes at the study level become more difficult to interpret for our main contact variables of interest.
+
+
+```{r prepare joint ML data}
+# Usually: Create Simple Effects Coding for the three Studies with S2 being the reference group
+# However, with clustering, stay with dummy because proportions interpretations become unnecessarily complicated
+
+allMlS1 <- workerInteractionType %>%
+  select(
+    PID,
+    AttitudesDutch = thermometerDutch_1,
+    OutgroupInteraction,
+    NonOutgroupInteraction
+  ) %>%
+  mutate(study = "S1")
+allMlS2 <- studentInteractionType %>%
+  select(
+    PID,
+    AttitudesDutch,
+    OutgroupInteraction,
+    NonOutgroupInteraction
+  ) %>%
+  mutate(study = "S2")
+allMlS3 <- dtMedical$full %>%
+  select(
+    PID,
+    AttitudesDutch,
+    OutgroupInteraction,
+    NonOutgroupInteraction
+  ) %>%
+  mutate(study = "S3")
+
+mlAll <- bind_rows(allMlS1, allMlS2, allMlS3) %>% 
+  mutate(
+    # ID
+    ID = group_indices_(., .dots=c("study", "PID")),
+    # Labels
+    OutgroupInteraction = as.character(OutgroupInteraction),
+    NonOutgroupInteraction = gsub("yes", "Yes", NonOutgroupInteraction),
+    NonOutgroupInteraction = gsub("no", "No", NonOutgroupInteraction),
+    # Factors
+    OutgroupInteractionFac = as.factor(OutgroupInteraction),
+    NonOutgroupInteractionFac = as.factor(NonOutgroupInteraction),
+    studyFac = as.factor(study),
+    # Numeric
+    OutgroupInteractionNum = as.numeric(OutgroupInteractionFac)-1,
+    NonOutgroupInteractionNum = as.numeric(NonOutgroupInteractionFac)-1,
+    studyNum1 = ifelse(study == "S1", 1, 0),
+    studyNum3 = ifelse(study == "S3", 1, 0),
+    # Mean across participants
+    study1M = mean(studyNum1, na.rm = TRUE),
+    study3M = mean(studyNum3, na.rm = TRUE)
+  ) %>%
+  group_by(PID) %>%
+  mutate(
+    # Center ( https://quantpsy.org/pubs/yaremych_preacher_hedeker_(in.press).pdf )
+    OutgroupInteractionC = scale(OutgroupInteractionNum, center = TRUE, scale = FALSE)[,1],
+    NonOutgroupInteractionC = scale(NonOutgroupInteractionNum, center = TRUE, scale = FALSE)[,1], 
+    study1C = scale(studyNum1, center = TRUE, scale = FALSE)[,1],
+    study3C = scale(studyNum3, center = TRUE, scale = FALSE)[,1],
+    # Mean
+    OutgroupInteractionM = mean(OutgroupInteractionNum, na.rm = TRUE),
+    NonOutgroupInteractionM = mean(NonOutgroupInteractionNum, na.rm = TRUE)
+  ) %>%
+  ungroup %>%
+  mutate(
+    OutgroupInteractionMC = scale(OutgroupInteractionM, center = TRUE, scale = FALSE)[,1],
+    NonOutgroupInteractionMC = scale(NonOutgroupInteractionM, center = TRUE, scale = FALSE)[,1], 
+  )
+```
+
+```{r lmerAll descriptive plot}
+ggplot(mlAll %>% filter(!is.na(OutgroupInteraction), !is.na(NonOutgroupInteraction)), 
+       aes(y=AttitudesDutch, x=OutgroupInteraction, 
+           group = interaction(OutgroupInteraction, NonOutgroupInteraction), 
+           fill=NonOutgroupInteraction))+
+  geom_violin(trim = T, width=.8, position = position_dodge(0.8)) +
+  geom_boxplot(width=0.04,
+               position = position_dodge(.8),
+               outlier.colour = NULL, 
+               outlier.shape = NA, 
+               notch=F, fill="black", 
+               lwd=1, color="black") + 
+  # geom_jitter(width = 0.15,
+  #            shape=18,
+  #            alpha=.2, size=1) +
+  stat_summary(fun.y=mean, 
+               geom="point", 
+               shape=16, 
+               size=1, 
+               position = position_dodge(0.8),
+               colour="white") +
+  #stat_summary(fun.data="mean_sdl",  
+  #             fun.args = list(mult=1), 
+  #             geom="pointrange", 
+  #             color = "red", 
+  #             width=.2)+
+  stat_summary(geom = "crossbar", 
+               width=0.04, 
+               fatten=0, 
+               position = position_dodge(0.8),
+               color="white", 
+               fun.data = function(x){ return(c(y=median(x), 
+                                                ymin=median(x), 
+                                                ymax=median(x))) })+
+  ylab("Outgroup Attitudes")+
+  xlab("Outgroup Interaction") +
+  ggtitle("Violin Plot across Studies:\nOutgroup Attitudes by Interaction Type")+
+  scale_y_continuous(
+    limits = c(0, 100),
+    breaks = c(0, 15, 30, 40, 50, 60, 70, 85, 100),
+    labels = c(
+      "Very cold or unfavorable feelings 0°",
+      "Quite cold and unfavorable feelings 15°",
+      "Fairly cold and unfavorable feelings 30°",
+      "A bit cold and unfavorable feelings 40°",
+      "No feeling at all 50°",
+      "A bit warm and favorable feelings 60°",
+      "Fairly warm and favorable feelings 70° ",
+      "Quite warm and favorable feelings 85° ",
+      "Very warm and favorable feelings 100° "
+    )
+  ) +
+  #coord_flip()+
+  scale_fill_brewer(palette = "Pastel2", name = "Non-Outgroup Interaction")+
+  # geom_line(stat="smooth", method = "lm",
+  #           aes(group = study, linetype = study),
+  #             size = .5,
+  #             alpha = 0.25) +
+  theme_Publication()+
+  theme(strip.background =element_rect(fill="black", color="black"),
+        strip.text = element_text(colour = 'white', face="bold"))#,
+        #panel.border = element_rect(color="grey"),
+        #legend.position="none")
+```
+
+
+### Random Intercepts Model
+
+We begin with a random intercepts model, which models the within-person and between-person effects of contacts with Dutch and non-Dutch people, while still accounting for the fact that the measurements are nested within people and studies.
+
+```{r joint ML random intercept}
+library("lmerTest")
+# Run three level regression model (MLM-3)
+mlAllIntRes <- lmer(
+  AttitudesDutch ~ OutgroupInteractionC + NonOutgroupInteractionC + OutgroupInteractionM + NonOutgroupInteractionM
+  + (1|study)
+  + (1|study:PID),
+  data = mlAll
+)
+#summary(mlAllIntRes)
+summ(
+  mlAllIntRes, 
+  confint = TRUE,
+  digits = 3
+)
+# save ICC
+mlAllIntICC <- performance::icc(mlAllIntRes, by_group=TRUE)
+# standardized coefficients
+stdCoef.merMod(mlAllIntRes)
+
+# 95%CIs
+mlAllIntResCI <- 
+  confint(method = "Wald", mlAllIntRes)
+
+sjPlot::plot_model(
+  mlAllIntRes,
+  title = "",
+  dot.size = 1.5,
+  show.values = TRUE
+) +
+  geom_hline(yintercept = 0, color = "black", linetype = "longdash", alpha = .75) +
+  labs(title = "Fixed Effects on Outgroup Attidues\n(Random Intercepts)") +
+  theme_Publication() +
+  theme(plot.title = element_text(size=14, face="bold", hjust = 0.5))
+sjPlot::plot_model(
+  mlAllIntRes,
+  type = "std",
+  dot.size = 1.5,
+  show.values = TRUE
+  ) +
+  geom_hline(yintercept = 0, color = "black", linetype = "longdash", alpha = .75) +
+  labs(title = "Fixed Effects on Outgroup Attidues\n(Random Intercepts)\n[Standardized Betas]") +
+  theme_Publication() +
+  theme(plot.title = element_text(size=14, face="bold", hjust = 0.5))
+
+
+# # Attempts at R^2
+# performance::r2(mlAllIntRes)
+# performance::model_performance(mlAllIntRes)
+
+# Save variances
+mlAllIntResVar <- 
+  lme4::VarCorr(mlAllIntRes)
+
+# Assumption Checks:
+mlAllIntResDiag <- 
+  sjPlot::plot_model(mlAllIntRes, type = "diag")
+grid.arrange(
+  mlAllIntResDiag[[1]],
+  mlAllIntResDiag[[2]]$`study:PID`,
+  mlAllIntResDiag[[2]]$`study`,
+  mlAllIntResDiag[[3]],
+  mlAllIntResDiag[[4]]
+)
+```
+We find that both the within-person and between-person levels of having interactions with Dutch people are uniquely associated with more positive outgroup attitudes. This is not the case for interactions with non-Dutch people.
+
+Looking at the interclass correlation, we see that `r format(round(mlAllIntICC$ICC[mlAllIntICC$Group == "study:PID"]*100,2), nsmall=2)`% of the variance in outgroup attitudes is accounted for by clustering the measurements within participants. The additional study level nesting only accounts for `r format(round(mlAllIntICC$ICC[mlAllIntICC$Group == "study"]*100,2), nsmall=2)`% of the variance in outgroup attitudes.
+
+### Random Slopes Person Level
+
+The second step of our analysis approach, we let the the impact of outgroup and non-outgroup interaction vary between participants. Given the above interclass correlations and our proposed interest, this analysis should be the most informative analysis. This analysis also parallels the analyses that were done on the individual study level (while now additionally accounting for the circumstance that the participants are nested within different studies).
+
+```{r joint ML random slopes L2}
+# Run three level regression model (MLM-3)
+mlAllSlopeL2Res <- lmer(
+  AttitudesDutch ~ OutgroupInteractionC + NonOutgroupInteractionC + OutgroupInteractionM + NonOutgroupInteractionM
+  + (1|study)
+  + (1+OutgroupInteractionC+NonOutgroupInteractionC|study:PID),
+  data = mlAll
+)
+#summary(mlAllSlopeL2Res)
+summ(
+  mlAllSlopeL2Res, 
+  confint = TRUE,
+  digits = 3
+)
+# save ICC
+mlAllSlopeL2ICC <- performance::icc(mlAllSlopeL2Res, by_group=TRUE)
+# standardized coefficients
+stdCoef.merMod(mlAllSlopeL2Res)
+
+# Compare new model to previous step
+anova(
+  mlAllIntRes,
+  mlAllSlopeL2Res
+) %>%
+  as.data.frame() %>%
+  mutate(
+    Chisq = round(Chisq, 3),
+    `p-value` = ifelse(`Pr(>Chisq)`>=.001, round(`Pr(>Chisq)`, 3), "< .001")
+  ) %>%
+  select(-`Pr(>Chisq)`) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Across Studies: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# 95%CIs
+mlAllSlopeL2ResCI <- 
+  confint(method = "Wald", mlAllSlopeL2Res)
+
+sjPlot::plot_model(
+  mlAllSlopeL2Res,
+  dot.size = 1.5,
+  show.values = TRUE
+) +
+  geom_hline(yintercept = 0, color = "black", linetype = "longdash", alpha = .75) +
+  labs(title = "Fixed Effects on Outgroup Attidues\n(Random Slopes Person Level)") +
+  theme_Publication() +
+  theme(plot.title = element_text(size=14, face="bold", hjust = 0.5))
+sjPlot::plot_model(
+  mlAllSlopeL2Res,
+  type = "std",
+  dot.size = 1.5,
+  show.values = TRUE
+  ) +
+  geom_hline(yintercept = 0, color = "black", linetype = "longdash", alpha = .75) +
+  labs(title = "Fixed Effects on Outgroup Attidues\n(Random Slopes Person Level)\n[Standardized Betas]") +
+  theme_Publication() +
+  theme(plot.title = element_text(size=14, face="bold", hjust = 0.5))
+
+# Save variances
+mlAllSlopeL2ResVar <- 
+  lme4::VarCorr(mlAllSlopeL2Res)
+
+# Assumption Checks:
+mlAllSlopeL2ResDiag <- 
+  sjPlot::plot_model(mlAllSlopeL2Res, type = "diag")
+grid.arrange(
+  mlAllSlopeL2ResDiag[[1]],
+  mlAllSlopeL2ResDiag[[2]]$`study:PID`,
+  mlAllSlopeL2ResDiag[[2]]$`study`,
+  mlAllSlopeL2ResDiag[[3]],
+  mlAllSlopeL2ResDiag[[4]]
+)
+```
+
+We find that the person-level nesting adds a significant amount of explained variance to the model. In terms of fixed effects results, we again find that within-person and between-person outgroup interactions are meaningfully associated with outgroup attitudes, while non-outgroup interactions are not.
+
+### Random Slopes Person and Study Level
+
+In a final step, we also let the two main predictor vary between studies. Given that there is not much variation in outgroup attitudes that is accounted for by the study grouping, and because the predictors can already vary between participants, we don't expect this to be a meaningful addition.
+
+```{r joint ML random slopes L2 and L3}
+# Run three level regregression model (MLM-3)
+mlAllSlopeL23Res <- lmer(
+  AttitudesDutch ~ OutgroupInteractionC + NonOutgroupInteractionC + OutgroupInteractionM + NonOutgroupInteractionM
+  + (1+OutgroupInteractionC+NonOutgroupInteractionC|study)
+  + (1+OutgroupInteractionC+NonOutgroupInteractionC|study:PID),
+  data = mlAll
+)
+#summary(mlAllSlopeL23Res)
+summ(
+  mlAllSlopeL23Res, 
+  confint = TRUE,
+  digits = 3
+)
+
+# standardized coefficients
+stdCoef.merMod(mlAllSlopeL23Res)
+
+# Compare new model to previous step
+anova(
+  mlAllIntRes,
+  mlAllSlopeL2Res,
+  mlAllSlopeL23Res
+) %>%
+  as.data.frame() %>%
+  mutate(
+    Chisq = round(Chisq, 3),
+    `p-value` = ifelse(`Pr(>Chisq)`>=.001, round(`Pr(>Chisq)`, 3), "< .001")
+  ) %>%
+  select(-`Pr(>Chisq)`) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Across Studies: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# 95%CIs
+mlAllSlopeL2ResCI <- 
+  confint(method = "Wald", mlAllSlopeL2Res)
+
+sjPlot::plot_model(
+  mlAllSlopeL23Res,
+  dot.size = 1.5,
+  show.values = TRUE
+) +
+  geom_hline(yintercept = 0, color = "black", linetype = "longdash", alpha = .75) +
+  labs(title = "Fixed Effects on Outgroup Attidues\n(Random Slopes Person and Study Level)") +
+  theme_Publication() +
+  theme(plot.title = element_text(size=14, face="bold", hjust = 0.5))
+sjPlot::plot_model(
+  mlAllSlopeL23Res,
+  type = "std",
+  dot.size = 1.5,
+  show.values = TRUE
+  ) +
+  geom_hline(yintercept = 0, color = "black", linetype = "longdash", alpha = .75) +
+  labs(title = "Fixed Effects on Outgroup Attidues\n(Random Slopes Person and Study Level)\n[Standardized Betas]") +
+  theme_Publication() +
+  theme(plot.title = element_text(size=14, face="bold", hjust = 0.5))
+
+```
+
+We find that the additional third-level random slopes, indeed do not add significantly to the model. Also the effect sizes and confidence intervals are not affected by this addition.
 
 # **Export for Methods and Results**  
 
