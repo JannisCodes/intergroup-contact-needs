@@ -9679,16 +9679,14 @@ robustMetaSDT <-
 
 Because between-person analyses were individually underpowered, we also combined the three data sets for a global test of of the general contact hypothesis. These analyses should in practice mirror the results of the meta analysis estimates from the forest plots above. However, given the availability of the full data, this approach offers additional support for the general effects and should clear up discrepancies between studies.
 
-Two analyses: 
+Three analyses: 
 
-1. Linear regression of within-person aggregated data (while controlling for study). This mirrors the most common measurement/conceptualization in cross-section literature and is the only option of including the effects of both the interaction and the interaction quality (because interaction quality ratings are only available for measurements following an interaction).
-2. Multilevel regression to check for a general contact effect (while controlling for study). This addresses whether a the positive effect on outgroup attitudes is unique to outgroup interactions --- as opposed to being a general social embeddedness effect.
+1. Correlational analysis of the aggregated data across the three studies.
+2. Linear regression of within-person aggregated data (while controlling for study). This mirrors the most common measurement/conceptualization in cross-section literature and is the only option of including the effects of both the interaction and the interaction quality (because interaction quality ratings are only available for measurements following an interaction).
+3. Multilevel regression to check for a general contact effect (while controlling for study). This addresses whether a the positive effect on outgroup attitudes is unique to outgroup interactions --- as opposed to being a general social embeddedness effect.
 
-## Linear Regression Contact Fequency and -Quality
-
-We begin with the liner ordinary least squares regression. For this purpose, we merge the three aggregated data sets. We assess the regression effects, while controlling for the possible effects of study-specific differences. To include the study-membership as a control variable, we use the student sample (Study 2) as the reference group because it is both the largest and the most homogeneous study.
-
-```{r OLS regression across the three studies}
+```{r join data sets for analysis}
+# Join aggregated data
 avS1 <- workerAvFreQual %>%
   select(
     -ExternalReference
@@ -9708,41 +9706,17 @@ avS3 <- medicalContactFreq %>%
   )
 
 avAll <- bind_rows(avS1, avS2, avS3) %>%
-  mutate(ID = c(1:nrow(.)))
-
+  mutate(
+    ID = c(1:nrow(.)),
+    studyNum1 = ifelse(study == "S1", 1, 0),
+    studyNum3 = ifelse(study == "S3", 1, 0)
+  )
 avAll$study2 <- relevel(as.factor(avAll$study),"S2")
 
-lmAllAttFreqQualX <-
-  lm(
-    AvAttitude ~ SumContactNL_c * AvQuality_c + SumContactNL_c * study2 + AvQuality_c * study2,
-    data = avAll
-  )
 
-summ(
-  lmAllAttFreqQualX,
-  confint = TRUE,
-  digits = 3
-)
-
-```
-
-## Multilevel Regression Interaction Types 
-
-We also replicate the basic contact type analysis across all three studies. This analysis should again mirror the estimates from the forest plots but should offer additional evidence for a set of analyses that has seen relatively heterogenity across the three studies (also given the differing number of outgroup interactions).
-
-One additional complication of this model is the three level structure because timepoints are nested within participants, who are nested within studies. This also brings up the question on which level we would expect and should model random slopes. We chose a three-step approach:
-
-1. Random Intercepts
-2. Random Slopes Person Level
-3. Random Slopes Person- and Study Level
-
-Theoretically, we see the random slopes at the person-level as the most important test (i.e., Step 2). This step still "controls for" the study-nestedness as part of the random intercepts, while the random slopes at the study level become more difficult to interpret for our main contact variables of interest.
-
-
-```{r prepare joint ML data}
+# Join key raw variables
 # Usually: Create Simple Effects Coding for the three Studies with S2 being the reference group
 # However, with clustering, stay with dummy because proportions interpretations become unnecessarily complicated
-
 allMlS1 <- workerInteractionType %>%
   select(
     PID,
@@ -9806,6 +9780,70 @@ mlAll <- bind_rows(allMlS1, allMlS2, allMlS3) %>%
     NonOutgroupInteractionMC = scale(NonOutgroupInteractionM, center = TRUE, scale = FALSE)[,1], 
   )
 ```
+
+## Correlational Analysis
+
+We begin with the most descriptive analysis of simply assessing bivariate correlations of the person-aggregated data. For each participant we aggregate the number of contacts they had over the study period, what their average interaction quality was, and how positive they were about the Dutch on average. 
+
+It should be noted that this first step does not account for the fact that the participants came from different study samples and the bivariate correlations do not partial out the effect of other potential third variables. At the same time, however, this analysis mirrors one of the most common conceptualizations of the contact hypothesis within the (cross-sectional) literature --- i.e., a correlation of retrospective aggregations of the number of contacts and average contact quality with outgroup attitudes as an effect size of the intergroup contact hypothesis.
+
+```{r cor across the three studies}
+# correlation panel
+pairs.panels.new(
+  avAll %>% select(SumContactNL, SumContactNLAll, AvQuality, AvAttitude),
+  labels = c(
+    "Sum:\nNumer of beeps with Outgroup Contact (NL)",
+    "Sum:\nNumber of Outgroup Contacts (NL)",
+    "Mean:\nInteraction Quality",
+    "Mean:\nOutgroup Attitudes (NL)"
+  )
+)
+
+# correlation panel with interaction sums winsorized
+pairs.panels.new(
+  avAll %>% select(WinSumContactNL, WinSumContactNLAll, AvQuality, AvAttitude),
+  labels = c(
+    "Sum:\nNumer of beeps with Outgroup Contact (NL)\n[Winsorized]",
+    "Sum:\nNumber of Outgroup Contacts (NL)\n[Winsorized]",
+    "Mean:\nInteraction Quality",
+    "Mean:\nOutgroup Attitudes (NL)"
+  )
+)
+
+```
+
+We find that under some circumstances there is a small to medium correlation between the number of interactions and average interaction quality ratings. However, none of the aggregated variables meaningfully correlates with average outgroup attitudes in a bivariate manner.
+
+## Linear Regression Contact Fequency and -Quality
+
+We begin with the liner ordinary least squares regression. For this purpose, we merge the three aggregated data sets. We assess the regression effects, while controlling for the possible effects of study-specific differences. To include the study-membership as a control variable, we use the student sample (Study 2) as the reference group because it is both the largest and the most homogeneous study.
+
+```{r OLS regression across the three studies}
+lmAllAttFreqQualX <-
+  lm(
+    AvAttitude ~ SumContactNL_c * AvQuality_c + SumContactNL_c * study2 + AvQuality_c * study2,
+    data = avAll
+  )
+
+summ(
+  lmAllAttFreqQualX,
+  confint = TRUE,
+  digits = 3
+)
+
+```
+
+## Multilevel Regression Interaction Types 
+
+We also replicate the basic contact type analysis across all three studies. This analysis should again mirror the estimates from the forest plots but should offer additional evidence for a set of analyses that has seen relatively heterogenity across the three studies (also given the differing number of outgroup interactions).
+
+One additional complication of this model is the three level structure because timepoints are nested within participants, who are nested within studies. This also brings up the question on which level we would expect and should model random slopes. We chose a three-step approach:
+
+1. Random Intercepts
+2. Random Slopes Person Level
+3. Random Slopes Person- and Study Level
+
+Theoretically, we see the random slopes at the person-level as the most important test (i.e., Step 2). This step still "controls for" the study-nestedness as part of the random intercepts, while the random slopes at the study level become more difficult to interpret for our main contact variables of interest.
 
 ```{r lmerAll descriptive plot}
 ggplot(mlAll %>% filter(!is.na(OutgroupInteraction), !is.na(NonOutgroupInteraction)), 
@@ -10125,6 +10163,11 @@ names(dtStudentSupp) <- ls(pattern = "student")
 # Medical sample
 dtMedicalSupp <- lapply(ls(pattern = "medical"), get)
 names(dtMedicalSupp) <- ls(pattern = "medical")
+
+dtAll <- list(
+  avAll = avAll,
+  mlAll = mlAll
+)
 
 # collect and export all data files
 save(list = ls(pattern = "dt"), file = "data/wrangled.RData")
