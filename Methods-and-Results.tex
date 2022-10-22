@@ -679,3 +679,231 @@ times larger (with all scaling being equal). For full results see Table
 Online Supplementary Material A. Across all three studies, psychological
 need fulfillment, thus, remained a robust and flexible predictor of
 positive outgroup attitudes.
+
+\section{Embeddedness and Stability across Studies}
+
+\begin{center}
+    \noindent\rule{8cm}{0.4pt}\\
+    \hl{\textit{New Section:}}\\
+    \vspace{-0.25cm}
+    \noindent\rule{8cm}{0.4pt}
+\end{center}
+
+Introduction sentence
+
+\hl{maybe move this first paragraph to the end?}
+\subsection{Stability}
+
+We begin by assessing the stability of our main analyses across the
+three studies. To do so, we plot the effect sizes of each parameter of
+interest in a forest plot. Forest plots are a popular form of evidence
+synthesis and are commonly found within meta-analytic efforts. By
+plotting a standardized effect size and confidence interval of key
+parameters for each study, forest plots offer a visual method of
+identifying broader patterns across studies. This affords users a chance
+to spot stable as well as unreliable effects more easily. While not the
+focus of our efforts here, forest plots are commonly accompanied with a
+meta-analytic effect size that summarizes the effect size across
+studies.
+
+We assess forest plots of the basic contact hypothesis test (Figure
+\ref{fig:ContactHypothesis}), the core need fulfillment proposal (Figure
+\ref{fig:AllportNeedFulfillment}), as well as the robustness analyses
+(Figure \ref{fig:Robustness}). For the basic contact hypothesis test we
+see that outgroup contact has a strong and consistent effect on outgroup
+attitudes while interactions with non-outgroup members consistently have
+no meaningful effect on outgroup attitudes. While this would be expected
+from the general intergroup contact literature, this is not a trivial
+finding. We are among the first to assess the contact hypothesis using
+real-life data from intensive longitudinal data and these close to event
+assessments are comparable but not equivalent to the assessments found
+in cross-sectional data (also see below). When looking at Figure
+\ref{fig:AllportNeedFulfillment}, we see that the fulfillment of core
+needs during intergroup contacts is consistently a meaningful predictor
+of outgroup attitudes and interaction quality perceptions (see Figure
+\ref{fig:AllportNeedFulfillment} A and B). We also see that the effect
+of core need fulfillment on outgroup attitudes is strongly reduced when
+modeled together with interaction quality perceptions, supporting our
+assertion that interaction quality offers a psychological mechanism for
+the direct effect. Additionally, the core need fulfillment is also
+consistently outgroup contact specific (Figure \ref{fig:Robustness} A)
+and remains a meaningful predictor of outgroup attitudes even when
+controlling for traditional psychological need fulfillments (Figure
+\ref{fig:Robustness} B).
+
+\subsection{General contact hypothesis}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Join aggregated data}
+\NormalTok{avS1 }\OtherTok{\textless{}{-}}\NormalTok{ dtWorkerSupp}\SpecialCharTok{$}\NormalTok{workerAvFreQual }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(}
+    \SpecialCharTok{{-}}\NormalTok{ExternalReference}
+\NormalTok{  ) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}
+    \AttributeTok{PID =} \FunctionTok{c}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\FunctionTok{nrow}\NormalTok{(.)),}
+    \AttributeTok{study =} \StringTok{"S1"}
+\NormalTok{  ) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(PID, }\FunctionTok{everything}\NormalTok{())}
+\NormalTok{avS2 }\OtherTok{\textless{}{-}}\NormalTok{ dtStudentSupp}\SpecialCharTok{$}\NormalTok{studentContactFreq }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}
+    \AttributeTok{study =} \StringTok{"S2"}
+\NormalTok{  )}
+\NormalTok{avS3 }\OtherTok{\textless{}{-}}\NormalTok{ dtMedicalSupp}\SpecialCharTok{$}\NormalTok{medicalContactFreq }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}
+    \AttributeTok{study =} \StringTok{"S3"}
+\NormalTok{  )}
+
+\NormalTok{avAll }\OtherTok{\textless{}{-}} \FunctionTok{bind\_rows}\NormalTok{(avS1, avS2, avS3) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}
+    \AttributeTok{ID =} \FunctionTok{c}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\FunctionTok{nrow}\NormalTok{(.)),}
+    \AttributeTok{studyNum1 =} \FunctionTok{ifelse}\NormalTok{(study }\SpecialCharTok{==} \StringTok{"S1"}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{0}\NormalTok{),}
+    \AttributeTok{studyNum3 =} \FunctionTok{ifelse}\NormalTok{(study }\SpecialCharTok{==} \StringTok{"S3"}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{0}\NormalTok{)}
+\NormalTok{  )}
+\NormalTok{avAll}\SpecialCharTok{$}\NormalTok{study2 }\OtherTok{\textless{}{-}} \FunctionTok{relevel}\NormalTok{(}\FunctionTok{as.factor}\NormalTok{(avAll}\SpecialCharTok{$}\NormalTok{study),}\StringTok{"S2"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{lmAllAttFreqQualX }\OtherTok{\textless{}{-}}
+  \FunctionTok{lm}\NormalTok{(}
+\NormalTok{    AvAttitude }\SpecialCharTok{\textasciitilde{}}\NormalTok{ SumContactNL\_c }\SpecialCharTok{*}\NormalTok{ AvQuality\_c }\SpecialCharTok{+}\NormalTok{ SumContactNL\_c }\SpecialCharTok{*}\NormalTok{ study2 }\SpecialCharTok{+}\NormalTok{ AvQuality\_c }\SpecialCharTok{*}\NormalTok{ study2,}
+    \AttributeTok{data =}\NormalTok{ avAll}
+\NormalTok{  )}
+
+\FunctionTok{summ}\NormalTok{(}
+\NormalTok{  lmAllAttFreqQualX,}
+  \AttributeTok{confint =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{digits =} \DecValTok{3}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{table}[!h]
+\centering
+\begin{tabular}{lr}
+\toprule
+\cellcolor{gray!6}{Observations} & \cellcolor{gray!6}{205 (2 missing obs. deleted)}\\
+Dependent variable & AvAttitude\\
+\cellcolor{gray!6}{Type} & \cellcolor{gray!6}{OLS linear regression}\\
+\bottomrule
+\end{tabular}
+\end{table} \begin{table}[!h]
+\centering
+\begin{tabular}{lr}
+\toprule
+\cellcolor{gray!6}{F(9,195)} & \cellcolor{gray!6}{2.643}\\
+R² & 0.109\\
+\cellcolor{gray!6}{Adj. R²} & \cellcolor{gray!6}{0.068}\\
+\bottomrule
+\end{tabular}
+\end{table} \begin{table}[!h]
+\centering
+\begin{threeparttable}
+\begin{tabular}{lrrrrr}
+\toprule
+  & Est. & 2.5\% & 97.5\% & t val. & p\\
+\midrule
+\cellcolor{gray!6}{(Intercept)} & \cellcolor{gray!6}{67.297} & \cellcolor{gray!6}{64.274} & \cellcolor{gray!6}{70.319} & \cellcolor{gray!6}{43.908} & \cellcolor{gray!6}{0.000}\\
+SumContactNL\_c & 0.736 & 0.328 & 1.144 & 3.558 & 0.000\\
+\cellcolor{gray!6}{AvQuality\_c} & \cellcolor{gray!6}{0.222} & \cellcolor{gray!6}{-0.119} & \cellcolor{gray!6}{0.563} & \cellcolor{gray!6}{1.283} & \cellcolor{gray!6}{0.201}\\
+study2S1 & 3.062 & -4.600 & 10.724 & 0.788 & 0.432\\
+\cellcolor{gray!6}{study2S3} & \cellcolor{gray!6}{-2.510} & \cellcolor{gray!6}{-7.348} & \cellcolor{gray!6}{2.328} & \cellcolor{gray!6}{-1.023} & \cellcolor{gray!6}{0.307}\\
+\addlinespace
+SumContactNL\_c:AvQuality\_c & 0.002 & -0.020 & 0.024 & 0.198 & 0.843\\
+\cellcolor{gray!6}{SumContactNL\_c:study2S1} & \cellcolor{gray!6}{-0.684} & \cellcolor{gray!6}{-1.441} & \cellcolor{gray!6}{0.073} & \cellcolor{gray!6}{-1.782} & \cellcolor{gray!6}{0.076}\\
+SumContactNL\_c:study2S3 & -0.595 & -1.076 & -0.113 & -2.437 & 0.016\\
+\cellcolor{gray!6}{AvQuality\_c:study2S1} & \cellcolor{gray!6}{0.518} & \cellcolor{gray!6}{-0.313} & \cellcolor{gray!6}{1.349} & \cellcolor{gray!6}{1.229} & \cellcolor{gray!6}{0.220}\\
+AvQuality\_c:study2S3 & 0.133 & -0.367 & 0.634 & 0.526 & 0.600\\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\item Standard errors: OLS
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# prepare F stat for manuscript}
+\NormalTok{fit }\OtherTok{\textless{}{-}} \FunctionTok{summary}\NormalTok{(lmAllAttFreqQualX)}
+\NormalTok{lmAllFstatLatex }\OtherTok{\textless{}{-}} \FunctionTok{paste}\NormalTok{(}
+  \StringTok{"}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{textit\{F\}("}\NormalTok{,}
+\NormalTok{  fit}\SpecialCharTok{$}\NormalTok{fstatistic[}\StringTok{"numdf"}\NormalTok{],}
+  \StringTok{", "}\NormalTok{,}
+\NormalTok{  fit}\SpecialCharTok{$}\NormalTok{fstatistic[}\StringTok{"dendf"}\NormalTok{],}
+  \StringTok{") = "}\NormalTok{,}
+  \FunctionTok{format}\NormalTok{(}\FunctionTok{round}\NormalTok{(fit}\SpecialCharTok{$}\NormalTok{fstatistic[}\StringTok{"value"}\NormalTok{], }\DecValTok{2}\NormalTok{), }\AttributeTok{nsmall =} \DecValTok{2}\NormalTok{),}
+  \StringTok{", }\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{textit\{p\} = "}\NormalTok{,}
+  \FunctionTok{format}\NormalTok{(}\FunctionTok{round}\NormalTok{(}
+    \FunctionTok{pf}\NormalTok{(}
+\NormalTok{      fit}\SpecialCharTok{$}\NormalTok{fstatistic[}\StringTok{"value"}\NormalTok{],}
+\NormalTok{      fit}\SpecialCharTok{$}\NormalTok{fstatistic[}\StringTok{"numdf"}\NormalTok{],}
+\NormalTok{      fit}\SpecialCharTok{$}\NormalTok{fstatistic[}\StringTok{"dendf"}\NormalTok{],}
+      \AttributeTok{lower.tail =} \ConstantTok{FALSE}
+\NormalTok{    ),}
+    \DecValTok{3}
+\NormalTok{  ), }\AttributeTok{nsmall =} \DecValTok{3}\NormalTok{),}
+  \StringTok{", }\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{textit\{R}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{textsuperscript\{2\}\} = "}\NormalTok{,}
+  \FunctionTok{format}\NormalTok{(}\FunctionTok{round}\NormalTok{(fit}\SpecialCharTok{$}\NormalTok{r.squared, }\DecValTok{2}\NormalTok{), }\AttributeTok{nsmall =} \DecValTok{2}\NormalTok{),}
+  \AttributeTok{sep =} \StringTok{""}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+During the main analyses, we have thus far shown that participants held
+more positive outgroup attitudes following intergroup contacts and that
+a perceived interaction quality was associated with more positive
+outgroup attitudes following an intergroup contact. We have, however,
+not brought the two elements of the contact hypothesis together in a
+single analysis. This is mainly due to the difficulty that interaction
+quality ratings are only possible when participants had an interaction
+--- which means that the two factors cannot be assessed in a multilevel
+analysis that models individual measurement occasions. This has not been
+an issue in the past literature because experimental and cross-sectional
+data collections have only considered cases in which intergroup contacts
+were present. Outside of the lab, the most common method has been to ask
+participants to recall how many interactions they had over the past
+month, how positive these interactions were, and how positive they feel
+towards the outgroup in general. The effects of intergroup contacts,
+interaction quality, and outgroup attitudes are thus aggregated by the
+participant in a cognitive recall aggregation. Intensive longitudinal
+data also allows for aggregation of all three variables, with the
+differences that the measurements are aggregated from individual reports
+that are close to the actual experience. However, this aggregation
+process summarizes the dense multitude of measurement occasions as
+single summary statistics per participants. This by extension means that
+we face statistical power restrictions on the person level and have this
+decided to only present this analysis based on a combined data set of
+all three studies.
+
+We thus run a linear regression model where average outgroup attitudes
+are predicted by the number of interactions and the average interaction
+quality ratings of all participants across the three studies. We do so
+while controlling for the possible effects of study-specific
+differences. To include the study-membership as a control variable, we
+use the student sample (Study 2) as the reference group because it is
+both the largest and the most homogeneous study. Looking at the overall
+model, we find that the model predicts a statistically significant
+amount of variance in average outgroup attitudes (\textit{F}(9, 195) =
+2.64, \textit{p} = 0.007, \textit{R\textsuperscript{2}} = 0.11). Looking
+at the individual effects, we find that only the number of outgroup
+interactions is associated with average outgroup attitudes (\textit{b} =
+0.74, \textit{t}(195) = 3.56, \textit{p} \textless{} .001,
+\textit{95\%CI}{[}0.33, 1.14{]}). Neither the average interaction
+quality perceptions nor an interaction of amount and quality of contact
+are meaningful or significant predictors of average outgroup attitudes
+(both \textit{b} \textless0.22 and \textit{p} \textgreater{} .201). In
+short, participants who on average had more positive interactions were
+not statistically more likely to show higher average outgroup attitudes.
+This result is surprising because it contradicts the tenet of the
+intergroup contact hypothesis that intergroup contact depends on
+positive contact. Additionally, the aggregated results contradict the
+results of our own multi-level regressions, where we have shown that the
+positive effect of individual outgroup interactions dependent on
+interaction quality perceptions.
+
+\subsection{Contact key need content}
+
+topic model

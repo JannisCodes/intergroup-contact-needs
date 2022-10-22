@@ -317,6 +317,39 @@ MlCoeffHtml <- function(lmeMdl = NULL, lmerCI = NULL, varName = NULL) {
   }
 }
 
+LmCoeffLatex <- function(lmMdl = NULL, varName = NULL, ci = TRUE) {
+  # lmMdl <- lmAllAttFreqQualX
+  # varName <- "SumContactNL_c"
+  
+  lmCI <-  confint(lmMdl)
+  lmEta <- effectsize::eta_squared(lmMdl)
+  
+  b <- coef(summary(lmMdl))[varName,"Estimate"] %>% round(2) %>% format(nsmall=2)
+  df <- lmMdl$df.residual %>% as.numeric
+  t <- coef(summary(lmMdl))[varName,"t value"] %>% round(2) %>% format(nsmall=2)
+  p <- ifelse(coef(summary(lmMdl))[varName,"Pr(>|t|)"]<.001, "< .001", paste0("= ", coef(summary(lmMdl))[varName,"Pr(>|t|)"] %>% round(3) %>% format(nsmall=3)))
+  etaSqP <- lmEta$Eta2_partial[lmEta$Parameter == varName]
+  
+  if (ci == TRUE) {
+    CIlwr <- lmCI[varName, "2.5 %"] %>% round(2) %>% format(nsmall=2)
+    CIupr <- lmCI[varName, "97.5 %"] %>% round(2) %>% format(nsmall=2)
+    
+    paste0(
+      "\\textit{b} = ", b, 
+      ", \\textit{t}(", format(df, big.mark=","), ") = ", t,
+      ", \\textit{p} ", p,
+      ", \\textit{95\\%CI}[", CIlwr, ", ", CIupr, "]"
+    )
+  } else {
+    paste0(
+      "\\textit{b} = ", b, 
+      ", \\textit{t}(", format(df, big.mark=","), ") = ", t,
+      ", \\textit{p} ", p
+    )
+  }
+}
+
+
 linesep<-function(x,y=character()){
   if(!length(x))
     return(y)

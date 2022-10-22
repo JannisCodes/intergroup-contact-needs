@@ -4761,6 +4761,98 @@ medicalSdtCompChiSq <- paste0("$\\chi^2$(", medicalSdtCompDf, ", \\textit{N} = "
 
 In a final step, we again checked whether during the interaction the core situational need remains a meaningful predictor even when taking other fundamental psychological needs into account. We find that the core need fulfillment adds additional variance above a model with only the self-determination theory needs (random slopes models; `r medicalSdtCompChiSq`). We find that the core need explains the most variance in outgroup attitudes after an outgroup contact (`r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreSdt, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreSdtCI, varName = "KeyNeedFulfillment_cwc")`). When compared to the model with only the SDT needs, the core need fulfillment flexibly takes on some of the explained variance of all of the three fundamental needs. However, similar to the previous study, in this large sample relatedness (`r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreSdt, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreSdtCI, varName = "Relatedness_cwc")`), competence (`r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreSdt, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreSdtCI, varName = "Competence_cwc")`) and autonomy (`r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreSdt, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreSdtCI, varName = "Autonomy_cwc")`) each also predicted positive outgroup attitudes independently. This being said, the regression coefficient for the core need was three times larger (with all scaling being equal). For full results see Table \ref{tab:robustnessTblLong} and Figure \ref{fig:Robustness} as well as Online Supplementary Material A. Across all three studies, psychological need fulfillment, thus, remained a robust and flexible predictor of positive outgroup attitudes.
 
+\section{Embeddedness and Stability across Studies}
+
+\begin{center}
+    \noindent\rule{8cm}{0.4pt}\\
+    \hl{\textit{New Section:}}\\
+    \vspace{-0.25cm}
+    \noindent\rule{8cm}{0.4pt}
+\end{center}
+
+Introduction sentence
+
+\hl{maybe move this first paragraph to the end?}
+\subsection{Stability}
+We begin by assessing the stability of our main analyses across the three studies. To do so, we plot the effect sizes of each parameter of interest in a forest plot. Forest plots are a popular form of evidence synthesis and are commonly found within meta-analytic efforts. By plotting a standardized effect size and confidence interval of key parameters for each study, forest plots offer a visual method of identifying broader patterns across studies. This affords users a chance to spot stable as well as unreliable effects more easily. While not the focus of our efforts here, forest plots are commonly accompanied with a meta-analytic effect size that summarizes the effect size across studies. 
+
+We assess forest plots of the basic contact hypothesis test (Figure \ref{fig:ContactHypothesis}), the core need fulfillment proposal (Figure \ref{fig:AllportNeedFulfillment}), as well as the robustness analyses (Figure \ref{fig:Robustness}). For the basic contact hypothesis test we see that outgroup contact has a strong and consistent effect on outgroup attitudes while interactions with non-outgroup members consistently have no meaningful effect on outgroup attitudes. While this would be expected from the general intergroup contact literature, this is not a trivial finding. We are among the first to assess the contact hypothesis using real-life data from intensive longitudinal data and these close to event assessments are comparable but not equivalent to the assessments found in cross-sectional data (also see below). When looking at Figure \ref{fig:AllportNeedFulfillment}, we see that the fulfillment of core needs during intergroup contacts is consistently a meaningful predictor of outgroup attitudes and interaction quality perceptions (see Figure \ref{fig:AllportNeedFulfillment} A and B). We also see that the effect of core need fulfillment on outgroup attitudes is strongly reduced when modeled together with interaction quality perceptions, supporting our assertion that interaction quality offers a psychological mechanism for the direct effect. Additionally, the core need fulfillment is also consistently outgroup contact specific (Figure \ref{fig:Robustness} A) and remains a meaningful predictor of outgroup attitudes even when controlling for traditional psychological need fulfillments (Figure \ref{fig:Robustness} B).
+
+\subsection{General contact hypothesis}
+```{r join data sets for analysis}
+# Join aggregated data
+avS1 <- dtWorkerSupp$workerAvFreQual %>%
+  select(
+    -ExternalReference
+  ) %>%
+  mutate(
+    PID = c(1:nrow(.)),
+    study = "S1"
+  ) %>%
+  select(PID, everything())
+avS2 <- dtStudentSupp$studentContactFreq %>%
+  mutate(
+    study = "S2"
+  )
+avS3 <- dtMedicalSupp$medicalContactFreq %>%
+  mutate(
+    study = "S3"
+  )
+
+avAll <- bind_rows(avS1, avS2, avS3) %>%
+  mutate(
+    ID = c(1:nrow(.)),
+    studyNum1 = ifelse(study == "S1", 1, 0),
+    studyNum3 = ifelse(study == "S3", 1, 0)
+  )
+avAll$study2 <- relevel(as.factor(avAll$study),"S2")
+```
+```{r OLS regression across the three studies}
+lmAllAttFreqQualX <-
+  lm(
+    AvAttitude ~ SumContactNL_c * AvQuality_c + SumContactNL_c * study2 + AvQuality_c * study2,
+    data = avAll
+  )
+
+summ(
+  lmAllAttFreqQualX,
+  confint = TRUE,
+  digits = 3
+)
+
+# prepare F stat for manuscript
+fit <- summary(lmAllAttFreqQualX)
+lmAllFstatLatex <- paste(
+  "\\textit{F}(",
+  fit$fstatistic["numdf"],
+  ", ",
+  fit$fstatistic["dendf"],
+  ") = ",
+  format(round(fit$fstatistic["value"], 2), nsmall = 2),
+  ", \\textit{p} = ",
+  format(round(
+    pf(
+      fit$fstatistic["value"],
+      fit$fstatistic["numdf"],
+      fit$fstatistic["dendf"],
+      lower.tail = FALSE
+    ),
+    3
+  ), nsmall = 3),
+  ", \\textit{R\\textsuperscript{2}} = ",
+  format(round(fit$r.squared, 2), nsmall = 2),
+  sep = ""
+)
+```
+
+During the main analyses, we have thus far shown that participants held more positive outgroup attitudes following intergroup contacts and that a perceived interaction quality was associated with more positive outgroup attitudes following an intergroup contact. We have, however, not brought the two elements of the contact hypothesis together in a single analysis. This is mainly due to the difficulty that interaction quality ratings are only possible when participants had an interaction --- which means that the two factors cannot be assessed in a multilevel analysis that models individual measurement occasions. This has not been an issue in the past literature because experimental and cross-sectional data collections have only considered cases in which intergroup contacts were present. Outside of the lab, the most common method has been to ask participants to recall how many interactions they had over the past month, how positive these interactions were, and how positive they feel towards the outgroup in general. The effects of intergroup contacts, interaction quality, and outgroup attitudes are thus aggregated by the participant in a cognitive recall aggregation. Intensive longitudinal data also allows for aggregation of all three variables, with the differences that the measurements are aggregated from individual reports that are close to the actual experience. However, this aggregation process summarizes the dense multitude of measurement occasions as single summary statistics per participants. This by extension means that we face statistical power restrictions on the person level and have this decided to only present this analysis based on a combined data set of all three studies.
+
+We thus run a linear regression model where average outgroup attitudes are predicted by the number of interactions and the average interaction quality ratings of all participants across the three studies. We do so while controlling for the possible effects of study-specific differences. To include the study-membership as a control variable, we use the student sample (Study 2) as the reference group because it is both the largest and the most homogeneous study. Looking at the overall model, we find that the model predicts a statistically significant amount of variance in average outgroup attitudes (`r lmAllFstatLatex`). Looking at the individual effects, we find that only the number of outgroup interactions is associated with average outgroup attitudes (`r LmCoeffLatex(lmMdl = lmAllAttFreqQualX, varName = "SumContactNL_c", ci = TRUE)`). Neither the average interaction quality perceptions nor an interaction of amount and quality of contact are meaningful or significant predictors of average outgroup attitudes (both \textit{b} <0.22 and \textit{p} > .201). In short, participants who on average had more positive interactions were not statistically more likely to show higher average outgroup attitudes. This result is surprising because it contradicts the tenet of the intergroup contact hypothesis that intergroup contact depends on positive contact. Additionally, the aggregated results contradict the results of our own multi-level regressions, where we have shown that the positive effect of individual outgroup interactions dependent on interaction quality perceptions. 
+
+\subsection{Contact key need content}
+topic model
+
+
 ```{r intergroupGeneralTblLong, include=FALSE}
 # Table of intergroup contact in ESM data:
 # lm
