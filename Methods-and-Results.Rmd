@@ -4779,7 +4779,8 @@ We begin by assessing the stability of our main analyses across the three studie
 We assess forest plots of the basic contact hypothesis test (Figure \ref{fig:ContactHypothesis}), the core need fulfillment proposal (Figure \ref{fig:AllportNeedFulfillment}), as well as the robustness analyses (Figure \ref{fig:Robustness}). For the basic contact hypothesis test we see that outgroup contact has a strong and consistent effect on outgroup attitudes while interactions with non-outgroup members consistently have no meaningful effect on outgroup attitudes. While this would be expected from the general intergroup contact literature, this is not a trivial finding. We are among the first to assess the contact hypothesis using real-life data from intensive longitudinal data and these close to event assessments are comparable but not equivalent to the assessments found in cross-sectional data (also see below). When looking at Figure \ref{fig:AllportNeedFulfillment}, we see that the fulfillment of core needs during intergroup contacts is consistently a meaningful predictor of outgroup attitudes and interaction quality perceptions (see Figure \ref{fig:AllportNeedFulfillment} A and B). We also see that the effect of core need fulfillment on outgroup attitudes is strongly reduced when modeled together with interaction quality perceptions, supporting our assertion that interaction quality offers a psychological mechanism for the direct effect. Additionally, the core need fulfillment is also consistently outgroup contact specific (Figure \ref{fig:Robustness} A) and remains a meaningful predictor of outgroup attitudes even when controlling for traditional psychological need fulfillments (Figure \ref{fig:Robustness} B).
 
 \subsection{General contact hypothesis}
-```{r join data sets for analysis}
+
+```{r join data sets for analysis, include=FALSE}
 # Join aggregated data
 avS1 <- dtWorkerSupp$workerAvFreQual %>%
   select(
@@ -4807,7 +4808,7 @@ avAll <- bind_rows(avS1, avS2, avS3) %>%
   )
 avAll$study2 <- relevel(as.factor(avAll$study),"S2")
 ```
-```{r OLS regression across the three studies}
+```{r OLS regression across the three studies, include=FALSE}
 lmAllAttFreqQualX <-
   lm(
     AvAttitude ~ SumContactNL_c * AvQuality_c + SumContactNL_c * study2 + AvQuality_c * study2,
