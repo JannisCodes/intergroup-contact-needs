@@ -1035,6 +1035,7 @@ df <- df %>%
 dtStudents$full <- df
 rm(df)
 
+
 # Between participants contact frequency
 studentContactFreq <- dtStudents$full %>%
   group_by(PID) %>%
@@ -1044,7 +1045,8 @@ studentContactFreq <- dtStudents$full %>%
     PercContactNL = SumContactNL / n * 100,
     SumContactNLAll = sum(ContactNum[InteractionDumDutch == 1], na.rm = TRUE),
     AvAttitude = mean(AttitudesDutch, na.rm = TRUE),
-    AvQuality = mean(quality_overall, na.rm = TRUE)
+    AvQuality = mean(quality_overall, na.rm = TRUE),
+    AvQualityOut = mean(quality_overall[InteractionDumDutch==1], na.rm = TRUE)
   ) %>%
   mutate(
     WinSumContactNL = DescTools::Winsorize(SumContactNL),
@@ -1463,7 +1465,8 @@ medicalContactFreq <-
     PercContactNL = SumContactNL / n * 100,
     SumContactNLAll = sum(ContactNum[InteractionDumDutch == 1], na.rm = TRUE),
     AvAttitude = mean(AttitudesDutch, na.rm = TRUE),
-    AvQuality = mean(qualityOverall, na.rm = TRUE)
+    AvQuality = mean(qualityOverall, na.rm = TRUE),
+    AvQualityOut = mean(qualityOverall[InteractionDumDutch==1], na.rm = TRUE)
   ) %>%
   mutate(
     WinSumContactNL = DescTools::Winsorize(SumContactNL),
@@ -1873,7 +1876,8 @@ workerAvFreQual <- dtWorker$full %>%
     PercContactNL = SumContactNL / n * 100,
     SumContactNLAll = sum(number),
     AvAttitude = mean(thermometerDutch_1, na.rm = TRUE),
-    AvQuality = mean(quality_overall_1, na.rm = TRUE)
+    AvQuality = mean(quality_overall_1, na.rm = TRUE),
+    AvQualityOut = mean(quality_overall_1[Contact_dum==1], na.rm = TRUE)
   ) %>%
   mutate(
     WinSumContactNL = DescTools::Winsorize(SumContactNL),
@@ -1881,7 +1885,8 @@ workerAvFreQual <- dtWorker$full %>%
     SumContactNL_c = SumContactNL - mean(SumContactNL, na.rm = TRUE),
     SumContactNLAll_c = SumContactNLAll - mean(SumContactNLAll, na.rm = TRUE),
     AvAttitude_c = AvAttitude - mean(AvAttitude, na.rm = TRUE),
-    AvQuality_c = AvQuality - mean(AvQuality, na.rm = TRUE)
+    AvQuality_c = AvQuality - mean(AvQuality, na.rm = TRUE),
+    AvQualityOut_c = AvQualityOut - mean(AvQualityOut, na.rm = TRUE)
   )
 ```
 
@@ -1914,7 +1919,7 @@ Within the data, we find a medium sized correlation between the participants' Av
 ```{r workerModelOlsAttFreqQual}
 # regression
 mdlWorker$lmAttFreqQualX <-
-  lm(AvAttitude ~ SumContactNL_c * AvQuality_c, data = workerAvFreQual)
+  lm(AvAttitude ~ SumContactNL_c * AvQualityOut_c, data = workerAvFreQual)
 # summary(lmWorkerAttFreqQualX)
 
 summ(
@@ -1929,14 +1934,14 @@ mdlWorker$lmAttFreqQualXEta <-
 
 interactions::interact_plot(
   mdlWorker$lmAttFreqQualX,
-  pred = AvQuality_c,
+  pred = AvQualityOut_c,
   modx = SumContactNL_c,
   interval = TRUE,
   partial.residuals = TRUE
 )
 
 interactions::johnson_neyman(mdlWorker$lmAttFreqQualX,
-                             pred = AvQuality_c,
+                             pred = AvQualityOut_c,
                              modx = SumContactNL_c,
                              alpha = .05)
 ```
@@ -4077,12 +4082,13 @@ studentContactFreq <-
     SumContactNL_c = SumContactNL - mean(SumContactNL, na.rm = TRUE),
     SumContactNLAll_c = SumContactNLAll - mean(SumContactNLAll, na.rm = TRUE),
     AvAttitude_c = AvAttitude - mean(AvAttitude, na.rm = TRUE),
-    AvQuality_c = AvQuality - mean(AvQuality, na.rm = TRUE)
+    AvQuality_c = AvQuality - mean(AvQuality, na.rm = TRUE),
+    AvQualityOut_c = AvQualityOut - mean(AvQualityOut, na.rm = TRUE)
   )
 
 # regression
 mdlStudent$lmAttFreqQualX <-
-  lm(AvAttitude ~ SumContactNL_c * AvQuality_c, data = studentContactFreq)
+  lm(AvAttitude ~ SumContactNL_c * AvQualityOut_c, data = studentContactFreq)
 
 summ(
   mdlStudent$lmAttFreqQualX,
@@ -4100,14 +4106,14 @@ mdlStudent$lmAttFreqQualXEta <-
 interactions::interact_plot(
   mdlStudent$lmAttFreqQualX,
   pred = SumContactNL_c,
-  modx = AvQuality_c,
+  modx = AvQualityOut_c,
   interval = TRUE,
   partial.residuals = TRUE
 )
 
 interactions::johnson_neyman(mdlStudent$lmAttFreqQualX,
                              pred = SumContactNL_c,
-                             modx = AvQuality_c,
+                             modx = AvQualityOut_c,
                              alpha = .05)
 ```
 
@@ -6054,7 +6060,8 @@ medicalContactFreq <-
     SumContactNL_c = SumContactNL - mean(SumContactNL, na.rm = TRUE),
     SumContactNLAll_c = SumContactNLAll - mean(SumContactNLAll, na.rm = TRUE),
     AvAttitude_c = AvAttitude - mean(AvAttitude, na.rm = TRUE),
-    AvQuality_c = AvQuality - mean(AvQuality, na.rm = TRUE)
+    AvQuality_c = AvQuality - mean(AvQuality, na.rm = TRUE),
+    AvQualityOut_c = AvQualityOut - mean(AvQualityOut, na.rm = TRUE)
   )
 
 # correlation panel
@@ -6211,7 +6218,7 @@ Attitude = ContactFreq \times AverageContactQual
 ```{r medicalModelOlsAttFreqQual}
 # regression
 mdlMedical$lmAttFreqQualX <-
-  lm(AvAttitude ~ SumContactNL_c * AvQuality_c, data = medicalContactFreq)
+  lm(AvAttitude ~ SumContactNL_c * AvQualityOut_c, data = medicalContactFreq)
 
 summ(
   mdlMedical$lmAttFreqQualX,
@@ -6225,14 +6232,14 @@ mdlMedical$lmAttFreqQualXEta <-
 interactions::interact_plot(
   mdlMedical$lmAttFreqQualX,
   pred = SumContactNL_c,
-  modx = AvQuality_c,
+  modx = AvQualityOut_c,
   interval = TRUE,
   partial.residuals = TRUE
 )
 
 interactions::johnson_neyman(mdlMedical$lmAttFreqQualX,
                              pred = SumContactNL_c,
-                             modx = AvQuality_c,
+                             modx = AvQualityOut_c,
                              alpha = .05)
 ```
 
@@ -9805,7 +9812,7 @@ It should be noted that this first step does not account for the fact that the p
 ```{r cor across the three studies}
 # correlation panel
 pairs.panels.new(
-  avAll %>% select(SumContactNL, SumContactNLAll, AvQuality, AvAttitude),
+  avAll %>% select(SumContactNL, SumContactNLAll, AvQualityOut, AvAttitude),
   labels = c(
     "Sum:\nNumer of beeps with Outgroup Contact (NL)",
     "Sum:\nNumber of Outgroup Contacts (NL)",
@@ -9816,7 +9823,7 @@ pairs.panels.new(
 
 # correlation panel with interaction sums winsorized
 pairs.panels.new(
-  avAll %>% select(WinSumContactNL, WinSumContactNLAll, AvQuality, AvAttitude),
+  avAll %>% select(WinSumContactNL, WinSumContactNLAll, AvQualityOut, AvAttitude),
   labels = c(
     "Sum:\nNumer of beeps with Outgroup Contact (NL)\n[Winsorized]",
     "Sum:\nNumber of Outgroup Contacts (NL)\n[Winsorized]",
@@ -9836,7 +9843,7 @@ We begin with the liner ordinary least squares regression. For this purpose, we 
 ```{r OLS regression across the three studies}
 lmAllAttFreqQualX <-
   lm(
-    AvAttitude ~ SumContactNL_c * AvQuality_c + SumContactNL_c * study2 + AvQuality_c * study2,
+    AvAttitude ~ SumContactNL_c * AvQualityOut_c + SumContactNL_c * study2 + AvQualityOut_c * study2,
     data = avAll
   )
 

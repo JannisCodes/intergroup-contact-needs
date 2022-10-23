@@ -271,7 +271,7 @@ workerOutMlCor %>%
 
 \subsubsection{Participants} After receiving ethical approval from the University Masked for Peer Review, we recruited `r nrow(workerSampleInfo)` migrants using the local paid participant pool and specifically targeted non-Dutch migrants to participate in our study. Participants reported on their interactions for at least 30 days with two daily measures (capturing the morning and afternoon). With this design, we aimed at getting 50-60 measurements per participant (\textit{M} = `r format(round(mean(workerSampleInfo$dailiesN),2), nsmall=2)`, \textit{SD} = `r format(round(sd(workerSampleInfo$dailiesN),2), nsmall=2)`, \textit{total N} = `r format(sum(workerSampleInfo$dailiesN), big.mark=",")`). This is a common number of measurements found in experience sampling studies and offers sufficient power to model processes within and between participants \citep[e.g., for a systematic review see][]{AanhetRot2012}. Participants were compensated for their participation with up to 34 Euros – each two Euros for pre- and post-questionnaire as well as 50 Eurocents for every experience sampling measurement occasion. The sample consisted of relatively young, educated, and western migrants from the global north ($M_{age}$ = `r format(round(mean(workerSampleInfo$age),2), nsmall=2)`, $SD_{age}$ = `r format(round(sd(workerSampleInfo$age),2), nsmall=2)`, `r nrow(workerSampleInfo %>% filter(gender == "Female"))` women, `r nrow(workerSampleInfo %>% filter(occupation == "student"))` students). The sample accurately describes the largest groups of migrants in the region \citep[][]{GemeenteGroningen2015}.
 
-\subsubsection{Procedure} The study itself consisted of three main parts, an introductory pre-measurement, and the daily experience sampling measurements, as well as a concluding post-measurement. After giving informed consent, participants started by filling in an online pre-questionnaire assessing demographics and general information about their immigration. Over the next thirty days, the participants were then invited twice a day (at 12 pm and 7pm) to reflect upon their interactions, psychological need fulfillments, and current attitudes towards the Dutch outgroup (\textit{median duration} = `r seconds_to_period(median(dtWorker$clean$Duration__in_seconds_)) %>% as.character`, \textit{MAD duration} = `r seconds_to_period(round(mad(dtWorker$clean$Duration__in_seconds_))) %>% as.character`). General compliance was high (`r format(round(sum(workerSampleInfo$dailiesN)/(nrow(workerSampleInfo)*62)*100,2), nsmall=2)`\% of all invited surveys were filled in)\footnote{Two participants completed only two days (among the others, participation was `r format(round(sum(workerSampleInfo$dailiesN[workerSampleInfo$dailiesN>3])/(nrow(workerSampleInfo[workerSampleInfo$dailiesN>3,])*62)*100,2), nsmall=2)`\%).}. The response rates were approximately equal during mornings (\textit{n} = `r format(sum(workerSampleInfo$morningN), big.mark=",")`) and afternoons (\textit{n} = `r format(sum(workerSampleInfo$afternoonN), big.mark=",")`) and most measurements were completed within four hours of the invitation. After the final day of experience sampling measurements, participants were invited to fill in a longer post measurement survey that mirrored the pre-measurement. All key variables for this study were part of the short experience sampling surveys. 
+\subsubsection{Procedure} The study itself consisted of three main parts, an introductory pre-measurement, and the daily experience sampling measurements, as well as a concluding post-measurement. After giving informed consent, participants started by filling in an online pre-questionnaire assessing demographics and general information about their immigration. Over the next thirty days, the participants were then invited twice a day (at 12 pm and 7pm) to reflect upon their interactions, psychological need fulfillments, and current attitudes towards the Dutch outgroup (\textit{median survey duration} = `r seconds_to_period(median(dtWorker$clean$Duration__in_seconds_)) %>% as.character`, \textit{MAD duration} = `r seconds_to_period(round(mad(dtWorker$clean$Duration__in_seconds_))) %>% as.character`). General compliance was high (`r format(round(sum(workerSampleInfo$dailiesN)/(nrow(workerSampleInfo)*62)*100,2), nsmall=2)`\% of all invited surveys were filled in)\footnote{Two participants completed only two days (among the others, participation was `r format(round(sum(workerSampleInfo$dailiesN[workerSampleInfo$dailiesN>3])/(nrow(workerSampleInfo[workerSampleInfo$dailiesN>3,])*62)*100,2), nsmall=2)`\%).}. The response rates were approximately equal during mornings (\textit{n} = `r format(sum(workerSampleInfo$morningN), big.mark=",")`) and afternoons (\textit{n} = `r format(sum(workerSampleInfo$afternoonN), big.mark=",")`) and most measurements were completed within four hours of the invitation. After the final day of experience sampling measurements, participants were invited to fill in a longer post measurement survey that mirrored the pre-measurement. All key variables for this study were part of the short experience sampling surveys. 
 
 \subsubsection{Materials}
 
@@ -458,7 +458,7 @@ mdlWorker$varInterceptAttType <-
 
 \subsubsection{Contact Hypothesis}
 <!-- We tested the most general contact hypothesis in two steps. First, we assessed whether overall between participants more intergroup interactions were related to to more positive average outgroup attitudes. Second, we tested whether a potential positive effect on outgroup attitudes depended on the interaction quality (jointly with the number of interactions). We find that neither the overall number of contacts nor the number of experience sampling responses with a contact were significantly related with the average outgroup attitudes (all | \textit{r} | < `r rContactAvgMax`, all \textit{p} > `r pContactAvgMin`). However, we did find a medium sized correlation between the participants' average contact quality and their average outgroup attitudes (\textit{r} = `r format(round(rAttitudeQuality$r[rownames(rAttitudeQuality$r) != "AvAttitude","AvAttitude"],2), nsmall = 2)`, \textit{p} = `r format(round(rAttitudeQuality$P[rownames(rAttitudeQuality$r) != "AvAttitude","AvAttitude"],3), nsmall = 3)`). And when considering the number of contacts and average contact quality jointly in a linear regression, we additionally found a statistically significant interaction term (\textit{b} = `r coef(summary(mdlWorker$lmAttFreqQualX))["SumContactNL_c:AvQuality_c","Estimate"] %>% round(2) %>% format(nsmall=2)`, \textit{t}(`r mdlWorker$lmAttFreqQualX$df.residual`) = `r coef(summary(mdlWorker$lmAttFreqQualX))["SumContactNL_c:AvQuality_c","t value"] %>% round(2) %>% format(nsmall=2)`, \textit{p} = `r coef(summary(mdlWorker$lmAttFreqQualX))["SumContactNL_c:AvQuality_c","Pr(>|t|)"] %>% round(3) %>% format(nsmall=3)`, $\eta_p^2$ = `r mdlWorker$lmAttFreqQualXEta %>% filter(Parameter == "SumContactNL_c:AvQuality_c") %>% select(Eta2_partial) %>% as.numeric %>% round(2) %>% format(nsmall=2)`), where in our sample with an increasing number of contacts the positive effect of average contact quality becomes weaker (also see Table \ref{tab:intergroupGeneralTblLong}).  -->
-We used a multilevel regression to check whether having an interaction with an outgroup member had a situational (i.e., contemporaneous) effect within the participants. We find that having an outgroup contact is indeed associated with significantly more positive outgroup attitudes within the participants (`r MlCoeffLatex(lmeMdl = mdlWorker$lmeInterceptAttType, lmerCI = mdlWorker$lmerInterceptAttTypeCI, varName = "OutgroupInteractionC")`), even after controlling for having an interaction with a non-Dutch (which did not relate to outgroup attitudes independently). Additionally, while multi-level regressions are generally robust against unequal cell sizes, we correct for inequalities by use centered predictors and reintroducing the means as level two predictors. Nonetheless, we also offer an analysis of the joint data sets in Online Supplemental Material A (for full results see Table \ref{tab:intergroupGeneralTblLong}, Figure \ref{fig:ContactHypothesis}, and Online Supplementary Material A)\footnote{Interestingly, adding random slopes to this model did not explain additional variance. This is unusual and might indicate that the effect is very consistent across participants. However, the small number of participants, or other measurement issues provide an alternative explanation, which is why we offer a combined data set analyses following the individual studies.}. 
+We used a multilevel regression to check whether having an interaction with an outgroup member had a situational (i.e., contemporaneous) effect within the participants. We find that having an outgroup contact is indeed associated with significantly more positive outgroup attitudes (`r MlCoeffLatex(lmeMdl = mdlWorker$lmeInterceptAttType, lmerCI = mdlWorker$lmerInterceptAttTypeCI, varName = "OutgroupInteractionC")`), even after controlling for having an interaction with a non-Dutch (which did not relate to outgroup attitudes independently). Additionally, while multi-level regressions are generally robust against unequal cell sizes, we correct for inequalities by use centered predictors and reintroducing the means as level two predictors. Nonetheless, we also offer an analysis of the joint data sets in Online Supplemental Material A (for full results see Table \ref{tab:intergroupGeneralTblLong}, Figure \ref{fig:ContactHypothesis}, and Online Supplementary Material A)\footnote{Interestingly, adding random slopes to this model did not explain additional variance. This is unusual and might indicate that the effect is very consistent across participants. However, the small number of participants, or other measurement issues provide an alternative explanation, which is why we offer a combined data set analyses following the individual studies.}. 
 Thus, in our first data we find initial evidence that outgroup contacts show a positive effect on outgroup attitudes within real-life data. While this offers support for the most basic premise of the intergroup contact hypothesis (i.e., that any interaction will lead to more positive outgroup attitudes), this analysis does not consider any notion of interaction quality. We assess the conditional effects of interaction numbers and interaction quality ratings after we report on the individual studies to avoid under-powered analyses.
 
 \subsubsection{Core Need}The main proposal of our article is that the success of an outgroup contact might be explained by whether or not the contact fulfilled the person's core situational need. This should, in turn, be due to a higher perceived contact quality. We sequentially test whether the fulfillment of the core need during an interaction is (1) related to more positive outgroup attitudes, (2) higher perceived contact quality, and (3) whether the variance explained by the core need is subsumed by the perceived contact quality if considered jointly (for full regression results see Table \ref{tab:intergroupNeedsTblLong} and Figure \ref{fig:AllportNeedFulfillment}). 
@@ -1520,7 +1520,7 @@ studentOutMlCor %>%
 
 \subsubsection{Participants} We recruited `r nrow(studentSampleInfo)` international students using a local participant pool. We specifically targeted non-Dutch students, who had recently arrived in the Netherlands. Participants reported on their interactions for at least 30 days with two daily measures (capturing the morning and afternoon). With this design, we again aimed at receiving 50-60 measurements per participant (\textit{M} = `r format(round(mean(studentSampleInfo$dailiesN),2), nsmall=2)`, \textit{SD} = `r format(round(sd(studentSampleInfo$dailiesN),2), nsmall=2)`, \textit{total N} = `r format(sum(studentSampleInfo$dailiesN), big.mark=",")`). As with the previous study this should offer sufficient power to model processes within participants and will lend stronger weight to between-participant results. Participants were compensated for their participation with partial course credits --- depending on their participation. The sample consisted of relatively young migrants, who were mostly from the global north ($M_{age}$ = `r format(round(mean(studentSampleInfo$age),2), nsmall=2)`, $SD_{age}$ = `r format(round(sd(studentSampleInfo$age),2), nsmall=2)`, `r nrow(studentSampleInfo %>% filter(gender == "women"))` women). The sample fairly accurately describes the local population of international students.
 
-\subsubsection{Procedure} The study procedure mirrored the setup of Study 1 and consisted of pre-, experience sampling-, and post-measurements. The participants were invited for experience sampling measurements twice a day (at 12 pm and 7pm) for 30 days (\textit{median duration} = `r seconds_to_period(median(difftime(dtStudents$clean$ended.daily, dtStudents$clean$created.daily))) %>% as.character`, \textit{MAD duration} = `r seconds_to_period(round(mad(difftime(dtStudents$clean$ended.daily, dtStudents$clean$created.daily)))) %>% as.character`).  General compliance was high (`r format(round(sum(studentSampleInfo$dailiesN)/(nrow(studentSampleInfo)*62)*100,2), nsmall=2)`\% of all invited surveys were filled in). The response rates were approximately equal during mornings (\textit{n} = `r format(sum(studentSampleInfo$morningN), big.mark=",")`) and afternoons (\textit{n} = `r format(sum(studentSampleInfo$afternoonN), big.mark=",")`). All key variables for this study were part of the short experience sampling surveys. 
+\subsubsection{Procedure} The study procedure mirrored the setup of Study 1 and consisted of pre-, experience sampling-, and post-measurements. The participants were invited for experience sampling measurements twice a day (at 12 pm and 7pm) for 30 days (\textit{median survey duration} = `r seconds_to_period(median(difftime(dtStudents$clean$ended.daily, dtStudents$clean$created.daily))) %>% as.character`, \textit{MAD duration} = `r seconds_to_period(round(mad(difftime(dtStudents$clean$ended.daily, dtStudents$clean$created.daily)))) %>% as.character`).  General compliance was high (`r format(round(sum(studentSampleInfo$dailiesN)/(nrow(studentSampleInfo)*62)*100,2), nsmall=2)`\% of all invited surveys were filled in). The response rates were approximately equal during mornings (\textit{n} = `r format(sum(studentSampleInfo$morningN), big.mark=",")`) and afternoons (\textit{n} = `r format(sum(studentSampleInfo$afternoonN), big.mark=",")`). All key variables for this study were part of the short experience sampling surveys. 
 
 \subsubsection{Materials}
 
@@ -2831,7 +2831,7 @@ medicalOutMlCor %>%
 
 \subsubsection{Participants} We recruited `r nrow(medicalSampleInfo)` international medical students using contacts within the University Medical School. We specifically targeted non-Dutch students, who had recently arrived in the Netherlands. Participants reported on their interactions for at least 30 days with two daily measures (capturing the morning and afternoon). With this design, we aimed at getting 50-60 measurements per participant (\textit{M} = `r format(round(mean(medicalSampleInfo$dailiesN),2), nsmall=2)`, \textit{SD} = `r format(round(sd(medicalSampleInfo$dailiesN),2), nsmall=2)`, \textit{total N} = `r format(sum(medicalSampleInfo$dailiesN), big.mark=",")`). As with the previous studies, this should offer sufficient power to model processes within participants and will lend stronger weight to between-participant results. Participants were compensated for their participation in the same manner as during Study 1. The sample consisted of relatively young migrants, who were mostly from the global north ($M_{age}$ = `r format(round(mean(medicalSampleInfo$age),2), nsmall=2)`, $SD_{age}$ = `r format(round(sd(medicalSampleInfo$age),2), nsmall=2)`, `r nrow(medicalSampleInfo %>% filter(gender == "women"))` women). The sample fairly accurately describes the local population of young international medical professionals.
 
-\subsubsection{Procedure} The study procedure mirrored the setup of studies one and two, in that it consisted of pre-, experience sampling-, and post-measurement. The participants were invited for experience sampling measurements twice a day (at 12 pm and 7pm) for 30 days (\textit{median duration} = `r seconds_to_period(median(difftime(dtMedical$clean$ended.daily, dtMedical$clean$created.daily, units = "secs"), na.rm=TRUE)) %>% as.character`, \textit{MAD duration} = `r seconds_to_period(round(mad(difftime(dtMedical$clean$ended.daily, dtMedical$clean$created.daily, units = "secs"), na.rm=TRUE))) %>% as.character`).  General compliance was high (`r format(round(table(medicalSampleInfo$dailiesN>30)["TRUE"]/nrow(medicalSampleInfo)*100,2), nsmall=2)`\% filled in at least 31 experience sampling surveys or more). The response rates were approximately equal during mornings (\textit{n} = `r format(sum(medicalSampleInfo$morningN), big.mark=",")`) and afternoons (\textit{n} = `r format(sum(medicalSampleInfo$afternoonN), big.mark=",")`). All key variables for this study were part of the short experience sampling surveys. 
+\subsubsection{Procedure} The study procedure mirrored the setup of studies one and two, in that it consisted of pre-, experience sampling-, and post-measurement. The participants were invited for experience sampling measurements twice a day (at 12 pm and 7pm) for 30 days (\textit{median survey duration} = `r seconds_to_period(median(difftime(dtMedical$clean$ended.daily, dtMedical$clean$created.daily, units = "secs"), na.rm=TRUE)) %>% as.character`, \textit{MAD duration} = `r seconds_to_period(round(mad(difftime(dtMedical$clean$ended.daily, dtMedical$clean$created.daily, units = "secs"), na.rm=TRUE))) %>% as.character`).  General compliance was high (`r format(round(table(medicalSampleInfo$dailiesN>30)["TRUE"]/nrow(medicalSampleInfo)*100,2), nsmall=2)`\% filled in at least 31 experience sampling surveys or more). The response rates were approximately equal during mornings (\textit{n} = `r format(sum(medicalSampleInfo$morningN), big.mark=",")`) and afternoons (\textit{n} = `r format(sum(medicalSampleInfo$afternoonN), big.mark=",")`). All key variables for this study were part of the short experience sampling surveys. 
 
 \subsubsection{Materials}
 
@@ -3108,7 +3108,7 @@ ggsave(
 <!-- As in Studies 1 and 2, we first conducted a general contact hypothesis test. We found no correlation between the overall number of intergroup contacts and average outgroup attitudes --- for neither the total number of outgroup interactions nor the number of measurement beeps with an interaction (|\textit{r}| < `r cor(dtMedicalSupp$medicalContactFreq$SumContactNL, dtMedicalSupp$medicalContactFreq$AvAttitude) %>% round(2) %>% format(nsmall=2)`, \textit{p} > `r cor.test(dtMedicalSupp$medicalContactFreq$SumContactNL, dtMedicalSupp$medicalContactFreq$AvAttitude)$p.value %>% round(3) %>% format(nsmall=3)`). However, we did find a significant correlation between the participants' average interaction quality and their average outgroup attitudes (\textit{r} = `r cor(dtMedicalSupp$medicalContactFreq$AvQuality, dtMedicalSupp$medicalContactFreq$AvAttitude) %>% round(2) %>% format(nsmall=2)`, \textit{p} = `r cor.test(dtMedicalSupp$medicalContactFreq$AvQuality, dtMedicalSupp$medicalContactFreq$AvAttitude)$p.value %>% round(3) %>% format(nsmall=3)`). When considering the number of interactions and average interaction quality jointly in a linear regression, we only found a main effect of average perceived interaction quality on outgroup attitudes (\textit{b} = `r coef(summary(mdlMedical$lmAttFreqQualX))["AvQuality_c","Estimate"] %>% round(2) %>% format(nsmall=2)`, \textit{t}(`r mdlMedical$lmAttFreqQualX$df.residual`) = `r coef(summary(mdlMedical$lmAttFreqQualX))["AvQuality_c","t value"] %>% round(2) %>% format(nsmall=2)`, \textit{p} = `r coef(summary(mdlMedical$lmAttFreqQualX))["AvQuality_c","Pr(>|t|)"] %>% round(3) %>% format(nsmall=3)`, $\eta_p^2$ = `r mdlMedical$lmAttFreqQualXEta %>% filter(Parameter == "AvQuality_c") %>% select(Eta2_partial) %>% as.numeric %>% round(2) %>% format(nsmall=2)`) but no significant effect of the number of contacts nor an interaction effect. This result mirrors that of Study 1 but is inconsistent with the second study.  -->
 Additionally, in a multilevel regression to check for contemporaneous within person effects, we found that having an outgroup interaction was indeed associated with significantly more positive outgroup attitudes within the participants (random slopes model; `r MlCoeffLatex(lmeMdl = mdlMedical$lmeSlopesAttType, lmerCI = mdlMedical$lmerSlopesAttTypeCI, varName = "OutgroupInteractionC")`), even after controlling for having an interaction with a non-Dutch (which did not relate to outgroup attitudes independently; for full results see Table \ref{tab:intergroupGeneralTblLong}, Figure \ref{fig:ContactHypothesis}, and Online Supplementary Material A). Thus, in our third data set we found within person contemporaneous effect of intergroup contact was consistent across all three studies.  
 
-\subsubsection{Allport's Conditions}
+\subsubsection{Core Need}
 
 ```{r medicalOutModelMLAttNull, include=FALSE}
 # create empty list to organize models
@@ -3151,180 +3151,6 @@ mdlMedicalOut$Att$IccPercNull <-
   ((as.numeric(mdlMedicalOut$Att$varNull[1]) / (as.numeric(mdlMedicalOut$Att$varNull[1]) + as.numeric(mdlMedicalOut$Att$varNull[2])))) * 100
 ```
 
-```{r medicalOutModelInterceptAttAllport, include=FALSE}
-# Create and save Model
-mdlMedicalOut$Att$lmeInterceptAllport <-
-  lme(
-    AttitudesDutch ~ AllportsCondition_cwc,
-    random = ~ 1 | PID,
-    na.action = na.omit,
-    data = dtMedicalSupp$medicalOutWithinBetween
-  )
-
-# Get summary with p-values (Satterthwaite's method)
-summ(
-  mdlMedicalOut$Att$lmerInterceptAllport <-
-    lmer(
-      AttitudesDutch ~ AllportsCondition_cwc + (1 | PID),
-      data = dtMedicalSupp$medicalOutWithinBetween
-    ),
-  confint = TRUE,
-  digits = 3,
-  center = FALSE
-)
-
-mdlMedicalOut$Att$lmerInterceptAllportCI <- 
-  confint(method = "Wald", mdlMedicalOut$Att$lmerInterceptAllport)
-
-# Compare new model to previous step
-anova(mdlMedicalOut$Att$lmeNull, 
-      mdlMedicalOut$Att$lmeInterceptAllport) %>%
-  as.data.frame() %>%
-  select(-call) %>%
-  mutate(
-    L.Ratio = round(L.Ratio, 3),
-    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
-  ) %>%
-  replace(is.na(.), "") %>%
-  kbl(
-    .,
-    caption = "Student: Model Comparison",
-    format = "latex",
-    linesep = "",
-    booktabs = T,
-    align = rep("c", ncol(.)),
-    digits = 3
-  ) %>%
-  kable_styling(position = "left")
-
-# Save variances
-mdlMedicalOut$Att$varInterceptAllport <-
-  lme4::VarCorr(mdlMedicalOut$Att$lmeInterceptAllport)
-```
-
-```{r medicalOutModelSlopesAttAllport, include=FALSE}
-# Create and save Model (optimizer needed to reach convergence)
-mdlMedicalOut$Att$lmeSlopesAllport <-
-  lme(
-    AttitudesDutch ~
-      AllportsCondition_cwc,
-    random = ~ 1 + AllportsCondition_cwc | PID,
-    na.action = na.omit,
-    control = lmeControl(opt = "optim"),
-    data = dtMedicalSupp$medicalOutWithinBetween
-  )
-
-# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
-summ(
-  mdlMedicalOut$Att$lmerSlopesAllport <- lmer(
-    AttitudesDutch ~
-      AllportsCondition_cwc +
-      (1 + AllportsCondition_cwc | PID),
-    data = dtMedicalSupp$medicalOutWithinBetween
-  ),
-  confint = TRUE,
-  digits = 3,
-  center = FALSE
-)
-
-# all variables standardized within PPT
-summ(
-  mdlMedicalOut$Att$lmerSlopesAllportZ <- lmer(
-    AttitudesDutch_zwc ~
-      AllportsCondition_zwc +
-      (1 + AllportsCondition_zwc | PID),
-    data = dtMedicalSupp$medicalOutWithinBetween
-  ),
-  confint = TRUE,
-  digits = 3,
-  center = FALSE
-)
-
-# standardized coefficients
-stdCoef.merMod(mdlMedicalOut$Att$lmerSlopesAllport)
-
-# 95%CIs
-mdlMedicalOut$Att$lmerSlopesAllportCI <- 
-  confint(method = "Wald", mdlMedicalOut$Att$lmerSlopesAllport)
-
-# Attempts at R^2
-#r2mlm::r2mlm(mdlMedicalOut$Att$lmerSlopesAllport, bargraph = TRUE)
-mitml::multilevelR2(mdlMedicalOut$Att$lmerSlopesAllport)
-performance::r2(mdlMedicalOut$Att$lmerSlopesAllport)
-performance::model_performance(mdlMedicalOut$Att$lmerSlopesAllport)
-performance::compare_performance(mdlMedicalOut$Att$lmerNull, 
-                                 mdlMedicalOut$Att$lmerInterceptAllport, 
-                                 mdlMedicalOut$Att$lmerSlopesAllport)
-
-# Compare new model to previous step
-anova(mdlMedicalOut$Att$lmeNull, 
-      mdlMedicalOut$Att$lmeInterceptAllport, 
-      mdlMedicalOut$Att$lmeSlopesAllport) %>%
-  as.data.frame() %>%
-  select(-call) %>%
-  mutate(
-    L.Ratio = round(L.Ratio, 3),
-    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
-  ) %>%
-  replace(is.na(.), "") %>%
-  kbl(
-    .,
-    caption = "Student: Model Comparison",
-    format = "latex",
-    linesep = "",
-    booktabs = T,
-    align = rep("c", ncol(.)),
-    digits = 3
-  ) %>%
-  kable_styling(position = "left")
-
-# Save variances
-mdlMedicalOut$Att$varSlopesAllport <- 
-  lme4::VarCorr(mdlMedicalOut$Att$lmeSlopesAllport)
-
-# Assumption Checks:
-mdlMedicalOut$Att$diagSlopesAllport <- 
-  sjPlot::plot_model(mdlMedicalOut$Att$lmerSlopesAllport, type = "diag")
-grid.arrange(
-  mdlMedicalOut$Att$diagSlopesAllport[[1]],
-  mdlMedicalOut$Att$diagSlopesAllport[[2]]$`PID`,
-  mdlMedicalOut$Att$diagSlopesAllport[[3]],
-  mdlMedicalOut$Att$diagSlopesAllport[[4]]
-)
-
-# Plot prediction model
-mdlMedicalOut$Att$predSlopesAllport <- 
-  dtMedicalSupp$medicalOutWithinBetween %>% 
-  filter(PID %in% dtMedicalSupp$medicalOutPltIDs) %>%
-  select(AttitudesDutch, TIDnum, PID) %>% 
-  mutate(measure = predict(mdlMedicalOut$Att$lmeSlopesAllport,
-                           dtMedicalSupp$medicalOutWithinBetween %>% filter(PID %in% dtMedicalSupp$medicalOutPltIDs),
-                           re.form = NA
-                           )
-         )
-
-(
-  mdlMedicalOut$Att$predPltSlopesAllport <-
-    ggplot(data = mdlMedicalOut$Att$predSlopesAllport, 
-           aes(x = TIDnum, y = measure)) +
-    geom_line(alpha = 1, color = "blue") +
-    geom_line(aes(y = AttitudesDutch), alpha = 1) +
-    facet_wrap( ~ PID, ncol = 6) +
-    xlab("Time") +
-    ylab("Outgroup Attitudes") +
-    theme_Publication()
-)
-ggsave(
-  filename = "Figures/MedicalOut_PredictionPlot_SlopesAttAllport.png",
-  mdlMedicalOut$Att$predPltSlopesAllport,
-  width = 18,
-  height = 12,
-  dpi = 800,
-  units = "cm",
-  device = "png"
-)
-```
-
 ```{r medicalOutModelMLQltNull, include=FALSE}
 # Create and save Model
 mdlMedicalOut$Qlt$lmerNull <-
@@ -3358,315 +3184,6 @@ mdlMedicalOut$Qlt$IccNull <-
 mdlMedicalOut$Qlt$IccPercNull <-
   ((as.numeric(mdlMedicalOut$Qlt$varNull[1]) / (as.numeric(mdlMedicalOut$Qlt$varNull[1]) + as.numeric(mdlMedicalOut$Qlt$varNull[2])))) * 100
 ```
-
-```{r medicalOutModelInterceptQltAllport, include=FALSE}
-# Create and save Model
-mdlMedicalOut$Qlt$lmeInterceptAllport <-
-  lme(
-    qualityOverall ~ AllportsCondition_cwc,
-    random = ~ 1 | PID,
-    na.action = na.omit,
-    data = dtMedicalSupp$medicalOutWithinBetween
-  )
-
-# Get summary with p-values (Satterthwaite's method)
-summ(
-  mdlMedicalOut$Qlt$lmerInterceptAllport <-
-    lmer(
-      qualityOverall ~ AllportsCondition_cwc + (1 | PID),
-      data = dtMedicalSupp$medicalOutWithinBetween
-    ),
-  confint = TRUE,
-  digits = 3,
-  center = FALSE
-)
-
-mdlMedicalOut$Qlt$lmerInterceptAllportCI <- 
-  confint(method = "Wald", mdlMedicalOut$Qlt$lmerInterceptAllport)
-
-# Compare new model to previous step
-anova(mdlMedicalOut$Qlt$lmeNull, 
-      mdlMedicalOut$Qlt$lmeInterceptAllport) %>%
-  as.data.frame() %>%
-  select(-call) %>%
-  mutate(
-    L.Ratio = round(L.Ratio, 3),
-    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
-  ) %>%
-  replace(is.na(.), "") %>%
-  kbl(
-    .,
-    caption = "Medical: Model Comparison",
-    format = "latex",
-    linesep = "",
-    booktabs = T,
-    align = rep("c", ncol(.)),
-    digits = 3
-  ) %>%
-  kable_styling(position = "left")
-
-# Save variances
-mdlMedicalOut$Qlt$varInterceptAllport <-
-  lme4::VarCorr(mdlMedicalOut$Qlt$lmeInterceptAllport)
-```
-
-```{r medicalOutModelSlopesQltAllport, include=FALSE}
-# Create and save Model (optimizer needed to reach convergence)
-mdlMedicalOut$Qlt$lmeSlopesAllport <-
-  lme(
-    qualityOverall ~
-      AllportsCondition_cwc,
-    random = ~ 1 + AllportsCondition_cwc | PID,
-    na.action = na.omit,
-    control = lmeControl(opt = "optim"),
-    data = dtMedicalSupp$medicalOutWithinBetween
-  )
-
-# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
-summ(
-  mdlMedicalOut$Qlt$lmerSlopesAllport <-
-    lmer(
-      qualityOverall ~
-        AllportsCondition_cwc +
-        (1 + AllportsCondition_cwc | PID),
-      data = dtMedicalSupp$medicalOutWithinBetween
-    ),
-  confint = TRUE,
-  digits = 3,
-  center = FALSE
-)
-
-mdlMedicalOut$Qlt$lmerSlopesAllportCI <- 
-  confint(method = "Wald", mdlMedicalOut$Qlt$lmerSlopesAllport)
-
-# Compare new model to previous step
-anova(mdlMedicalOut$Qlt$lmeNull, 
-      mdlMedicalOut$Qlt$lmeInterceptAllport, 
-      mdlMedicalOut$Qlt$lmeSlopesAllport) %>%
-  as.data.frame() %>%
-  select(-call) %>%
-  mutate(
-    L.Ratio = round(L.Ratio, 3),
-    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
-  ) %>%
-  replace(is.na(.), "") %>%
-  kbl(
-    .,
-    caption = "Medical: Model Comparison",
-    format = "latex",
-    linesep = "",
-    booktabs = T,
-    align = rep("c", ncol(.)),
-    digits = 3
-  ) %>%
-  kable_styling(position = "left")
-
-# Save variances
-mdlMedicalOut$Qlt$varSlopesAllport <- 
-  lme4::VarCorr(mdlMedicalOut$Qlt$lmeSlopesAllport)
-
-# Assumption Checks:
-mdlMedicalOut$Qlt$diagSlopesAllport <-
-  sjPlot::plot_model(mdlMedicalOut$Qlt$lmerSlopesAllport, type = "diag")
-grid.arrange(
-  mdlMedicalOut$Qlt$diagSlopesAllport[[1]],
-  mdlMedicalOut$Qlt$diagSlopesAllport[[2]]$`PID`,
-  mdlMedicalOut$Qlt$diagSlopesAllport[[3]],
-  mdlMedicalOut$Qlt$diagSlopesAllport[[4]]
-)
-
-# Plot prediction model
-mdlMedicalOut$Qlt$predSlopesAllport <- 
-  dtMedicalSupp$medicalOutWithinBetween %>%
-  filter(PID %in% dtMedicalSupp$medicalOutPltIDs) %>%
-  select(AttitudesDutch, TIDnum, PID) %>% 
-  mutate(measure = predict(mdlMedicalOut$Qlt$lmeSlopesAllport,
-                           dtMedicalSupp$medicalOutWithinBetween %>% filter(PID %in% dtMedicalSupp$medicalOutPltIDs),
-                           re.form = NA
-                           )
-         )
-
-(
-  mdlMedicalOut$Qlt$predPltSlopesAllport <-
-    ggplot(data = mdlMedicalOut$Qlt$predSlopesAllport %>% filter(PID %in% dtMedicalSupp$medicalOutPltIDs), 
-           aes(x = TIDnum, y = measure)) +
-    geom_line(alpha = 1, color = "blue") +
-    geom_line(aes(y = AttitudesDutch), alpha = 1) +
-    facet_wrap(~ PID, ncol = 6) +
-    xlab("Time") +
-    ylab("Outgroup Attitudes") +
-    theme_Publication()
-)
-ggsave(
-  filename = "Figures/MedicalOut_PredictionPlot_SlopesAllport.png",
-  mdlMedicalOut$Qlt$predPltSlopesAllport,
-  width = 18,
-  height = 12,
-  dpi = 800,
-  units = "cm",
-  device = "png"
-)
-
-```
-
-```{r medicalOutModelInterceptAttAllportQlt, include=FALSE}
-# Create and save Model
-mdlMedicalOut$Att$lmeInterceptAllportQlt <-
-  lme(
-    AttitudesDutch ~ AllportsCondition_cwc + qualityOverall_cwc,
-    random = ~ 1 | PID,
-    na.action = na.omit,
-    data = dtMedicalSupp$medicalOutWithinBetween
-  )
-
-# Get summary with p-values (Satterthwaite's method)
-summ(
-  mdlMedicalOut$Att$lmerInterceptAllportQlt <-
-    lmer(
-      AttitudesDutch ~ AllportsCondition_cwc + qualityOverall_cwc + (1 | PID),
-      data = dtMedicalSupp$medicalOutWithinBetween
-    ),
-  confint = TRUE,
-  digits = 3
-)
-
-mdlMedicalOut$Att$lmerInterceptAllportQltCI <- 
-  confint(method = "Wald", mdlMedicalOut$Att$lmerInterceptAllportQlt)
-
-# Compare new model to previous step
-anova(
-  mdlMedicalOut$Att$lmeNull, 
-  mdlMedicalOut$Att$lmeInterceptAllportQlt
-  ) %>%
-  as.data.frame() %>%
-  select(-call) %>%
-  mutate(
-    L.Ratio = round(L.Ratio, 3),
-    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
-  ) %>%
-  replace(is.na(.), "") %>%
-  kbl(
-    .,
-    caption = "Medical: Model Comparison",
-    format = "latex",
-    linesep = "",
-    booktabs = T,
-    align = rep("c", ncol(.)),
-    digits = 3
-  ) %>%
-  kable_styling(position = "left")
-
-# Save variances
-mdlMedicalOut$Att$varInterceptAllportQlt <-
-  lme4::VarCorr(mdlMedicalOut$Att$lmeInterceptAllportQlt)
-```
-
-```{r medicalOutModelSlopesAttAllportQlt, include=FALSE}
-# Create and save Model (optimizer needed to reach convergence)
-mdlMedicalOut$Att$lmeSlopesAllportQlt <-
-  lme(
-    AttitudesDutch ~
-      AllportsCondition_cwc + qualityOverall_cwc,
-    random = ~ 1 + AllportsCondition_cwc + qualityOverall_cwc | PID,
-    na.action = na.omit,
-    control = lmeControl(opt = "optim"),
-    data = dtMedicalSupp$medicalOutWithinBetween
-  )
-
-# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
-summ(
-  mdlMedicalOut$Att$lmerSlopesAllportQlt <- lmer(
-    AttitudesDutch ~
-      AllportsCondition_cwc + qualityOverall_cwc +
-      (1 + AllportsCondition_cwc + qualityOverall_cwc | PID),
-    data = dtMedicalSupp$medicalOutWithinBetween,
-    control = lmerControl(optimizer="bobyqa", optCtrl=list(maxfun=2e5))
-  ),
-  confint = TRUE,
-  digits = 3
-)
-
-mdlMedicalOut$Att$lmerSlopesAllportQltCI <- 
-  confint(method = "Wald", mdlMedicalOut$Att$lmerSlopesAllportQlt)
-
-# Compare new model to previous step
-anova(
-  mdlMedicalOut$Att$lmeNull,
-  mdlMedicalOut$Att$lmeInterceptAllportQlt,
-  mdlMedicalOut$Att$lmeSlopesAllportQlt
-) %>%
-  as.data.frame() %>%
-  select(-call) %>%
-  mutate(
-    L.Ratio = round(L.Ratio, 3),
-    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
-  ) %>%
-  replace(is.na(.), "") %>%
-  kbl(
-    .,
-    caption = "Medical: Model Comparison",
-    format = "latex",
-    linesep = "",
-    booktabs = T,
-    align = rep("c", ncol(.)),
-    digits = 3
-  ) %>%
-  kable_styling(position = "left")
-
-# Save variances
-mdlMedicalOut$Att$varSlopesAllportQlt <- 
-  lme4::VarCorr(mdlMedicalOut$Att$lmeSlopesAllportQlt)
-
-# Assumption Checks:
-mdlMedicalOut$Att$diagSlopesAllportQlt <- 
-  sjPlot::plot_model(mdlMedicalOut$Att$lmerSlopesAllportQlt, type = "diag")
-grid.arrange(
-  mdlMedicalOut$Att$diagSlopesAllportQlt[[1]],
-  mdlMedicalOut$Att$diagSlopesAllportQlt[[2]]$`PID`,
-  mdlMedicalOut$Att$diagSlopesAllportQlt[[3]],
-  mdlMedicalOut$Att$diagSlopesAllportQlt[[4]]
-)
-
-# Plot prediction model
-mdlMedicalOut$Att$predSlopesAllportQlt <- 
-  dtMedicalSupp$medicalOutWithinBetween %>% 
-  filter(complete.cases(AllportsCondition, qualityOverall)) %>%
-  filter(PID %in% dtMedicalSupp$medicalOutPltIDs) %>%
-  select(AttitudesDutch, TIDnum, PID) %>% 
-  mutate(measure = predict(mdlMedicalOut$Att$lmeSlopesAllportQlt,
-                           dtMedicalSupp$medicalOutWithinBetween %>% 
-                             filter(complete.cases(AllportsCondition, qualityOverall)) %>%
-                             filter(PID %in% dtMedicalSupp$medicalOutPltIDs),
-                           re.form = NA
-                           )
-         )
-
-(
-  mdlMedicalOut$Att$predPltSlopesAllportQlt <-
-    ggplot(data = mdlMedicalOut$Att$predSlopesAllportQlt, aes(x = TIDnum, y = measure)) +
-    geom_line(alpha = 1, color = "blue") +
-    geom_line(aes(y = AttitudesDutch), alpha = 1) +
-    facet_wrap( ~ PID, ncol = 6) +
-    xlab("Time") +
-    ylab("Outgroup Attitudes") +
-    theme_Publication()
-)
-ggsave(
-  filename = "Figures/MedicalOut_PredictionPlot_SlopesAttAllportQlt.png",
-  mdlMedicalOut$Att$predPltSlopesAllportQlt,
-  width = 18,
-  height = 12,
-  dpi = 800,
-  units = "cm",
-  device = "png"
-)
-```
-
-As we did with core need fulfillment in previous studies, we sequentially tested whether the fulfillment of Allport's contact conditions was (1) related to more positive outgroup attitudes, (2) higher perceived interaction quality, and (3) whether the variance explained by Allport's Conditions is assumed by the perceived interaction quality if considered jointly. In the multilevel models we find that the fulfillment of Allport's Conditions during outgroup contacts was associated with more positive outgroup attitudes (random slopes model; `r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesAllport, lmerCI = mdlMedicalOut$Att$lmerSlopesAllportCI, varName = "AllportsCondition_cwc")`) and also predicted higher perceived interaction quality (random slopes model; `r MlCoeffLatex(lmeMdl = mdlMedicalOut$Qlt$lmeSlopesAllport, lmerCI = mdlMedicalOut$Qlt$lmerSlopesAllportCI, varName = "AllportsCondition_cwc")`). Moreover, when we consider the influences of Allport's Conditions and interaction quality on outgroup attitudes jointly, we find that perceived interaction quality is a substantially stronger predictor (random slopes mode; `r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesAllportQlt, lmerCI = mdlMedicalOut$Att$lmerSlopesAllportQltCI, varName = "qualityOverall_cwc")`) and the unique variance explained by Allport's Conditions was less than half of its original effect size (`r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesAllportQlt, lmerCI = mdlMedicalOut$Att$lmerSlopesAllportQltCI, varName = "AllportsCondition_cwc")`; also see Table \ref{tab:intergroupNeedsTblLong} and Figure \ref{fig:AllportNeedFulfillment}). These results indicate that in this data set the fulfillment of Allport's conditions had a significant influence on outgroup attitudes and this effect is likely, in parts, explained by its effect through perceived interaction quality. 
-
-<!-- \faQuestionCircle\ Are we sure that we don't want some sort of bootstrapped indirect effect?  -->
-
-\subsubsection{Core Need}
 
 ```{r medicalOutModelInterceptAttCore, include=FALSE}
 # Create and save Model
@@ -4151,9 +3668,493 @@ ggsave(
 )
 ```
 
-Similarly, we again sequentially tested whether the fulfillment of the core need during an interaction was (1) related to more positive outgroup attitudes, (2) higher perceived interaction quality, and (3) whether the variance explained by the core need is assumed by the perceived interaction quality if considered jointly. We find that the fulfillment of the core need during outgroup contacts was associated with more positive outgroup attitudes (random slopes model; `r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesCore, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreCI, varName = "KeyNeedFulfillment_cwc")`) and also predicted higher perceived interaction quality (random slopes model; `r MlCoeffLatex(lmeMdl = mdlMedicalOut$Qlt$lmeSlopesCore, lmerCI = mdlMedicalOut$Qlt$lmerSlopesCoreCI, varName = "KeyNeedFulfillment_cwc")`). Additionally, once we consider the influences of core need fulfillment and interaction quality on outgroup attitudes jointly, we find that perceived interaction quality is a substantially stronger predictor (random slopes mode; `r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreQlt, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreQltCI, varName = "qualityOverall_cwc")`) and the unique variance explained by core need fulfillment was roughly half of its original effect size (`r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreQlt, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreQltCI, varName = "KeyNeedFulfillment_cwc")`; for full results see Table \ref{tab:intergroupNeedsTblLong} and Figure \ref{fig:AllportNeedFulfillment}). These results indicate that in this data set outgroup attitudes were significantly predicted by the fulfillment of core situational needs and this effect partially emerged via its effect on perceived interaction quality. 
+Similarly to the previous studies, we again sequentially tested whether the fulfillment of the core need during an interaction was (1) related to more positive outgroup attitudes, (2) higher perceived interaction quality, and (3) whether the variance explained by the core need is assumed by the perceived interaction quality if considered jointly. We find that the fulfillment of the core need during outgroup contacts was associated with more positive outgroup attitudes (random slopes model; `r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesCore, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreCI, varName = "KeyNeedFulfillment_cwc")`) and also predicted higher perceived interaction quality (random slopes model; `r MlCoeffLatex(lmeMdl = mdlMedicalOut$Qlt$lmeSlopesCore, lmerCI = mdlMedicalOut$Qlt$lmerSlopesCoreCI, varName = "KeyNeedFulfillment_cwc")`). Additionally, once we consider the influences of core need fulfillment and interaction quality on outgroup attitudes jointly, we find that perceived interaction quality is a substantially stronger predictor (random slopes mode; `r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreQlt, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreQltCI, varName = "qualityOverall_cwc")`) and the unique variance explained by core need fulfillment was roughly half of its original effect size (`r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreQlt, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreQltCI, varName = "KeyNeedFulfillment_cwc")`; for full results see Table \ref{tab:intergroupNeedsTblLong} and Figure \ref{fig:AllportNeedFulfillment}). These results indicate that in this data set outgroup attitudes were significantly predicted by the fulfillment of core situational needs and this effect partially emerged via its effect on perceived interaction quality. 
 
 <!-- \faQuestionCircle\ Are we sure that we don't want some sort of bootstrapped indirect effect?  -->
+
+\subsubsection{Allport's Conditions}
+
+```{r medicalOutModelInterceptAttAllport, include=FALSE}
+# Create and save Model
+mdlMedicalOut$Att$lmeInterceptAllport <-
+  lme(
+    AttitudesDutch ~ AllportsCondition_cwc,
+    random = ~ 1 | PID,
+    na.action = na.omit,
+    data = dtMedicalSupp$medicalOutWithinBetween
+  )
+
+# Get summary with p-values (Satterthwaite's method)
+summ(
+  mdlMedicalOut$Att$lmerInterceptAllport <-
+    lmer(
+      AttitudesDutch ~ AllportsCondition_cwc + (1 | PID),
+      data = dtMedicalSupp$medicalOutWithinBetween
+    ),
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+
+mdlMedicalOut$Att$lmerInterceptAllportCI <- 
+  confint(method = "Wald", mdlMedicalOut$Att$lmerInterceptAllport)
+
+# Compare new model to previous step
+anova(mdlMedicalOut$Att$lmeNull, 
+      mdlMedicalOut$Att$lmeInterceptAllport) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Student: Model Comparison",
+    format = "latex",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlMedicalOut$Att$varInterceptAllport <-
+  lme4::VarCorr(mdlMedicalOut$Att$lmeInterceptAllport)
+```
+
+```{r medicalOutModelSlopesAttAllport, include=FALSE}
+# Create and save Model (optimizer needed to reach convergence)
+mdlMedicalOut$Att$lmeSlopesAllport <-
+  lme(
+    AttitudesDutch ~
+      AllportsCondition_cwc,
+    random = ~ 1 + AllportsCondition_cwc | PID,
+    na.action = na.omit,
+    control = lmeControl(opt = "optim"),
+    data = dtMedicalSupp$medicalOutWithinBetween
+  )
+
+# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
+summ(
+  mdlMedicalOut$Att$lmerSlopesAllport <- lmer(
+    AttitudesDutch ~
+      AllportsCondition_cwc +
+      (1 + AllportsCondition_cwc | PID),
+    data = dtMedicalSupp$medicalOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+
+# all variables standardized within PPT
+summ(
+  mdlMedicalOut$Att$lmerSlopesAllportZ <- lmer(
+    AttitudesDutch_zwc ~
+      AllportsCondition_zwc +
+      (1 + AllportsCondition_zwc | PID),
+    data = dtMedicalSupp$medicalOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+
+# standardized coefficients
+stdCoef.merMod(mdlMedicalOut$Att$lmerSlopesAllport)
+
+# 95%CIs
+mdlMedicalOut$Att$lmerSlopesAllportCI <- 
+  confint(method = "Wald", mdlMedicalOut$Att$lmerSlopesAllport)
+
+# Attempts at R^2
+#r2mlm::r2mlm(mdlMedicalOut$Att$lmerSlopesAllport, bargraph = TRUE)
+mitml::multilevelR2(mdlMedicalOut$Att$lmerSlopesAllport)
+performance::r2(mdlMedicalOut$Att$lmerSlopesAllport)
+performance::model_performance(mdlMedicalOut$Att$lmerSlopesAllport)
+performance::compare_performance(mdlMedicalOut$Att$lmerNull, 
+                                 mdlMedicalOut$Att$lmerInterceptAllport, 
+                                 mdlMedicalOut$Att$lmerSlopesAllport)
+
+# Compare new model to previous step
+anova(mdlMedicalOut$Att$lmeNull, 
+      mdlMedicalOut$Att$lmeInterceptAllport, 
+      mdlMedicalOut$Att$lmeSlopesAllport) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Student: Model Comparison",
+    format = "latex",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlMedicalOut$Att$varSlopesAllport <- 
+  lme4::VarCorr(mdlMedicalOut$Att$lmeSlopesAllport)
+
+# Assumption Checks:
+mdlMedicalOut$Att$diagSlopesAllport <- 
+  sjPlot::plot_model(mdlMedicalOut$Att$lmerSlopesAllport, type = "diag")
+grid.arrange(
+  mdlMedicalOut$Att$diagSlopesAllport[[1]],
+  mdlMedicalOut$Att$diagSlopesAllport[[2]]$`PID`,
+  mdlMedicalOut$Att$diagSlopesAllport[[3]],
+  mdlMedicalOut$Att$diagSlopesAllport[[4]]
+)
+
+# Plot prediction model
+mdlMedicalOut$Att$predSlopesAllport <- 
+  dtMedicalSupp$medicalOutWithinBetween %>% 
+  filter(PID %in% dtMedicalSupp$medicalOutPltIDs) %>%
+  select(AttitudesDutch, TIDnum, PID) %>% 
+  mutate(measure = predict(mdlMedicalOut$Att$lmeSlopesAllport,
+                           dtMedicalSupp$medicalOutWithinBetween %>% filter(PID %in% dtMedicalSupp$medicalOutPltIDs),
+                           re.form = NA
+                           )
+         )
+
+(
+  mdlMedicalOut$Att$predPltSlopesAllport <-
+    ggplot(data = mdlMedicalOut$Att$predSlopesAllport, 
+           aes(x = TIDnum, y = measure)) +
+    geom_line(alpha = 1, color = "blue") +
+    geom_line(aes(y = AttitudesDutch), alpha = 1) +
+    facet_wrap( ~ PID, ncol = 6) +
+    xlab("Time") +
+    ylab("Outgroup Attitudes") +
+    theme_Publication()
+)
+ggsave(
+  filename = "Figures/MedicalOut_PredictionPlot_SlopesAttAllport.png",
+  mdlMedicalOut$Att$predPltSlopesAllport,
+  width = 18,
+  height = 12,
+  dpi = 800,
+  units = "cm",
+  device = "png"
+)
+```
+
+```{r medicalOutModelInterceptQltAllport, include=FALSE}
+# Create and save Model
+mdlMedicalOut$Qlt$lmeInterceptAllport <-
+  lme(
+    qualityOverall ~ AllportsCondition_cwc,
+    random = ~ 1 | PID,
+    na.action = na.omit,
+    data = dtMedicalSupp$medicalOutWithinBetween
+  )
+
+# Get summary with p-values (Satterthwaite's method)
+summ(
+  mdlMedicalOut$Qlt$lmerInterceptAllport <-
+    lmer(
+      qualityOverall ~ AllportsCondition_cwc + (1 | PID),
+      data = dtMedicalSupp$medicalOutWithinBetween
+    ),
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+
+mdlMedicalOut$Qlt$lmerInterceptAllportCI <- 
+  confint(method = "Wald", mdlMedicalOut$Qlt$lmerInterceptAllport)
+
+# Compare new model to previous step
+anova(mdlMedicalOut$Qlt$lmeNull, 
+      mdlMedicalOut$Qlt$lmeInterceptAllport) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Medical: Model Comparison",
+    format = "latex",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlMedicalOut$Qlt$varInterceptAllport <-
+  lme4::VarCorr(mdlMedicalOut$Qlt$lmeInterceptAllport)
+```
+
+```{r medicalOutModelSlopesQltAllport, include=FALSE}
+# Create and save Model (optimizer needed to reach convergence)
+mdlMedicalOut$Qlt$lmeSlopesAllport <-
+  lme(
+    qualityOverall ~
+      AllportsCondition_cwc,
+    random = ~ 1 + AllportsCondition_cwc | PID,
+    na.action = na.omit,
+    control = lmeControl(opt = "optim"),
+    data = dtMedicalSupp$medicalOutWithinBetween
+  )
+
+# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
+summ(
+  mdlMedicalOut$Qlt$lmerSlopesAllport <-
+    lmer(
+      qualityOverall ~
+        AllportsCondition_cwc +
+        (1 + AllportsCondition_cwc | PID),
+      data = dtMedicalSupp$medicalOutWithinBetween
+    ),
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+
+mdlMedicalOut$Qlt$lmerSlopesAllportCI <- 
+  confint(method = "Wald", mdlMedicalOut$Qlt$lmerSlopesAllport)
+
+# Compare new model to previous step
+anova(mdlMedicalOut$Qlt$lmeNull, 
+      mdlMedicalOut$Qlt$lmeInterceptAllport, 
+      mdlMedicalOut$Qlt$lmeSlopesAllport) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Medical: Model Comparison",
+    format = "latex",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlMedicalOut$Qlt$varSlopesAllport <- 
+  lme4::VarCorr(mdlMedicalOut$Qlt$lmeSlopesAllport)
+
+# Assumption Checks:
+mdlMedicalOut$Qlt$diagSlopesAllport <-
+  sjPlot::plot_model(mdlMedicalOut$Qlt$lmerSlopesAllport, type = "diag")
+grid.arrange(
+  mdlMedicalOut$Qlt$diagSlopesAllport[[1]],
+  mdlMedicalOut$Qlt$diagSlopesAllport[[2]]$`PID`,
+  mdlMedicalOut$Qlt$diagSlopesAllport[[3]],
+  mdlMedicalOut$Qlt$diagSlopesAllport[[4]]
+)
+
+# Plot prediction model
+mdlMedicalOut$Qlt$predSlopesAllport <- 
+  dtMedicalSupp$medicalOutWithinBetween %>%
+  filter(PID %in% dtMedicalSupp$medicalOutPltIDs) %>%
+  select(AttitudesDutch, TIDnum, PID) %>% 
+  mutate(measure = predict(mdlMedicalOut$Qlt$lmeSlopesAllport,
+                           dtMedicalSupp$medicalOutWithinBetween %>% filter(PID %in% dtMedicalSupp$medicalOutPltIDs),
+                           re.form = NA
+                           )
+         )
+
+(
+  mdlMedicalOut$Qlt$predPltSlopesAllport <-
+    ggplot(data = mdlMedicalOut$Qlt$predSlopesAllport %>% filter(PID %in% dtMedicalSupp$medicalOutPltIDs), 
+           aes(x = TIDnum, y = measure)) +
+    geom_line(alpha = 1, color = "blue") +
+    geom_line(aes(y = AttitudesDutch), alpha = 1) +
+    facet_wrap(~ PID, ncol = 6) +
+    xlab("Time") +
+    ylab("Outgroup Attitudes") +
+    theme_Publication()
+)
+ggsave(
+  filename = "Figures/MedicalOut_PredictionPlot_SlopesAllport.png",
+  mdlMedicalOut$Qlt$predPltSlopesAllport,
+  width = 18,
+  height = 12,
+  dpi = 800,
+  units = "cm",
+  device = "png"
+)
+
+```
+
+```{r medicalOutModelInterceptAttAllportQlt, include=FALSE}
+# Create and save Model
+mdlMedicalOut$Att$lmeInterceptAllportQlt <-
+  lme(
+    AttitudesDutch ~ AllportsCondition_cwc + qualityOverall_cwc,
+    random = ~ 1 | PID,
+    na.action = na.omit,
+    data = dtMedicalSupp$medicalOutWithinBetween
+  )
+
+# Get summary with p-values (Satterthwaite's method)
+summ(
+  mdlMedicalOut$Att$lmerInterceptAllportQlt <-
+    lmer(
+      AttitudesDutch ~ AllportsCondition_cwc + qualityOverall_cwc + (1 | PID),
+      data = dtMedicalSupp$medicalOutWithinBetween
+    ),
+  confint = TRUE,
+  digits = 3
+)
+
+mdlMedicalOut$Att$lmerInterceptAllportQltCI <- 
+  confint(method = "Wald", mdlMedicalOut$Att$lmerInterceptAllportQlt)
+
+# Compare new model to previous step
+anova(
+  mdlMedicalOut$Att$lmeNull, 
+  mdlMedicalOut$Att$lmeInterceptAllportQlt
+  ) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Medical: Model Comparison",
+    format = "latex",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlMedicalOut$Att$varInterceptAllportQlt <-
+  lme4::VarCorr(mdlMedicalOut$Att$lmeInterceptAllportQlt)
+```
+
+```{r medicalOutModelSlopesAttAllportQlt, include=FALSE}
+# Create and save Model (optimizer needed to reach convergence)
+mdlMedicalOut$Att$lmeSlopesAllportQlt <-
+  lme(
+    AttitudesDutch ~
+      AllportsCondition_cwc + qualityOverall_cwc,
+    random = ~ 1 + AllportsCondition_cwc + qualityOverall_cwc | PID,
+    na.action = na.omit,
+    control = lmeControl(opt = "optim"),
+    data = dtMedicalSupp$medicalOutWithinBetween
+  )
+
+# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
+summ(
+  mdlMedicalOut$Att$lmerSlopesAllportQlt <- lmer(
+    AttitudesDutch ~
+      AllportsCondition_cwc + qualityOverall_cwc +
+      (1 + AllportsCondition_cwc + qualityOverall_cwc | PID),
+    data = dtMedicalSupp$medicalOutWithinBetween,
+    control = lmerControl(optimizer="bobyqa", optCtrl=list(maxfun=2e5))
+  ),
+  confint = TRUE,
+  digits = 3
+)
+
+mdlMedicalOut$Att$lmerSlopesAllportQltCI <- 
+  confint(method = "Wald", mdlMedicalOut$Att$lmerSlopesAllportQlt)
+
+# Compare new model to previous step
+anova(
+  mdlMedicalOut$Att$lmeNull,
+  mdlMedicalOut$Att$lmeInterceptAllportQlt,
+  mdlMedicalOut$Att$lmeSlopesAllportQlt
+) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  kbl(
+    .,
+    caption = "Medical: Model Comparison",
+    format = "latex",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlMedicalOut$Att$varSlopesAllportQlt <- 
+  lme4::VarCorr(mdlMedicalOut$Att$lmeSlopesAllportQlt)
+
+# Assumption Checks:
+mdlMedicalOut$Att$diagSlopesAllportQlt <- 
+  sjPlot::plot_model(mdlMedicalOut$Att$lmerSlopesAllportQlt, type = "diag")
+grid.arrange(
+  mdlMedicalOut$Att$diagSlopesAllportQlt[[1]],
+  mdlMedicalOut$Att$diagSlopesAllportQlt[[2]]$`PID`,
+  mdlMedicalOut$Att$diagSlopesAllportQlt[[3]],
+  mdlMedicalOut$Att$diagSlopesAllportQlt[[4]]
+)
+
+# Plot prediction model
+mdlMedicalOut$Att$predSlopesAllportQlt <- 
+  dtMedicalSupp$medicalOutWithinBetween %>% 
+  filter(complete.cases(AllportsCondition, qualityOverall)) %>%
+  filter(PID %in% dtMedicalSupp$medicalOutPltIDs) %>%
+  select(AttitudesDutch, TIDnum, PID) %>% 
+  mutate(measure = predict(mdlMedicalOut$Att$lmeSlopesAllportQlt,
+                           dtMedicalSupp$medicalOutWithinBetween %>% 
+                             filter(complete.cases(AllportsCondition, qualityOverall)) %>%
+                             filter(PID %in% dtMedicalSupp$medicalOutPltIDs),
+                           re.form = NA
+                           )
+         )
+
+(
+  mdlMedicalOut$Att$predPltSlopesAllportQlt <-
+    ggplot(data = mdlMedicalOut$Att$predSlopesAllportQlt, aes(x = TIDnum, y = measure)) +
+    geom_line(alpha = 1, color = "blue") +
+    geom_line(aes(y = AttitudesDutch), alpha = 1) +
+    facet_wrap( ~ PID, ncol = 6) +
+    xlab("Time") +
+    ylab("Outgroup Attitudes") +
+    theme_Publication()
+)
+ggsave(
+  filename = "Figures/MedicalOut_PredictionPlot_SlopesAttAllportQlt.png",
+  mdlMedicalOut$Att$predPltSlopesAllportQlt,
+  width = 18,
+  height = 12,
+  dpi = 800,
+  units = "cm",
+  device = "png"
+)
+```
+
+As we did with core need fulfillment, we sequentially tested whether the fulfillment of Allport's contact conditions was (1) related to more positive outgroup attitudes, (2) higher perceived interaction quality, and (3) whether the variance explained by Allport's Conditions is assumed by the perceived interaction quality if considered jointly. In the multilevel models we find that the fulfillment of Allport's Conditions during outgroup contacts was associated with more positive outgroup attitudes (random slopes model; `r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesAllport, lmerCI = mdlMedicalOut$Att$lmerSlopesAllportCI, varName = "AllportsCondition_cwc")`) and also predicted higher perceived interaction quality (random slopes model; `r MlCoeffLatex(lmeMdl = mdlMedicalOut$Qlt$lmeSlopesAllport, lmerCI = mdlMedicalOut$Qlt$lmerSlopesAllportCI, varName = "AllportsCondition_cwc")`). Moreover, when we consider the influences of Allport's Conditions and interaction quality on outgroup attitudes jointly, we find that perceived interaction quality is a substantially stronger predictor (random slopes mode; `r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesAllportQlt, lmerCI = mdlMedicalOut$Att$lmerSlopesAllportQltCI, varName = "qualityOverall_cwc")`) and the unique variance explained by Allport's Conditions was less than half of its original effect size (`r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesAllportQlt, lmerCI = mdlMedicalOut$Att$lmerSlopesAllportQltCI, varName = "AllportsCondition_cwc")`; also see Table \ref{tab:intergroupNeedsTblLong} and Figure \ref{fig:AllportNeedFulfillment}). These results indicate that in this data set the fulfillment of Allport's conditions had a significant influence on outgroup attitudes and this effect is likely, in parts, explained by its effect through perceived interaction quality. 
+
+<!-- \faQuestionCircle\ Are we sure that we don't want some sort of bootstrapped indirect effect?  -->
+
 
 \subsubsection{Compare Fulfillment of Core Need and Allport's Conditions}
 
@@ -4344,7 +4345,7 @@ ggsave(
 )
 ```
 
-To test wether Allport's conditions or the core need fulfillment are better at predicting outgroup attitudes, we first assess relative model performance indices (i.e., Akaike information criterion, and Bayesian information criterion), and then consider the two predictors in a joint model to see whether the two approaches predict the same variance in outgroup attitudes. When comparing the model selection indices we find that the fulfillment of the situational core need, indeed performs slightly better than the model using Allport's conditions ($AIC_{CoreNeed}$ `r format(round(AIC(mdlMedicalOut$Att$lmerSlopesCore), 2), nsmall = 2)` < `r format(round(AIC(mdlMedicalOut$Att$lmerSlopesAllport), 2), nsmall = 2)` $AIC_{Allport}$, and $BIC_{CoreNeed}$ `r format(round(BIC(mdlMedicalOut$Att$lmerSlopesCore), 2), nsmall = 2)` < `r format(round(BIC(mdlMedicalOut$Att$lmerSlopesAllport), 2), nsmall = 2)` $BIC_{Allport}$). Additionally, when considering the predictors jointly, we find that both significantly predict outgroup attitudes with similar sized regression parameters (random slopes model; Allport's Conditions: `r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreAllport, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreAllportCI, varName = "AllportsCondition_cwc")`, Core Need: `r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreAllport, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreAllportCI, varName = "KeyNeedFulfillment_cwc")`; also see Table \ref{tab:intergroupNeedsTblLong} and Figure \ref{fig:AllportNeedFulfillment}). This indicates that, although both Allport's conditions and the core need fulfillment seem to (in part) work through perceived interaction quality, they explain different aspects of the variance in outgroup attitudes and do not constitute one another.  
+To test wether Allport's conditions or the core need fulfillment are better at predicting outgroup attitudes, we first assess relative model performance indices (i.e., Akaike information criterion, and Bayesian information criterion), and then consider the two predictors in a joint model to see whether the two approaches predict the same variance in outgroup attitudes. When comparing the model selection indices, we find that the fulfillment of the situational core need indeed performs slightly better than the model using Allport's conditions ($AIC_{CoreNeed}$ `r format(round(AIC(mdlMedicalOut$Att$lmerSlopesCore), 2), nsmall = 2)` < `r format(round(AIC(mdlMedicalOut$Att$lmerSlopesAllport), 2), nsmall = 2)` $AIC_{Allport}$, and $BIC_{CoreNeed}$ `r format(round(BIC(mdlMedicalOut$Att$lmerSlopesCore), 2), nsmall = 2)` < `r format(round(BIC(mdlMedicalOut$Att$lmerSlopesAllport), 2), nsmall = 2)` $BIC_{Allport}$). Additionally, when considering the predictors jointly, we find that both significantly predict outgroup attitudes with similar sized regression parameters (random slopes model; Allport's Conditions: `r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreAllport, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreAllportCI, varName = "AllportsCondition_cwc")`, Core Need: `r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreAllport, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreAllportCI, varName = "KeyNeedFulfillment_cwc")`; also see Table \ref{tab:intergroupNeedsTblLong} and Figure \ref{fig:AllportNeedFulfillment}). This indicates that, although both Allport's conditions and the core need fulfillment seem to (in part) work through perceived interaction quality, they explain different aspects of the variance in outgroup attitudes and do not constitute one another.  
 
 \subsubsection{Robustness}
 
@@ -4770,13 +4771,12 @@ In a final step, we again checked whether during the interaction the core situat
     \noindent\rule{8cm}{0.4pt}
 \end{center}
 
-Introduction sentence
+Beyond the individual results of three studies, we conducted three additional analyses to test the broader cross-study claims and contextualize our results. In particular, we aim to gain a broader picture of the individual results by considering them jointly, and we leverage the data from all participants to test between-participant contact effects and explore the content of the participants' situational contact needs.
 
-\hl{maybe move this first paragraph to the end?}
 \subsection{Stability}
-We begin by assessing the stability of our main analyses across the three studies. To do so, we plot the effect sizes of each parameter of interest in a forest plot. Forest plots are a popular form of evidence synthesis and are commonly found within meta-analytic efforts. By plotting a standardized effect size and confidence interval of key parameters for each study, forest plots offer a visual method of identifying broader patterns across studies. This affords users a chance to spot stable as well as unreliable effects more easily. While not the focus of our efforts here, forest plots are commonly accompanied with a meta-analytic effect size that summarizes the effect size across studies. 
+We begin by assessing the stability of our main analyses across the three studies. To do so, we plot the effect sizes of each parameter of interest in a forest plot. Forest plots are a popular form of evidence synthesis and are commonly found within meta-analytic efforts. By plotting a standardized effect size and confidence interval of key parameters for each study, forest plots offer a visual method of identifying broader patterns across studies. This affords us a chance to spot stable as well as unreliable effects more easily. While not the focus of our efforts here, forest plots are commonly accompanied with a meta-analytic effect size that summarizes the effect size across studies. 
 
-We assess forest plots of the basic contact hypothesis test (Figure \ref{fig:ContactHypothesis}), the core need fulfillment proposal (Figure \ref{fig:AllportNeedFulfillment}), as well as the robustness analyses (Figure \ref{fig:Robustness}). For the basic contact hypothesis test we see that outgroup contact has a strong and consistent effect on outgroup attitudes while interactions with non-outgroup members consistently have no meaningful effect on outgroup attitudes. While this would be expected from the general intergroup contact literature, this is not a trivial finding. We are among the first to assess the contact hypothesis using real-life data from intensive longitudinal data and these close to event assessments are comparable but not equivalent to the assessments found in cross-sectional data (also see below). When looking at Figure \ref{fig:AllportNeedFulfillment}, we see that the fulfillment of core needs during intergroup contacts is consistently a meaningful predictor of outgroup attitudes and interaction quality perceptions (see Figure \ref{fig:AllportNeedFulfillment} A and B). We also see that the effect of core need fulfillment on outgroup attitudes is strongly reduced when modeled together with interaction quality perceptions, supporting our assertion that interaction quality offers a psychological mechanism for the direct effect. Additionally, the core need fulfillment is also consistently outgroup contact specific (Figure \ref{fig:Robustness} A) and remains a meaningful predictor of outgroup attitudes even when controlling for traditional psychological need fulfillments (Figure \ref{fig:Robustness} B).
+We assess forest plots of the basic contact hypothesis test (Figure \ref{fig:ContactHypothesis}), the core need fulfillment proposal (Figure \ref{fig:AllportNeedFulfillment}), as well as the robustness analyses (Figure \ref{fig:Robustness}). For the basic contact hypothesis test we see that outgroup contact has a strong and consistent effect on outgroup attitudes while interactions with non-outgroup members consistently have no meaningful effect on outgroup attitudes. While this would be expected from the general intergroup contact literature, this is not a trivial finding. We are among the first to assess the contact hypothesis using real-life intensive longitudinal data and these close to event assessments are comparable but not equivalent to the assessments found in cross-sectional data (also see below). When looking at Figure \ref{fig:AllportNeedFulfillment}, we see that the fulfillment of core needs during intergroup contacts is consistently a meaningful predictor of outgroup attitudes and interaction quality perceptions (see Figure \ref{fig:AllportNeedFulfillment} A and B). We also see that the effect of core need fulfillment on outgroup attitudes is strongly reduced when modeled together with interaction quality perceptions, supporting our assertion that interaction quality offers a psychological mechanism for the direct effect. Additionally, the core need fulfillment is also consistently outgroup contact specific (Figure \ref{fig:Robustness} A) and remains a meaningful predictor of outgroup attitudes even when controlling for traditional psychological need fulfillments (Figure \ref{fig:Robustness} B).
 
 \subsection{General contact hypothesis}
 
@@ -4811,7 +4811,7 @@ avAll$study2 <- relevel(as.factor(avAll$study),"S2")
 ```{r OLS regression across the three studies, include=FALSE}
 lmAllAttFreqQualX <-
   lm(
-    AvAttitude ~ SumContactNL_c * AvQuality_c + SumContactNL_c * study2 + AvQuality_c * study2,
+    AvAttitude ~ SumContactNL_c * AvQualityOut_c + SumContactNL_c * study2 + AvQualityOut_c * study2,
     data = avAll
   )
 
@@ -4846,21 +4846,20 @@ lmAllFstatLatex <- paste(
 )
 ```
 
-During the main analyses, we have thus far shown that participants held more positive outgroup attitudes following intergroup contacts and that a perceived interaction quality was associated with more positive outgroup attitudes following an intergroup contact. We have, however, not brought the two elements of the contact hypothesis together in a single analysis. This is mainly due to the difficulty that interaction quality ratings are only possible when participants had an interaction --- which means that the two factors cannot be assessed in a multilevel analysis that models individual measurement occasions. This has not been an issue in the past literature because experimental and cross-sectional data collections have only considered cases in which intergroup contacts were present. Outside of the lab, the most common method has been to ask participants to recall how many interactions they had over the past month, how positive these interactions were, and how positive they feel towards the outgroup in general. The effects of intergroup contacts, interaction quality, and outgroup attitudes are thus aggregated by the participant in a cognitive recall aggregation. Intensive longitudinal data also allows for aggregation of all three variables, with the differences that the measurements are aggregated from individual reports that are close to the actual experience. However, this aggregation process summarizes the dense multitude of measurement occasions as single summary statistics per participants. This by extension means that we face statistical power restrictions on the person level and have this decided to only present this analysis based on a combined data set of all three studies.
+During the main analyses, we have thus far shown that participants held more positive outgroup attitudes following intergroup contacts and that a perceived interaction quality was associated with more positive outgroup attitudes following an intergroup contact. We have, however, not brought the two elements of the contact hypothesis together in a single analysis. This is mainly due to the difficulty that interaction quality ratings are only possible when participants had an interaction --- which means that the two factors cannot be assessed in a multilevel analysis that models individual measurement occasions. This has not been an issue in the past literature because experimental and cross-sectional data collections have only considered cases in which intergroup contacts were present. Outside of the lab, the most common method has been to ask participants to recall how many interactions they had over the past month, how positive these interactions were, and how positive they feel towards the outgroup in general. The effects of intergroup contacts, interaction quality, and outgroup attitudes are thus summarized by the participant in a cognitive recall aggregation. Intensive longitudinal data also allows for aggregation of all three variables, with the differences that the measurements are aggregated from individual reports that are close to the actual experience. However, this aggregation process summarizes the dense multitude of measurement occasions as single summary statistics per participants. This, by extension, means that we face statistical power restrictions on the person level and have thus decided to only present this analysis based on a combined data set of all three studies.
 
-We thus run a linear regression model where average outgroup attitudes are predicted by the number of interactions and the average interaction quality ratings of all participants across the three studies. We do so while controlling for the possible effects of study-specific differences. To include the study-membership as a control variable, we use the student sample (Study 2) as the reference group because it is both the largest and the most homogeneous study. Looking at the overall model, we find that the model predicts a statistically significant amount of variance in average outgroup attitudes (`r lmAllFstatLatex`). Looking at the individual effects, we find that only the number of outgroup interactions is associated with average outgroup attitudes (`r LmCoeffLatex(lmMdl = lmAllAttFreqQualX, varName = "SumContactNL_c", ci = TRUE)`). Neither the average interaction quality perceptions nor an interaction of amount and quality of contact are meaningful or significant predictors of average outgroup attitudes (both \textit{b} <0.22 and \textit{p} > .201). In short, participants who on average had more positive interactions were not statistically more likely to show higher average outgroup attitudes. This result is surprising because it contradicts the tenet of the intergroup contact hypothesis that intergroup contact depends on positive contact. Additionally, the aggregated results contradict the results of our own multi-level regressions, where we have shown that the positive effect of individual outgroup interactions dependent on interaction quality perceptions. 
+We run a linear regression model where average outgroup attitudes are predicted by the number of interactions and the average interaction quality ratings of all participants across the three studies. We do so while controlling for the possible effects of study-specific differences. To include the study-membership as a control variable, we use the student sample (Study 2) as the reference group because it is both the largest and the most homogeneous study. Looking at the overall model, we find that the model predicts a statistically significant amount of variance in average outgroup attitudes (`r lmAllFstatLatex`). Looking at the individual effects, we find that only the number of outgroup interactions has a clear association with average outgroup attitudes (`r LmCoeffLatex(lmMdl = lmAllAttFreqQualX, varName = "SumContactNL_c", ci = TRUE)`). The average interaction quality perceptions had a much smaller effect (`r LmCoeffLatex(lmMdl = lmAllAttFreqQualX, varName = "AvQualityOut_c", ci = TRUE)`), and we do not find the most important interaction effect at all. In short, the effect of outgroup interactions did not depend on the average interaction quality, so that participants who on average had more positive interactions were not statistically more likely to show higher average outgroup attitudes than those with more negative interactions. This result is surprising because it contradicts the tenet of the intergroup contact hypothesis that intergroup contact depends on positive contact. 
 
 \subsection{Contact key need content}
-
-Because our participants jointly reported on several thousands of intergroup contacts, it would not be feasible to analyse these qualitative responses in a traditional qualitative content analysis. We instead rely on recent machine learning advances within the natural language processing domain. For our analysis we use the BERT language model. BERT (Bidirectional Encoder Representations from Transformers) was developed by Google in 2018 and today forms a key elements of many natural language processing workflows. In its essence, BERT is a framework that allows users to codify every word in relation to every other word within a large set of documents. This task is immensely computationally intensive and most users of the framework don't create their own model. We use the "all-mpnet-base-v2" language model for our embedding. The model is a community-based version of BERT that uses Microsoft's "mpnet-base" model and is fine-tuned with 1 Billion diverse sentence pairs. The model was trained with a 768 dimensional dense vector space (a relatively high number) to represent every word. As a result, the model is widely considered to be one of the most accurate all-purpose language models within the open-source BERT framework. We extracted 47 topics from the 2,983 interaction goal free-text entries --- a relatively large number of topics. The higher number of topics allows us to retain more of the smaller topics and leaves a relatively low number of 308 free-text entries unclassified (16.64%). A full write up of the topic modeling process is available in Online Supplemental Material C.
+Finally, we use the qualitative data from the participants’ self-identified core needs to contextualize the results of our main analysis. However, because our participants jointly reported on thousands of intergroup contacts, it would not be feasible to analyse these qualitative responses in a traditional qualitative content analysis. We instead rely on recent machine learning advances within the natural language processing domain. For our analysis we use the BERT language model. BERT (Bidirectional Encoder Representations from Transformers) was developed by Google in 2018 and today forms a key elements of many natural language processing workflows. In its essence, BERT is a framework that allows users to codify every word in relation to every other word within a large set of documents. This task is immensely computationally intensive and most users of the framework don't create their own model. We use the "all-mpnet-base-v2" language model for our embedding. The model is a community-based version of BERT that uses Microsoft's "mpnet-base" model and is fine-tuned with 1 Billion diverse sentence pairs. The model was trained with a 768 dimensional dense vector space (a relatively high number) to represent every word. As a result, the model is widely considered to be one of the most accurate all-purpose language models within the open-source BERT framework. We extracted 47 topics from the 2,983 interaction goal free-text entries --- a relatively large number of topics. The higher number of topics allows us to retain more of the smaller topics and leaves a relatively low number of 308 free-text entries unclassified (10.33%). A full write up of the topic modeling process is available in Online Supplemental Material C.
 
 In terms of the content of the topics, we find that a number of topics are primarily task-oriented, where participants hope to increase their study, research, presentation, or work performance. Opposing the task and work oriented needs, are a wide variety of leisure-related wishes. Specifically, relaxation and entertainment wishes were prominent terms across several topics. Additionally, a number of clusters is primarily relationship-oriented, so that participants sought contact with outgroup members for intimate and casual social contact in itself. Similarly, socializing and celebrations were also explicit social needs (incl., parties). Another set of topics was more practically oriented, when participants sought to share food and cook cook together, or had organizational needs (e.g., housing, cleaning, and living). 
 
-A reasonable set of contact goals were specifically migration specific (e.g., wish to learn about culture, politics, and language) or were concerned inquiry and information needs more generally (e.g., seeking answers, banking information). A further set of topics was specifically geared towards a wish to experience cultural products (e.g., music, theater, food). Similarly, a number of participants had travel related goals in their interactions with the majority group members.
+A reasonable set of contact goals were specifically migration-specific (e.g., wish to learn about culture, politics, and language) or were concerned inquiry and information needs more generally (e.g., seeking answers, bureaucratic information). A further set of topics was specifically geared towards a wish to experience cultural products (e.g., music, theater, food) or had travel related goals in their interactions with the majority group members.
 
-One interesting observation was the importance of contact goals specific to contact through the medical and public health system. This goal type was partly specific to our young medical professionals sample (e.g., working with patients, treatment), but also more broadly interactions of newcomers with the outgroup majority as patients themselves (e.g., therapeutic goals). Also health, fitness, and personal improvement goals (e.g., sports and music) were common goals that participants shared during the interactions with the majority group members. A final also under-explored topic is that of spiritual, religious, and otherwise transcendental needs (incl. meditation, prayer, religious services). This seems to offer a deep and fundamental need that is mostly ignored in western secular migrant research. 
+One interesting observation was the importance of contact goals specific to contact through the medical and public health system. This goal type was partly specific to our young medical professionals sample (e.g., working with patients, treatment), but also more broadly interactions of newcomers with the outgroup majority as patients themselves (e.g., therapeutic goals). Also health, fitness, and personal improvement goals (e.g., sports and music) were common goals that participants shared during the interactions with the majority group members. A final topic was that of spiritual, religious, and otherwise transcendental needs (incl. meditation, prayer, religious services). 
 
-Thus while, medical and spiritual interaction goals were more unexpected, almost all other extracted topics fall into broader or narrower need concepts that are commonly discussed within the psychological needs literature. Something about need theories/models plus our own review article.
+Thus, almost all other extracted topics fall into broader or narrower need concepts that are commonly discussed within the psychological needs literature. Something about need theories/models plus our own review article.
 
 
 ```{r intergroupGeneralTblLong, include=FALSE}
