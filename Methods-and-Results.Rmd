@@ -4771,7 +4771,7 @@ In a final step, we again checked whether during the interaction the core situat
     \noindent\rule{8cm}{0.4pt}
 \end{center}
 
-Beyond the individual results of three studies, we conducted three additional analyses to test the broader cross-study claims and contextualize our results. In particular, we aim to gain a broader picture of the individual results by considering them jointly, and we leverage the data from all participants to test between-participant contact effects and explore the content of the participants' situational contact needs.
+Beyond the individual results of the three studies, we conducted three additional analyses to test the broader cross-study claims and contextualize our results. In particular, we aim to gain a broader picture of the individual results by considering them jointly, and we leverage the data from all participants to test between-participant contact effects and explore the content of the participants' situational contact needs.
 
 \subsection{Stability}
 We begin by assessing the stability of our main analyses across the three studies. To do so, we plot the effect sizes of each parameter of interest in a forest plot. Forest plots are a popular form of evidence synthesis and are commonly found within meta-analytic efforts. By plotting a standardized effect size and confidence interval of key parameters for each study, forest plots offer a visual method of identifying broader patterns across studies. This affords us a chance to spot stable as well as unreliable effects more easily. While not the focus of our efforts here, forest plots are commonly accompanied with a meta-analytic effect size that summarizes the effect size across studies. 
@@ -4859,7 +4859,7 @@ A reasonable set of contact goals were specifically migration-specific (e.g., wi
 
 One interesting observation was the importance of contact goals specific to contact through the medical and public health system. This goal type was partly specific to our young medical professionals sample (e.g., working with patients, treatment), but also more broadly interactions of newcomers with the outgroup majority as patients themselves (e.g., therapeutic goals). Also health, fitness, and personal improvement goals (e.g., sports and music) were common goals that participants shared during the interactions with the majority group members. A final topic was that of spiritual, religious, and otherwise transcendental needs (incl. meditation, prayer, religious services). 
 
-Thus, almost all other extracted topics fall into broader or narrower need concepts that are commonly discussed within the psychological needs literature. Something about need theories/models plus our own review article.
+Thus, almost all other extracted topics fall into broader or narrower need concepts that are commonly discussed within the psychological needs literature \citep[e.g.,][]{Orehek2018a} and offer insight into a core aspect of the migration experience that has remained broadly under-explored \citep[][]{Kreienkamp2022d}.
 
 
 ```{r intergroupGeneralTblLong, include=FALSE}
