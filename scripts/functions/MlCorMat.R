@@ -213,7 +213,9 @@ MlTraitState <-
       #mutate_if(is.factor, as.numeric) %>% # let's hope this doesn't cause any problems :-D
       mutate_at(selection, as.numeric) %>% # let's hope this works 
       mutate_at(selection, list(gm = ~mean(., na.rm=TRUE))) %>% # grand mean
+      mutate_at(selection, list(gsd = ~sd(., na.rm=TRUE))) %>% # grand sd
       mutate_at(selection, list(gmc = ~.-mean(., na.rm=TRUE))) %>% # grand mean centered
+      mutate_at(selection, list(gmz = ~(.-mean(., na.rm=TRUE))/sd(., na.rm=TRUE))) %>% # grand mean standardized
       group_by_at(vars(matches(id))) %>%
       mutate_at(selection, list(cm = ~mean(., na.rm=TRUE))) %>% # cluster mean
       mutate_at(selection, list(csd = ~sd(., na.rm=TRUE))) %>% # cluster sd

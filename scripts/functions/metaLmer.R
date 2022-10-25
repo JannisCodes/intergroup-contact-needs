@@ -289,7 +289,7 @@ metaLmerOut <- function(lmerDataTbl, type = "FE", name, title, ...) {
         vi = get(paste(var.boot[i], ".vi", sep =
                          "")),
         data = md,
-        method = "FE",
+        method = type,
         slab = sample
       )
     
@@ -452,12 +452,12 @@ metaLmerOut <- function(lmerDataTbl, type = "FE", name, title, ...) {
 
 
 
-metaSubForest <- function(effects, title = "", addAbove = 0, filename = NULL, width = 600, height = 800,...) {
+metaSubForest <- function(effects, title = "", addAbove = 0, filename = NULL, type = "REML", width = 600, height = 800,...) {
   metaGeneral <- rma(
     yi = yi,
     vi = vi,
     data = effects,
-    method = "FE",
+    method = type,
     slab = paste(analysis, coef, sample, sep = " - ")
   )
   
@@ -501,7 +501,7 @@ metaSubForest <- function(effects, title = "", addAbove = 0, filename = NULL, wi
     subgroupMeta[[i]] <- rma(yi, 
                              vi, 
                              data = effects %>% filter(metaId == unique(effects$metaId)[i]), 
-                             method = "FE",
+                             method = type,
                              slab = paste(analysis, coef, sep = " - "))
   }
   
@@ -565,7 +565,7 @@ metaSubForest <- function(effects, title = "", addAbove = 0, filename = NULL, wi
     addpoly(
       subgroupMeta[[i]], 
       row = rev(unlist(rev(metaIndex)))[[i]],
-      mlab = "► Fixed Effect",
+      mlab = ifelse(type == "REML", "► Random Effect", ifelse(type == "FE", "► Fixed Effect", "► CHECK EFFECT")),
       cex = 0.75
     )
   }

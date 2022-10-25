@@ -1,5 +1,5 @@
-#obj <- mdlWorkerLmerSlopesAttCoreInt
-#objz <- mdlWorkerLmerSlopesAttCoreIntZ
+#obj <- mdlWorker$lmerInterceptAttTypeTbl
+#objz <- mdlWorker$lmerInterceptAttTypeTblZ
 
 lmerTblPrep <- function (obj, objz = NULL, alpha = 0.05, ...) {
   # Summarize models
@@ -75,10 +75,10 @@ lmerTblPrep <- function (obj, objz = NULL, alpha = 0.05, ...) {
   coefOut <- 
     join(
       coefOut %>% 
-        mutate(coef = gsub('_cwc', '', coef)), 
+        mutate(coef = gsub('_cwc|C$', '', coef)), 
       coefZOut %>% 
         select(coef, Beta) %>% 
-        mutate(coef = gsub('_zwc|Z$', '', coef)) %>%
+        mutate(coef = gsub('_zwc|_gmz|Z$', '', coef)) %>%
         mutate(Beta = ifelse(coef == "(Intercept)", "", Beta)),
       by = "coef"
     )
@@ -182,7 +182,7 @@ lmerTblPrep <- function (obj, objz = NULL, alpha = 0.05, ...) {
   out
 }
 
-#obj <- mdlWorker$lmAttFreqQualX
+#obj <- lmAllAttFreqQualX2
 lmTblPrep <- function (obj, alpha = 0.05, ...) {
   # Summarize models
   smry <- summ(obj, confint = TRUE)

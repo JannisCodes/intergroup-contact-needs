@@ -9,21 +9,26 @@
 \toprule
 \multicolumn{1}{c}{} & \multicolumn{2}{c}{Study 1} & \multicolumn{2}{c}{Study 2} & \multicolumn{2}{c}{Study 3} \\
 \cmidrule(l{3pt}r{3pt}){2-3} \cmidrule(l{3pt}r{3pt}){4-5} \cmidrule(l{3pt}r{3pt}){6-7}
- & $B$ & Effect Size & $B$ & Effect Size & $B$ & Effect Size\\
+ & $B$ & $\beta$ & $B$ & $\beta$ & $B$ & $\beta$\\
 \midrule
 \addlinespace[0.3em]
 \multicolumn{7}{l}{\textbf{Between Participant [aggregated linear regression] (Effect Size = $\eta_{partial}$)}}\\
-\hspace{1em}(Intercept) & 70.50**** [66.06, 74.94] &  & 67.62**** [64.16, 71.08] &  & 64.83**** [61.50, 68.16] & \\
-\hspace{1em}SumContactNL & 0.27 [-0.15,  0.69] & 0.02 & 0.81** [ 0.32,  1.29] & 0.08 & 0.15 [-0.08,  0.38] & 0.02\\
-\hspace{1em}AvQuality & 0.84** [ 0.36,  1.33] & 0.39 & 0.25 [-0.14,  0.64] & 0.01 & 0.36* [ 0.04,  0.68] & 0.07\\
-\hspace{1em}SumContactNL:AvQuality & -0.05** [-0.08, -0.01] & 0.34 & 0.02 [-0.03,  0.08] & 0.01 & 0.01 [-0.02,  0.03] & 0.01\\
-\hspace{1em}$R^2 / R^2_{adjusted}$ & 0.540 / 0.459 &  & 0.094 / 0.069 &  & 0.088 / 0.047 & \\
-\addlinespace[0.3em]
-\multicolumn{7}{l}{\textbf{Within Participants [multilevel linear regression] (Effect Size = $\beta$)}}\\
-\hspace{1em}(Intercept) & 67.44**** [61.71, 73.17] &  & 63.72**** [59.42, 68.01] &  & 56.30**** [51.58, 61.02] & \\
-\hspace{1em}OutgroupInteraction & 2.48**** [ 1.36,  3.59] & 1.07 [ 0.59, 1.54] & 2.99*** [ 1.45,  4.54] & 0.11 [ 0.07, 0.16] & 5.63**** [ 3.97,  7.29] & 0.21 [ 0.15, 0.27]\\
-\hspace{1em}NonOutgroupInteraction & 0.43 [-0.68,  1.54] & 0.16 [-0.32, 0.63] & 0.01 [-0.76,  0.78] & 0.01 [-0.03, 0.05] & 0.34 [-0.49,  1.18] & 0.02 [-0.02, 0.05]\\
-\hspace{1em}$R^2_{marginal} / R^2_{conditional}$ & 0.006 / 0.703 &  & 0.003 / 0.817 &  & 0.026 / 0.708 & \\
+\hspace{1em}(Intercept) & 74.12**** [ 56.74, 91.49] &  & 67.05**** [ 57.37, 76.73] &  & 60.36**** [ 46.45, 74.27] & \\
+\hspace{1em}OutgroupInteraction & 2.48**** [  1.37,  3.59] & 1.07 [ 0.59, 1.54] & 2.83*** [  1.28,  4.38] & 0.11 [ 0.07, 0.16] & 5.57**** [  3.90,  7.23] & 0.21 [ 0.15, 0.27]\\
+\hspace{1em}NonOutgroupInteraction & 0.44 [ -0.67,  1.55] & 0.16 [-0.32, 0.63] & 0.02 [ -0.76,  0.79] & 0.01 [-0.03, 0.05] & 0.36 [ -0.48,  1.19] & 0.02 [-0.02, 0.05]\\
+\hspace{1em}OutgroupInteractionM & 0.99 [-26.61, 28.59] & 1.65 [-4.27, 7.57] & 26.53** [  8.61, 44.46] & 0.00 [-0.03, 0.03] & 14.14 [ -2.19, 30.48] & 0.00 [-0.03, 0.03]\\
+\hspace{1em}NonOutgroupInteractionM & -4.82 [-30.26, 20.63] & -1.08 [-7.02, 4.86] & -8.32 [-22.98,  6.35] & 0.00 [-0.03, 0.03] & -2.75 [-20.00, 14.50] & 0.00 [-0.03, 0.03]\\
+\hspace{1em}$R^2_{marginal} / R^2_{conditional}$ & 0.009 / 0.722 &  & 0.050 / 0.818 &  & 0.049 / 0.717 & \\
+(Intercept) & 68.15**** [65.25, 71.06] &  &  &  &  & \\
+AvQualityOut & 0.29* [ 0.02,  0.56]; $\eta_{partial}$ = 0.08 &  &  &  &  & \\
+studyNum1 & 2.23 [-5.03,  9.48]; $\eta_{partial}$ = 0.00 &  &  &  &  & \\
+studyNum3 & -3.15 [-7.78,  1.48]; $\eta_{partial}$ = 0.01 &  &  &  &  & \\
+SumContactNL:AvQualityOut & -0.01 [-0.02,  0.01]; $\eta_{partial}$ = 0.00 &  &  &  &  & \\
+SumContactNL:studyNum1 & -0.46 [-1.17,  0.24]; $\eta_{partial}$ = 0.00 &  &  &  &  & \\
+SumContactNL:studyNum3 & -0.46* [-0.92, -0.01]; $\eta_{partial}$ = 0.02 &  &  &  &  & \\
+AvQualityOut:studyNum1 & 0.46 [-0.30,  1.23]; $\eta_{partial}$ = 0.01 &  &  &  &  & \\
+AvQualityOut:studyNum3 & 0.16 [-0.24,  0.56]; $\eta_{partial}$ = 0.00 &  &  &  &  & \\
+$R^2 / R^2_{adjusted}$ & 0.139 / 0.098 &  &  &  &  & \\
 \bottomrule
 \multicolumn{7}{l}{\rule{0pt}{1em}\textit{Note: }}\\
 \multicolumn{7}{l}{\rule{0pt}{1em}**** $p$ < .0001, *** $p$ < .001, ** $p$ < .01, * $p$ < .05}\\

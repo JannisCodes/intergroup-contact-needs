@@ -183,7 +183,9 @@ dtWorkerSupp$workerWithinBetween <-
         "relatedness_1", 
         "quality_overall_1", 
         "OutgroupInteraction",
-        "NonOutgroupInteraction"
+        "NonOutgroupInteraction", 
+        "OutgroupInteractionM",
+        "NonOutgroupInteractionM"
       )
   )
 
@@ -1435,7 +1437,9 @@ dtStudentSupp$studentWithinBetween <-
         "AttitudesDutch",
         "quality_overall",
         "OutgroupInteraction",
-        "NonOutgroupInteraction"
+        "NonOutgroupInteraction",
+        "OutgroupInteractionM",
+        "NonOutgroupInteractionM"
       )
   )
 dtStudentSupp$studentOutWithinBetween <-
@@ -2760,9 +2764,12 @@ dtMedicalSupp$medicalWithinBetween <-
     selection =
       c(
         "OutgroupInteraction",
-        "NonOutgroupInteraction"
+        "NonOutgroupInteraction",
+        "OutgroupInteractionM",
+        "NonOutgroupInteractionM"
       )
   )
+
 ```
 
 ```{r medicalVarDescr, include=FALSE}
@@ -4911,37 +4918,37 @@ for (i in 1:length(mdlPrepLmGeneral)){
 # Study 1: 
 dtWorkerSupp$workerWithinBetween$AttitudesDutch <- dtWorkerSupp$workerWithinBetween$thermometerDutch_1
 mdlWorker$lmerInterceptAttTypeTbl <- lmer(
-    AttitudesDutch ~ OutgroupInteraction + NonOutgroupInteraction + (1 | PID),
+    AttitudesDutch ~ OutgroupInteractionC + NonOutgroupInteractionC + OutgroupInteractionM + NonOutgroupInteractionM + (1 | PID),
     data = dtWorkerSupp$workerWithinBetween
   )
 dtWorkerSupp$workerWithinBetween$AttitudesDutch_zwc <- dtWorkerSupp$workerWithinBetween$thermometerDutch_1
 mdlWorker$lmerInterceptAttTypeTblZ <- lmer(
-    AttitudesDutch_zwc ~ OutgroupInteraction_zwc + NonOutgroupInteraction_zwc + (1 | PID),
+    AttitudesDutch_zwc ~ OutgroupInteraction_zwc + NonOutgroupInteraction_zwc + OutgroupInteractionM_gmz + NonOutgroupInteractionM_gmz + (1 | PID),
     data = dtWorkerSupp$workerWithinBetween
   )
 # Study 2:
 mdlStudent$lmerSlopesAttType <- lmer(
     AttitudesDutch ~
-      OutgroupInteraction + NonOutgroupInteraction +
-      (1 + OutgroupInteraction + NonOutgroupInteraction | PID),
+      OutgroupInteractionC + NonOutgroupInteractionC + OutgroupInteractionM + NonOutgroupInteractionM +
+      (1 + OutgroupInteractionC + NonOutgroupInteractionC | PID),
     data = dtStudentSupp$studentWithinBetween
   )
 mdlStudent$lmerSlopesAttTypeZ <- lmer(
     AttitudesDutch_zwc ~
-      OutgroupInteraction_zwc + NonOutgroupInteraction_zwc +
+      OutgroupInteraction_zwc + NonOutgroupInteraction_zwc + OutgroupInteractionM_gmz + NonOutgroupInteractionM_gmz +
       (1 + OutgroupInteraction_zwc + NonOutgroupInteraction_zwc | PID),
     data = dtStudentSupp$studentWithinBetween
   )
 # Study 3:
 mdlMedical$lmerSlopesAttType <- lmer(
     AttitudesDutch ~
-      OutgroupInteraction + NonOutgroupInteraction +
-      (1 + OutgroupInteraction + NonOutgroupInteraction | PID),
+      OutgroupInteractionC + NonOutgroupInteractionC + OutgroupInteractionM + NonOutgroupInteractionM +
+      (1 + OutgroupInteractionC + NonOutgroupInteractionC | PID),
     data = dtMedicalSupp$medicalWithinBetween
   )
 mdlMedical$lmerSlopesAttTypeZ <- lmer(
     AttitudesDutch_zwc ~
-      OutgroupInteraction_zwc + NonOutgroupInteraction_zwc +
+      OutgroupInteraction_zwc + NonOutgroupInteraction_zwc + OutgroupInteractionM_gmz + NonOutgroupInteractionM_gmz +
       (1 + OutgroupInteraction_zwc + NonOutgroupInteraction_zwc | PID),
     data = dtMedicalSupp$medicalWithinBetween
   )
@@ -4973,26 +4980,62 @@ names(mdlTblGeneralLmer) <- gsub("Beta", "ES", names(mdlTblGeneralLmer))
 names(mdlTblGeneralLm) <- make.unique(names(mdlTblGeneralLm))
 names(mdlTblGeneralLm) <- gsub("Eta2_partial", "ES", names(mdlTblGeneralLm))
 
+lmAllAttFreqQualX2 <-
+  lm(
+    AvAttitude ~ 
+      SumContactNL_c * AvQualityOut_c + 
+      SumContactNL_c * studyNum1 + 
+      SumContactNL_c * studyNum3 + 
+      AvQualityOut_c * studyNum1 + 
+      AvQualityOut_c * studyNum3,
+    data = avAll
+  )
+
+mdlTblGeneralLmAll <- lmTblPrep(lmAllAttFreqQualX2)$mdlTbl %>%
+  rename(., ES = Eta2_partial) %>%
+  replace(is.na(.), "") %>%
+  mutate(
+    B = ifelse(ES != "", paste(B, "; $\\eta_{partial}$ = ", ES, sep = ""), B),
+    ES = ""
+  )
+
+View(mdlTblGeneralLmAll)
+
 mdlTblGeneralLong <- 
-  rbind(mdlTblGeneralLm %>%
-                             filter(
-                               coef %in% c(
-                                 "(Intercept)",
-                                 "SumContactNL",
-                                 "AvQuality",
-                                 "SumContactNL:AvQuality",
-                                 "R2_R2_adjusted"
-                               )
-                             ),
-                           mdlTblGeneralLmer %>%
+  rbind(mdlTblGeneralLmer %>%
                              filter(
                                coef %in% c(
                                  "(Intercept)",
                                  "OutgroupInteraction",
                                  "NonOutgroupInteraction",
+                                 "OutgroupInteractionM",
+                                 "NonOutgroupInteractionM",
                                  "R2Marg_R2Cond"
                                )
-                             ))
+                             ),
+        mdlTblGeneralLmAll %>%
+                             filter(
+                               coef %in% c(
+                                 "(Intercept)",
+                                 "AvQualityOut",
+                                 "AvQuality",
+                                 "studyNum1",
+                                 "studyNum3",
+                                 "SumContactNL:AvQualityOut",
+                                 "SumContactNL:studyNum1",
+                                 "SumContactNL:studyNum3", 
+                                 "AvQualityOut:studyNum1",
+                                 "AvQualityOut:studyNum3",
+                                 "R2_R2_adjusted"
+                               )
+                             ) %>%
+          mutate(
+            B.1 = "",
+            ES.1 = "",
+            B.2 = "",
+            ES.2 =  ""
+          )
+                           )
 mdlTblGeneralLong$coef <- mapvalues(
   mdlTblGeneralLong$coef,
   from = c(
@@ -5004,6 +5047,51 @@ mdlTblGeneralLong$coef <- mapvalues(
     "$R^2_{marginal} / R^2_{conditional}$"
   )
 )
+
+library(huxtable)
+testTbl <- mdlTblGeneralLong %>%
+  replace(is.na(.), "") %>%
+  hux(.) %>%
+  set_contents(1, 1:7, c("", rep(c("$B$", "$\\beta$"), (ncol(.)-1)/2))) %>%
+  insert_row("", "Study 1", "", "Study 2", "", "Study 3", "", after = 0) %>%
+  merge_cells(1, 2:3) %>% 
+  merge_cells(1, 4:5) %>% 
+  merge_cells(1, 6:7) %>% 
+  set_align(1:2, everywhere, "center") %>%
+  set_escape_contents(everywhere, everywhere, FALSE) %>%
+  set_header_rows(1, TRUE) %>%
+  theme_article %>%
+  set_bottom_border(1, 2:3, brdr(0.5, "solid", "black")) %>%
+  set_bottom_border(1, 4:5, brdr(0.5, "solid", "black")) %>%
+  set_bottom_border(1, 6:7, brdr(0.5, "solid", "black")) %>%
+  insert_column(after = 3, fill = "") %>%
+  set_bottom_border(1, 4, 0) %>%
+  insert_column(after = 6, fill = "") %>%
+  set_bottom_border(1, 7, 0) %>%
+  set_col_width(., 7, 0) %>%
+  insert_row(after = 2, "\\textbf{Within Participants [multilevel linear regression]}", fill = "", copy_cell_props = FALSE) %>%
+  merge_cells(3, 1:ncol(.)) %>%
+  insert_row(after = 9, "\\textbf{Between Participant [aggregated linear regression]}", fill = "", copy_cell_props = FALSE) %>%
+  merge_cells(10, 1:ncol(.)) %>%
+  set_left_padding(4:9, 1, 12) %>%
+  set_left_padding(11:nrow(.), 1, 12) %>%
+  set_font_size(9)
+
+for (i in 11:nrow(testTbl)) {
+  testTbl <- testTbl %>%
+    merge_cells(i, 2:ncol(.)) %>%
+    set_align(i, 2:ncol(.), "center")
+}
+testTbl %>% 
+  as_flextable
+
+capture.output(print_latex(testTbl), file = 'TableOnly.tex')
+
+quick_latex(testTbl, file = "Table.tex", open = FALSE)
+
+
+
+
 mdlTblGeneralLong %>%
     replace(is.na(.), "") %>%
   kbl(
@@ -5012,7 +5100,7 @@ mdlTblGeneralLong %>%
     format = "latex",
     linesep = "",
     booktabs = TRUE,
-    col.names = c("", rep(c("$B$", "Effect Size"), (ncol(.)-1)/2)),
+    col.names = c("", rep(c("$B$", "$\\beta$"), (ncol(.)-1)/2)),
     align = c("l", rep("c", ncol(.) - 1)),
     escape = FALSE,
     digits = 3
@@ -5027,9 +5115,10 @@ mdlTblGeneralLong %>%
       "Study 3" = 2
     )
   ) %>%
-  pack_rows("Between Participant [aggregated linear regression] (Effect Size = $\\eta_{partial}$)", 1, 5, escape = FALSE) %>%
-  pack_rows("Within Participants [multilevel linear regression] (Effect Size = $\\beta$)", 6, 9, escape = FALSE) %>%
-  footnote(
+  pack_rows("Between Participant [aggregated linear regression] (Effect Size = $\\eta_{partial}$)", 1, 6, escape = FALSE) %>%
+  # pack_rows("Within Participants [multilevel linear regression] (Effect Size = $\\beta$)", 6, 9, escape = FALSE) %>%
+  kableExtra::footnote(
+    .,
     general = c("**** $p$ < .0001, *** $p$ < .001, ** $p$ < .01, * $p$ < .05"), 
     escape = FALSE
   ) %>%
@@ -6384,7 +6473,7 @@ for(i in 1:length(var)){
       meta.parametric[[var[i]]] <- rma(yi = get(paste(var[i],".yi",sep="")),
                                        vi = get(paste(var[i],".vi",sep="")), 
                                        data = md, 
-                                       method = "FE", # "REML", 
+                                       method = "REML", #"FE", 
                                        slab = sample)
       #metafor::forest(meta.parametric[[var[i]]],
       #                main = paste("Meta Analysis ",names[i],sep = ""))
@@ -6440,7 +6529,7 @@ for(i in 1:length(var)){
     meta <- rma(yi = yi,
                 vi = vi, 
                 data = eff, 
-                method = "FE", # "REML", 
+                method = "REML", #"FE", 
                 slab = paste(coef, sample, sep=" - "))
 
     k <- length(var) * length(studies)
@@ -6628,7 +6717,7 @@ dev.off()
       meta.bootstrapped[[var.boot[i]]] <- rma(yi = get(paste(var.boot[i],".yi",sep="")),
                                               vi = get(paste(var.boot[i],".vi",sep="")),
                                               data = md,
-                                              method = "FE",
+                                              method =  "REML", #"FE", 
                                               slab = sample)
       #metafor::forest(meta.bootstrapped[[var.boot[i]]],
       #                main = paste("Meta Analysis ",names.boot[i],sep = ""))
@@ -6702,7 +6791,7 @@ dev.off()
     meta.boot <- rma(yi = yi,
                      vi = vi, 
                      data = eff.boot, 
-                     method = "FE", 
+                     method = "REML", #"FE", 
                      slab = paste(coef, sample, sep=" - "))
 
     k <- 3*3
@@ -6754,9 +6843,10 @@ for (i in 1:length(mdlTblElementsGeneralLmer)){
 GeneralLmerMetaTbl <- GeneralLmerMetaTbl %>% arrange(coef)
      
 GeneralLmerMeta <- metaLmerOut(GeneralLmerMetaTbl,
-                               type = "FE",
+                               type = "REML", #"FE", 
                                name = "GeneralLmer",
                                title = "Contact Hypothesis — Mixed Effects Regression")
+
       
 ```
 
@@ -6775,7 +6865,8 @@ effGeneral <- rbind(
 
 metaSubForest(effGeneral, 
               title = "Meta Analysis: Forest Plot Contact Hypothesis \n[Parametric]",
-              filename = "GeneralComb_WeirdScale",
+              filename = "GeneralLmer",
+              type = "REML",
               addAbove = 5,
               width = 600,
               height = 600)
@@ -6833,7 +6924,7 @@ theoryMetaTblNoAllport <- theoryMetaTbl %>%
 TheoryMetaQualityNeed <-
   metaLmerOut(
     lmerDataTbl = theoryMetaTblNoAllport %>% filter(formula == "QualityRaw ~ CoreNeed"),
-    type = "FE",
+    type = "REML", #"FE", 
     name = "TheoryQualityCore",
     title = "Quality ~ CoreNeed"
   )
@@ -6841,7 +6932,7 @@ TheoryMetaQualityNeed <-
 TheoryMetaAttitudeNeed <-
   metaLmerOut(
     lmerDataTbl = theoryMetaTblNoAllport %>% filter(formula == "Attitude ~ CoreNeed"),
-    type = "FE",
+    type = "REML", #"FE", 
     name = "TheoryAttitudeCore",
     title = "Attitude ~ CoreNeed"
   )
@@ -6849,7 +6940,7 @@ TheoryMetaAttitudeNeed <-
 TheoryMetaAttitudeNeedQuality <-
   metaLmerOut(
     lmerDataTbl = theoryMetaTblNoAllport %>% filter(formula == "Attitude ~ CoreNeed + Quality"),
-    type = "FE",
+    type = "REML", #"FE", 
     name = "TheoryAttitudeCoreQuality",
     title = "Attitude ~ CoreNeed + Quality"
   )
@@ -6860,19 +6951,23 @@ effTheory <- rbind(
   TheoryMetaQualityNeed$eff %>%
     filter(coef != "(Intercept)") %>%
     mutate(analysis = "(A) Quality ~ Core Need",
-           metaId = paste(coef, analysis, sep = ".")),
+           metaId = paste(coef, analysis, sep = ".")) %>%
+    as.data.frame,
   TheoryMetaAttitudeNeed$eff %>%
     mutate(analysis = "(B) Attitude ~ Core Need",
-           metaId = paste(coef, analysis, sep = ".")),
+           metaId = paste(coef, analysis, sep = ".")) %>%
+    as.data.frame,
   TheoryMetaAttitudeNeedQuality$eff %>%
     mutate(analysis = "(C) Attitude ~ Core Need + Quality",
-           metaId = paste(coef, analysis, sep = "."))
+           metaId = paste(coef, analysis, sep = ".")) %>%
+    as.data.frame
 )
 
 metaSubForest(effTheory, 
               title = "Meta Analysis: Forest Plot Core Need Fulfillment \n[Parametric]",
               filename = "TheoryComb",
               addAbove = 5,
+              type = "REML",
               width = 600,
               height = 600)
 ```
@@ -6930,7 +7025,7 @@ robustMetaTbl <- robustMetaTbl %>%
 robustMetaContact <-
   metaLmerOut(
     lmerDataTbl = robustMetaTbl %>% filter(formula == "AttitudesDutch ~ CoreNeed_cwc * OutgroupInteraction"),
-    type = "FE",
+    type = "REML", #"FE", 
     name = "RobustContact",
     title = "Robustness — Contact and Need Fulfillment"
   )
@@ -6938,7 +7033,7 @@ robustMetaContact <-
 robustMetaSDT <-
   metaLmerOut(
     lmerDataTbl = robustMetaTbl %>% filter(formula == "AttitudesDutch ~ CoreNeed_cwc + Competence_cwc + Autonomy_cwc +      Relatedness_cwc"),
-    type = "FE",
+    type = "REML", #"FE", 
     name = "RobustSDT",
     title = "Robustness — Other Needs"
   )
@@ -6948,11 +7043,11 @@ robustMetaSDT <-
 effRobust <- rbind(
   robustMetaContact$eff %>%
     filter(coef != "(Intercept)") %>%
-    mutate(analysis = "(A) Contact and Need Fulfillment",
+    mutate(analysis = "(A) Attitude ~ Contact and Need Fulfillment",
            metaId = paste(coef, analysis, sep = ".")) %>%
     as.data.frame,
   robustMetaSDT$eff %>%
-    mutate(analysis = "(B) Other Needs",
+    mutate(analysis = "(B) Attitude ~ Other Needs",
            metaId = paste(coef, analysis, sep = ".")) %>%
     as.data.frame
 )
