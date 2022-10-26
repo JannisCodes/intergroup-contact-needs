@@ -146,11 +146,11 @@ coreNeedPathS3 <-
 
 `r path_tikz(coreNeedPathS1)`
 
-\vspace{12pt}
+\vspace{24pt}
 
 `r path_tikz(coreNeedPathS2)`
 
-\vspace{12pt}
+\vspace{24pt}
 
 `r path_tikz(coreNeedPathS3)`
 
