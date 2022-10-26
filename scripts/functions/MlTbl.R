@@ -1,5 +1,8 @@
-#obj <- mdlWorker$lmerInterceptAttTypeTbl
-#objz <- mdlWorker$lmerInterceptAttTypeTblZ
+#obj <- tblLmerS1AttSlopeCoreQlt
+#objz <- tblLmerS1AttSlopeCoreQltZ
+
+# obj <- mdlTblElements[[i]][[1]]
+# objz <- mdlTblElements[[i]][[2]]
 
 lmerTblPrep <- function (obj, objz = NULL, alpha = 0.05, ...) {
   # Summarize models
@@ -39,7 +42,6 @@ lmerTblPrep <- function (obj, objz = NULL, alpha = 0.05, ...) {
       RsqUpper = upper.CL
     )
   coefZOut <- merge(coefZCI, coefZR2)
-  
   coefZOut$Beta <- paste0(
     format(round(coefZOut$est, 2), nsmall = 2),
     " [", 
@@ -48,6 +50,10 @@ lmerTblPrep <- function (obj, objz = NULL, alpha = 0.05, ...) {
     format(round(coefZOut$upr, 2), nsmall = 2),
     "]"
   )
+  coefZOut$BetaStar <- ifelse(coefZOut$p < .0001, "****", 
+                          ifelse(coefZOut$p < .001, "***", 
+                                 ifelse(coefZOut$p < .01, "**", 
+                                        ifelse(coefZOut$p < .05, "*", ""))))
   
   # Get unstandardized coefficients
   coef <- smry$coeftable %>% 
@@ -72,12 +78,16 @@ lmerTblPrep <- function (obj, objz = NULL, alpha = 0.05, ...) {
     format(round(coefOut$upr, 2), nsmall = 2),
     "]"
   )
+  coefOut$Bstar <- ifelse(coefOut$p < .0001, "****", 
+                          ifelse(coefOut$p < .001, "***", 
+                                 ifelse(coefOut$p < .01, "**", 
+                                        ifelse(coefOut$p < .05, "*", ""))))
   coefOut <- 
     join(
       coefOut %>% 
         mutate(coef = gsub('_cwc|C$', '', coef)), 
       coefZOut %>% 
-        select(coef, Beta) %>% 
+        select(coef, estBeta = est, Beta, BetaStar) %>% 
         mutate(coef = gsub('_zwc|_gmz|Z$', '', coef)) %>%
         mutate(Beta = ifelse(coef == "(Intercept)", "", Beta)),
       by = "coef"

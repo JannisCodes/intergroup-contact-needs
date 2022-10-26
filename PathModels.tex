@@ -1,0 +1,42 @@
+\begin{tikzpicture}[font=\sffamily]
+    \node[mynode] (m){Interaction\\Quality};
+    \node[mynode,below left=of m](x) {Core Need\\Fulfillment};
+    \node[mynode,below right=of m](y) {Outgroup\\Attitudes};
+    \node[mynode,above left=of m](xd) {Core Need\\Fulfillment};
+    \node[mynode,above right=of m](yd) {Outgroup\\Attitudes};
+    \draw[-latex] (xd.east) -- node[above=2mm, align=center] {0.30**} (yd.west);
+    \draw[-latex] (x.north) -- node[auto] {0.40****} (m.west);
+    \draw[-latex] (m.east) -- node[auto] {0.41***} (y.north);
+    \draw[-latex] (x.east) -- node[below=2mm, align=center] {0.13} (y.west);
+    \path (xd.north west) ++(-0.2, 6pt) node[above left]{\textbf{(A)}};
+\end{tikzpicture}
+
+\vspace{12pt}
+
+\begin{tikzpicture}[font=\sffamily]
+    \node[mynode] (m){Interaction\\Quality};
+    \node[mynode,below left=of m](x) {Core Need\\Fulfillment};
+    \node[mynode,below right=of m](y) {Outgroup\\Attitudes};
+    \node[mynode,above left=of m](xd) {Core Need\\Fulfillment};
+    \node[mynode,above right=of m](yd) {Outgroup\\Attitudes};
+    \draw[-latex] (xd.east) -- node[above=2mm, align=center] {0.14***} (yd.west);
+    \draw[-latex] (x.north) -- node[auto] {0.27****} (m.west);
+    \draw[-latex] (m.east) -- node[auto] {0.24****} (y.north);
+    \draw[-latex] (x.east) -- node[below=2mm, align=center] {0.07} (y.west);
+    \path (xd.north west) ++(-0.2, 6pt) node[above left]{\textbf{(B)}};
+\end{tikzpicture}
+
+\vspace{12pt}
+
+\begin{tikzpicture}[font=\sffamily]
+    \node[mynode] (m){Interaction\\Quality};
+    \node[mynode,below left=of m](x) {Core Need\\Fulfillment};
+    \node[mynode,below right=of m](y) {Outgroup\\Attitudes};
+    \node[mynode,above left=of m](xd) {Core Need\\Fulfillment};
+    \node[mynode,above right=of m](yd) {Outgroup\\Attitudes};
+    \draw[-latex] (xd.east) -- node[above=2mm, align=center] {0.18****} (yd.west);
+    \draw[-latex] (x.north) -- node[auto] {0.31****} (m.west);
+    \draw[-latex] (m.east) -- node[auto] {0.23****} (y.north);
+    \draw[-latex] (x.east) -- node[below=2mm, align=center] {0.10**} (y.west);
+    \path (xd.north west) ++(-0.2, 6pt) node[above left]{\textbf{(C)}};
+\end{tikzpicture}

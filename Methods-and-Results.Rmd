@@ -4999,8 +4999,6 @@ mdlTblGeneralLmAll <- lmTblPrep(lmAllAttFreqQualX2)$mdlTbl %>%
     ES = ""
   )
 
-View(mdlTblGeneralLmAll)
-
 mdlTblGeneralLong <- 
   rbind(mdlTblGeneralLmer %>%
                              filter(
@@ -5498,9 +5496,20 @@ mdlTblElements <- list(
 
 # lmerTblPrep(mdlTblElements[[1]][[1]], mdlTblElements[[1]][[2]])
 
+
 mdlPrep <- list()
 for (i in 1:length(mdlTblElements)) {
   mdlPrep[[i]] <- lmerTblPrep(mdlTblElements[[i]][[1]], mdlTblElements[[i]][[2]])
+}
+
+shortMdlPath <- list()
+for(i in 1:length(mdlPrep)){
+  study <- gsub("S", "Study", str_extract(mdlPrep[[i]]$fit$data, "S1|S2|S3"))
+  dv <- gsub("Raw", "", sub(" ~.*", "", mdlPrep[[i]]$fit$formula)) 
+  pred <- gsub("\\(Intercept\\)", "", paste(mdlPrep[[i]]$coeficients$coef, collapse = ''))
+  
+  name <- paste(study, dv, pred, sep='.')
+  shortMdlPath[[name]] <- mdlPrep[[i]]$coeficients[, c("coef", "est", "Bstar", "B", "estBeta", "BetaStar", "Beta")]
 }
 
 # Long format
@@ -7060,6 +7069,11 @@ metaSubForest(effRobust,
               height = 800)
 ```
 
+
+```{r Export Path Models}
+save(shortMdlPath, 
+     file = "data/theoryMdlTabl.RData")
+```
 
 ```{r OsfExport, include=FALSE}
 # export individual minimal CSV files 

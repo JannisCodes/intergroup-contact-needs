@@ -1,0 +1,158 @@
+---
+output: latex_fragment
+header-includes:
+  - \usepackage{tikz}
+  - \usepackage{pgfplots}
+  - \pgfplotsset{compat=1.17}
+  - \tikzset{mynode/.style={draw,text width=1in,align=center} }
+  - \usetikzlibrary{positioning}
+---
+
+```{r, load_packages, include = FALSE}
+lib <- c(
+  "rmarkdown",
+  "knitr",
+  "remedy",
+  "bookdown",
+  "glue"
+)
+invisible(lapply(lib, library, character.only = TRUE))
+rm(lib)
+```
+  
+```{r, load_function, include=FALSE}
+# \\path (xd.north west) ++(-0.2, 3pt) node[above left]{(A)};
+# \\path (xd.north west) ++(-0.4, 16pt) node[draw, above left, shape=circle, very thick, inner sep=2pt] {\\large \\textbf{<<fig_num>>}};
+path_tikz_fig <- function(data) {
+  glue::glue_data(data, 
+"
+\\begin{figure}
+\\begin{center}
+\\begin{tikzpicture}[font=\\sffamily]
+    \\node[mynode] (m){<<lab_m>>};
+    \\node[mynode,below left=of m](x) {<<lab_x>>};
+    \\node[mynode,below right=of m](y) {<<lab_y>>};
+    \\node[mynode,above left=of m](xd) {<<lab_x_direct>>};
+    \\node[mynode,above right=of m](yd) {<<lab_y_direct>>};
+    \\draw[-latex] (xd.east) -- node[above=2mm, align=center] {<<coef_xy_direct>>} (yd.west);
+    \\draw[-latex] (x.north) -- node[auto] {<<coef_xm>>} (m.west);
+    \\draw[-latex] (m.east) -- node[auto] {<<coef_my>>} (y.north);
+    \\draw[-latex] (x.east) -- node[below=2mm, align=center] {<<coef_xy>>} (y.west);
+    \\path (xd.north west) ++(-0.2, 6pt) node[above left]{\\textbf{(<<fig_num>>)}};
+\\end{tikzpicture}
+\\end{center}
+\\end{figure}
+", 
+.open = "<<", .close = ">>"
+)
+}
+
+path_tikz <- function(data) {
+  glue::glue_data(data, 
+"
+\\begin{tikzpicture}[font=\\sffamily]
+    \\node[mynode] (m){<<lab_m>>};
+    \\node[mynode,below left=of m](x) {<<lab_x>>};
+    \\node[mynode,below right=of m](y) {<<lab_y>>};
+    \\node[mynode,above left=of m](xd) {<<lab_x_direct>>};
+    \\node[mynode,above right=of m](yd) {<<lab_y_direct>>};
+    \\draw[-latex] (xd.east) -- node[above=2mm, align=center] {<<coef_xy_direct>>} (yd.west);
+    \\draw[-latex] (x.north) -- node[auto] {<<coef_xm>>} (m.west);
+    \\draw[-latex] (m.east) -- node[auto] {<<coef_my>>} (y.north);
+    \\draw[-latex] (x.east) -- node[below=2mm, align=center] {<<coef_xy>>} (y.west);
+    \\path (xd.north west) ++(-0.2, 6pt) node[above left]{\\textbf{(<<fig_num>>)}};
+\\end{tikzpicture}
+", 
+.open = "<<", .close = ">>"
+)
+}
+```
+  
+  
+```{r create_diagram, echo = FALSE, results = 'asis'}
+
+load("data/theoryMdlTabl.RData")
+
+y <- "Attitude"
+x <- "CoreNeed"
+m <- "Quality"
+xm <- "CoreNeedQuality"
+
+studies <- c("Study1", "Study2", "Study3")
+
+pathCoeffs <- list()
+for (study in studies) {
+  mdlDir <- shortMdlPath[[paste(study, y, x, sep = ".")]]
+  mdlM <- shortMdlPath[[paste(study, m, x, sep = ".")]]
+  mdlFull <- shortMdlPath[[paste(study, y, xm, sep = ".")]]
+  
+  pathCoeffs[[study]] <-
+    data.frame(
+      xy_direct = paste(format(round(mdlDir$estBeta[mdlDir$coef==x],2), nsmall=2), mdlDir$Bstar[mdlDir$coef==x], sep=""), # c
+      xm = paste(format(round(mdlM$estBeta[mdlM$coef==x],2), nsmall=2), mdlM$Bstar[mdlM$coef==x], sep=""), # a
+      my = paste(format(round(mdlFull$estBeta[mdlFull$coef==m],2), nsmall=2), mdlFull$Bstar[mdlFull$coef==m], sep=""), # b
+      xy = paste(format(round(mdlFull$estBeta[mdlFull$coef==x],2), nsmall=2), mdlFull$Bstar[mdlFull$coef==x], sep="") # c'
+    )
+}
+
+
+coreNeedPathS1 <-
+  data.frame(
+    lab_x_direct = "Core Need\\\\Fulfillment",
+    lab_y_direct   = "Outgroup\\\\Attitudes",
+    lab_x   = "Core Need\\\\Fulfillment",
+    lab_m   = "Interaction\\\\Quality",
+    lab_y   = "Outgroup\\\\Attitudes",
+    coef_xy_direct = pathCoeffs$Study1$xy_direct,
+    coef_xm = pathCoeffs$Study1$xm,
+    coef_my = pathCoeffs$Study1$my,
+    coef_xy = pathCoeffs$Study1$xy,
+    fig_num = "A"
+  )
+coreNeedPathS2 <-
+  data.frame(
+    lab_x_direct = "Core Need\\\\Fulfillment",
+    lab_y_direct   = "Outgroup\\\\Attitudes",
+    lab_x   = "Core Need\\\\Fulfillment",
+    lab_m   = "Interaction\\\\Quality",
+    lab_y   = "Outgroup\\\\Attitudes",
+    coef_xy_direct = pathCoeffs$Study2$xy_direct,
+    coef_xm = pathCoeffs$Study2$xm,
+    coef_my = pathCoeffs$Study2$my,
+    coef_xy = pathCoeffs$Study2$xy,
+    fig_num = "B"
+  )
+coreNeedPathS3 <-
+  data.frame(
+    lab_x_direct = "Core Need\\\\Fulfillment",
+    lab_y_direct   = "Outgroup\\\\Attitudes",
+    lab_x   = "Core Need\\\\Fulfillment",
+    lab_m   = "Interaction\\\\Quality",
+    lab_y   = "Outgroup\\\\Attitudes",
+    coef_xy_direct = pathCoeffs$Study3$xy_direct,
+    coef_xm = pathCoeffs$Study3$xm,
+    coef_my = pathCoeffs$Study3$my,
+    coef_xy = pathCoeffs$Study3$xy,
+    fig_num = "C"
+  )
+
+# requires chunk header to be set to results = 'asis'
+# cat("\n", path_tikz(coreNeedPathS1), "\n")
+# cat("\n", path_tikz(coreNeedPathS2), "\n")
+# cat("\n", path_tikz(coreNeedPathS3), "\n")
+
+```
+
+
+`r path_tikz(coreNeedPathS1)`
+
+\vspace{12pt}
+
+`r path_tikz(coreNeedPathS2)`
+
+\vspace{12pt}
+
+`r path_tikz(coreNeedPathS3)`
+
+<!-- \textit{Note:} Stars based on more conservative unstandardized regressions -->
+
