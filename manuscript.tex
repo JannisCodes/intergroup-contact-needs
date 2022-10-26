@@ -43,6 +43,12 @@
 \usepackage{adjustbox}
 \usepackage{makecell}
 \usepackage{tabu}
+% Path Diagrams
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.17}
+\tikzset{mynode/.style={draw,text width=1in,align=center} }
+\usetikzlibrary{positioning}
 
 % make warning with red triangle
 \newcommand\Warning[1][2ex]{%
@@ -370,6 +376,18 @@ In sum, we used extensive longitudinal methodologies to capture real-life intera
 
 
 % Figures
+\begin{figure}
+  \caption{Main Model}
+  \label{fig:MainPaths}
+  %\centering\includegraphics[width=\textwidth]{Figures/forestParametricREMLGeneralLmer.png}
+  \begin{center}
+    \input{PathModels.tex}
+  \end{center}
+  \caption*{Note: \\
+  Summary of mixed models results of the contemporaneous contact effects.\\
+  General: Random effects meta analytic results are presented for completeness.}
+\end{figure}
+
 \begin{figure}
   \caption{Contact Hypothesis}
   \label{fig:ContactHypothesis}
