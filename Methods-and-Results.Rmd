@@ -5073,9 +5073,10 @@ testTbl <- mdlTblGeneralLong %>%
   merge_cells(10, 1:ncol(.)) %>%
   set_left_padding(4:9, 1, 12) %>%
   set_left_padding(11:nrow(.), 1, 12) %>%
-  set_font_size(9)
+  add_footnote(., "Note:<br>**** p < .0001, *** p < .001, ** p < .01, * p < .05") %>%
+  set_font_size(9) 
 
-for (i in 11:nrow(testTbl)) {
+for (i in 11:(nrow(testTbl)-1)) {
   testTbl <- testTbl %>%
     merge_cells(i, 2:ncol(.)) %>%
     set_align(i, 2:ncol(.), "center")
