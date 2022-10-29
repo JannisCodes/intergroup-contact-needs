@@ -5610,6 +5610,11 @@ mdlTblTheoreticalLong <- mdlTblLong %>%
   pack_rows("Study 3: Needs", 9, 12) %>%
   pack_rows("Study 3: Allport", 13, 16) %>%
   pack_rows("Study 3: Needs & Allport", 17, 20)  %>%
+  kableExtra::footnote(
+    .,
+    general = c("**** $p$ < .0001, *** $p$ < .001, ** $p$ < .01, * $p$ < .05"), 
+    escape = FALSE
+  ) %>%
   kable_styling(latex_options = "scale_down") %>%
   kableExtra::landscape() %>%
   gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
@@ -6005,6 +6010,11 @@ mdlTblRobustLong <- robustTblLong %>%
   add_header_above(., c(" ", "Study 1" = 2, "Study 2" = 2, "Study 3" = 2)) %>%
   pack_rows("Contact [Full Sample]", 1, 5) %>%
   pack_rows("Self-Determination Theory [Outgroup Interactions only]", 6, 11) %>%
+  kableExtra::footnote(
+    .,
+    general = c("**** $p$ < .0001, *** $p$ < .001, ** $p$ < .01, * $p$ < .05"), 
+    escape = FALSE
+  ) %>%
   kable_styling(latex_options = "scale_down") %>%
   kableExtra::landscape() %>%
   gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
