@@ -7071,7 +7071,7 @@ metaSubForest(effRobust,
 ```
 
 
-```{r Export Path Models}
+```{r Export Path Models, include=FALSE}
 save(shortMdlPath, 
      file = "data/theoryMdlTabl.RData")
 ```
