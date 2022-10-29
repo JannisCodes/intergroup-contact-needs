@@ -5090,9 +5090,14 @@ quick_latex(testTbl, file = "Table.tex", open = FALSE)
 
 
 
-
 mdlTblGeneralLong %>%
-    replace(is.na(.), "") %>%
+  replace(is.na(.), "") %>%
+  mutate(
+    B = ifelse(
+      B.1 == "", paste("\\multicolumn{6}{c}{", B, sep=""),
+      B
+    )
+  ) %>%
   kbl(
     .,
     caption = "Intergroup General",
@@ -5114,8 +5119,8 @@ mdlTblGeneralLong %>%
       "Study 3" = 2
     )
   ) %>%
-  pack_rows("Between Participant [aggregated linear regression] (Effect Size = $\\eta_{partial}$)", 1, 6, escape = FALSE) %>%
-  # pack_rows("Within Participants [multilevel linear regression] (Effect Size = $\\beta$)", 6, 9, escape = FALSE) %>%
+  pack_rows("Within Participants [multilevel linear regression] (Effect Size = $\\beta$)", 1, 6, escape = FALSE) %>%
+  pack_rows("Between Participant [aggregated linear regression] (Effect Size = $\\eta_{partial}$)", 7, nrow(mdlTblGeneralLong), escape = FALSE) %>%
   kableExtra::footnote(
     .,
     general = c("**** $p$ < .0001, *** $p$ < .001, ** $p$ < .01, * $p$ < .05"), 
@@ -5124,6 +5129,7 @@ mdlTblGeneralLong %>%
   kable_styling(latex_options = "scale_down") %>%
   gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
   gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
+  gsub(" &  &  &  &  & \\", "}\\", ., fixed = TRUE) %>% # fix table position
   kableExtra::landscape() %>%
   save_kable("Tables/mdlContactGeneralLong.tex")
 ```
