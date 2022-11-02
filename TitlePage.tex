@@ -53,8 +53,9 @@ breaklinks=true,
 % language settings
 \DeclareLanguageMapping{american}{american-apa}
 
-% add reference library file
-\addbibresource{references.bib}
+% custom open science badge height
+\newlength{\badgeheight}
+\setlength{\badgeheight}{1em}
 
 % add reference library file
 \addbibresource{references.bib}
@@ -83,7 +84,18 @@ breaklinks=true,
 
 We have no known conflict of interest to declare. The authors received no specific funding for this work. Materials and software are available at \url{https://janniscodes.github.io/intergroup-contact-needs/}  \citep{Kreienkamp2022}. Protocols, materials, data, and code are available at \url{https://osf.io/pr9zs/?view_only=208a53a1f0ff48dda1c17357328fa578} \citep{Kreienkamp2022a}. The preregistration of Study 3 can be accessed as part of our Open Science Framework repository \citep{Kreienkamp2021f}.
 
-Correspondence concerning this article should be addressed to Jannis Kreienkamp, Department of Psychology, University of Groningen, Grote Kruisstraat 2/1, 9712 TS Groningen (The Netherlands).  E-mail: j.kreienkamp@rug.nl}
+Correspondence concerning this article should be addressed to Jannis Kreienkamp, Department of Psychology, University of Groningen, Grote Kruisstraat 2/1, 9712 TS Groningen (The Netherlands).  E-mail: j.kreienkamp@rug.nl
+
+\vspace{1.5em}
+\noindent\textit{Open Science Practices:}\\
+\noindent \href{https://osf.io}{\includegraphics[height=\badgeheight]{assets/open-badges-small/registrationplus-color.png}} Preregistration+, 
+\href{https://osf.io}{\includegraphics[height=\badgeheight]{assets/open-badges-small/material-color.png}} Open Materials, 
+\href{https://osf.io}{\includegraphics[height=\badgeheight]{assets/open-badges-small/data-color.png}} Open Data,
+\href{https://osf.io}{\includegraphics[height=\badgeheight]{assets/open-badges-small/code-color.png}} Open Code, 
+\href{https://osf.io}{\includegraphics[height=\badgeheight]{assets/open-badges-small/supplements-color.png}} Open Supplements
+
+}
+
 
 \leftheader{Kreienkamp}
 
@@ -93,7 +105,23 @@ Correspondence concerning this article should be addressed to Jannis Kreienkamp,
 \begin{document}
 
 % add title information (incl. title page and abstract)
-\maketitle
+%\maketitle
+
+\makeatletter
+\vspace*{3em}
+\begin{center}
+\noindent \textbf\@title
+\vspace{1em}
+\noindent \@author
+\end{center}
+\vspace{6em}
+\begin{center}%
+    \textbf\acksname%
+\end{center}%
+\vspace{-1em}
+\protect\raggedright
+\setlength{\parindent}{0.5in}
+\indent\par\@acks%
 
 \printbibliography
 
