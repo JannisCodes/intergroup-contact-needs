@@ -11,6 +11,8 @@ This repository brings together the full manuscript (syncronized from Overleaf) 
 
 The full annotated analysis code is available [here](https://janniscodes.github.io/intergroup-contact-needs/Supplemental-Material-A-Annotated-Analysis).
 
+The supplemental materials for the BERT topic model is available [here](https://janniscodes.github.io/bert-migrant-need-content/BERT-topic-model-outgroup)
+
 Please note that the full repository will remain 'private' and anonymized until after the manuscript has been accepted for publication (to allow for blind peer review).
 
 
