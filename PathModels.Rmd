@@ -38,7 +38,7 @@ path_tikz_fig <- function(data) {
     \\draw[-latex] (x.north) -- node[auto] {<<coef_xm>>} (m.west);
     \\draw[-latex] (m.east) -- node[auto] {<<coef_my>>} (y.north);
     \\draw[-latex] (x.east) -- node[below=2mm, align=center] {<<coef_xy>>} (y.west);
-    \\path (xd.north west) ++(-0.2, 6pt) node[above left]{\\textbf{(<<fig_num>>)}};
+    \\path (xd.north west) ++(-0.2, 6pt) node[above left]{\\textbf{(<<fig_num>>) <<study_num>>}};
 \\end{tikzpicture}
 \\end{center}
 \\end{figure}
@@ -60,7 +60,7 @@ path_tikz <- function(data) {
     \\draw[-latex] (x.north) -- node[auto] {<<coef_xm>>} (m.west);
     \\draw[-latex] (m.east) -- node[auto] {<<coef_my>>} (y.north);
     \\draw[-latex] (x.east) -- node[below=2mm, align=center] {<<coef_xy>>} (y.west);
-    \\path (xd.north west) ++(-0.2, 6pt) node[above left]{\\textbf{(<<fig_num>>)}};
+    \\path (xd.north west) ++(-0.2, 6pt) node[above left]{\\textbf{(<<fig_num>>) <<study_num>>}};
 \\end{tikzpicture}
 ", 
 .open = "<<", .close = ">>"
@@ -107,7 +107,8 @@ coreNeedPathS1 <-
     coef_xm = pathCoeffs$Study1$xm,
     coef_my = pathCoeffs$Study1$my,
     coef_xy = pathCoeffs$Study1$xy,
-    fig_num = "A"
+    fig_num = "A",
+    study_num = "Study 1"
   )
 coreNeedPathS2 <-
   data.frame(
@@ -120,7 +121,8 @@ coreNeedPathS2 <-
     coef_xm = pathCoeffs$Study2$xm,
     coef_my = pathCoeffs$Study2$my,
     coef_xy = pathCoeffs$Study2$xy,
-    fig_num = "B"
+    fig_num = "B",
+    study_num = "Study 2"
   )
 coreNeedPathS3 <-
   data.frame(
@@ -133,7 +135,8 @@ coreNeedPathS3 <-
     coef_xm = pathCoeffs$Study3$xm,
     coef_my = pathCoeffs$Study3$my,
     coef_xy = pathCoeffs$Study3$xy,
-    fig_num = "C"
+    fig_num = "C",
+    study_num = "Study 3"
   )
 
 # requires chunk header to be set to results = 'asis'
