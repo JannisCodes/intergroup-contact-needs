@@ -108,7 +108,7 @@ coreNeedPathS1 <-
     coef_my = pathCoeffs$Study1$my,
     coef_xy = pathCoeffs$Study1$xy,
     fig_num = "A",
-    study_num = "Study 1"
+    study_num = "Study 1:"
   )
 coreNeedPathS2 <-
   data.frame(
@@ -122,7 +122,7 @@ coreNeedPathS2 <-
     coef_my = pathCoeffs$Study2$my,
     coef_xy = pathCoeffs$Study2$xy,
     fig_num = "B",
-    study_num = "Study 2"
+    study_num = "Study 2:"
   )
 coreNeedPathS3 <-
   data.frame(
@@ -136,7 +136,7 @@ coreNeedPathS3 <-
     coef_my = pathCoeffs$Study3$my,
     coef_xy = pathCoeffs$Study3$xy,
     fig_num = "C",
-    study_num = "Study 3"
+    study_num = "Study 3:"
   )
 
 # requires chunk header to be set to results = 'asis'
