@@ -83,9 +83,10 @@ lib <- c(
   "devtools",
   "mada",
   "data.table",
+  #"tidyr",
+  #"tidyverse",
   "plyr",
   "dplyr",
-  "tidyr",
   "Hmisc",
   "kableExtra",
   "papaja",
@@ -147,6 +148,7 @@ knitr::opts_chunk$set(
   fig.height = 8,
   fig.path = "Figures/",
   echo = TRUE,
+  cache = TRUE,
   warning = FALSE,
   message = FALSE
 )
@@ -228,7 +230,7 @@ dtMedical <- list(
 
 ## Data Cleaning & Data Exclusions  
 
-### Worker
+### Study 1
 
 For the sojourner sample data was collected in four separate surveys: (1) the pre-measurement, (2) the daily morning survey, (3) the daily afternoon survey, as well as (4) a post-measurement. We combine the four individual surveys into one cohesive dataframe and drop superfluous variables that are not relevant to the analyses relevant here. We then format the time and date variables and add person- and measurement indices (for easy and meaningful addressing of the data). We also exclude our own test data.  
 <i class="fas fa-info-circle"></i> _Note:_ All data preparation steps are saved in the '_dtWorker_' list. 
@@ -406,7 +408,7 @@ dat.af <- dtWorker$raw.afternoon[, names.a]
 dat.af$daytime <- "afternoon"
 
 # merge morning and afternoon measurements with indicator [+ clean up]
-daily.dat <- rbind.fill(dat.mo, dat.af)
+daily.dat <- plyr::rbind.fill(dat.mo, dat.af)
 daily.dat <- daily.dat[daily.dat$ExternalReference != 55951, ]
 dtWorker$daily <- daily.dat
 rm(dat.mo, dat.af, names.m, names.a, daily.dat)
@@ -565,8 +567,8 @@ df <- df %>%
     SubTime = chron::times(time.0),
     time.daily = as.character(time.daily),
     PPDate = as.Date(df$date.daily),
-    number = replace_na(number, 0),
-    NonDutchNum = replace_na(NonDutchNum, 0)
+    number = tidyr::replace_na(number, 0),
+    NonDutchNum = tidyr::replace_na(NonDutchNum, 0)
   )
 
 dtWorker$clean <- df
@@ -579,7 +581,7 @@ rm(df.pre, names.post, dat.post.red, dat.pre.red, df)
 # save(dtWorker$clean, file = "data/processed/MT_clean-merged_07-05-2018.RData")
 ```
 
-### Student
+### Study 2
 
 For the student sample data was, similarly, collected in three separate surveys: (1) the pre-measurement, (2) the daily survey sent out at lunch and dinner time, and (3) a post-measurement. We combine the three individual surveys into one large dataframe and drop superfluous variables that are not relevant to the analyses relevant here. We exclude our own test data as well as one participant who entered the study twice (but gave different responses during the pre-measurement). We also reformat missing values and format core ID variables.  
 <i class="fas fa-info-circle"></i> _Note:_ All data preparation steps are saved in the '_dtStudents_' list. 
@@ -594,17 +596,19 @@ ownIDs <- c(
 )
 
 # Prepare dfs for Cleaning
-df.pre <- dtStudents$raw.pre %>%
-  mutate_all(na_if, "") %>%
-  mutate_all(na_if, "NA") %>%
+df.pre <- dtStudents$raw.pre %>% 
+  naniar::replace_with_na_all(condition = ~.x == "") %>%
+  naniar::replace_with_na_all(condition = ~.x == "NA") %>%
+  # mutate_all(na_if, "") %>%
+  # mutate_all(na_if, "NA") %>%
   filter(!is.na(ended)) %>% # remove all who did not finish
   filter(!e_mail %in% .$e_mail[duplicated(.$e_mail)]) %>% # remove all who did the pre questionnaire multiple times (b/c inconsistent ratings scales)
   filter(!session %in% ownIDs) %>% # remove our own test
   mutate(session = as.character(session)) # turn factor into character strings (probably just precaution)
 
 df.post <- dtStudents$raw.post %>%
-  mutate_all(na_if, "") %>%
-  mutate_all(na_if, "NA") %>%
+  naniar::replace_with_na_all(condition = ~.x == "") %>%
+  naniar::replace_with_na_all(condition = ~.x == "NA") %>%
   filter(!is.na(session)) %>% # remove own test runs
   filter(!session %in% ownIDs) %>% # remove our own test
   filter(session %in% df.pre$session) %>% # remove anyone who wasn't in the pre
@@ -613,8 +617,8 @@ df.post <- dtStudents$raw.post %>%
   mutate(session = as.character(session)) # turn factor into character strings (probably just precaution)
 
 df.daily <- dtStudents$raw.daily %>%
-  mutate_all(na_if, "") %>%
-  mutate_all(na_if, "NA") %>%
+  naniar::replace_with_na_all(condition = ~.x == "") %>%
+  naniar::replace_with_na_all(condition = ~.x == "NA") %>%
   filter(!session %in% ownIDs) %>% # remove our own test
   filter(session %in% df.pre$session) %>% # remove anyone who wasn't in the pre
   filter(!is.na(ended)) %>% # remove all who never finished
@@ -645,7 +649,7 @@ dtStudents$clean <- dfCombined
 rm(df.pre, df.daily, df.post, dfPreDaily, dfCombined, ownIDs)
 ```
 
-### Medical
+### Study 3
 
 For the medical professionals sample data was, again, collected in three separate surveys: (1) the pre-measurement, (2) the daily survey sent out at lunch and dinner time, and (3) a post-measurement. We combine the three individual surveys into one large dataframe. We exclude our own test data. We also reformat missing values and format core ID variables.  
 <i class="fas fa-info-circle"></i> _Note:_ All data preparation steps are saved in the '_dtMedical_' list. 
@@ -662,15 +666,15 @@ ownIDs <- c(
 
 # Prepare dfs for Cleaning
 df.pre <- dtMedical$raw.pre %>%
-  mutate_all(na_if, "") %>%
-  mutate_all(na_if, "NA") %>%
+  naniar::replace_with_na_all(condition = ~.x == "") %>%
+  naniar::replace_with_na_all(condition = ~.x == "NA") %>%
   filter(!is.na(ended)) %>% # remove all who did not finish
   filter(!session %in% ownIDs) %>% # remove our own test
   mutate(session = as.character(session)) # turn factor into character strings (probably just precaution)
 
 df.post <- dtMedical$raw.post %>%
-  mutate_all(na_if, "") %>%
-  mutate_all(na_if, "NA") %>% 
+  naniar::replace_with_na_all(condition = ~.x == "") %>%
+  naniar::replace_with_na_all(condition = ~.x == "NA") %>%
   filter(!is.na(session)) %>% # remove own test runs
   filter(!session %in% ownIDs) %>% # remove our own test
   filter(session %in% df.pre$session) %>% # remove anyone who wasn't in the pre
@@ -679,8 +683,8 @@ df.post <- dtMedical$raw.post %>%
   mutate(session = as.character(session)) # turn factor into character strings (probably just precaution)
 
 df.daily <- dtMedical$raw.daily %>%
-  mutate_all(na_if, "") %>%
-  mutate_all(na_if, "NA") %>%
+  naniar::replace_with_na_all(condition = ~.x == "") %>%
+  naniar::replace_with_na_all(condition = ~.x == "NA") %>%
   filter(!session %in% ownIDs) %>% # remove our own test
   filter(session %in% df.pre$session) %>% # remove anyone who wasn't in the pre
   #filter(!is.na(ended)) %>% # remove all who never finished [disabled because only relevant if data is missing]
@@ -714,7 +718,7 @@ rm(df.pre, df.daily, df.post, dfPreDaily, dfCombined, ownIDs)
 
 ## Calculate needed transformations  
 
-### Worker
+### Study 1
 
 For the worker sample, the data transformation stage had three main aims: 
 
@@ -740,6 +744,18 @@ df$PPDate[df$SubTime < "18:50:00" &
   df$daytime == "afternoon"] <- df$PPDate[df$SubTime < "18:50:00" &
   df$daytime == "afternoon"] - 1
 
+# Interaction Quality
+pairs.panels.new(
+  df[c("quality_overall_1", "quality_meaning_1")],
+  labels = c(
+    "Pleasantness.",
+    "Meaningfulness."
+  )
+)
+df$interaction_quality <-
+  rowMeans(df[c("quality_overall_1", "quality_meaning_1")], na.rm = TRUE)
+df$interaction_quality[df$interaction_quality == "NaN"] <- NA
+
 # Need scales
 df$keyMotiveFulfilled <- rowSums(df[, c("keymotive_fulfillemt_1", "keyMotive_noInt_fulf_1")], na.rm = T)
 df$autonomy.daily.all <- rowSums(df[, c("autonomy_1", "autonomy_NoInt_1")], na.rm = T)
@@ -760,6 +776,11 @@ pairs.panels.new(
 )
 df$relatedness_1 <- rowMeans(df[, c("relatedness_other_1", "relatedness_self_1")], na.rm = T)
 
+df$interaction_accidental <- df$qualityAccidental_1
+df$interaction_voluntary <- df$qualityVoluntary_1
+df$interaction_meaningful <- df$quality_meaning_1  
+
+
 # summarize by participant (check that everything is within pp might not be the case for )
 between <- df %>%
   group_by(ExternalReference) %>%
@@ -775,7 +796,10 @@ between <- df %>%
     AvCompetence = mean(competence.daily.all, na.rm = T),
     AvRelatedness = mean(relatedness.daily.all, na.rm = T),
     AvThermo = mean(thermometerDutch_1, na.rm = T),
-    AvWB = mean(ExWB_1, na.rm = T)
+    AvWB = mean(ExWB_1, na.rm = T),
+    AvAccidental = mean(interaction_accidental, na.rm = TRUE),
+    AvVoluntary = mean(interaction_voluntary, na.rm = TRUE),
+    AvMeaningful = mean(interaction_meaningful, na.rm = TRUE)
   ) %>%
   ungroup() %>%
   mutate(
@@ -833,8 +857,12 @@ workerWithinBetween <-
         "autonomy_1",
         "relatedness_1", 
         "quality_overall_1", 
+        "interaction_quality",
         "OutgroupInteraction",
-        "NonOutgroupInteraction"
+        "NonOutgroupInteraction",
+        "interaction_accidental", 
+        "interaction_voluntary",
+        "interaction_meaningful"
       )
   )
 
@@ -850,7 +878,11 @@ workerOutWithinBetween <-
         "competence_1",
         "autonomy_1",
         "relatedness_1", 
-        "quality_overall_1"
+        "quality_overall_1",
+        "interaction_quality",
+        "interaction_accidental",
+        "interaction_voluntary",
+        "interaction_meaningful"
       )
   )
 
@@ -863,7 +895,11 @@ workerContactFreq <- dtWorker$full %>%
     SumContactNL = sum(Contact_dum),
     PercContactNL = SumContactNL / n * 100,
     SumContactNLAll = sum(number),
-    AvAttitude = mean(thermometerDutch_1, na.rm = T)
+    AvAttitude = mean(thermometerDutch_1, na.rm = TRUE),
+    AvQualityComb = mean(interaction_quality, na.rm = TRUE),
+    AvAccidental = mean(interaction_accidental, na.rm = TRUE),
+    AvVoluntary = mean(interaction_voluntary, na.rm = TRUE),
+    AvMeaningful = mean(interaction_meaningful, na.rm = TRUE)
   ) %>%
   mutate(
     WinSumContactNL = DescTools::Winsorize(SumContactNL),
@@ -885,7 +921,7 @@ workerContactFreq <- dtWorker$full %>%
 # prepareMplusData(mplus.intcont, "data/processed/dynamic-subset-intonly.dat")
 ```
 
-### Student
+### Study 2
 
 For the student sample, the data transformation stage had five main aims: 
 
@@ -919,9 +955,27 @@ df$interaction.f <-
 df$intNL <- ifelse(df$Interaction == "Dutch", 1, 0)
 df$intNonNL <- ifelse(df$Interaction == "Non-Dutch", 1, 0)
 
+# Rename interaction accidental
+df$interaction_accidental <- df$InteractionContextAccidental
+df$interaction_voluntary <- df$InteractionContextvoluntary
+df$interaction_meaningful <- df$quality_meaning  
+df$interaction_importance <- df$quality_importance
+
 # -------------------------------------------------------------------------------------------------------------
 #                                       Combine Variables
 # -------------------------------------------------------------------------------------------------------------
+# Interaction Quality
+pairs.panels.new(
+  df[c("quality_overall", "quality_meaning")],
+  labels = c(
+    "Pleasantness.",
+    "Meaningfulness."
+  )
+)
+df$interaction_quality <-
+  rowMeans(df[c("quality_overall", "quality_meaning")], na.rm = TRUE)
+df$interaction_quality[df$interaction_quality == "NaN"] <- NA
+
 # Relatedness
 pairs.panels.new(
   df[c("RelatednessSelf", "RelatednessOther")],
@@ -1046,7 +1100,12 @@ studentContactFreq <- dtStudents$full %>%
     SumContactNLAll = sum(ContactNum[InteractionDumDutch == 1], na.rm = TRUE),
     AvAttitude = mean(AttitudesDutch, na.rm = TRUE),
     AvQuality = mean(quality_overall, na.rm = TRUE),
-    AvQualityOut = mean(quality_overall[InteractionDumDutch==1], na.rm = TRUE)
+    AvQualityComb = mean(interaction_quality, na.rm = TRUE),
+    AvQualityOut = mean(quality_overall[InteractionDumDutch==1], na.rm = TRUE),
+    AvAccidental = mean(interaction_accidental, na.rm = TRUE),
+    AvVoluntary = mean(interaction_voluntary, na.rm = TRUE),
+    AvMeaningful = mean(interaction_meaningful, na.rm = TRUE),
+    AvImportant = mean(interaction_importance, na.rm = TRUE)
   ) %>%
   mutate(
     WinSumContactNL = DescTools::Winsorize(SumContactNL),
@@ -1121,8 +1180,14 @@ studentWithinBetween <-
         "Relatedness",
         "AttitudesDutch",
         "quality_overall",
+        "interaction_quality",
         "OutgroupInteraction",
-        "NonOutgroupInteraction"
+        "NonOutgroupInteraction", 
+        "InteractionContextvoluntary",
+        "interaction_accidental", 
+        "interaction_voluntary", 
+        "interaction_meaningful",
+        "interaction_importance"
       )
   )
 studentOutWithinBetween <-
@@ -1136,13 +1201,19 @@ studentOutWithinBetween <-
         "Autonomy",
         "Relatedness",
         "AttitudesDutch",
-        "quality_overall"
+        "quality_overall",
+        "interaction_quality",
+        "InteractionContextvoluntary",
+        "interaction_accidental", 
+        "interaction_voluntary", 
+        "interaction_meaningful",
+        "interaction_importance"
       )
   )
 
 ```
 
-### Medical
+### Study 3
 
 For the medical professional sample, the data transformation stage had five main aims: 
 
@@ -1177,7 +1248,7 @@ df$intNonNL <- ifelse(df$Interaction == "Non-Dutch", 1, 0)
 
 df <- df %>%
   mutate(
-    NonDutchContact = replace_na(NonDutchNum, 0), # make second non-Dutch countable
+    NonDutchContact = tidyr::replace_na(NonDutchNum, 0), # make second non-Dutch countable
     NonDutchContact = ifelse(NonDutchContact > 1, 1, 0) # recode (yes = 1 -> 1, no = 2 -> 0)
   ) %>%
   mutate(
@@ -1207,11 +1278,41 @@ df <- df %>%
   ) %>%
   ungroup
 
+# rename interaction accidental
+df$interaction_accidental <- df$InteractionContextAccidental
+df$interaction_voluntary <- df$InteractionContextvoluntary
+df$interaction_meaningful <- df$qualityMeaning  
+df$interaction_importance <- df$qualityImportance
 
 
 # -------------------------------------------------------------------------------------------------------------
 #                                       Combine Variables
 # -------------------------------------------------------------------------------------------------------------
+
+# Interaction Quality
+pairs.panels.new(
+  df[c("qualityOverall", "qualityMeaning")],
+  labels = c(
+    "Pleasantness.",
+    "Meaningfulness."
+  )
+)
+df$interaction_quality <-
+  rowMeans(df[c("qualityOverall", "qualityMeaning")], na.rm = TRUE)
+df$interaction_quality[df$interaction_quality == "NaN"] <- NA
+
+# Interaction Quality
+pairs.panels.new(
+  df[c("qualityOverall", "qualityMeaning")],
+  labels = c(
+    "Pleasantness.",
+    "Meaningfulness."
+  )
+)
+df$interaction_quality <-
+  rowMeans(df[c("qualityOverall", "qualityMeaning")], na.rm = TRUE)
+df$interaction_quality[df$interaction_quality == "NaN"] <- NA
+
 # Relatedness
 pairs.panels.new(
   df[c("RelatednessSelf", "RelatednessOther")],
@@ -1291,7 +1392,7 @@ data <-
     InteractionContextCooperative,
     InteractionContextvoluntary
   ) %>%
-  drop_na %>%
+  tidyr::drop_na() %>%
   melt(
     ., 
     id.vars = c("PID", "TIDnum")
@@ -1396,6 +1497,7 @@ colnames(remergePP) <-
 df <- cbind(df, remergePP)
 rm(remergePP, PP)
 
+
 # -------------------------------------------------------------------------------------------------------------
 #                                 Center Relevant Variables
 # -------------------------------------------------------------------------------------------------------------
@@ -1412,7 +1514,12 @@ medicalOutWithinBetween <-
         "Relatedness",
         "AllportsCondition",
         "AttitudesDutch",
-        "qualityOverall"
+        "qualityOverall",
+        "interaction_quality",
+        "interaction_accidental",
+        "interaction_voluntary",
+        "interaction_meaningful",
+        "interaction_importance"
       )
   )
 
@@ -1429,8 +1536,13 @@ medicalWithinBetween <-
         "AllportsCondition",
         "AttitudesDutch",
         "qualityOverall",
+        "interaction_quality",
+        "interaction_accidental",
         "OutgroupInteraction",
-        "NonOutgroupInteraction"
+        "NonOutgroupInteraction",
+        "interaction_voluntary",
+        "interaction_meaningful",
+        "interaction_importance"
       )
   )
 
@@ -1446,7 +1558,12 @@ df <- # keep only for compatibility of old framgents
         "Relatedness",
         "AllportsCondition",
         "AttitudesDutch",
-        "qualityOverall"
+        "qualityOverall",
+        "interaction_quality",
+        "interaction_accidental",
+        "interaction_voluntary",
+        "interaction_meaningful",
+        "interaction_importance"
       )
   )
 
@@ -1466,6 +1583,11 @@ medicalContactFreq <-
     SumContactNLAll = sum(ContactNum[InteractionDumDutch == 1], na.rm = TRUE),
     AvAttitude = mean(AttitudesDutch, na.rm = TRUE),
     AvQuality = mean(qualityOverall, na.rm = TRUE),
+    AvAccidental = mean(interaction_accidental, na.rm = TRUE),
+    AvVoluntary = mean(interaction_voluntary, na.rm = TRUE),
+    AvMeaningful = mean(interaction_meaningful, na.rm = TRUE),
+    AvImportance = mean(interaction_importance, na.rm = TRUE),
+    AvQualityComb = mean(interaction_quality, na.rm = TRUE),
     AvQualityOut = mean(qualityOverall[InteractionDumDutch==1], na.rm = TRUE)
   ) %>%
   mutate(
@@ -1495,7 +1617,7 @@ medicalOutPltIDs <-
   as.vector
 ```
 
-# **Worker Sample**
+# **Study 1**
 
 The first sample we assess is the smaller sojourner study. We will sequentially test our main hypotheses for this study:
 
@@ -1522,7 +1644,7 @@ workerOccupation <-
   mutate_all(as_factor) %>% 
   mutate_all(as.character) %>%
   replace(is.na(.), "") %>%
-  unite("occupation", -PID, sep = "/") %>%
+  tidyr::unite("occupation", -PID, sep = "/") %>%
   mutate(occupation = trimws(occupation, which = "both", whitespace = "[/]")) %>%
   distinct
 
@@ -3282,9 +3404,9 @@ ggplot(data = workerInteractionType,
 # create parameters for prediction
 datNew = data.frame(
   keyMotiveFulfilled_cwc = rep(seq(
-    round_any(min(
+    plyr::round_any(min(
       workerWithinBetween$keyMotiveFulfilled_cwc
-    ), 5, f = floor), round_any(max(
+    ), 5, f = floor), plyr::round_any(max(
       workerWithinBetween$keyMotiveFulfilled_cwc
     ), 5, f = ceiling), 5
   ), 2),
@@ -3334,9 +3456,9 @@ ggplot(
               aes(ymin = fit - se, ymax = fit + se),
               alpha = 0.3) +
   scale_x_continuous(breaks = seq(
-    round_any(min(
+    plyr::round_any(min(
       workerWithinBetween$keyMotiveFulfilled_cwc
-    ), 5, f = floor), round_any(max(
+    ), 5, f = floor), plyr::round_any(max(
       workerWithinBetween$keyMotiveFulfilled_cwc
     ), 5, f = ceiling), 10
   )) +
@@ -3366,9 +3488,9 @@ ggplot(
 # create parameters for prediction:
 # datNew = data.frame(
 #   keyMotiveFulfilled_cwc = rep(seq(
-#     round_any(min(
+#     plyr::round_any(min(
 #       workerWithinBetween$keyMotiveFulfilled_cwc
-#     ), 2, f = floor), round_any(max(
+#     ), 2, f = floor), plyr::round_any(max(
 #       workerWithinBetween$keyMotiveFulfilled_cwc
 #     ), 2, f = ceiling), 2
 #   ), 2)
@@ -3396,9 +3518,9 @@ ggplot(
 #            y = pred,
 #            fill = OutgroupInteractionLab)) +
 #   scale_x_continuous(breaks = seq(
-#     round_any(min(
+#     plyr::round_any(min(
 #       workerWithinBetween$keyMotiveFulfilled_cwc
-#     ), 5, f = floor), round_any(max(
+#     ), 5, f = floor), plyr::round_any(max(
 #       workerWithinBetween$keyMotiveFulfilled_cwc
 #     ), 5, f = ceiling), 10
 #   )) +
@@ -3657,7 +3779,252 @@ ggsave(
 
 We find that adding the random slopes does add significantly beyond the random intercept model. We also see that when taking the possibility to varying slopes into account, the coefficient interpretations remains consistent (i.e., core need and relatedness remain the strongest and only significant predictors). Note however a slight reduction in the p value of the core need fulfillment.   
 
-# **Student Sample**
+
+#### Interaction Accidental  
+
+To test whether the effect of core need fulfillment is relevant to planned and accidental interactions (i.e., whether 'goal-directed'), we compare the the effect to fulfillment of the situation core need when interactions were accidental or planned.  
+
+##### random intercept   
+
+Here we use the interaction dataset and add generalized situational core need fulfillment and whether the interaction was planned or accidental as well as their interaction term to a random intercept model of outgroup attitudes.  
+
+\begin{equation}
+(\#eq:workerInterceptAttAccNeedEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+                           &\ \beta_{2i}InteractionAccidental_{ti} + \\
+                           &\ \beta_{3i}KeyNeedFulfillXInteractionAccidental_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} \\
+                      &\ \beta_{2i} = \gamma_{20} \\
+                      &\ \beta_{3i} = \gamma_{30}
+  \end{split} 
+\end{equation} 
+
+```{r workerModelInterceptAttCoreAcc}
+# Create and save Model
+mdlWorkerOut$Att$lmeInterceptAttCoreAcc <-
+  lme(
+    thermometerDutch_1 ~ keymotive_fulfillemt_1_cwc * interaction_accidental_cwc,
+    random =  ~ 1 | PID,
+    data = workerOutWithinBetween
+  )
+
+# Get summary with p-values (Satterthwaite's method)
+summ(
+  mdlWorkerOut$Att$lmerInterceptAttCoreAcc <- lmer(
+    thermometerDutch_1 ~ keymotive_fulfillemt_1_cwc * interaction_accidental_cwc + (1 | PID),
+    data = workerOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+
+# 95% CI
+mdlWorkerOut$Att$lmerInterceptAttCoreAccCI <- 
+  confint(method = "Wald", mdlWorkerOut$Att$lmerInterceptAttCoreAcc)
+
+# Compare new model to previous step
+anova(mdlWorkerOut$Att$lmeNull, 
+      mdlWorkerOut$Att$lmeInterceptAttCoreAcc) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  add_rownames(., var = "Description") %>%
+  mutate(Description = gsub(".*\\$", "", Description)) %>%
+  kbl(
+    .,
+    caption = "Worker: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = c("l", rep("c", ncol(.)-1)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlWorkerOut$Att$varInterceptAttCoreAcc <- 
+  lme4::VarCorr(mdlWorkerOut$Att$lmeInterceptAttCoreAcc)
+
+# The estimate of between-group (or Intercept variance) explained:
+# Variance Explained = 1 – (Var with Predictor/Var without Predictor)
+mdlWorkerOut$Att$varBtwInterceptAttCoreAcc <-
+  1 - (as.numeric(mdlWorkerOut$Att$varBtwInterceptAttCoreAcc[1]) / as.numeric(mdlWorkerOut$Att$varNull[1]))
+mdlWorkerOut$Att$varBtwPercInterceptAttCoreAcc <-
+  (1 - (as.numeric(mdlWorkerOut$Att$varBtwInterceptAttCoreAcc[1]) / as.numeric(mdlWorkerOut$Att$varNull[1]))) * 100
+# and the estimate of within-group (or residual variance) explained is:
+mdlWorkerOut$Att$varWithinInterceptAttCoreAcc <-
+  1 - (as.numeric(mdlWorkerOut$Att$varBtwInterceptAttCoreAcc[2]) / as.numeric(mdlWorkerOut$Att$varNull[2]))
+mdlWorkerOut$Att$varWithinPercInterceptAttCoreAcc <-
+  (1 - (as.numeric(mdlWorkerOut$Att$varBtwInterceptAttCoreAcc[2]) / as.numeric(mdlWorkerOut$Att$varNull[2]))) * 100
+```
+
+We find that the model explains significantly more variance than the empty null model. However, more interestingly, looking at the coefficients, we find that, as seen earlier, having an outgroup interaction has a strong effect on outgroup attitudes. Importantly, we find that there is no main effect of key need fulfillment but a significant interaction effect of core need fulfillment and outgroup contact. This indicates that it is not key need fulfillment in general --- but only key need fulfillment during an outgroup contact that predicts more positive outgroup attitudes.  
+
+##### random slope
+
+We again check whether further letting the effects vary between participants explains additional variance in outgroup attitudes (i.e., random slope).  
+
+\begin{equation}
+(\#eq:workerSlopesAttAccNeedEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+                           &\ \beta_{2i}InteractionAccidental_{ti} + \\
+                           &\ \beta_{3i}KeyNeedFulfillXInteractionAccidental_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} + u_{1i} \\
+                      &\ \beta_{2i} = \gamma_{20} + u_{2i} \\
+                      &\ \beta_{3i} = \gamma_{30} + u_{3i}
+  \end{split} 
+\end{equation} 
+
+```{r workerModelSlopesAttCoreAccX}
+# Create and save Model (optimizer needed to reach convergence)
+mdlWorkerOut$Att$lmeSlopesAttCoreAcc <- lme(
+  thermometerDutch_1 ~
+    keymotive_fulfillemt_1_cwc * interaction_accidental_cwc,
+  random = ~ 1 + keymotive_fulfillemt_1_cwc + interaction_accidental_cwc | PID,
+  control = lmeControl(opt = "optim"),
+  data = workerOutWithinBetween
+)
+
+# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
+summ(
+  mdlWorkerOut$Att$lmerSlopesAttCoreAcc <- lmer(
+    thermometerDutch_1 ~
+      keymotive_fulfillemt_1_cwc * interaction_accidental_cwc +
+      (1 + keymotive_fulfillemt_1_cwc + interaction_accidental_cwc | PID),
+    data = workerOutWithinBetween
+  ), 
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+
+# 95%CI
+mdlWorkerOut$Att$lmerSlopesAttCoreAccCI <- 
+  confint(method = "Wald", mdlWorkerOut$Att$lmerSlopesAttCoreAcc)
+
+# Compare new model to previous step
+anova(mdlWorkerOut$Att$lmeNull, 
+      mdlWorkerOut$Att$lmeInterceptAttCoreAcc,
+      mdlWorkerOut$Att$lmeSlopesAttCoreAcc) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  add_rownames(., var = "Description") %>%
+  mutate(Description = gsub(".*\\$", "", Description)) %>%
+  kbl(
+    .,
+    caption = "Worker: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlWorkerOut$Att$varSlopesAttCoreAcc <- 
+  lme4::VarCorr(mdlWorkerOut$Att$lmeSlopesAttCoreAcc)
+
+# Assumption Checks:
+mdlWorkerOut$Att$diagSlopesAttCoreInt <-
+  sjPlot::plot_model(mdlWorkerOut$Att$lmerSlopesAttCoreAcc, type = "diag")
+grid.arrange(
+  mdlWorkerOut$Att$diagSlopesAttCoreInt[[1]],
+  mdlWorkerOut$Att$diagSlopesAttCoreInt[[2]]$`PID`,
+  mdlWorkerOut$Att$diagSlopesAttCoreInt[[3]],
+  mdlWorkerOut$Att$diagSlopesAttCoreInt[[4]]
+)
+
+# Plot prediction model
+mdlWorkerOut$Att$predSlopesAttCoreAcc <- 
+  workerOutWithinBetween %>%
+  select(thermometerDutch_1, session, PID) %>% 
+  mutate(measure = predict(mdlWorkerOut$Att$lmeSlopesAttCoreAcc,
+                           workerOutWithinBetween,
+                           re.form = NA
+                           )
+         )
+
+(
+  mdlWorkerOut$Att$predPltSlopesAttCoreAcc <-
+    ggplot(data = mdlWorkerOut$Att$predSlopesAttCoreAcc, aes(x = session, y = measure)) +
+    geom_line(alpha = 1, color = "blue") +
+    geom_line(aes(y = thermometerDutch_1), alpha = 1) +
+    facet_wrap(~ PID, ncol = 6) +
+    xlab("Time") +
+    ylab("Outgroup Attitudes") +
+    theme_Publication()
+)
+ggsave(
+  filename = "Figures/Worker_PredictionPlot_SlopesAttCoreAcc.png",
+  mdlWorkerOut$Att$predPltSlopesAttCoreAcc,
+  width = 18,
+  height = 12,
+  dpi = 800,
+  units = "cm",
+  device = "png"
+)
+```
+
+We find that adding the random slopes does add significantly beyond the random intercept model. We also see that when taking the possibility to varying slopes into account, the coefficient interpretations remains consistent (i.e., outgroup contact and its interaction with core need fulfillment remain significant predictors of positive outgroup attitudes).  
+
+##### Plot Interaction   
+
+Before we move on, we shortly illustrate the interaction effect of how the effect of core need fulfillment differed by whether an outgroup contact took place or not. To this end we illustrate (1) the raw data points (without taking the nested nature into account), as well as a plot of the model predicted values and their prediction interval (taking the nested structure into account based; similar to an interaction plot).  
+
+```{r workerModelInterceptAttCoreAccPlt}
+
+interactions::interact_plot(
+  mdlWorkerOut$Att$lmerSlopesAttCoreAcc,
+  pred = keymotive_fulfillemt_1_cwc,
+  modx = interaction_accidental_cwc,
+  interval = TRUE,
+  partial.residuals = TRUE,
+  x.label = "Keyneed Fulfillment",
+  y.label = "Outgroup Attitudes",
+  legend.main = "Interaction Accidental"
+)
+  
+  
+
+mdlWorkerOut$Att$jnSlopesAttCoreAcc <-
+  interactions::johnson_neyman(
+    mdlWorkerOut$Att$lmerSlopesAttCoreAcc,
+    pred = keymotive_fulfillemt_1_cwc,
+    modx = interaction_accidental_cwc,
+    alpha = .05
+  )
+  
+mdlWorkerOut$Att$jnSlopesAttCoreAcc$plot  +
+  labs(
+    x = "Interaction Accidental",
+    y = "Slope of Keyneed Fulfillment"
+  )
+  
+```
+
+
+# **Study 2**
 
 The second sample we assess is larger study with international psychology students at Western European university. The hypotheses mirror those of the first study and are re-iterated here:
 
@@ -5462,9 +5829,9 @@ ggplot(data = studentInteractionType,
 # create parameters for prediction
 datNew = data.frame(
   KeyNeedFullfillment_cwc = rep(seq(
-    round_any(min(
+    plyr::round_any(min(
       studentWithinBetween$KeyNeedFullfillment_cwc
-    ), 5, f = floor), round_any(max(
+    ), 5, f = floor), plyr::round_any(max(
       studentWithinBetween$KeyNeedFullfillment_cwc
     ), 5, f = ceiling), 5
   ), 2),
@@ -5514,9 +5881,9 @@ ggplot(
               aes(ymin = fit - se, ymax = fit + se),
               alpha = 0.3) +
   scale_x_continuous(breaks = seq(
-    round_any(min(
+    plyr::round_any(min(
       studentWithinBetween$KeyNeedFullfillment_cwc
-    ), 5, f = floor), round_any(max(
+    ), 5, f = floor), plyr::round_any(max(
       studentWithinBetween$KeyNeedFullfillment_cwc
     ), 5, f = ceiling), 10
   )) +
@@ -5546,9 +5913,9 @@ ggplot(
 # # create parameters for prediction:
 # datNew = data.frame(
 #   KeyNeedFullfillment_cwc = rep(seq(
-#     round_any(min(
+#     plyr::round_any(min(
 #       studentWithinBetween$KeyNeedFullfillment_cwc
-#     ), 2, f = floor), round_any(max(
+#     ), 2, f = floor), plyr::round_any(max(
 #       studentWithinBetween$KeyNeedFullfillment_cwc
 #     ), 2, f = ceiling), 2
 #   ), 2)
@@ -5576,9 +5943,9 @@ ggplot(
 #            y = pred,
 #            fill = OutgroupInteractionLab)) +
 #   scale_x_continuous(breaks = seq(
-#     round_any(min(
+#     plyr::round_any(min(
 #       studentWithinBetween$KeyNeedFullfillment_cwc
-#     ), 5, f = floor), round_any(max(
+#     ), 5, f = floor), plyr::round_any(max(
 #       studentWithinBetween$KeyNeedFullfillment_cwc
 #     ), 5, f = ceiling), 10
 #   )) +
@@ -5881,7 +6248,251 @@ ggsave(
 
 We find that adding the random slopes does add significantly beyond the random intercept model. We also see that when taking the possibility to varying slopes into account, the coefficient interpretations remains consistent (i.e., core need and relatedness remain the strongest and only significant predictors).   
 
-# **Young Medical Professional Sample**
+#### Interaction Accidental  
+
+To test whether the effect of core need fulfillment is relevant to planned and accidental interactions (i.e., whether 'goal-directed'), we compare the the effect to fulfillment of the situation core need when interactions were accidental or planned.  
+
+##### random intercept   
+
+Here we use the interaction dataset and add generalized situational core need fulfillment and whether the interaction was planned or accidental as well as their interaction term to a random intercept model of outgroup attitudes.  
+
+\begin{equation}
+(\#eq:studentOutInterceptAttAccNeedEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+                           &\ \beta_{2i}InteractionAccidental_{ti} + \\
+                           &\ \beta_{3i}KeyNeedFulfillXInteractionAccidental_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} \\
+                      &\ \beta_{2i} = \gamma_{20} \\
+                      &\ \beta_{3i} = \gamma_{30}
+  \end{split} 
+\end{equation} 
+
+```{r studentOutModelInterceptAttCoreAcc}
+# Create and save Model
+mdlStudentOut$Att$lmeInterceptAttCoreAcc <-
+  lme(
+    AttitudesDutch ~ KeyNeedFullfillment_cwc * interaction_accidental_cwc,
+    random =  ~ 1 | PID,
+    data = studentOutWithinBetween
+  )
+
+# Get summary with p-values (Satterthwaite's method)
+summ(
+  mdlStudentOut$Att$lmerInterceptAttCoreAcc <- lmer(
+    AttitudesDutch ~ KeyNeedFullfillment_cwc * interaction_accidental_cwc + (1 | PID),
+    data = studentOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+
+# 95% CI
+mdlStudentOut$Att$lmerInterceptAttCoreAccCI <- 
+  confint(method = "Wald", mdlStudentOut$Att$lmerInterceptAttCoreAcc)
+
+# Compare new model to previous step
+anova(mdlStudentOut$Att$lmeNull, 
+      mdlStudentOut$Att$lmeInterceptAttCoreAcc) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  add_rownames(., var = "Description") %>%
+  mutate(Description = gsub(".*\\$", "", Description)) %>%
+  kbl(
+    .,
+    caption = "Worker: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = c("l", rep("c", ncol(.)-1)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlStudentOut$Att$varInterceptAttCoreAcc <- 
+  lme4::VarCorr(mdlStudentOut$Att$lmeInterceptAttCoreAcc)
+
+# The estimate of between-group (or Intercept variance) explained:
+# Variance Explained = 1 – (Var with Predictor/Var without Predictor)
+mdlStudentOut$Att$varBtwInterceptAttCoreAcc <-
+  1 - (as.numeric(mdlStudentOut$Att$varBtwInterceptAttCoreAcc[1]) / as.numeric(mdlStudentOut$Att$varNull[1]))
+mdlStudentOut$Att$varBtwPercInterceptAttCoreAcc <-
+  (1 - (as.numeric(mdlStudentOut$Att$varBtwInterceptAttCoreAcc[1]) / as.numeric(mdlStudentOut$Att$varNull[1]))) * 100
+# and the estimate of within-group (or residual variance) explained is:
+mdlStudentOut$Att$varWithinInterceptAttCoreAcc <-
+  1 - (as.numeric(mdlStudentOut$Att$varBtwInterceptAttCoreAcc[2]) / as.numeric(mdlStudentOut$Att$varNull[2]))
+mdlStudentOut$Att$varWithinPercInterceptAttCoreAcc <-
+  (1 - (as.numeric(mdlStudentOut$Att$varBtwInterceptAttCoreAcc[2]) / as.numeric(mdlStudentOut$Att$varNull[2]))) * 100
+```
+
+We find that the model explains significantly more variance than the empty null model. However, more interestingly, looking at the coefficients, we find that, as seen earlier, having an outgroup interaction has a strong effect on outgroup attitudes. Importantly, we find that there is no main effect of key need fulfillment but a significant interaction effect of core need fulfillment and outgroup contact. This indicates that it is not key need fulfillment in general --- but only key need fulfillment during an outgroup contact that predicts more positive outgroup attitudes.  
+
+##### random slope
+
+We again check whether further letting the effects vary between participants explains additional variance in outgroup attitudes (i.e., random slope).  
+
+\begin{equation}
+(\#eq:studentOutSlopesAttAccNeedEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+                           &\ \beta_{2i}InteractionAccidental_{ti} + \\
+                           &\ \beta_{3i}KeyNeedFulfillXInteractionAccidental_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} + u_{1i} \\
+                      &\ \beta_{2i} = \gamma_{20} + u_{2i} \\
+                      &\ \beta_{3i} = \gamma_{30} + u_{3i}
+  \end{split} 
+\end{equation} 
+
+```{r studentOutModelSlopesAttCoreAccX}
+# Create and save Model (optimizer needed to reach convergence)
+mdlStudentOut$Att$lmeSlopesAttCoreAcc <- lme(
+  AttitudesDutch ~ KeyNeedFullfillment_cwc * interaction_accidental_cwc,
+  random = ~ 1 + KeyNeedFullfillment_cwc + interaction_accidental_cwc | PID,
+  control = lmeControl(opt = "optim"),
+  data = studentOutWithinBetween
+)
+
+# interaction_voluntary_cwc 
+# interaction_meaningful_cwc 
+# interaction_importance_cwc
+# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
+summ(
+  mdlStudentOut$Att$lmerSlopesAttCoreAcc <- lmer(
+    AttitudesDutch ~ KeyNeedFullfillment_cwc * interaction_accidental_cwc +
+      (1 + KeyNeedFullfillment_cwc + interaction_accidental_cwc | PID),
+    data = studentOutWithinBetween
+  ), 
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+
+# 95%CI
+mdlStudentOut$Att$lmerSlopesAttCoreAccCI <- 
+  confint(method = "Wald", mdlStudentOut$Att$lmerSlopesAttCoreAcc)
+
+# Compare new model to previous step
+anova(mdlStudentOut$Att$lmeNull, 
+      mdlStudentOut$Att$lmeInterceptAttCoreAcc,
+      mdlStudentOut$Att$lmeSlopesAttCoreAcc) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  add_rownames(., var = "Description") %>%
+  mutate(Description = gsub(".*\\$", "", Description)) %>%
+  kbl(
+    .,
+    caption = "Worker: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlStudentOut$Att$varSlopesAttCoreAcc <- 
+  lme4::VarCorr(mdlStudentOut$Att$lmeSlopesAttCoreAcc)
+
+# Assumption Checks:
+mdlStudentOut$Att$diagSlopesAttCoreInt <-
+  sjPlot::plot_model(mdlStudentOut$Att$lmerSlopesAttCoreAcc, type = "diag")
+grid.arrange(
+  mdlStudentOut$Att$diagSlopesAttCoreInt[[1]],
+  mdlStudentOut$Att$diagSlopesAttCoreInt[[2]]$`PID`,
+  mdlStudentOut$Att$diagSlopesAttCoreInt[[3]],
+  mdlStudentOut$Att$diagSlopesAttCoreInt[[4]]
+)
+
+# # Plot prediction model
+# mdlStudentOut$Att$predSlopesAttCoreAcc <- 
+#   studentOutWithinBetween %>%
+#   select(AttitudesDutch, session, PID) %>% 
+#   mutate(measure = predict(mdlStudentOut$Att$lmeSlopesAttCoreAcc,
+#                            studentOutWithinBetween,
+#                            re.form = NA
+#                            )
+#          )
+# 
+# (
+#   mdlStudentOut$Att$predPltSlopesAttCoreAcc <-
+#     ggplot(data = mdlStudentOut$Att$predSlopesAttCoreAcc, aes(x = session, y = measure)) +
+#     geom_line(alpha = 1, color = "blue") +
+#     geom_line(aes(y = AttitudesDutch), alpha = 1) +
+#     facet_wrap(~ PID, ncol = 6) +
+#     xlab("Time") +
+#     ylab("Outgroup Attitudes") +
+#     theme_Publication()
+# )
+# ggsave(
+#   filename = "Figures/Student_PredictionPlot_SlopesAttCoreAcc.png",
+#   mdlStudentOut$Att$predPltSlopesAttCoreAcc,
+#   width = 18,
+#   height = 12,
+#   dpi = 800,
+#   units = "cm",
+#   device = "png"
+# )
+```
+
+We find that adding the random slopes does add significantly beyond the random intercept model. We also see that when taking the possibility to varying slopes into account, the coefficient interpretations remains consistent (i.e., outgroup contact and its interaction with core need fulfillment remain significant predictors of positive outgroup attitudes).  
+
+##### Plot Interaction   
+
+Before we move on, we shortly illustrate the interaction effect of how the effect of core need fulfillment differed by whether an outgroup contact took place or not. To this end we illustrate (1) the raw data points (without taking the nested nature into account), as well as a plot of the model predicted values and their prediction interval (taking the nested structure into account based; similar to an interaction plot).  
+
+```{r studentOutModelInterceptAttCoreAccPlt}
+
+interactions::interact_plot(
+  mdlStudentOut$Att$lmerSlopesAttCoreAcc,
+  pred = KeyNeedFullfillment_cwc,
+  modx = interaction_accidental_cwc,
+  interval = TRUE,
+  partial.residuals = TRUE,
+  x.label = "Keyneed Fulfillment",
+  y.label = "Outgroup Attitudes",
+  legend.main = "Interaction Accidental"
+)
+  
+  
+
+mdlStudentOut$Att$jnSlopesAttCoreAcc <-
+  interactions::johnson_neyman(
+    mdlStudentOut$Att$lmerSlopesAttCoreAcc,
+    pred = KeyNeedFullfillment_cwc,
+    modx = interaction_accidental_cwc,
+    alpha = .05
+  )
+  
+mdlStudentOut$Att$jnSlopesAttCoreAcc$plot  +
+  labs(
+    x = "Interaction Accidental",
+    y = "Slope of Keyneed Fulfillment"
+  )
+  
+```
+
+# **Study 3**
 
 ## Data Description
 
@@ -6312,7 +6923,7 @@ We find that an estimated `r format(round(mdlMedical$IccPercAttNull, 2), nsmall=
 
 To this random intercept model we now add the two types of interactions possible at each measurement point as contemporaneous predictors of outgroup attitudes. That is: We check whether within participants having an outgroup interaction (or a non-outgroup interaction) is associated with more positive outgroup attitudes at the same measurement point.  
 
-\begin{equation}
+\begin{equation} 
 (\#eq:medicalInteractionTypeModel)
   \begin{split}
     \textrm{Level 1:} &
@@ -8414,9 +9025,9 @@ ggplot(data = dtMedical$full,
 # create parameters for prediction
 datNew = data.frame(
   KeyNeedFulfillment_cwc = rep(seq(
-    round_any(min(
+    plyr::round_any(min(
       dtMedical$full$KeyNeedFulfillment_cwc %>% na.omit
-    ), 5, f = floor), round_any(max(
+    ), 5, f = floor), plyr::round_any(max(
       dtMedical$full$KeyNeedFulfillment_cwc %>% na.omit
     ), 5, f = ceiling), 5
   ), 2),
@@ -8466,9 +9077,9 @@ ggplot(
               aes(ymin = fit - se, ymax = fit + se),
               alpha = 0.3) +
   scale_x_continuous(breaks = seq(
-    round_any(min(
+    plyr::round_any(min(
       studentWithinBetween$KeyNeedFullfillment_cwc
-    ), 5, f = floor), round_any(max(
+    ), 5, f = floor), plyr::round_any(max(
       studentWithinBetween$KeyNeedFullfillment_cwc
     ), 5, f = ceiling), 10
   )) +
@@ -8498,9 +9109,9 @@ ggplot(
 # # create parameters for prediction:
 # datNew = data.frame(
 #   KeyNeedFulfillment_cwc = rep(seq(
-#     round_any(min(
+#     plyr::round_any(min(
 #       dtMedical$full$KeyNeedFulfillment_cwc %>% na.omit
-#     ), 2, f = floor), round_any(max(
+#     ), 2, f = floor), plyr::round_any(max(
 #       dtMedical$full$KeyNeedFulfillment_cwc %>% na.omit
 #     ), 2, f = ceiling), 2
 #   ), 2)
@@ -8528,9 +9139,9 @@ ggplot(
 #            y = pred,
 #            fill = OutgroupInteractionLab)) +
 #   scale_x_continuous(breaks = seq(
-#     round_any(min(
+#     plyr::round_any(min(
 #       dtMedical$full$KeyNeedFulfillment_cwc %>% na.omit
-#     ), 5, f = floor), round_any(max(
+#     ), 5, f = floor), plyr::round_any(max(
 #       dtMedical$full$KeyNeedFulfillment_cwc %>% na.omit
 #     ), 5, f = ceiling), 10
 #   )) +
@@ -8857,6 +9468,250 @@ medicalSdtCompChiSq <- paste0("$chi^2$(", medicalSdtCompDf, ", <i>N</i> = ", med
 
 When compared to the model with only the SDT needs, the core need fulfillment flexibly takes on some of the explained variance of all of the three fundamental needs. However, similar to the previous study, in this large sample relatedness, competence, and autonomy each predicted positive outgroup attitudes independently. However, the regression coefficient is three times as large for the core need fulfillment (with all scaling being equal). 
 
+
+#### Interaction Accidental  
+
+To test whether the effect of core need fulfillment is relevant to planned and accidental interactions (i.e., whether 'goal-directed'), we compare the the effect to fulfillment of the situation core need when interactions were accidental or planned.  
+
+##### random intercept   
+
+Here we use the interaction dataset and add generalized situational core need fulfillment and whether the interaction was planned or accidental as well as their interaction term to a random intercept model of outgroup attitudes.  
+
+\begin{equation}
+(\#eq:medicalOutInterceptAttAccNeedEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+                           &\ \beta_{2i}InteractionAccidental_{ti} + \\
+                           &\ \beta_{3i}KeyNeedFulfillXInteractionAccidental_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} \\
+                      &\ \beta_{2i} = \gamma_{20} \\
+                      &\ \beta_{3i} = \gamma_{30}
+  \end{split} 
+\end{equation} 
+
+```{r medicalOutModelInterceptAttCoreAcc}
+# Create and save Model
+mdlMedicalOut$Att$lmeInterceptAttCoreAcc <-
+  lme(
+    AttitudesDutch ~ KeyNeedFulfillment_cwc * interaction_accidental_cwc,
+    random =  ~ 1 | PID,
+    data = medicalOutWithinBetween,
+    na.action = na.exclude
+  )
+
+# Get summary with p-values (Satterthwaite's method)
+summ(
+  mdlMedicalOut$Att$lmerInterceptAttCoreAcc <- lmer(
+    AttitudesDutch ~ KeyNeedFulfillment_cwc * interaction_accidental_cwc + (1 | PID),
+    data = medicalOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+
+# 95% CI
+mdlMedicalOut$Att$lmerInterceptAttCoreAccCI <- 
+  confint(method = "Wald", mdlMedicalOut$Att$lmerInterceptAttCoreAcc)
+
+# Compare new model to previous step
+anova(mdlMedicalOut$Att$lmeNull, 
+      mdlMedicalOut$Att$lmeInterceptAttCoreAcc) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  add_rownames(., var = "Description") %>%
+  mutate(Description = gsub(".*\\$", "", Description)) %>%
+  kbl(
+    .,
+    caption = "Worker: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = c("l", rep("c", ncol(.)-1)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlMedicalOut$Att$varInterceptAttCoreAcc <- 
+  lme4::VarCorr(mdlMedicalOut$Att$lmeInterceptAttCoreAcc)
+
+# The estimate of between-group (or Intercept variance) explained:
+# Variance Explained = 1 – (Var with Predictor/Var without Predictor)
+mdlMedicalOut$Att$varBtwInterceptAttCoreAcc <-
+  1 - (as.numeric(mdlMedicalOut$Att$varBtwInterceptAttCoreAcc[1]) / as.numeric(mdlMedicalOut$Att$varNull[1]))
+mdlMedicalOut$Att$varBtwPercInterceptAttCoreAcc <-
+  (1 - (as.numeric(mdlMedicalOut$Att$varBtwInterceptAttCoreAcc[1]) / as.numeric(mdlMedicalOut$Att$varNull[1]))) * 100
+# and the estimate of within-group (or residual variance) explained is:
+mdlMedicalOut$Att$varWithinInterceptAttCoreAcc <-
+  1 - (as.numeric(mdlMedicalOut$Att$varBtwInterceptAttCoreAcc[2]) / as.numeric(mdlMedicalOut$Att$varNull[2]))
+mdlMedicalOut$Att$varWithinPercInterceptAttCoreAcc <-
+  (1 - (as.numeric(mdlMedicalOut$Att$varBtwInterceptAttCoreAcc[2]) / as.numeric(mdlMedicalOut$Att$varNull[2]))) * 100
+```
+
+We find that the model explains significantly more variance than the empty null model. However, more interestingly, looking at the coefficients, we find that, as seen earlier, having an outgroup interaction has a strong effect on outgroup attitudes. Importantly, we find that there is no main effect of key need fulfillment but a significant interaction effect of core need fulfillment and outgroup contact. This indicates that it is not key need fulfillment in general --- but only key need fulfillment during an outgroup contact that predicts more positive outgroup attitudes.  
+
+##### random slope
+
+We again check whether further letting the effects vary between participants explains additional variance in outgroup attitudes (i.e., random slope).  
+
+\begin{equation}
+(\#eq:medicalOutSlopesAttAccNeedEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+                           &\ \beta_{2i}InteractionAccidental_{ti} + \\
+                           &\ \beta_{3i}KeyNeedFulfillXInteractionAccidental_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} + u_{1i} \\
+                      &\ \beta_{2i} = \gamma_{20} + u_{2i} \\
+                      &\ \beta_{3i} = \gamma_{30} + u_{3i}
+  \end{split} 
+\end{equation} 
+
+```{r medicalOutModelSlopesAttCoreAccX}
+
+# Create and save Model (optimizer needed to reach convergence)
+mdlMedicalOut$Att$lmeSlopesAttCoreAcc <- lme(
+  AttitudesDutch ~ KeyNeedFulfillment_cwc * interaction_accidental_cwc,
+  random = ~ 1 + KeyNeedFulfillment_cwc + interaction_accidental_cwc | PID,
+  control = lmeControl(opt = "optim"),
+  data = medicalOutWithinBetween,
+  na.action = na.exclude
+)
+
+# Get summary with p-values (Satterthwaite's method) [+ save model for plotting]
+summ(
+  mdlMedicalOut$Att$lmerSlopesAttCoreAcc <- lmer(
+    AttitudesDutch ~ KeyNeedFulfillment_cwc * interaction_accidental_cwc +
+      (1 + KeyNeedFulfillment_cwc + interaction_accidental_cwc | PID),
+    data = medicalOutWithinBetween
+  ), 
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+
+# 95%CI
+mdlMedicalOut$Att$lmerSlopesAttCoreAccCI <- 
+  confint(method = "Wald", mdlMedicalOut$Att$lmerSlopesAttCoreAcc)
+
+# Compare new model to previous step
+anova(mdlMedicalOut$Att$lmeNull, 
+      mdlMedicalOut$Att$lmeInterceptAttCoreAcc,
+      mdlMedicalOut$Att$lmeSlopesAttCoreAcc) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  add_rownames(., var = "Description") %>%
+  mutate(Description = gsub(".*\\$", "", Description)) %>%
+  kbl(
+    .,
+    caption = "Worker: Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = rep("c", ncol(.)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+
+# Save variances
+mdlMedicalOut$Att$varSlopesAttCoreAcc <- 
+  lme4::VarCorr(mdlMedicalOut$Att$lmeSlopesAttCoreAcc)
+
+# Assumption Checks:
+mdlMedicalOut$Att$diagSlopesAttCoreInt <-
+  sjPlot::plot_model(mdlMedicalOut$Att$lmerSlopesAttCoreAcc, type = "diag")
+grid.arrange(
+  mdlMedicalOut$Att$diagSlopesAttCoreInt[[1]],
+  mdlMedicalOut$Att$diagSlopesAttCoreInt[[2]]$`PID`,
+  mdlMedicalOut$Att$diagSlopesAttCoreInt[[3]],
+  mdlMedicalOut$Att$diagSlopesAttCoreInt[[4]]
+)
+
+# # Plot prediction model
+# mdlMedicalOut$Att$predSlopesAttCoreAcc <- 
+#   medicalOutWithinBetween %>%
+#   select(AttitudesDutch, session, PID) %>% 
+#   mutate(measure = predict(mdlMedicalOut$Att$lmeSlopesAttCoreAcc,
+#                            medicalOutWithinBetween,
+#                            re.form = NA
+#                            )
+#          )
+# 
+# (
+#   mdlMedicalOut$Att$predPltSlopesAttCoreAcc <-
+#     ggplot(data = mdlMedicalOut$Att$predSlopesAttCoreAcc, aes(x = session, y = measure)) +
+#     geom_line(alpha = 1, color = "blue") +
+#     geom_line(aes(y = AttitudesDutch), alpha = 1) +
+#     facet_wrap(~ PID, ncol = 6) +
+#     xlab("Time") +
+#     ylab("Outgroup Attitudes") +
+#     theme_Publication()
+# )
+# ggsave(
+#   filename = "Figures/Medical_PredictionPlot_SlopesAttCoreAcc.png",
+#   mdlMedicalOut$Att$predPltSlopesAttCoreAcc,
+#   width = 18,
+#   height = 12,
+#   dpi = 800,
+#   units = "cm",
+#   device = "png"
+# )
+```
+
+We find that adding the random slopes does add significantly beyond the random intercept model. We also see that when taking the possibility to varying slopes into account, the coefficient interpretations remains consistent (i.e., outgroup contact and its interaction with core need fulfillment remain significant predictors of positive outgroup attitudes).  
+
+##### Plot Interaction   
+
+Before we move on, we shortly illustrate the interaction effect of how the effect of core need fulfillment differed by whether an outgroup contact took place or not. To this end we illustrate (1) the raw data points (without taking the nested nature into account), as well as a plot of the model predicted values and their prediction interval (taking the nested structure into account based; similar to an interaction plot).  
+
+```{r medicalOutModelInterceptAttCoreAccPlt}
+
+interactions::interact_plot(
+  mdlMedicalOut$Att$lmerSlopesAttCoreAcc,
+  pred = KeyNeedFulfillment_cwc,
+  modx = interaction_accidental_cwc,
+  interval = TRUE,
+  partial.residuals = TRUE,
+  x.label = "Keyneed Fulfillment",
+  y.label = "Outgroup Attitudes",
+  legend.main = "Interaction Accidental"
+)
+  
+  
+
+mdlMedicalOut$Att$jnSlopesAttCoreAcc <-
+  interactions::johnson_neyman(
+    mdlMedicalOut$Att$lmerSlopesAttCoreAcc,
+    pred = KeyNeedFulfillment_cwc,
+    modx = interaction_accidental_cwc,
+    alpha = .05
+  )
+  
+mdlMedicalOut$Att$jnSlopesAttCoreAcc$plot  +
+  labs(
+    x = "Interaction Accidental",
+    y = "Slope of Keyneed Fulfillment"
+  )
+  
+```
 
 # **Forest Plots of Main Analyses**  
 

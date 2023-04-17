@@ -1,3 +1,4 @@
+library(plyr)
 #obj <- tblLmerS1AttSlopeCoreQlt
 #objz <- tblLmerS1AttSlopeCoreQltZ
 
@@ -64,7 +65,7 @@ lmerTblPrep <- function (obj, objz = NULL, alpha = 0.05, ...) {
                   #method = "profile") %>% 
     as.data.frame %>%
     tibble::rownames_to_column(., "coef")
-  coefOut <- join(coef, conf, by = "coef")
+  coefOut <- plyr::join(coef, conf, by = "coef")
   colnames(coefOut) <- c("coef", "est", "se", "tval", "df", "p", "lwr", "upr")
   coefOut$B <- paste0(
     format(round(coefOut$est, 2), nsmall = 2),
@@ -83,7 +84,7 @@ lmerTblPrep <- function (obj, objz = NULL, alpha = 0.05, ...) {
                                  ifelse(coefOut$p < .01, "**", 
                                         ifelse(coefOut$p < .05, "*", ""))))
   coefOut <- 
-    join(
+    plyr::join(
       coefOut %>% 
         mutate(coef = gsub('_cwc|C$', '', coef)), 
       coefZOut %>% 
@@ -209,7 +210,7 @@ lmTblPrep <- function (obj, alpha = 0.05, ...) {
     tibble::rownames_to_column(., "coef") %>%
     select(coef, se = S.E.)
   
-  coef <- join(
+  coef <- plyr::join(
     coefCI, 
     coefSE,
     by = "coef"
@@ -249,7 +250,7 @@ lmTblPrep <- function (obj, alpha = 0.05, ...) {
   
   # Merge B and effect size
   coefEta <- 
-    join(
+    plyr::join(
       coef %>% 
         mutate(coef = gsub('_c', '', coef)), 
        eta %>% 
@@ -258,7 +259,7 @@ lmTblPrep <- function (obj, alpha = 0.05, ...) {
       by = "coef"
     )
   coefOut <- 
-    join(
+    plyr::join(
       coefEta, 
       Rsq %>% 
         mutate(coef = gsub('_c', '', coef)),
