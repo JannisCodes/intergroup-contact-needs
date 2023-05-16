@@ -73,6 +73,7 @@ lib <- c(
   "plotly",
   "gridExtra",
   "ggpattern",
+  "ggridges",
   "lme4",
   "nlme",
   "jtools",
@@ -152,6 +153,9 @@ knitr::opts_chunk$set(
   warning = FALSE,
   message = FALSE
 )
+
+# set ggplot theme
+theme_set(theme_Publication())
 ```
 
 <br/>
@@ -858,6 +862,7 @@ workerWithinBetween <-
         "relatedness_1", 
         "quality_overall_1", 
         "interaction_quality",
+        "ExWB_1",
         "OutgroupInteraction",
         "NonOutgroupInteraction",
         "interaction_accidental", 
@@ -879,6 +884,7 @@ workerOutWithinBetween <-
         "autonomy_1",
         "relatedness_1", 
         "quality_overall_1",
+        "ExWB_1",
         "interaction_quality",
         "interaction_accidental",
         "interaction_voluntary",
@@ -896,6 +902,7 @@ workerContactFreq <- dtWorker$full %>%
     PercContactNL = SumContactNL / n * 100,
     SumContactNLAll = sum(number),
     AvAttitude = mean(thermometerDutch_1, na.rm = TRUE),
+    AvWellBeing = mean(ExWB_1, na.rm = TRUE),
     AvQualityComb = mean(interaction_quality, na.rm = TRUE),
     AvAccidental = mean(interaction_accidental, na.rm = TRUE),
     AvVoluntary = mean(interaction_voluntary, na.rm = TRUE),
@@ -1089,7 +1096,6 @@ df <- df %>%
 dtStudents$full <- df
 rm(df)
 
-
 # Between participants contact frequency
 studentContactFreq <- dtStudents$full %>%
   group_by(PID) %>%
@@ -1099,6 +1105,7 @@ studentContactFreq <- dtStudents$full %>%
     PercContactNL = SumContactNL / n * 100,
     SumContactNLAll = sum(ContactNum[InteractionDumDutch == 1], na.rm = TRUE),
     AvAttitude = mean(AttitudesDutch, na.rm = TRUE),
+    AvWellBeing = mean(ExWB, na.rm = TRUE),
     AvQuality = mean(quality_overall, na.rm = TRUE),
     AvQualityComb = mean(interaction_quality, na.rm = TRUE),
     AvQualityOut = mean(quality_overall[InteractionDumDutch==1], na.rm = TRUE),
@@ -1179,6 +1186,7 @@ studentWithinBetween <-
         "Autonomy",
         "Relatedness",
         "AttitudesDutch",
+        "ExWB",
         "quality_overall",
         "interaction_quality",
         "OutgroupInteraction",
@@ -1201,6 +1209,7 @@ studentOutWithinBetween <-
         "Autonomy",
         "Relatedness",
         "AttitudesDutch",
+        "ExWB",
         "quality_overall",
         "interaction_quality",
         "InteractionContextvoluntary",
@@ -1428,7 +1437,9 @@ as.data.frame(psych::describe(df$AllportsCondition, skew=T)) %>%
   kable(., caption = "Allport's Conditions: Scale Descriptives", row.names = FALSE) %>% 
   kable_styling("hover", full_width = F, latex_options = "hold_position")
 
-histogram(df$AllportsCondition)
+ggplot(df, aes(x= AllportsCondition)) +
+  geom_histogram() +
+  theme_Publication()
 
 # -------------------------------------------------------------------------------------------------------------
 #                                 Add Variables related to interaction partner
@@ -1513,6 +1524,7 @@ medicalOutWithinBetween <-
         "Autonomy",
         "Relatedness",
         "AllportsCondition",
+        "exWB",
         "AttitudesDutch",
         "qualityOverall",
         "interaction_quality",
@@ -1535,6 +1547,7 @@ medicalWithinBetween <-
         "Relatedness",
         "AllportsCondition",
         "AttitudesDutch",
+        "exWB",
         "qualityOverall",
         "interaction_quality",
         "interaction_accidental",
@@ -1559,6 +1572,7 @@ df <- # keep only for compatibility of old framgents
         "AllportsCondition",
         "AttitudesDutch",
         "qualityOverall",
+        "exWB",
         "interaction_quality",
         "interaction_accidental",
         "interaction_voluntary",
@@ -1582,6 +1596,7 @@ medicalContactFreq <-
     PercContactNL = SumContactNL / n * 100,
     SumContactNLAll = sum(ContactNum[InteractionDumDutch == 1], na.rm = TRUE),
     AvAttitude = mean(AttitudesDutch, na.rm = TRUE),
+    AvWellBeing =  mean(exWB, na.rm = TRUE),
     AvQuality = mean(qualityOverall, na.rm = TRUE),
     AvAccidental = mean(interaction_accidental, na.rm = TRUE),
     AvVoluntary = mean(interaction_voluntary, na.rm = TRUE),
@@ -1729,7 +1744,123 @@ workerInteractionType %>%
 
 ### Variable distributions  
 
-```{r WorkerVarDescr}
+```{r workerVarDescr}
+workerDescr <- workerInteractionType %>%
+  select(
+    `Core Need` = keyMotiveFulfilled,
+    Competence = competence.daily.all,
+    Autonomy = autonomy.daily.all,
+    Relatedness = relatedness.daily.all,
+    Quality = quality_overall_1,
+    Attitudes = thermometerDutch_1
+  )
+workerDescrOut <- workerInteractionType %>%
+  filter(OutgroupInteraction == "Yes") %>%
+  select(
+    `Core Need` = keyMotiveFulfilled,
+    Competence = competence.daily.all,
+    Autonomy = autonomy.daily.all,
+    Relatedness = relatedness.daily.all,
+    Quality = quality_overall_1,
+    Attitudes = thermometerDutch_1
+  )
+
+workerDescr %>%
+  psych::describe(., trim = .2) %>%
+  as.data.frame %>%
+  mutate(
+    vars = rownames(.),
+    na = sapply(workerDescr, function(x) sum(is.na(x)), simplify = TRUE),
+    win.mean = sapply(workerDescr, psych::winsor.mean, simplify = TRUE),
+    win.sd = sapply(workerDescr, psych::winsor.sd, simplify = TRUE)
+  ) %>% 
+  dplyr::select(variables = vars, n, na, 
+                mean, `mean win` = win.mean, `mean trim` = trimmed, median,
+                sd, `sd win` = win.sd, MAD = mad, min, max,
+                skew, kurtosis) %>%
+  kbl(., 
+      #label = "",
+      caption = "Study 1: Descriptives overall",
+      format = "html", 
+      #linesep = "",
+      #booktabs = T,
+      row.names = F,
+      digits = 2,
+      align = c('l', rep('c', ncol(.)-1)))  %>%
+  add_header_above(., c(" " = 3,"Centrality" = 4, "Dispersion" = 5, "Distribution" = 2)) %>%
+  footnote(general = "'na' indicates the number of measurements for which measurements are missing.") %>%
+  kable_classic(full_width = F, 
+                lightable_options = "hover", 
+                html_font = "Cambria")
+
+workerDescrOut %>%
+  psych::describe(., trim = .2) %>%
+  as.data.frame %>%
+  mutate(
+    vars = rownames(.),
+    na = sapply(workerDescrOut, function(x) sum(is.na(x)), simplify = TRUE),
+    win.mean = sapply(workerDescrOut, psych::winsor.mean, simplify = TRUE),
+    win.sd = sapply(workerDescrOut, psych::winsor.sd, simplify = TRUE)
+  ) %>% 
+  dplyr::select(variables = vars, n, na, 
+                mean, `mean win` = win.mean, `mean trim` = trimmed, median,
+                sd, `sd win` = win.sd, MAD = mad, min, max,
+                skew, kurtosis) %>%
+  kbl(., 
+      #label = "",
+      caption = "Study 1: Descriptives outgroup interactions",
+      format = "html", 
+      #linesep = "",
+      #booktabs = T,
+      row.names = F,
+      digits = 2,
+      align = c('l', rep('c', ncol(.)-1)))  %>%
+  add_header_above(., c(" " = 3,"Centrality" = 4, "Dispersion" = 5, "Distribution" = 2)) %>%
+  footnote(general = "'na' indicates the number of measurements for which measurements are missing.") %>%
+  kable_classic(full_width = F, 
+                lightable_options = "hover", 
+                html_font = "Cambria")
+```
+
+
+```{r workerDistributionAll}
+ggplot(
+  workerDescr %>% melt, 
+  aes(x = value, y = variable, fill = stat(x))
+  ) +
+  geom_density_ridges_gradient(size = 0.3, rel_min_height = 0.01) + 
+  labs(
+    x = "Response",
+    y = "Variable",
+    title = "Study 1: Variable Distribution Overall",
+    caption = "Note: Core Need Fulfillment is on a 0 to 100 scale, whereas all other scales are on a -50 to 50 scale."
+  ) + 
+  theme(
+    legend.position = "none" 
+  )
+```
+
+```{r workerDistributionOutgroupContact}
+ggplot(
+  workerDescrOut %>% melt, 
+  aes(x = value, y = variable, fill = stat(x))
+  ) +
+  geom_density_ridges_gradient(size = 0.3, rel_min_height = 0.01) + 
+  labs(
+    x = "Response",
+    y = "Variable",
+    title = "Study 1: Variable Distribution Outgroup Interactions",
+    caption = "Note: Core Need Fulfillment is on a 0 to 100 scale, whereas all other scales are on a -50 to 50 scale."
+  ) + 
+  theme(
+    legend.position = "none" 
+  )
+```
+
+
+### Variable correlations  
+
+```{r WorkerVarCor}
 # calculate correlations and descriptives
 workerMlCor <-
   MlCorMat(
@@ -4024,6 +4155,184 @@ mdlWorkerOut$Att$jnSlopesAttCoreAcc$plot  +
 ```
 
 
+
+#### Well-being outcome  
+
+To test whether the need mechanism also extends to the migrants' well-being, we additionally tested the main model would also predict well-being.
+
+Here we use the interaction dataset and add generalized situational core need fulfillment as well as interaction quality in the most complex model.
+
+\begin{equation}
+(\#eq:worderOutSlopeWbNeedQualEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Well-Being_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+                             &\ \beta_{2i}Quality_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} + u_{1i} \\
+                      &\ \beta_{2i} = \gamma_{20} + u_{2i}
+  \end{split} 
+\end{equation} 
+
+##### Well-being: need fulfillment   
+
+```{r workerWellBeingModelChoice}
+workerWbModels <-
+  list(
+    null = ExWB_1 ~ 1,
+    wb_need = ExWB_1 ~ keymotive_fulfillemt_1_cwc,
+    wb_need_qual = ExWB_1 ~ keymotive_fulfillemt_1_cwc + quality_overall_1_cwc
+  )
+workerWbModelType <-
+  list(
+    intercept = ~ 1 | PID,
+    slope_need = ~ 1 + keymotive_fulfillemt_1_cwc | PID,
+    slope_need_qual = ~ 1 + keymotive_fulfillemt_1_cwc + quality_overall_1_cwc | PID
+  )
+
+# Well-being Null Model
+mdlWorkerOut$Wb$lmeNull <-
+  lme(workerWbModels$null,
+      random = workerWbModelType$intercept,
+      data = workerOutWithinBetween)
+
+# Well-being ~ Need
+mdlWorkerOut$Wb$lmeInterceptNeed <-
+  lme(workerWbModels$wb_need,
+      random = workerWbModelType$intercept,
+      data = workerOutWithinBetween)
+mdlWorkerOut$Wb$lmeSlopeNeed <-
+  lme(workerWbModels$wb_need,
+      random = workerWbModelType$slope_need,
+      data = workerOutWithinBetween)
+
+anova(mdlWorkerOut$Wb$lmeNull, 
+      mdlWorkerOut$Wb$lmeInterceptNeed,
+      mdlWorkerOut$Wb$lmeSlopeNeed) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  add_rownames(., var = "Description") %>%
+  mutate(Description = gsub(".*\\$", "", Description)) %>%
+  kbl(
+    .,
+    caption = "Worker: Well-being Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = c("l", rep("c", ncol(.)-1)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+```
+
+The random slope model is the best fitting for need fulfillment. 
+
+
+```{r workerOutWellBeingNeedModel}
+# Get summary with p-values (Satterthwaite's method)
+summ(
+  mdlWorkerOut$Wb$lmerSlopeNeed <- lmer(
+    ExWB_1 ~ keymotive_fulfillemt_1_cwc + (1 + keymotive_fulfillemt_1_cwc | PID),
+    data = workerOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+
+# 95% CI
+mdlWorkerOut$Att$lmerSlopeNeedCI <- 
+  confint(method = "Wald", mdlWorkerOut$Wb$lmerSlopeNeed)
+
+# all standardized within
+summ(
+  mdlWorkerOut$Wb$lmerSlopeNeedZ <- lmer(
+    ExWB_1_zwc ~ keymotive_fulfillemt_1_zwc + (1 + keymotive_fulfillemt_1_cwc | PID),
+    data = workerOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+```
+
+##### Well-being: need fulfillment and interaction quality
+
+```{r workerWellBeingQualityModelChoice}
+# Well-being ~ Need + Quality
+mdlWorkerOut$Wb$lmeInterceptNeedQual <-
+  lme(workerWbModels$wb_need_qual,
+      random = workerWbModelType$intercept,
+      data = workerOutWithinBetween)
+mdlWorkerOut$Wb$lmeSlopeNeedQual <-
+  lme(workerWbModels$wb_need_qual,
+      random = workerWbModelType$slope_need_qual,
+      control = lmeControl(opt = "optim"),
+      data = workerOutWithinBetween)
+
+
+anova(mdlWorkerOut$Wb$lmeNull, 
+      mdlWorkerOut$Wb$lmeInterceptNeedQual,
+      mdlWorkerOut$Wb$lmeSlopeNeedQual) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  add_rownames(., var = "Description") %>%
+  mutate(Description = gsub(".*\\$", "", Description)) %>%
+  kbl(
+    .,
+    caption = "Worker: Well-being Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = c("l", rep("c", ncol(.)-1)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+```
+
+Random slope model is the best fitting for need fulfillment and interaction quality. 
+
+
+```{r workerOutWellBeingQualityNeedModel}
+# Get summary with p-values (Satterthwaite's method)
+summ(
+  mdlWorkerOut$Wb$lmerSlopeNeedQual <- lmer(
+    ExWB_1 ~ keymotive_fulfillemt_1_cwc + quality_overall_1_cwc + (1 + keymotive_fulfillemt_1_cwc + quality_overall_1_cwc | PID),
+    data = workerOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+
+# 95% CI
+mdlWorkerOut$Att$lmerSlopeNeedQualCI <- 
+  confint(method = "Wald", mdlWorkerOut$Wb$lmerSlopeNeedQual)
+
+# all standardized within
+summ(
+  mdlWorkerOut$Wb$lmerSlopeNeedQualZ <- lmer(
+    ExWB_1_zwc ~ keymotive_fulfillemt_1_zwc + quality_overall_1_zwc + (1 + keymotive_fulfillemt_1_zwc + quality_overall_1_zwc | PID),
+    data = workerOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+```
+
 # **Study 2**
 
 The second sample we assess is larger study with international psychology students at Western European university. The hypotheses mirror those of the first study and are re-iterated here:
@@ -4126,7 +4435,122 @@ studentInteractionType %>%
 
 ### Variable distributions  
 
+
 ```{r studentVarDescr}
+studentDescr <- studentInteractionType %>%
+  select(
+    `Core Need` = KeyNeedFullfillment,
+    Competence = Competence,
+    Autonomy = Autonomy,
+    Relatedness = Relatedness,
+    Quality = quality_overall,
+    Attitudes = AttitudesDutch
+  )
+studentDescrOut <- studentInteractionType %>%
+  filter(OutgroupInteraction == "Yes") %>%
+  select(
+    `Core Need` = KeyNeedFullfillment,
+    Competence = Competence,
+    Autonomy = Autonomy,
+    Relatedness = Relatedness,
+    Quality = quality_overall,
+    Attitudes = AttitudesDutch
+  )
+
+studentDescr %>%
+  psych::describe(., trim = .2) %>%
+  as.data.frame %>%
+  mutate(
+    vars = rownames(.),
+    na = sapply(studentDescr, function(x) sum(is.na(x)), simplify = TRUE),
+    win.mean = sapply(studentDescr, psych::winsor.mean, simplify = TRUE),
+    win.sd = sapply(studentDescr, psych::winsor.sd, simplify = TRUE)
+  ) %>% 
+  dplyr::select(variables = vars, n, na, 
+                mean, `mean win` = win.mean, `mean trim` = trimmed, median,
+                sd, `sd win` = win.sd, MAD = mad, min, max,
+                skew, kurtosis) %>%
+  kbl(., 
+      #label = "",
+      caption = "Study 2: Descriptives overall",
+      format = "html", 
+      #linesep = "",
+      #booktabs = T,
+      row.names = F,
+      digits = 2,
+      align = c('l', rep('c', ncol(.)-1)))  %>%
+  add_header_above(., c(" " = 3,"Centrality" = 4, "Dispersion" = 5, "Distribution" = 2)) %>%
+  footnote(general = "'na' indicates the number of measurements for which measurements are missing.") %>%
+  kable_classic(full_width = F, 
+                lightable_options = "hover", 
+                html_font = "Cambria")
+
+studentDescrOut %>%
+  psych::describe(., trim = .2) %>%
+  as.data.frame %>%
+  mutate(
+    vars = rownames(.),
+    na = sapply(studentDescrOut, function(x) sum(is.na(x)), simplify = TRUE),
+    win.mean = sapply(studentDescrOut, psych::winsor.mean, simplify = TRUE),
+    win.sd = sapply(studentDescrOut, psych::winsor.sd, simplify = TRUE)
+  ) %>% 
+  dplyr::select(variables = vars, n, na, 
+                mean, `mean win` = win.mean, `mean trim` = trimmed, median,
+                sd, `sd win` = win.sd, MAD = mad, min, max,
+                skew, kurtosis) %>%
+  kbl(., 
+      #label = "",
+      caption = "Study 2: Descriptives outgroup interactions",
+      format = "html", 
+      #linesep = "",
+      #booktabs = T,
+      row.names = F,
+      digits = 2,
+      align = c('l', rep('c', ncol(.)-1)))  %>%
+  add_header_above(., c(" " = 3,"Centrality" = 4, "Dispersion" = 5, "Distribution" = 2)) %>%
+  footnote(general = "'na' indicates the number of measurements for which measurements are missing.") %>%
+  kable_classic(full_width = F, 
+                lightable_options = "hover", 
+                html_font = "Cambria")
+```
+
+
+```{r studentDistributionAll}
+ggplot(
+  studentDescr %>% melt, 
+  aes(x = value, y = variable, fill = stat(x))
+  ) +
+  geom_density_ridges_gradient(size = 0.3, rel_min_height = 0.01) + 
+  labs(
+    x = "Response",
+    y = "Variable",
+    title = "Study 2: Variable Distribution Overall"
+  ) + 
+  theme(
+    legend.position = "none" 
+  )
+```
+
+```{r studentDistributionOutgroupContact}
+ggplot(
+  studentDescrOut %>% melt, 
+  aes(x = value, y = variable, fill = stat(x))
+  ) +
+  geom_density_ridges_gradient(size = 0.3, rel_min_height = 0.01) + 
+  labs(
+    x = "Response",
+    y = "Variable",
+    title = "Study 2: Variable Distribution Outgroup Interactions"
+  ) + 
+  theme(
+    legend.position = "none" 
+  )
+```
+
+
+### Variable correlations 
+
+```{r studentVarCor}
 # calculate correlations and descriptives
 studentMlCor <-
   MlCorMat(
@@ -6492,6 +6916,188 @@ mdlStudentOut$Att$jnSlopesAttCoreAcc$plot  +
   
 ```
 
+
+
+#### Well-being outcome  
+
+To test whether the need mechanism also extends to the migrants' well-being, we additionally tested the main model would also predict well-being.
+
+Here we use the interaction dataset and add generalized situational core need fulfillment as well as interaction quality in the most complex model.
+
+\begin{equation}
+(\#eq:studentOutSlopeWbNeedQualEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Well-Being_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+                             &\ \beta_{2i}Quality_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} + u_{1i} \\
+                      &\ \beta_{2i} = \gamma_{20} + u_{2i}
+  \end{split} 
+\end{equation} 
+
+##### Well-being: need fulfillment   
+
+```{r studentWellBeingModelChoice}
+
+studentWbModels <-
+  list(
+    null = ExWB ~ 1,
+    wb_need = ExWB ~ KeyNeedFullfillment_cwc,
+    wb_need_qual = ExWB ~ KeyNeedFullfillment_cwc + quality_overall_cwc
+  )
+studentWbModelType <-
+  list(
+    intercept = ~ 1 | PID,
+    slope_need = ~ 1 + KeyNeedFullfillment_cwc | PID,
+    slope_need_qual = ~ 1 + KeyNeedFullfillment_cwc + quality_overall_cwc | PID
+  )
+
+# Well-being Null Model
+mdlStudentOut$Wb$lmeNull <-
+  lme(studentWbModels$null,
+      random = studentWbModelType$intercept,
+      data = studentOutWithinBetween)
+
+# Well-being ~ Need
+mdlStudentOut$Wb$lmeInterceptNeed <-
+  lme(studentWbModels$wb_need,
+      random = studentWbModelType$intercept,
+      data = studentOutWithinBetween)
+mdlStudentOut$Wb$lmeSlopeNeed <-
+  lme(studentWbModels$wb_need,
+      random = studentWbModelType$slope_need,
+      data = studentOutWithinBetween)
+
+anova(mdlStudentOut$Wb$lmeNull, 
+      mdlStudentOut$Wb$lmeInterceptNeed,
+      mdlStudentOut$Wb$lmeSlopeNeed) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  add_rownames(., var = "Description") %>%
+  mutate(Description = gsub(".*\\$", "", Description)) %>%
+  kbl(
+    .,
+    caption = "Student: Well-being Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = c("l", rep("c", ncol(.)-1)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+```
+
+Intercept model is the best fitting for need fulfillment. 
+
+
+```{r studentOutWellBeingNeedModel}
+# Get summary with p-values (Satterthwaite's method)
+summ(
+  mdlStudentOut$Wb$lmerInterceptNeed <- lmer(
+    ExWB ~ KeyNeedFullfillment_cwc + (1 | PID),
+    data = studentOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+
+# 95% CI
+mdlStudentOut$Att$lmerInterceptNeedCI <- 
+  confint(method = "Wald", mdlStudentOut$Wb$lmerInterceptNeed)
+
+# all standardized within
+summ(
+  mdlStudentOut$Wb$lmerInterceptNeedZ <- lmer(
+    ExWB_zwc ~ KeyNeedFullfillment_zwc + (1 | PID),
+    data = studentOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+```
+
+##### Well-being: need fulfillment and interaction quality
+
+```{r studentWellBeingQualityModelChoice}
+# Well-being ~ Need + Quality
+mdlStudentOut$Wb$lmeInterceptNeedQual <-
+  lme(studentWbModels$wb_need_qual,
+      random = studentWbModelType$intercept,
+      data = studentOutWithinBetween)
+mdlStudentOut$Wb$lmeSlopeNeedQual <-
+  lme(studentWbModels$wb_need_qual,
+      random = studentWbModelType$slope_need_qual,
+      control = lmeControl(opt = "optim"),
+      data = studentOutWithinBetween)
+
+
+
+anova(mdlStudentOut$Wb$lmeNull, 
+      mdlStudentOut$Wb$lmeInterceptNeedQual,
+      mdlStudentOut$Wb$lmeSlopeNeedQual) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  add_rownames(., var = "Description") %>%
+  mutate(Description = gsub(".*\\$", "", Description)) %>%
+  kbl(
+    .,
+    caption = "Student: Well-being Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = c("l", rep("c", ncol(.)-1)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+```
+
+Intercept model is the best fitting for need fulfillment and interaction quality. 
+
+
+```{r studentOutWellBeingQualityNeedModel}
+# Get summary with p-values (Satterthwaite's method)
+summ(
+  mdlStudentOut$Wb$lmerInterceptNeedQuality <- lmer(
+    ExWB ~ KeyNeedFullfillment_cwc + quality_overall_cwc + (1 | PID),
+    data = studentOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+
+# 95% CI
+mdlStudentOut$Att$lmerInterceptNeedQualityCI <- 
+  confint(method = "Wald", mdlStudentOut$Wb$lmerInterceptNeedQuality)
+
+# all standardized within
+summ(
+  mdlStudentOut$Wb$lmerInterceptNeedQualityZ <- lmer(
+    ExWB_zwc ~ KeyNeedFullfillment_zwc + quality_overall_zwc + (1 | PID),
+    data = studentOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+```
+
+
 # **Study 3**
 
 ## Data Description
@@ -6585,14 +7191,133 @@ dtMedical$full %>%
 
 ### Variable distributions  
 
+
 ```{r medicalVarDescr}
+medicalDescr <- dtMedical$full %>%
+  select(
+    `Core Need` = KeyNeedFulfillment,
+    Competence = Competence,
+    Autonomy = Autonomy,
+    Relatedness = Relatedness,
+    AllportsCondition = AllportsCondition,
+    Quality = qualityOverall,
+    Attitudes = AttitudesDutch, 
+    `Well-being` = exWB
+  )
+medicalDescrOut <- dtMedical$full %>%
+  filter(OutgroupInteraction == "Yes") %>%
+  select(
+    `Core Need` = KeyNeedFulfillment,
+    Competence = Competence,
+    Autonomy = Autonomy,
+    Relatedness = Relatedness,
+    AllportsCondition = AllportsCondition,
+    Quality = qualityOverall,
+    Attitudes = AttitudesDutch,
+    `Well-being` = exWB
+  )
+
+medicalDescr %>%
+  psych::describe(., trim = .2) %>%
+  as.data.frame %>%
+  mutate(
+    vars = rownames(.),
+    na = sapply(medicalDescr, function(x) sum(is.na(x)), simplify = TRUE),
+    win.mean = sapply(medicalDescr, psych::winsor.mean, simplify = TRUE),
+    win.sd = sapply(medicalDescr, psych::winsor.sd, simplify = TRUE)
+  ) %>% 
+  dplyr::select(variables = vars, n, na, 
+                mean, `mean win` = win.mean, `mean trim` = trimmed, median,
+                sd, `sd win` = win.sd, MAD = mad, min, max,
+                skew, kurtosis) %>%
+  kbl(., 
+      #label = "",
+      caption = "Study 3: Descriptives overall",
+      format = "html", 
+      #linesep = "",
+      #booktabs = T,
+      row.names = F,
+      digits = 2,
+      align = c('l', rep('c', ncol(.)-1)))  %>%
+  add_header_above(., c(" " = 3,"Centrality" = 4, "Dispersion" = 5, "Distribution" = 2)) %>%
+  footnote(general = "'na' indicates the number of measurements for which measurements are missing.") %>%
+  kable_classic(full_width = F, 
+                lightable_options = "hover", 
+                html_font = "Cambria")
+
+medicalDescrOut %>%
+  psych::describe(., trim = .2) %>%
+  as.data.frame %>%
+  mutate(
+    vars = rownames(.),
+    na = sapply(medicalDescrOut, function(x) sum(is.na(x)), simplify = TRUE),
+    win.mean = sapply(medicalDescrOut, psych::winsor.mean, simplify = TRUE),
+    win.sd = sapply(medicalDescrOut, psych::winsor.sd, simplify = TRUE)
+  ) %>% 
+  dplyr::select(variables = vars, n, na, 
+                mean, `mean win` = win.mean, `mean trim` = trimmed, median,
+                sd, `sd win` = win.sd, MAD = mad, min, max,
+                skew, kurtosis) %>%
+  kbl(., 
+      #label = "",
+      caption = "Study 3: Descriptives outgroup interactions",
+      format = "html", 
+      #linesep = "",
+      #booktabs = T,
+      row.names = F,
+      digits = 2,
+      align = c('l', rep('c', ncol(.)-1)))  %>%
+  add_header_above(., c(" " = 3,"Centrality" = 4, "Dispersion" = 5, "Distribution" = 2)) %>%
+  footnote(general = "'na' indicates the number of measurements for which measurements are missing.") %>%
+  kable_classic(full_width = F, 
+                lightable_options = "hover", 
+                html_font = "Cambria")
+```
+
+
+```{r medicalDistributionAll}
+ggplot(
+  medicalDescr %>% melt, 
+  aes(x = value, y = variable, fill = stat(x))
+  ) +
+  geom_density_ridges_gradient(size = 0.3, rel_min_height = 0.01) + 
+  labs(
+    x = "Response",
+    y = "Variable",
+    title = "Study 3: Variable Distribution Overall"
+  ) + 
+  theme(
+    legend.position = "none" 
+  )
+```
+
+```{r medicalDistributionOutgroupContact}
+ggplot(
+  medicalDescrOut %>% melt, 
+  aes(x = value, y = variable, fill = stat(x))
+  ) +
+  geom_density_ridges_gradient(size = 0.3, rel_min_height = 0.01) + 
+  labs(
+    x = "Response",
+    y = "Variable",
+    title = "Study 3: Variable Distribution Outgroup Interactions"
+  ) + 
+  theme(
+    legend.position = "none" 
+  )
+```
+
+
+### Variable correlations 
+
+```{r medicalVarCor}
 # calculate correlations and descriptives
 medicalMlCor <-
   MlCorMat(
-    data = dtMedical$ful,
+    data = dtMedical$full,
     id = "PID",
-    selection = c("KeyNeedFulfillment", "Competence", "Autonomy", "Relatedness", "AllportsCondition", "qualityOverall", "AttitudesDutch"),
-    labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Allport", "Quality", "Attitudes NL")
+    selection = c("KeyNeedFulfillment", "Competence", "Autonomy", "Relatedness", "AllportsCondition", "qualityOverall", "AttitudesDutch", "exWB"),
+    labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Allport", "Quality", "Attitudes NL", "Well-being")
   ) 
 
 medicalMlCor %>%
@@ -6625,8 +7350,8 @@ medicalOutMlCor <-
   MlCorMat(
     data = dtMedical$full %>% filter(OutgroupInteraction == "Yes"),
     id = "PID",
-    selection = c("KeyNeedFulfillment", "Competence", "Autonomy", "Relatedness", "AllportsCondition", "qualityOverall", "AttitudesDutch"),
-    labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Allport", "Quality", "Attitudes NL")
+    selection = c("KeyNeedFulfillment", "Competence", "Autonomy", "Relatedness", "AllportsCondition", "qualityOverall", "AttitudesDutch", "exWB"),
+    labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Allport", "Quality", "Attitudes NL", "Well-being")
   ) 
 
 medicalOutMlCor %>%
@@ -9712,6 +10437,190 @@ mdlMedicalOut$Att$jnSlopesAttCoreAcc$plot  +
   )
   
 ```
+
+
+#### Well-being outcome  
+
+To test whether the need mechanism also extends to the migrants' well-being, we additionally tested the main model would also predict well-being.
+
+Here we use the interaction dataset and add generalized situational core need fulfillment as well as interaction quality in the most complex model.
+
+\begin{equation}
+(\#eq:medicalOutSlopeWbNeedQualEq)
+  \begin{split}
+    \textrm{Level 1:} &
+      \begin{aligned}[t]
+        \ Well-Being_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+                             &\ \beta_{2i}Quality_{ti} + e_{ti}
+      \end{aligned} \\
+    \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
+                      &\ \beta_{1i} = \gamma_{10} + u_{1i} \\
+                      &\ \beta_{2i} = \gamma_{20} + u_{2i}
+  \end{split} 
+\end{equation} 
+
+##### Well-being: need fulfillment   
+
+```{r medicalWellBeingModelChoice}
+medicalWbModels <-
+  list(
+    null = exWB ~ 1,
+    wb_need = exWB ~ KeyNeedFulfillment_cwc,
+    wb_need_qual = exWB ~ KeyNeedFulfillment_cwc + qualityOverall_cwc
+  )
+medicalWbModelType <-
+  list(
+    intercept = ~ 1 | PID,
+    slope_need = ~ 1 + KeyNeedFulfillment_cwc | PID,
+    slope_need_qual = ~ 1 + KeyNeedFulfillment_cwc + qualityOverall_cwc | PID
+  )
+
+# Well-being Null Model
+mdlMedicalOut$Wb$lmeNull <-
+  lme(medicalWbModels$null,
+      random = medicalWbModelType$intercept,
+      na.action = na.omit,
+      data = medicalOutWithinBetween)
+
+# Well-being ~ Need
+mdlMedicalOut$Wb$lmeInterceptNeed <-
+  lme(medicalWbModels$wb_need,
+      random = medicalWbModelType$intercept,
+      na.action = na.omit,
+      data = medicalOutWithinBetween)
+mdlMedicalOut$Wb$lmeSlopeNeed <-
+  lme(medicalWbModels$wb_need,
+      random = medicalWbModelType$slope_need,
+      na.action = na.omit,
+      data = medicalOutWithinBetween)
+
+anova(mdlMedicalOut$Wb$lmeNull, 
+      mdlMedicalOut$Wb$lmeInterceptNeed,
+      mdlMedicalOut$Wb$lmeSlopeNeed) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  add_rownames(., var = "Description") %>%
+  mutate(Description = gsub(".*\\$", "", Description)) %>%
+  kbl(
+    .,
+    caption = "Medical: Well-being Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = c("l", rep("c", ncol(.)-1)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+```
+
+Random Slopes model is the best fitting for need fulfillment. 
+
+
+```{r medicalOutWellBeingNeedModel}
+# Get summary with p-values (Satterthwaite's method)
+summ(
+  mdlMedicalOut$Wb$lmerSlopeNeed <- lmer(
+    exWB ~ KeyNeedFulfillment_cwc + (1 + KeyNeedFulfillment_cwc | PID),
+    data = medicalOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+
+# 95% CI
+mdlMedicalOut$Att$lmerSlopeNeedCI <- 
+  confint(method = "Wald", mdlMedicalOut$Wb$lmerSlopeNeed)
+
+# all standardized within
+summ(
+  mdlMedicalOut$Wb$lmerSlopeNeedZ <- lmer(
+    exWB_zwc ~ KeyNeedFulfillment_zwc + (1 + KeyNeedFulfillment_zwc | PID),
+    data = medicalOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+```
+
+##### Well-being: need fulfillment and interaction quality
+
+```{r medicalOutWellBeingModelChoice}
+# Well-being ~ Need + Quality
+mdlMedicalOut$Wb$lmeInterceptNeedQual <-
+  lme(medicalWbModels$wb_need_qual,
+      random = medicalWbModelType$intercept,
+      na.action = na.omit,
+      data = medicalOutWithinBetween)
+mdlMedicalOut$Wb$lmeSlopeNeedQual <-
+  lme(medicalWbModels$wb_need_qual,
+      random = medicalWbModelType$slope_need_qual,
+      na.action = na.omit,
+      control = lmeControl(opt = "optim"),
+      data = medicalOutWithinBetween)
+
+anova(mdlMedicalOut$Wb$lmeNull, 
+      mdlMedicalOut$Wb$lmeInterceptNeedQual,
+      mdlMedicalOut$Wb$lmeSlopeNeedQual) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  add_rownames(., var = "Description") %>%
+  mutate(Description = gsub(".*\\$", "", Description)) %>%
+  kbl(
+    .,
+    caption = "Medical: Well-being Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = c("l", rep("c", ncol(.)-1)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+```
+
+Random slopes model is the best fitting for need fulfillment and interaction quality. 
+
+
+```{r medicalOutWellBeingQualityNeedModel}
+# Get summary with p-values (Satterthwaite's method)
+summ(
+  mdlMedicalOut$Wb$lmerSlopeNeedQual <- lmer(
+    exWB ~ KeyNeedFulfillment_cwc + qualityOverall_cwc + (1 + KeyNeedFulfillment_cwc + qualityOverall_cwc | PID),
+    data = medicalOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+
+# 95% CI
+mdlMedicalOut$Att$lmerSlopeNeedQualCI <- 
+  confint(method = "Wald", mdlMedicalOut$Wb$lmerSlopeNeedQual)
+
+# all standardized within
+summ(
+  mdlMedicalOut$Wb$lmerSlopeNeedQualZ <- lmer(
+    exWB_zwc ~ KeyNeedFulfillment_zwc + qualityOverall_zwc + (1 + KeyNeedFulfillment_zwc + qualityOverall_zwc | PID),
+    data = medicalOutWithinBetween
+  ),
+  confint = TRUE,
+  digits = 3,
+  center = FALSE
+)
+```
+
+
 
 # **Forest Plots of Main Analyses**  
 
