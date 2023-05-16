@@ -1,0 +1,1472 @@
+\documentclass[10pt,a4paper]{protocol}
+
+% Change the page layout if you need to
+\geometry{left=1cm,right=9cm,marginparwidth=6.8cm,marginparsep=1.2cm,top=1cm,bottom=1cm}
+
+% Change the font if you want to.
+
+% If using pdflatex:
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[default]{lato}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{csquotes}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{tcolorbox}
+\usepackage[style=apa, sortcites=true, sorting=nyt, backend=biber, natbib=true, uniquename=false, uniquelist=false, useprefix=true]{biblatex}
+\usepackage{authblk}
+\usepackage{setspace,caption}
+\usepackage{subcaption}
+\usepackage{enumitem}
+\usepackage{lipsum}
+\usepackage{soul}
+\usepackage{xcolor}
+\usepackage{fourier}
+\usepackage{stackengine}
+\usepackage{scalerel}
+\usepackage{fontawesome}
+\usepackage[normalem]{ulem}
+\usepackage{longtable}
+\usepackage{amsmath}
+\usepackage{afterpage}
+\usepackage{float}
+\usepackage{titling}
+\usepackage{censor}
+\usepackage{pdfpages}
+\usepackage{bashful}
+% needed for the fact box label
+\usepackage{xparse}
+% this allows for the easy resize box
+\usepackage{graphicx}
+
+\tcbuselibrary{skins,breakable}
+\usetikzlibrary{shadings,shadows}
+ 
+% Turn on the style
+\pagestyle{fancy}
+\fancyhead{}
+\fancyfoot{}
+
+\fancyfoot[C]{%
+    \vspace{-3em}
+    \makebox[19cm][c]{%
+        \thepage}
+    }
+\renewcommand{\headrulewidth}{0pt}
+
+% If using xelatex or lualatex:
+% \setmainfont{Lato}
+
+\hypersetup{
+    colorlinks=true,
+    urlcolor=blue
+}
+
+% These commands create shortcuts for the nutrition label
+% Modified from: https://tex.stackexchange.com/questions/118600/how-can-i-create-a-nutrition-facts-label
+\newlength{\NFwidth}
+\setlength{\NFwidth}{4.5in}
+
+\NewDocumentCommand{\NFelement}{mmm}{\normalsize\textbf{#1} #2\hfill #3}
+\NewDocumentCommand{\NFline}{O{l}m}{\footnotesize\makebox[\NFwidth][#1]{#2}}
+
+\NewDocumentCommand{\NFentry}{sm}{%
+  \makebox[.5\NFwidth][l]{\normalsize
+    \IfBooleanT{#1}{\makebox[0pt][r]{\textbullet\ }}%
+    #2}\ignorespaces}
+\NewDocumentCommand{\NFtext}{+m}
+ {\parbox{\NFwidth}{\raggedright#1}}
+
+\newcommand{\NFtitle}{\multicolumn{1}{c}{\huge\bfseries Dataset Sheet}}
+
+\newcommand{\NFRULE}{\midrule[5pt]}
+\newcommand{\NFRule}{\midrule[2pt]}
+\newcommand{\NFrule}{\midrule}
+
+% Change the colours if you want to
+\definecolor{Bright}{HTML}{58318f}
+\definecolor{Green}{HTML}{319866}
+\definecolor{Black}{HTML}{111111}
+\definecolor{LightGrey}{HTML}{515c50}
+\colorlet{heading}{MidnightBlue}
+\colorlet{accent}{NavyBlue}
+\colorlet{emphasis}{Black}
+\colorlet{body}{LightGrey}
+
+% Change the bullets for itemize and rating marker
+% for \risk if you want to
+\renewcommand{\itemmarker}{{\small\textbullet}}
+\renewcommand{\ratingmarker}{\faSpinner}
+
+% add freetext option
+\newlength{\rulewidth}
+\setlength{\rulewidth}{1pt}
+\newlength{\ruleandnamegap}
+\setlength{\ruleandnamegap}{.4\baselineskip}
+\newcommand{\namefont}{\tiny}
+\newcommand{\ruleandname}[2]{%
+  \par\noindent
+  \rule{#2}{\rulewidth}\par
+  \vspace{\dimexpr-\baselineskip+\ruleandnamegap}
+  \noindent{\namefont #1}\par
+  \addvspace{\baselineskip}
+}
+\newcommand{\rulewithattribute}[3][-.1\baselineskip]{%
+  \par\noindent
+  \rule[#1]{1cm}{\rulewidth} #2 \rule[#1]{#3}{\rulewidth}\par
+  \vspace{\dimexpr-\baselineskip-#1+\ruleandnamegap}
+  \noindent{\namefont Score}\par
+  \addvspace{\baselineskip}
+}
+
+\newcommand\category[2]{
+{\Large\bfseries\color{emphasis} \vspace{0.25em} #1 \hspace{0.5em} #2 \\ [-0.6em] \rule{\textwidth}{0.4pt} \vspace{0.25em}}
+}
+
+% box
+\newenvironment{myblock}[1]{%
+    \tcolorbox[beamer,%
+    noparskip,breakable,
+    colback=LightBlue,colframe=DarkBlue,%
+    colbacklower=DarkBlue!75!LightBlue,%
+    title=#1]}%
+    {\endtcolorbox}
+    
+\newtcolorbox{topbot}[1][]{empty, notitle, sharp corners, 
+borderline north={1pt}{0pt}{black},
+borderline east={1pt}{0pt}{black},
+borderline south={1pt}{0pt}{black},
+borderline west={5pt}{0pt}{black},
+#1}
+
+%% links.bib contains references
+\addbibresource{links.bib}
+
+% create PDF of title page
+\immediate\write18{pdflatex CodingProtocolTitlePage}
+
+\begin{document}
+
+% fix page numbering with title page
+\setcounter{page}{0}
+
+\includepdf{CodingProtocolTitlePage.pdf}
+
+\name{Documentation: \par Coding Protocol}
+\tagline{For: `The Migration Experience: A Conceptual Framework and Systematic Scoping Review of Psychological Acculturation'}
+\made{February 20 2021}
+%%\logo{6.8cm}{images/MJ Research Design}
+%%\logo{6.8cm}{example-image}
+\logo{6.8cm}{images/rugLogoBlack}
+%\logo{6.8cm}{images/rugLogoBlackMasked}
+
+
+\docinfo{%
+  % can add more \addedtopeople
+  \madeby{Jannis Kreienkamp}{j.kreienkamp@rug.nl}{February 20, 2021}
+  \addedto{Laura F. Bringmann}
+  \addedto{Raili F. Engler}
+  \addedto{Peter de Jonge}
+  \addedto{Kai Epstude}
+  %\madeby{[masked for peer review]}{[masked for peer review]}{February 20, 2021}
+  %\addedto{[masked for peer review]}
+  %\addedto{[masked for peer review]}
+  %\addedto{[masked for peer review]}
+  %\addedto{[masked for peer review]}
+}
+
+
+\purpose{
+	This protocol document lays out detailed information for coders of the (included) manuscripts. This document serves as an instructive manual to the coders and documents the operationalizations of the coded variables. The systematic review produced three literature databases that aim to capture the status quo of the (1) theoretical, (2) methodological, and (3) empirical literature on psychological acculturation. The coding procedures (i.e., data extraction) for each dataset are documented in the following document protocol.
+} % add a short description of the purpose for this protocol
+
+
+%% Make the header extend all the way to the right, if you want.
+\begin{fullwidth}
+\makeheader
+\end{fullwidth}
+
+%% Provide the file name containing the sidebar contents as an optional parameter to \need.
+%% You can always just use \marginpar{...} if you do
+%% not need to align the top of the contents to any
+%% \need title in the "main" bar.
+\need[margins/materials]{Theoretical Literature}
+
+\category{1}{Bibliographic Information}
+
+\step{Theory}{What is the name of the theory?}{Bibliographic Information}
+\textit{Whenever possible record the name of the theory chosen by the authors themselves.}
+\vspace{1.5em}
+\ruleandname{character string}{5cm}
+\divider
+
+\step{Source}{Add the full APA 7 formatted citation of the theoretical manuscript that is being coded.}{Bibliographic Information}
+\textit{Example format: Author, A. A., \& Author, B. B. (Year). Title of the work. Source where you can retrieve the work. DOI (or URL) if available.}
+\vspace{1.5em}
+\ruleandname{character string}{10cm}
+\divider
+
+\step{CitationKey}{Add BibTeX citation key for the theoretical manuscript.}{Bibliographic Information}
+\textit{The citation key can be found in the bibliography manager (either in the shared Mendeley Library or the 'references.bib' file.)}
+\textit{\newline Example format: Author2019}
+\vspace{1.5em}
+\ruleandname{character string}{5cm}
+\divider
+
+\clearpage
+\vspace*{1em}
+
+\category{2}{Screening}
+
+\step{MissingABCD}{Whether the experience aspects (affect, behavior, cognition, and desire) are coded.}{Screening}
+\vspace{0.5em}
+\begin{itemize}
+	\item \makebox[5cm]{coded \dotfill[0]}
+	\item \makebox[5cm]{missing \dotfill[1]}
+\end{itemize}
+\divider
+
+\marginpar{
+\vspace{2em}
+Missingness Explanations
+
+\begin{tabular*}{6cm}{>{\raggedright\arraybackslash}p{0.03\linewidth} 
+>{\raggedright\arraybackslash}p{0.75\linewidth}}
+%\begin{tabular}
+\toprule
+\# & Examples / Explanation\\
+\midrule
+1 & manuscript is in a language other than English. \\
+2 & rural-urban, second generation \\
+3 & focus on dominant group \\
+4 & purely descriptive studies and replications in migrant populations. E.g., mental health of migrant group in general. \\
+5 & migration status, length of residence  \\
+6 & only discusses theory of others. \\
+7 & not accessible via library services \\
+8 & not accessible via library services \\
+9 & not accessible via library services \\
+10 & not accessible via library services \\
+11 & not accessible via library services \\
+\bottomrule
+\end{tabular*}
+}
+
+\divider
+\step{NoteMissing}{If experience aspects (affect, behavior, cognition, desire) not coded, provide the reason for missing coding.}{Screening}
+\vspace{0.5em}
+\begin{itemize}
+	\item \makebox[5cm]{not English \dotfill[1]}
+	\item \makebox[5cm]{not migration \dotfill[2]}
+	\item \makebox[5cm]{not migrant \dotfill[3]}
+	\item \makebox[5cm]{not acculturation \dotfill[4]}
+	\item \makebox[5cm]{not ABCD \dotfill[5]}
+	\item \makebox[5cm]{not theory \dotfill[6]}
+	\item \makebox[5cm]{thesis not accessible \dotfill[7]}
+	\item \makebox[5cm]{article not accessible \dotfill[8]}
+	\item \makebox[5cm]{book not accessible \dotfill[9]}
+	\item \makebox[5cm]{chapter not accessible \dotfill[10]}
+	\item \makebox[5cm]{poster not accessible \dotfill[11]}
+\end{itemize}
+\divider
+
+\step{Comment}{Any necessary comments of the coder.}{Screening}
+\textit{This can include additional information about the format and content of the theoretical work, as well as information on the missingness or accessibility.}
+\vspace{1.5em}
+\ruleandname{character string}{10cm}
+\divider
+
+\category{3}{Theory Information}
+
+\step{Summary}{A short summary of the theoretical work.}{Theory Information}
+\textit{This summary ideally includes the sections that were relevant to the experience aspect (affect, behavior, cognition, desire) coding.}
+\vspace{1.5em}
+
+\rule{10cm}{\rulewidth}\vspace{0.75em}
+\rule{10cm}{\rulewidth}\vspace{0.75em}
+\rule{10cm}{\rulewidth}\vspace{0.75em}
+\ruleandname{character string}{10cm}
+\divider
+
+\clearpage
+\vspace*{2em}
+
+\step{FrameworkTheoryModel}{Type of theoretical work, as identified by the author.}{Theory Information}
+\textit{Please code the term that is being used by the author(s).}
+\vspace{0.5em}
+\begin{itemize}
+	\item \makebox[5cm]{conceptualization \dotfill[1]}
+	\item \makebox[5cm]{framework \dotfill[2]}
+	\item \makebox[5cm]{theory \dotfill[3]}
+	\item \makebox[5cm]{model \dotfill[4]}
+\end{itemize}
+\divider
+
+
+\step{GeneralAspect}{Whether the theoretical work is about acculturation in general or whether it conceptualizes a particular aspect of acculturation.}{Theory Information}
+\textit{Is acculturation in general being considered or do the authors focus on a single aspect of acculturation, such as theories on labor market integration.}
+\vspace{0.5em}
+\begin{itemize}
+	\item \makebox[5cm]{general \dotfill[1]}
+	\item \makebox[5cm]{aspect \dotfill[2]}
+\end{itemize}
+\divider
+
+\step{Target}{If aspect is targeted, what is the target of the theoretical work?}{Theory Information}
+\textit{Example aspects might be theoretical works that exclusively focus on labor market integration or identity development.}
+\vspace{1.5em}
+\ruleandname{character string}{5cm}
+\divider
+
+\category{4}{Experience}
+\marginpar{
+\vspace{3em}
+Selected Affect Concept Examples:
+\begin{itemize}
+    \item loneliness
+    \item feeling at home
+    \item satisfaction with life
+    \item pride
+    \item comfortableness
+    \item joy
+    \item ease
+    \item well-being
+    \item worry
+    \item trust
+\end{itemize}
+}
+
+\step{Affect}{Whether the theoretical conceptualization included affect.}{Experience}
+\textit{To identify whether the author(s) included affective experiences in their theoretical conceptualization, you can examine the author(s)' theoretical axioms, theorems, and model elements for self-identified mentions of affect. Please consider affect at the following three levels of abstraction:\\
+\textbf{Aspect:} the authors might refer to `affect' or `affective' directly.\\
+\textbf{Construct:} the authors might refer to affective constructs such as `emotion' or `mood'.\\
+\textbf{Concept:} the authors might refer to affective concepts such as individual emotions, including `pride' or `loneliness'.\\
+\textbf{Operationalization:} the authors might also include affective conceptualizations in their descriptions of experiences, such as `a person feels' or `a person enjoys'.}
+\vspace{0.5em}
+\begin{itemize}
+	\item \makebox[5cm]{included \dotfill[1]}
+	\item \makebox[5cm]{not included \dotfill[–]}
+\end{itemize}
+\divider
+
+\clearpage
+\vspace*{2em}
+
+\marginpar{
+\vspace{3em}
+Selected Behavior Concept Examples:
+\begin{itemize}
+    \item language use
+    \item civic participation (voting, ...)
+    \item performance (work, ...)
+    \item media consumption
+    \item education
+    \item peer contacts
+    \item food consumption
+    \item cultural habits (holidays ...)
+    \item delinquency
+    \item marriage
+\end{itemize}
+}
+
+\step{Behavior}{Whether the theoretical conceptualization included behavior(s).}{Experience}
+\textit{To identify whether the author(s) included behavioral experiences in their theoretical conceptualization, you can examine the author(s)' theoretical axioms, theorems, and model elements for self-identified mentions of behaviors. Please consider behaviors at the following three levels of abstraction:\\
+\textbf{Aspect:} the authors might refer to `behavior' or `behavioral' directly.\\
+\textbf{Construct:} the authors might refer to behavioral constructs such as `activities' or `habits'.\\
+\textbf{Concept:} the authors might refer to behavioral concepts, such as `language use' or `media consumption'.\\
+\textbf{Operationalization:} the authors might also include behavioral conceptualizations in their descriptions of experiences, such as `a person does' or `a person works'.}
+\vspace{0.5em}
+\begin{itemize}
+	\item \makebox[5cm]{included \dotfill[1]}
+	\item \makebox[5cm]{not included \dotfill[–]}
+\end{itemize}
+\divider
+
+\marginpar{
+\vspace{3em}
+Selected Cognition Concept Examples:
+\begin{itemize}
+    \item ethnic identification
+    \item cultural values
+    \item acculturation orientation
+    \item preferences (food, friends, ...)
+    \item knowledge
+    \item importance ratings
+    \item inner thought language
+    \item perceived obligations
+    \item beliefs
+    \item stereotypes
+\end{itemize}
+}
+
+\step{Cognition}{Whether the theoretical conceptualization included cognition(s).}{Experience}
+\textit{To identify whether the author(s) included cognitive experiences in their theoretical conceptualization, you can examine the author(s)' theoretical axioms, theorems, and model elements for self-identified mentions of cognitions. Please consider cognitions at the following three levels of abstraction:\\
+\textbf{Aspect:} the authors might refer to `cognition' or `cognitive' directly.\\
+\textbf{Construct:} the authors might refer to cognitive constructs such as `knowledge' or `memories'.\\
+\textbf{Concept:} the authors might refer to cognitive concepts, such as `cultural values' or `ethnic identification'.\\
+\textbf{Operationalization:} the authors might also include cognitive conceptualizations in their descriptions of experiences, such as `a person thinks' or `a person prefers'.}
+\vspace{0.5em}
+\begin{itemize}
+	\item \makebox[5cm]{included \dotfill[1]}
+	\item \makebox[5cm]{not included \dotfill[–]}
+\end{itemize}
+\divider
+
+\marginpar{
+\vspace{3em}
+Selected Desire Concept Examples:
+\begin{itemize}
+    \item competence
+    \item independence
+    \item self-coherence
+    \item belonging
+    \item achievement
+    \item justice
+    \item growth
+    \item respect
+    \item acceptance
+    \item identity continuity
+\end{itemize}
+}
+
+\step{Desire}{Whether the theoretical conceptualization included desire(s).}{Experience}
+\textit{To identify whether the author(s) included motivational experiences in their theoretical conceptualization, you can examine the author(s)' theoretical axioms, theorems, and model elements for self-identified mentions of desires. Please consider desires at the following three levels of abstraction:\\
+\textbf{Aspect:} the authors might refer to `desire' or `motivational' directly.\\
+\textbf{Construct:} the authors might refer to desire constructs such as `needs' or `goals'.\\
+\textbf{Concept:} the authors might refer to desire concepts, such as `belonging' or `competence'.\\
+\textbf{Operationalization:} the authors might also include motivational conceptualizations in their descriptions of experiences, such as `a person wants' or `a person needs'.}
+\vspace{0.5em}
+\begin{itemize}
+	\item \makebox[5cm]{included \dotfill[1]}
+	\item \makebox[5cm]{not included \dotfill[–]}
+\end{itemize}
+\divider
+
+\clearpage
+\vspace*{2em}
+
+\category{5}{Data Collection}
+
+\step{SourceType}{Whether the theoretical conceptualization is based on theoretical reasoning or empirical investigations.}{Data Collection}
+\textit{Is the theoretical reasoning focused on past theoretical work or do the authors build a theoretical conceptualization based on (qualitative) investigations (e.g., grounded theory).}
+\vspace{0.5em}
+\begin{itemize}
+	\item \makebox[5cm]{theoretical \dotfill[1]}
+	\item \makebox[5cm]{empirical \dotfill[2]}
+\end{itemize}
+\divider
+
+\category{6}{Focus}
+
+\step{Time}{Whether the conceptualization of acculturation is dynamic or static.}{Focus}
+\textit{Do the authors self-identify the theory as a dynamic process (e.g., `process,' `development,' `longitudinal,' `temporal,' `dynamic') or a static outcome (e.g., `static,' `outcome,' `markers,' `consequence')}
+\vspace{0.5em}
+\begin{itemize}
+	\item \makebox[5cm]{static \dotfill[1]}
+	\item \makebox[5cm]{dynamic \dotfill[2]}
+\end{itemize}
+\divider
+
+\marginpar{
+\need{Methods Dataset}
+\resizebox{7cm}{!}{
+    % For organization, I like to keep the actual card in a separate file:
+    \input{Supplemental Material A - Coding Protocol/margins/FactSheetMethodological}
+    }
+}
+\need{Methodological Literature}
+\category{1}{Bibliographic Information}
+
+\step{Scale}{What is the name of the scale?}{Bibliographic Information}
+\textit{Whenever possible record the name of the scale chosen by the authors themselves.}
+\vspace{1.5em}
+\ruleandname{character string}{5cm}
+\divider
+
+\step{Source}{Whether the scale was added as part of one of the past methodological reviews or through our own review of the empirical literature.}{Bibliographic Information}
+\textit{Indicate whether the scale was included in one or multiple of the past methodological reviews or was added from our own review.}
+\vspace{0.5em}
+\begin{itemize}
+	\item \makebox[5cm]{Celenk2011 \dotfill[1]}
+	\item \makebox[5cm]{Matsudaira2006 \dotfill[2]}
+	\item \makebox[5cm]{Wallace2010 \dotfill[3]}
+	\item \makebox[5cm]{own review \dotfill[4]}
+\end{itemize}
+\divider
+
+\clearpage
+\vspace*{2em}
+
+\step{CitationKey}{Add BibTeX citation key for the theoretical manuscript.}{Bibliographic Information}
+\textit{The citation key can be found in the bibliography manager (either in the shared Mendeley Library or the 'references.bib' file.)}
+\textit{\newline Example format: Author2019}
+\vspace{1.5em}
+\ruleandname{character string}{5cm}
+\divider
+
+\step{APACite}{Add the full APA 7 formatted citation of the theoretical manuscript that is being coded.}{Bibliographic Information.}
+\textit{Example format: Author, A. A., \& Author, B. B. (Year). Title of the work. Source where you can retrieve the work. DOI (or URL) if available.}
+\vspace{1.5em}
+\ruleandname{character string}{10cm}
+\divider
+
+\step{DOI}{Add Digial Object Identifier (DOI).}{Bibliographic Information}
+\textit{The doi can be found in the bibliography manager (either in the shared Mendeley Library or the 'references.bib' file.)}
+\textit{\newline Example format: 10.prefix/suffix}
+\vspace{1.5em}
+\ruleandname{character string}{5cm}
+\divider
+
+\category{2}{Screening}
+
+\step{Coded}{Whether the experience aspects (affect, behavior, cognition, and desire) are coded.}{Screening}
+\vspace{0.5em}
+\begin{itemize}
+	\item \makebox[5cm]{missing \dotfill[0]}
+	\item \makebox[5cm]{coded \dotfill[1]}
+\end{itemize}
+\divider
+
+\marginpar{
+\vspace{1.4em}
+Missingness Explanations
+
+\begin{tabular*}{6cm}{>{\raggedright\arraybackslash}p{0.03\linewidth} 
+>{\raggedright\arraybackslash}p{0.75\linewidth}}
+%\begin{tabular}
+\toprule
+\# & Examples / Explanation\\
+\midrule
+1 & manuscript is in a language other than English. \\
+2 & rural-urban, second generation \\
+3 & focus on dominant group \\
+4 & purely descriptive studies and replications in migrant populations. E.g., mental health of migrant group in general. \\
+5 & migration status, length of residence  \\
+6 & only discusses theory of others. \\
+7 & not accessible via library services \\
+8 & not accessible via library services \\
+9 & not accessible via library services \\
+10 & not accessible via library services \\
+11 & not accessible via library services \\
+12 & not accessible via library services \\
+\bottomrule
+\end{tabular*}
+}
+
+\divider
+\step{MissingNote}{If experience aspects (affect, behavior, cognition, desire) not coded, provide the reason for missing coding.}{Screening}
+\vspace{0.5em}
+\begin{itemize}
+	\item \makebox[5cm]{not English \dotfill[1]}
+	\item \makebox[5cm]{not migration \dotfill[2]}
+	\item \makebox[5cm]{not migrant \dotfill[3]}
+	\item \makebox[5cm]{not acculturation \dotfill[4]}
+	\item \makebox[5cm]{not ABCD \dotfill[5]}
+	\item \makebox[5cm]{not measured \dotfill[6]}
+	\item \makebox[5cm]{items not accessible \dotfill[7]}
+	\item \makebox[5cm]{thesis not accessible \dotfill[8]}
+	\item \makebox[5cm]{article not accessible \dotfill[9]}
+	\item \makebox[5cm]{book not accessible \dotfill[10]}
+	\item \makebox[5cm]{chapter not accessible \dotfill[11]}
+	\item \makebox[5cm]{poster not accessible \dotfill[12]}
+\end{itemize}
+\divider
+
+\step{Comment}{Any necessary comments by the coder.}{Screening}
+\textit{This can include additional information about the format and content of the theoretical work, as well as information on the missingness or accessibility.}
+\vspace{1.5em}
+\ruleandname{character string}{10cm}
+\divider
+
+\category{3}{Scale Information}
+
+\step{Item}{Extract all available items of the scale.}{Scale Information}
+\textit{List all items of the scale as they are presented in the manuscript. If scoring is inconsistent consider adding basic scoring information to the items. Please number the items for clarity.}
+\vspace{1.5em}
+\par
+\hspace*{1pt}1. \\\rule[0.95em]{6cm}{\rulewidth}\\
+\hspace*{1pt}2. \\\rule[0.95em]{6cm}{\rulewidth}\\
+\hspace*{1pt}3. \\\rule[0.95em]{6cm}{\rulewidth}\\
+\hspace*{1pt}4. \\\rule[0.95em]{6cm}{\rulewidth}\\
+\hspace*{1pt}5. \\\rule[0.95em]{6cm}{\rulewidth}\\
+\hspace*{1pt}6. \\\rule[0.95em]{6cm}{\rulewidth}\\
+\hspace*{1pt}7. \\\rule[0.95em]{6cm}{\rulewidth}\\
+\hspace*{1pt}8. \\\rule[0.95em]{6cm}{\rulewidth}\\
+\hspace*{1pt}9. \\\rule[0.95em]{6cm}{\rulewidth}\\
+\hspace*{1pt}... .\\\rule[0.95em]{6cm}{\rulewidth}\\
+\hspace*{1pt}\textit{N}.\\\rule[0.95em]{6cm}{\rulewidth}\\
+\vspace{\dimexpr-\baselineskip-\ruleandnamegap}
+\noindent{\namefont character string}\par
+\divider
+
+\step{NItem}{Number of items in the scale.}{Scale Information}
+\textit{The total number of items should match the highest numbering in the `Item' variable. If that is not the case please explain in the `Note' section.}
+\vspace{1.5em}
+\par
+\rule{0.5cm}{\rulewidth} \hspace{1pt} \rule{0.5cm}{\rulewidth} \hspace{1pt} \rule{0.5cm}{\rulewidth} \par
+\vspace{\dimexpr-\baselineskip+\ruleandnamegap}
+\noindent{\namefont numeric}\par
+\divider
+
+\step{NSubScales}{Number of sub-scales identified by the authors.}{Scale Information}
+\textit{If multiple sets of sub-scales are proposed please elaborate in the `Note' section.}
+\vspace{1.5em}
+\par
+\rule{0.5cm}{\rulewidth} \hspace{1pt} \rule{0.5cm}{\rulewidth} \par
+\vspace{\dimexpr-\baselineskip+\ruleandnamegap}
+\noindent{\namefont numeric}\par
+\divider
+
+\clearpage
+\vspace*{2em}
+
+\step{ResponseRange}{Number of response options.}{Scale Information}
+\textit{If multiple response ranges are used please specify in the `Note' section.}
+\vspace{1.5em}
+\par
+\rule{0.5cm}{\rulewidth} \hspace{1pt} \rule{0.5cm}{\rulewidth} \hspace{1pt} \rule{0.5cm}{\rulewidth} \par
+\vspace{\dimexpr-\baselineskip+\ruleandnamegap}
+\noindent{\namefont numeric}\par
+\divider
+
+\step{ResponseRangeAnchors}{List the anchors associated with the reported the response range.}{Scale Information}
+\textit{If multiple sets of anchors are used please specify in the `Note' section.\\ Example format for range \{-2, 2\}:}
+\vspace{1.5em}
+\par
+\hspace*{1pt}\textit{\textcolor{body}{-2: very negative}}\\\rule[0.95em]{6cm}{\rulewidth}\\
+\hspace*{1pt}\textit{\textcolor{body}{-1: negative}}\\\rule[0.95em]{6cm}{\rulewidth}\\
+\hspace*{4pt}\textit{\textcolor{body}{0: neutral}}\\\rule[0.95em]{6cm}{\rulewidth}\\
+\hspace*{4pt}\textit{\textcolor{body}{1: positive}}\\\rule[0.95em]{6cm}{\rulewidth}\\
+\hspace*{4pt}\textit{\textcolor{body}{2: very positive}}\\\rule[0.95em]{6cm}{\rulewidth}\\
+\vspace{\dimexpr-\baselineskip-\ruleandnamegap}
+\noindent{\namefont character string}\par
+\divider
+
+\step{Note}{Any necessary coder comments about the scale.}{Scale Information}
+\textit{Any notes on the scale, including the structure of the scale (e.g., names of the sub-scales).}
+\vspace{1.5em}
+\ruleandname{character string}{10cm}
+\divider
+
+\category{4}{Experience}
+\marginpar{
+\vspace{3em}
+Selected Affect Concept Examples:
+\begin{itemize}
+    \item loneliness
+    \item feeling at home
+    \item satisfaction with life
+    \item pride
+    \item comfortableness
+    \item joy
+    \item ease
+    \item well-being
+    \item worry
+    \item trust
+\end{itemize}
+}
+
+\step{Affect}{Whether the scale includes affect.}{Experience}
+\textit{To identify whether the author(s) included affective experiences in their scale, you can examine the scale description, the (sub-)scale labels, as well as items for self-identified mentions of affect. Please consider affect at the following three levels of abstraction:\\
+\textbf{Aspect:} the authors might refer to `affect' or `affective' directly.\\
+\textbf{Construct:} the authors might refer to affective constructs such as `emotion' or `mood'.\\
+\textbf{Concept:} the authors might refer to affective concepts such as individual emotions, including `pride' or `loneliness'.\\
+\textbf{Operationalization:} the authors might also include affective conceptualizations in their items, such as `I feel ...' or `I enjoy ...'.}
+\vspace{0.5em}
+\begin{itemize}
+	\item \makebox[5cm]{included \dotfill[1]}
+	\item \makebox[5cm]{not included \dotfill[–]}
+\end{itemize}
+\divider
+
+\clearpage
+\vspace*{2em}
+
+\marginpar{
+\vspace{3em}
+Selected Behavior Concept Examples:
+\begin{itemize}
+    \item language use
+    \item civic participation (voting, ...)
+    \item performance (work, ...)
+    \item media consumption
+    \item education
+    \item peer contacts
+    \item food consumption
+    \item cultural habits (holidays ...)
+    \item delinquency
+    \item marriage
+\end{itemize}
+}
+
+\step{Behavior}{Whether the scale includes behavior(s).}{Experience}
+\textit{To identify whether the author(s) included affective experiences in their scale, you can examine the scale description, the (sub-)scale labels, as well as items for self-identified mentions of behaviors. Please consider behaviors at the following three levels of abstraction:\\
+\textbf{Aspect:} the authors might refer to `behavior' or `behavioral' directly.\\
+\textbf{Construct:} the authors might refer to behavioral constructs such as `activities' or `habits'.\\
+\textbf{Concept:} the authors might refer to behavioral concepts, such as `language use' or `media consumption'.\\
+\textbf{Operationalization:} the authors might also include behavioral conceptualizations in their items, such as `I do ...' or `I speak ...'.}
+\vspace{0.5em}
+\begin{itemize}
+	\item \makebox[5cm]{included \dotfill[1]}
+	\item \makebox[5cm]{not included \dotfill[–]}
+\end{itemize}
+\divider
+
+\marginpar{
+\vspace{3em}
+Selected Cognition Concept Examples:
+\begin{itemize}
+    \item ethnic identification
+    \item cultural values
+    \item acculturation orientation
+    \item preferences (food, friends, ...)
+    \item knowledge
+    \item importance ratings
+    \item inner thought language
+    \item perceived obligations
+    \item beliefs
+    \item stereotypes
+\end{itemize}
+}
+
+\step{Cognition}{Whether the scale includes cognition(s).}{Experience}
+\textit{To identify whether the author(s) included affective experiences in their scale, you can examine the scale description, the (sub-)scale labels, as well as items for self-identified mentions of cognitions. Please consider cognitions at the following three levels of abstraction:\\
+\textbf{Aspect:} the authors might refer to `cognition' or `cognitive' directly.\\
+\textbf{Construct:} the authors might refer to cognitive constructs such as `knowledge' or `memories'.\\
+\textbf{Concept:} the authors might refer to cognitive concepts, such as `cultural values' or `ethnic identification'.\\
+\textbf{Operationalization:} the authors might also include cognitive conceptualizations in their items, such as `I think ...' or `I prefer ...'.}
+\vspace{0.5em}
+\begin{itemize}
+	\item \makebox[5cm]{included \dotfill[1]}
+	\item \makebox[5cm]{not included \dotfill[–]}
+\end{itemize}
+\divider
+
+\marginpar{
+\vspace{3em}
+Selected Desire Concept Examples:
+\begin{itemize}
+    \item competence
+    \item independence
+    \item self-coherence
+    \item belonging
+    \item achievement
+    \item justice
+    \item growth
+    \item respect
+    \item acceptance
+    \item identity continuity
+\end{itemize}
+}
+
+\step{Desire}{Whether the scale includes desire(s).}{Experience}
+\textit{To identify whether the author(s) included affective experiences in their scale, you can examine the scale description, the (sub-)scale labels, as well as items for self-identified mentions of desires. Please consider desires at the following three levels of abstraction:\\
+\textbf{Aspect:} the authors might refer to `desire' or `motivational' directly.\\
+\textbf{Construct:} the authors might refer to desire constructs such as `needs' or `goals'.\\
+\textbf{Concept:} the authors might refer to desire concepts, such as `belonging' or `competence'.\\
+\textbf{Operationalization:} the authors might also include motivational conceptualizations in their items, such as `I want ...' or `I need ...'.}
+\vspace{0.5em}
+\begin{itemize}
+	\item \makebox[5cm]{included \dotfill[1]}
+	\item \makebox[5cm]{not included \dotfill[–]}
+\end{itemize}
+\divider
+
+\clearpage
+\vspace*{2em}
+
+\marginpar{
+\vspace{1em}
+Complexity Explanations
+
+\begin{tabular*}{6.2cm}{>{\centering\arraybackslash}p{0.08\linewidth} 
+>{\raggedright\arraybackslash}p{0.76\linewidth}}
+%\begin{tabular}
+\toprule
+\# & Examples / Explanation\\
+\midrule
+1 & focused on a concept that includes multiple aspects (e.g., satisfaction, distress) \\
+2 & aspects included as parts of a scale \\
+3 & aspects measured as independent conceptualizations of acculturation \\
+4 & aspects included as part of a review of multiple conceptualizations \\
+N/A & only one aspect was included  \\
+\bottomrule
+\end{tabular*}
+}
+
+\step{TypeComplexity}{Type of aspect combination [if multiple experience aspects included].}{Experience}
+\textit{If more than one experience aspect was coded, please specify how the multiple aspects were included. The scales might include the aspects either independently as parts of the acculturation conceptualization or as part of a scale or proxy measure that includes multiple experience aspects.}
+\vspace{0.5em}
+\begin{itemize}
+	\item \makebox[5cm]{complex concept \dotfill[1]}
+	\item \makebox[5cm]{complex scale \dotfill[2]}
+	\item \makebox[5cm]{independent \dotfill[3]}
+	\item \makebox[5cm]{review \dotfill[4]}
+	\item \makebox[5cm]{not applicable \dotfill[N/A]}
+\end{itemize}
+\divider
+
+\category{5}{Data Collection}
+
+\step{Measurement}{Levels of measurement.}{Data Collection}
+\textit{Identify the measurement level of the scales. Are the items (or at least the resulting scale) measured as a continuous dimension or is the resulting measure a classification into groups. Indicate `categorical' even if there is an order to the groups. Select `both' if a the measure includes both continuous and categorical measures.}
+\vspace{0.5em}
+\begin{itemize}
+	\item \makebox[5cm]{continuous \dotfill[1]}
+	\item \makebox[5cm]{categorical \dotfill[2]}
+	\item \makebox[5cm]{both \dotfill[3]}
+\end{itemize}
+\divider
+
+\category{6}{Focus}
+
+\step{domainScale}{Situational focus of the scale.}{Focus}
+\textit{To identify the author(s) situational focus in their scale, you can examine the scale description, the (sub-)scale labels, as well as items for self-identified mentions of life domains.}
+\vspace{0.5em}
+\begin{itemize}
+	\item \makebox[6cm]{spirituality/religion \dotfill[1]}
+    \item \makebox[6cm]{home/family \dotfill[2]}
+    \item \makebox[6cm]{health/care \dotfill[3]}
+    \item \makebox[6cm]{administrative/legal matters \dotfill[4]}
+    \item \makebox[6cm]{entertainment/media \dotfill[5]}
+    \item \makebox[6cm]{work/money/finances \dotfill[6]}
+    \item \makebox[6cm]{education/school \dotfill[7]}
+    \item \makebox[6cm]{transport/travel \dotfill[8]}
+    \item \makebox[6cm]{recreation/sport/art/friends \dotfill[9]}
+    \item \makebox[6cm]{community/politics \dotfill[10]}
+\end{itemize}
+\divider
+
+\clearpage
+\vspace*{2em}
+
+\category{7}{Sample}
+
+\step{Sample}{The sample recruited by the authors.}{Sample}
+\textit{Please specify the sample requirements of the authors. If non are provided use the code `general' to indicate that the general population of migrants was targeted.}
+\vspace{1.5em}
+\ruleandname{character string}{5cm}
+\divider
+
+\step{MigrationTime}{When in the migration process acculturation was assessed?}{Sample}
+\textit{Please specify whether the authors considered one or multiple time-points in the migration process. And if multiple are assessed, please specify which time-points were included.}
+\vspace{0.5em}
+\begin{itemize}
+	\item \makebox[6cm]{potential \dotfill[1]}
+    \item \makebox[6cm]{pre \dotfill[2]}
+    \item \makebox[6cm]{post \dotfill[3]}
+    \item \makebox[6cm]{pre \& post \dotfill[4]}
+    \item \makebox[6cm]{N/A \dotfill[5]}
+\end{itemize}
+\divider
+
+\step{IncludesMajority}{Whether members of the dominant group in the host society were considered.}{Sample}
+\textit{Please specify whether members of the dominant group in the host society were included for the scale validation.}
+\vspace{0.5em}
+\begin{itemize}
+	\item \makebox[6cm]{no \dotfill[0]}
+    \item \makebox[6cm]{yes \dotfill[1]}
+\end{itemize}
+\divider
+
+\step{HostCountry}{Country or countries of settlement considered for validation.}{Sample}
+\textit{Please specify the host country or countries that were included in the validation. This country is usually the country of settlement for the migrant group. If no country is focused on in particular, please use the code `any' to indicate that any host country was allowed as part of the sampling strategy.}
+\vspace{1.5em}
+
+\rule{3cm}{\rulewidth} , \rule{3cm}{\rulewidth} , \rule{3cm}{\rulewidth}\\
+\vspace{\dimexpr-\baselineskip+\ruleandnamegap}
+{\namefont character string\hspace{2.08cm}character string\hspace{2.08cm}character string}\par
+\divider
+
+\step{OriginCountry}{Country or countries of origin considered for validation.}{Sample}
+\textit{Please specify the origin country or countries that were included in the validation. These countries usually the country of origin for the migrant group. If no country is focused on in particular, please use the code `any' to indicate that migrants from any country were included as part of the sampling strategy.}
+\vspace{1.5em}
+
+\rule{3cm}{\rulewidth} , \rule{3cm}{\rulewidth} , \rule{3cm}{\rulewidth}\\
+\vspace{\dimexpr-\baselineskip+\ruleandnamegap}
+{\namefont character string\hspace{2.08cm}character string\hspace{2.08cm}character string}\par
+\divider
+
+\clearpage
+\vspace*{2em}
+
+\marginpar{
+\need{Empirical Dataset}
+\resizebox{7cm}{!}{
+    % For organization, I like to keep the actual card in a separate file:
+    \input{Supplemental Material A - Coding Protocol/margins/FactSheetEmpirical}
+    }
+}
+\need{Empirical Literature}
+\category{1}{Bibliographic Information}
+
+\begin{topbot}
+\subsubsection*{Additional Bibliographic Data}
+A range of additional bibliographic data fields is available in the dataset. These fields include the `type of publication', `year of publication', `author names', `title', `abstract', `DOI', `duplicate filters', as well as a range of publisher information. These fields are generated during the literature search by the bibliographic database and don't need any input from the coders. Additional information on the format and content of these fields is available in the `Codebook'.
+\end{topbot}
+
+\vspace*{2em}
+
+\step{CitationKey}{Add BibTeX citation key for the empirical manuscript.}{Bibliographic Information}
+\textit{The citation key can be found in the bibliography manager (either in the shared Mendeley Library or the 'references.bib' file.)}
+\textit{\newline Example format: Author2019}
+\vspace{1.5em}
+\ruleandname{character string}{5cm}
+\divider
+
+\category{2}{Screening}
+
+\step{TitleScreening}{Whether manuscript should be excluded during title screening.}{Screening}
+\vspace{0.5em}
+\begin{itemize}
+	\item \makebox[5cm]{excluded \dotfill[0]}
+	\item \makebox[5cm]{included \dotfill[1]}
+\end{itemize}
+\divider
+
+\marginpar{
+\vspace{1.4em}
+Missingness Explanations
+
+\begin{tabular*}{6cm}{>{\raggedright\arraybackslash}p{0.03\linewidth} 
+>{\raggedright\arraybackslash}p{0.75\linewidth}}
+%\begin{tabular}
+\toprule
+\# & Examples / Explanation\\
+\midrule
+1 & manuscript is in a language other than English. \\
+2 & rural-urban, second generation \\
+3 & focus on dominant group \\
+4 & purely descriptive studies and replications in migrant populations. E.g., mental health of migrant group in general. \\
+5 & migration status, length of residence  \\
+6 & only discusses theory of others. \\
+7 & not accessible via library services \\
+8 & not accessible via library services \\
+9 & not accessible via library services \\
+10 & not accessible via library services \\
+11 & not accessible via library services \\
+12 & not accessible via library services \\
+\bottomrule
+\end{tabular*}
+}
+
+\divider
+\step{TitleNote}{If excluded during `TitleScreening', provide the reason for exclusion.}{Screening}
+\vspace{0.5em}
+\begin{itemize}
+	\item \makebox[5cm]{not English \dotfill[1]}
+	\item \makebox[5cm]{not migration \dotfill[2]}
+	\item \makebox[5cm]{not migrant \dotfill[3]}
+	\item \makebox[5cm]{not acculturation \dotfill[4]}
+	\item \makebox[5cm]{not ABCD \dotfill[5]}
+	\item \makebox[5cm]{not measured \dotfill[6]}
+	\item \makebox[5cm]{items not accessible \dotfill[7]}
+	\item \makebox[5cm]{thesis not accessible \dotfill[8]}
+	\item \makebox[5cm]{article not accessible \dotfill[9]}
+	\item \makebox[5cm]{book not accessible \dotfill[10]}
+	\item \makebox[5cm]{chapter not accessible \dotfill[11]}
+	\item \makebox[5cm]{poster not accessible \dotfill[12]}
+\end{itemize}
+\divider
+
+\clearpage
+\vspace*{1em}
+
+\step{AbstractScreening}{Whether manuscript was excluded during abstract screening.}{Screening}
+\vspace{0.5em}
+\begin{itemize}
+	\item \makebox[5cm]{excluded \dotfill[0]}
+	\item \makebox[5cm]{included \dotfill[1]}
+\end{itemize}
+
+\marginpar{
+\vspace{1.4em}
+Missingness Explanations
+
+\begin{tabular*}{6cm}{>{\raggedright\arraybackslash}p{0.03\linewidth} 
+>{\raggedright\arraybackslash}p{0.75\linewidth}}
+%\begin{tabular}
+\toprule
+\# & Examples / Explanation\\
+\midrule
+1 & manuscript is in a language other than English. \\
+2 & rural-urban, second generation \\
+3 & focus on dominant group \\
+4 & purely descriptive studies and replications in migrant populations. E.g., mental health of migrant group in general. \\
+5 & migration status, length of residence  \\
+6 & only discusses theory of others. \\
+7 & not accessible via library services \\
+8 & not accessible via library services \\
+9 & not accessible via library services \\
+10 & not accessible via library services \\
+11 & not accessible via library services \\
+12 & not accessible via library services \\
+\bottomrule
+\end{tabular*}
+}
+\divider
+
+\step{AbstractNote}{If excluded during `AbstractScreening', provide the reason for exclusion.}{Screening}
+\vspace{0.5em}
+\begin{itemize}
+	\item \makebox[5cm]{not English \dotfill[1]}
+	\item \makebox[5cm]{not migration \dotfill[2]}
+	\item \makebox[5cm]{not migrant \dotfill[3]}
+	\item \makebox[5cm]{not acculturation \dotfill[4]}
+	\item \makebox[5cm]{not ABCD \dotfill[5]}
+	\item \makebox[5cm]{not measured \dotfill[6]}
+	\item \makebox[5cm]{items not accessible \dotfill[7]}
+	\item \makebox[5cm]{thesis not accessible \dotfill[8]}
+	\item \makebox[5cm]{article not accessible \dotfill[9]}
+	\item \makebox[5cm]{book not accessible \dotfill[10]}
+	\item \makebox[5cm]{chapter not accessible \dotfill[11]}
+	\item \makebox[5cm]{poster not accessible \dotfill[12]}
+\end{itemize}
+\divider
+
+\step{Downloaded}{Whether full manuscript--text was downloaded.}{Screening}
+\textit{If this was not possible, please describe steps taken in the `Comment' code.}
+\vspace{0.5em}
+\begin{itemize}
+	\item \makebox[5cm]{not downloaded \dotfill[0]}
+	\item \makebox[5cm]{downloaded \dotfill[1]}
+\end{itemize}
+\divider
+
+\step{MissingABCD}{Whether experience aspects were coded in full text.}{Screening}
+\textit{Does the empirical study consider (i.e., measure) psychological acculturation? Please focus particularly on the measurement of acculturation, e.g., scale description, the (sub-)scale labels, as well as items.}
+\vspace{0.5em}
+\begin{itemize}
+	\item \makebox[5cm]{coded \dotfill[0]}
+	\item \makebox[5cm]{missing \dotfill[1]}
+\end{itemize}
+
+\marginpar{
+\vspace{1.4em}
+Missingness Explanations
+
+\begin{tabular*}{6cm}{>{\raggedright\arraybackslash}p{0.03\linewidth} 
+>{\raggedright\arraybackslash}p{0.75\linewidth}}
+%\begin{tabular}
+\toprule
+\# & Examples / Explanation\\
+\midrule
+1 & manuscript is in a language other than English. \\
+2 & rural-urban, second generation \\
+3 & focus on dominant group \\
+4 & purely descriptive studies and replications in migrant populations. E.g., mental health of migrant group in general. \\
+5 & migration status, length of residence  \\
+6 & only discusses theory of others. \\
+7 & not accessible via library services \\
+8 & not accessible via library services \\
+9 & not accessible via library services \\
+10 & not accessible via library services \\
+11 & not accessible via library services \\
+12 & not accessible via library services \\
+\bottomrule
+\end{tabular*}
+}
+\divider
+
+\step{NoteMissing}{If excluded during full-text analysis, provide the reason for exclusion.}{Screening}
+\vspace{0.5em}
+\begin{itemize}
+	\item \makebox[5cm]{not English \dotfill[1]}
+	\item \makebox[5cm]{not migration \dotfill[2]}
+	\item \makebox[5cm]{not migrant \dotfill[3]}
+	\item \makebox[5cm]{not acculturation \dotfill[4]}
+	\item \makebox[5cm]{not ABCD \dotfill[5]}
+	\item \makebox[5cm]{not measured \dotfill[6]}
+	\item \makebox[5cm]{items not accessible \dotfill[7]}
+	\item \makebox[5cm]{thesis not accessible \dotfill[8]}
+	\item \makebox[5cm]{article not accessible \dotfill[9]}
+	\item \makebox[5cm]{book not accessible \dotfill[10]}
+	\item \makebox[5cm]{chapter not accessible \dotfill[11]}
+	\item \makebox[5cm]{poster not accessible \dotfill[12]}
+\end{itemize}
+\divider
+
+\clearpage
+\vspace*{2em}
+
+\step{Comment}{Any necessary comments of the coder.}{Screening}
+\textit{This can include additional information about the format and content of the theoretical work, as well as information on the missingness or accessibility.}
+\vspace{1.5em}
+\ruleandname{character string}{10cm}
+\divider
+
+\category{3}{Experience}
+\marginpar{
+\vspace{3em}
+Selected Affect Concept Examples:
+\begin{itemize}
+    \item loneliness
+    \item feeling at home
+    \item satisfaction with life
+    \item pride
+    \item comfortableness
+    \item joy
+    \item ease
+    \item well-being
+    \item worry
+    \item trust
+\end{itemize}
+}
+
+\step{Affect}{Whether the studies included affect.}{Experience}
+\textit{To identify whether the author(s) included affective experiences in their study of acculturation, you can examine the study description, the methods section, the (sub-)scale labels, as well as items for self-identified mentions of affect. Please consider affect at the following three levels of abstraction:\\
+\textbf{Aspect:} the authors might refer to `affect' or `affective' directly.\\
+\textbf{Construct:} the authors might refer to affective constructs such as `emotion' or `mood'.\\
+\textbf{Concept:} the authors might refer to affective concepts such as individual emotions, including `pride' or `loneliness'.\\
+\textbf{Operationalization:} the authors might also include affective conceptualizations in their operationalizations, such as `I feel ...' or `I enjoy ...'.}
+\vspace{0.5em}
+\begin{itemize}
+	\item \makebox[5cm]{included \dotfill[1]}
+	\item \makebox[5cm]{not included \dotfill[–]}
+\end{itemize}
+\divider
+
+\marginpar{
+\vspace{3em}
+Selected Behavior Concept Examples:
+\begin{itemize}
+    \item language use
+    \item civic participation (voting, ...)
+    \item performance (work, ...)
+    \item media consumption
+    \item education
+    \item peer contacts
+    \item food consumption
+    \item cultural habits (holidays ...)
+    \item delinquency
+    \item marriage
+\end{itemize}
+}
+
+\step{Behavior}{Whether the studies included behavior(s).}{Experience}
+\textit{To identify whether the author(s) included affective experiences in their study of acculturation, you can examine the study description, the methods section, the (sub-)scale labels, as well as items for self-identified mentions of behaviors. Please consider behaviors at the following three levels of abstraction:\\
+\textbf{Aspect:} the authors might refer to `behavior' or `behavioral' directly.\\
+\textbf{Construct:} the authors might refer to behavioral constructs such as `activities' or `habits'.\\
+\textbf{Concept:} the authors might refer to behavioral concepts, such as `language use' or `media consumption'.\\
+\textbf{Operationalization:} the authors might also include behavioral conceptualizations in their operationalizations, such as `I do ...' or `I speak ...'.}
+\vspace{0.5em}
+\begin{itemize}
+	\item \makebox[5cm]{included \dotfill[1]}
+	\item \makebox[5cm]{not included \dotfill[–]}
+\end{itemize}
+\divider
+
+
+\clearpage
+\vspace*{2em}
+
+\marginpar{
+\vspace{3em}
+Selected Cognition Concept Examples:
+\begin{itemize}
+    \item ethnic identification
+    \item cultural values
+    \item acculturation orientation
+    \item preferences (food, friends, ...)
+    \item knowledge
+    \item importance ratings
+    \item inner thought language
+    \item perceived obligations
+    \item beliefs
+    \item stereotypes
+\end{itemize}
+}
+
+\step{Cognition}{Whether the studies included cognition(s).}{Experience}
+\textit{To identify whether the author(s) included affective experiences in their studies, you can examine the study description, the methods section, the (sub-)scale labels, as well as items for self-identified mentions of cognitions. Please consider cognitions at the following three levels of abstraction:\\
+\textbf{Aspect:} the authors might refer to `cognition' or `cognitive' directly.\\
+\textbf{Construct:} the authors might refer to cognitive constructs such as `knowledge' or `memories'.\\
+\textbf{Concept:} the authors might refer to cognitive concepts, such as `cultural values' or `ethnic identification'.\\
+\textbf{Operationalization:} the authors might include cognitive conceptualizations in their operationalization, such as `I think ...' or `I prefer ...'.}
+\vspace{0.5em}
+\begin{itemize}
+	\item \makebox[5cm]{included \dotfill[1]}
+	\item \makebox[5cm]{not included \dotfill[–]}
+\end{itemize}
+\divider
+
+\marginpar{
+\vspace{3em}
+Selected Desire Concept Examples:
+\begin{itemize}
+    \item competence
+    \item independence
+    \item self-coherence
+    \item belonging
+    \item achievement
+    \item justice
+    \item growth
+    \item respect
+    \item acceptance
+    \item identity continuity
+\end{itemize}
+}
+
+\step{Desire}{Whether the studies included desire(s).}{Experience}
+\textit{To identify whether the author(s) included affective experiences in their study, you can examine the study description, the methods section, the (sub-)scale labels, as well as items for self-identified mentions of desires. Please consider desires at the following three levels of abstraction:\\
+\textbf{Aspect:} the authors might refer to `desire' or `motivational' directly.\\
+\textbf{Construct:} authors might include desire constructs such as `needs' or `goals'.\\
+\textbf{Concept:} authors might refer to desire concepts, such as `belonging' or `competence'.\\
+\textbf{Operationalization:} the authors might include motivational conceptualizations in their study, such as `I want ...' or `I need ...'.}
+\vspace{0.5em}
+\begin{itemize}
+	\item \makebox[5cm]{included \dotfill[1]}
+	\item \makebox[5cm]{not included \dotfill[–]}
+\end{itemize}
+\divider
+
+\marginpar{
+\vspace{1em}
+Complexity Explanations
+
+\begin{tabular*}{6.2cm}{>{\centering\arraybackslash}p{0.08\linewidth} 
+>{\raggedright\arraybackslash}p{0.76\linewidth}}
+%\begin{tabular}
+\toprule
+\# & Examples / Explanation\\
+\midrule
+1 & focused on a concept that includes multiple aspects (e.g., satisfaction, distress) \\
+2 & aspects included as parts of a scale \\
+3 & aspects measured as independent conceptualizations of acculturation \\
+4 & aspects included as part of a review of multiple conceptualizations \\
+N/A & only one aspect was included  \\
+\bottomrule
+\end{tabular*}
+}
+
+\step{TypeComplexity}{Type of aspect combination [if multiple experience aspects included].}{Experience}
+\textit{If more than one experience aspect was coded, please specify how the multiple aspects were included. The study might include the aspects either independently as parts of the acculturation conceptualization or as part of a scale or proxy measure that includes multiple experience aspects.}
+\vspace{0.5em}
+\begin{itemize}
+	\item \makebox[5cm]{complex concept \dotfill[1]}
+	\item \makebox[5cm]{complex scale \dotfill[2]}
+	\item \makebox[5cm]{independent \dotfill[3]}
+	\item \makebox[5cm]{review \dotfill[4]}
+	\item \makebox[5cm]{not applicable \dotfill[N/A]}
+\end{itemize}
+\divider
+
+\category{4}{Data Collection}
+
+\step{empirical}{Whether the manuscript presented empirical conceptualization(s) of acculturation.}{Data Collection}
+\textit{Please specify whether the authors collected (observable) data as part of their investigation.}
+\vspace{0.5em}
+\begin{itemize}
+	\item \makebox[5cm]{empirical \dotfill[1]}
+	\item \makebox[5cm]{non-empirical \dotfill[0]}
+\end{itemize}
+\divider
+
+\clearpage
+\vspace*{2em}
+
+\step{Method}{Type of empirical data collected.}{Data Collection}
+\textit{If empirical data was collected, what kind of data was collected or discussed by the author(s)?}
+\vspace{0.5em}
+\begin{itemize}
+	\item \makebox[5cm]{quantitative \dotfill[1]}
+	\item \makebox[5cm]{qualitative \dotfill[2]}
+	\item \makebox[5cm]{mixed method \dotfill[3]}
+	\item \makebox[5cm]{meta-analysis \dotfill[4]}
+	\item \makebox[5cm]{review \dotfill[5]}
+\end{itemize}
+\divider
+
+\step{MeasureDefinition}{Name of the scale used or the concepts measured as proxies.}{Data Collection}
+\textit{Please specify the name of the measurement tool (e.g., scale) used by the authors. If the scale is not yet in the scale database, please look up the validation of the scale and add it to the database. Do the same for proxy measures of acculturation.}
+\vspace{1.5em}
+\ruleandname{character string}{5cm}
+\divider
+
+\step{MeasurementLevels}{Levels of measurement.}{Data Collection}
+\textit{Identify the measurement level of the empirical scales. Are the items (or at least the resulting scale) measured as a continuous dimension or is the resulting measure a classification into groups. Indicate `categorical' even if there is an order to the groups. Select `both' if a the measure includes both continuous and categorical measures.}
+\vspace{0.5em}
+\begin{itemize}
+	\item \makebox[5cm]{continuous \dotfill[1]}
+	\item \makebox[5cm]{categorical \dotfill[2]}
+	\item \makebox[5cm]{both \dotfill[3]}
+\end{itemize}
+\divider
+
+\category{5}{Focus}
+
+\marginpar{
+Acculturation Term Examples:
+\begin{itemize}
+    \item acculturation
+    \item enculturation
+    \item transculturation
+    \item assimilation
+    \item integration
+    \item social integration
+    \item cultural adaptation
+    \item cultural adjustment
+    \item cultural transition
+\end{itemize}
+}
+
+\step{term}{Acculturation term used by authors.}{Data Collection}
+\textit{Please note which term the author(s) used to refer to ``psychological acculturation" (i.e., ``changes an individual experiences as a result of being in contact with other cultures").}
+\vspace{1.5em}
+\ruleandname{character string}{5cm}
+\divider
+
+\step{domainPaper}{Focus concept of the manuscript.}{Data Collection}
+\textit{Please specify the main focus of the manuscript. The focus is often clearest in the dependent variable within the model or analysis but should also be clearly stated within the title, abstract, or introduction. The focus could be `acculturation' but it could also be something else (that might, for example, be predicted by acculturation; e.g., depression).}
+\vspace{1.5em}
+\ruleandname{character string}{5cm}
+\divider
+
+\clearpage
+\vspace*{2em}
+
+\step{domainScale}{Situational focus of the acculturation conceptualization.}{Focus}
+\textit{To identify the author(s) situational focus in their conceptualization of psychological acculturation, you can examine the manuscript for self-identified mentions of life domains. Please place a particular focus on the study description, as well as the methodology, including scale descriptions, the (sub-)scale labels, and the  items themselves.}
+\vspace{0.5em}
+\begin{itemize}
+	\item \makebox[6cm]{spirituality/religion \dotfill[1]}
+    \item \makebox[6cm]{home/family \dotfill[2]}
+    \item \makebox[6cm]{health/care \dotfill[3]}
+    \item \makebox[6cm]{administrative/legal matters \dotfill[4]}
+    \item \makebox[6cm]{entertainment/media \dotfill[5]}
+    \item \makebox[6cm]{work/money/finances \dotfill[6]}
+    \item \makebox[6cm]{education/school \dotfill[7]}
+    \item \makebox[6cm]{transport/travel \dotfill[8]}
+    \item \makebox[6cm]{recreation/sport/art/friends \dotfill[9]}
+    \item \makebox[6cm]{community/politics \dotfill[10]}
+\end{itemize}
+\divider
+
+\category{6}{Sample}
+
+\step{Sample}{The sample recruited by the authors.}{Sample}
+\textit{Please specify the sample requirements of the authors. If non are provided use the code `general' to indicate that the general population of migrants was targeted.}
+\vspace{1.5em}
+\ruleandname{character string}{5cm}
+\divider
+
+\step{MigrationTime}{When in the migration process acculturation was assessed?}{Sample}
+\textit{Please specify whether the authors considered one or multiple time-points in the migration process. And if multiple are assessed, please specify which time-points were included.}
+\vspace{0.5em}
+\begin{itemize}
+	\item \makebox[6cm]{potential \dotfill[1]}
+    \item \makebox[6cm]{pre \dotfill[2]}
+    \item \makebox[6cm]{post \dotfill[3]}
+    \item \makebox[6cm]{pre \& post \dotfill[4]}
+    \item \makebox[6cm]{N/A \dotfill[5]}
+\end{itemize}
+\divider
+
+\step{IncludesMajority}{Whether members of the dominant group in the host society were considered.}{Sample}
+\textit{Please specify whether members of the dominant group in the host society were included for the study. If they were included please note in the `comment' code whether acculturation was measured for the dominant group.}
+\vspace{0.5em}
+\begin{itemize}
+	\item \makebox[6cm]{no \dotfill[0]}
+    \item \makebox[6cm]{yes \dotfill[1]}
+\end{itemize}
+\divider
+
+\clearpage
+\vspace*{2em}
+
+\step{HostCountry}{Country or countries of settlement considered for study.}{Sample}
+\textit{Please specify the host country or countries that were included in the study. This country is usually the country of settlement for the migrant group. If no country is focused on in particular, please use the code `any' to indicate that any host country was allowed as part of the sampling strategy.}
+\vspace{1.5em}
+
+\rule{3cm}{\rulewidth} , \rule{3cm}{\rulewidth} , \rule{3cm}{\rulewidth}\\
+\vspace{\dimexpr-\baselineskip+\ruleandnamegap}
+{\namefont character string\hspace{2.08cm}character string\hspace{2.08cm}character string}\par
+\divider
+
+\step{OriginCountry}{Country or countries of origin considered for study.}{Sample}
+\textit{Please specify the origin country or countries that were included in the study. These countries are usually the country of origin for the migrant group. If no country is focused on in particular, please use the code `any' to indicate that migrants from any country were included as part of the sampling strategy.}
+\vspace{1.5em}
+
+\rule{3cm}{\rulewidth} , \rule{3cm}{\rulewidth} , \rule{3cm}{\rulewidth}\\
+\vspace{\dimexpr-\baselineskip+\ruleandnamegap}
+{\namefont character string\hspace{2.08cm}character string\hspace{2.08cm}character string}\par
+\divider
+
+\category{7}{Analysis}
+
+\marginpar{
+Analysis Type Examples:
+\begin{itemize}
+    \item cluster analysis
+    \item correlation analysis
+    \item lagged regression
+    \item cross-lagged panel analysis
+    \item longitudinal analysis
+    \item mean differences
+    \item participant selection
+    \item path analysis
+    \item prevalence rates
+    \item regression (incl. PROCESS macro)
+    \item structural equation modeling
+    \item social network analysis
+    \item validation analyses
+    \item content analysis
+    \item open coding 
+    \item axial coding
+    \item phenomenological praxis
+    \item constant comparative coding
+\end{itemize}
+}
+
+\step{MainAnalysis}{Type of data analysis conducted by the authors.}{Analysis}
+\textit{Please specify the type of analysis conducted by the authors. If multiple analyses were conducted please report the `main' analysis. The main analysis offers the most direct test of the hypotheses and lends the most weight during the interpretation and summary of the results. (The main analysis is often the last and most complex analysis.)}
+\vspace{1.5em}
+\ruleandname{character string}{5cm} 
+\divider
+
+\step{VariableType}{The place in the model that acculturation takes [if quantitative analysis]}{Analysis}
+\textit{If a quantitative analysis was conducted please specify the variable type of acculturation (during the main analysis, identified during `MainAnalysis').}
+\vspace{0.5em}
+\begin{itemize}
+	\item \makebox[5cm]{Control\dotfill[1]}
+    \item \makebox[5cm]{Correlation\dotfill[2]}
+    \item \makebox[5cm]{Dependent\dotfill[3]}
+    \item \makebox[5cm]{Mediator\dotfill[4]}
+    \item \makebox[5cm]{Moderator\dotfill[5]}
+    \item \makebox[5cm]{N/A\dotfill[6]}
+    \item \makebox[5cm]{Predictor\dotfill[7]}
+    \item \makebox[5cm]{Predictor \& Dependent\dotfill[8]}
+    \item \makebox[5cm]{selection criterion\dotfill[9]}
+\end{itemize}
+\divider
+
+% --------------------------------
+%           Last Page
+% --------------------------------
+
+\clearpage
+
+\need[margins/otherinfo]{Links}
+
+\nocite{*}
+
+\printbibliography[heading=none]
+%[reference to GitHub repository masked for peer review]
+
+%[reference to DataVerse repository masked for peer review]
+
+\divider
+
+
+%% If the NEXT page doesn't start with a \need but you'd
+%% still like to add a sidebar, then use this command on THIS
+%% page to add it. The optional argument lets you pull up the
+%% sidebar a bit so that it looks aligned with the top of the
+%% main column.
+% \addnextpagesidebar[-1ex]{page3sidebar}
+
+
+\end{document}

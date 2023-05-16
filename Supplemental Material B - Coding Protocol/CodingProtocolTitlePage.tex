@@ -1,0 +1,84 @@
+% define document type (i.e., template. Here: A4 APA manuscript with 12pt font)
+\documentclass[man, 12pt, a4paper]{apa7}
+
+% add packages
+\usepackage[american]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{csquotes}
+\usepackage{hyperref}
+\usepackage[style=apa, sortcites=true, sorting=nyt, backend=biber, natbib=true, uniquename=false, uniquelist=false, useprefix=true]{biblatex}
+\usepackage{authblk}
+\usepackage{graphicx}
+\usepackage{setspace,caption}
+\usepackage{subcaption}
+\usepackage{enumitem}
+\usepackage{lipsum}
+\usepackage{soul}
+\usepackage{xcolor}
+\usepackage{fourier}
+\usepackage{stackengine}
+\usepackage{scalerel}
+\usepackage{fontawesome}
+\usepackage[normalem]{ulem}
+\usepackage{longtable}
+\usepackage{amsmath}
+\usepackage{afterpage}
+\usepackage{float}
+\usepackage{titling}
+\usepackage{censor}
+
+% formatting links in the PDF file
+\hypersetup{
+pdfpagemode={UseOutlines},
+bookmarksopen=true,
+bookmarksopenlevel=0,
+hypertexnames=false,
+colorlinks   = true, %Colours links instead of ugly boxes
+urlcolor     = blue, %Colour for external hyperlinks
+linkcolor    = blue, %Colour of internal links
+citecolor   = cyan, %Colour of citations
+pdfstartview={FitV},
+unicode,
+breaklinks=true,
+}
+
+% language settings
+\DeclareLanguageMapping{american}{american-apa}
+
+% add reference library file
+\addbibresource{references.bib}
+
+% Title and header
+\title{Supplemental Information A: Coding Protocol}
+\shorttitle{SI A: Coding Protocol}
+\author{Jannis Kreienkamp, Laura F. Bringmann, Raili F. Engler, Peter de Jonge, Kai Epstude}
+%\author{[authors masked for peer review]}
+\newcommand{\manuscript}{The Migration Experience: A Conceptual Framework and Systematic Scoping Review of Psychological Acculturation}
+
+% set indentation size
+\setlength\parindent{1.27cm}
+
+% Start of the main document:
+\begin{document}
+
+% add title information (incl. title page and abstract)
+\begin{titlepage}
+	{\noindent\Large Supplementary Information for \par}
+	\vspace{0.5cm}
+	{\noindent\Large \manuscript \par}
+	\vspace{1.5cm}
+	{\noindent\LARGE\bfseries \thetitle \par}
+	\vspace{2cm}
+	{\noindent\Large\itshape \theauthor \par}
+	\vfill
+	\noindent Corresponding Author Jannis Kreienkamp\par
+	\noindent E-mail: j.kreienkamp@rug.nl\par
+	%\noindent Corresponding Author [masked for peer review]\par
+	%\noindent E-mail: [masked for peer review]\par
+	\vfill
+
+    % Bottom of the page
+	{\noindent Last updated: \today\par}
+\end{titlepage}
+
+\end{document}
