@@ -26,7 +26,8 @@ strLabFix <- function(varIn, ...) {
       " X "
     ),
     vectorize_all = FALSE
-  )
+  ) %>%
+    stri_replace_all_regex(., "[ZC]$", "")
 }
 
 strStudyFix <- function(studyIn, ...) {
@@ -35,16 +36,22 @@ strStudyFix <- function(studyIn, ...) {
     pattern = c(
       "Worker", 
       "worker", 
+      "s1",
       "Student",
       "student",
+      "s2",
       "Medical",
-      "medical"
+      "medical",
+      "s3"
     ),
     replacement = c(
       "Study 1",
       "Study 1",
+      "Study 1",
       "Study 2",
       "Study 2",
+      "Study 2",
+      "Study 3",
       "Study 3",
       "Study 3"
     ),
@@ -506,7 +513,7 @@ metaSubForest <- function(effects, title = "", addAbove = 0, filename = NULL, ty
   }
   
   png(file = paste0("Figures/forestParametric", filename, ".png"), width = width, height = height)
-  forestGeneral <- forest(
+  forestGeneral <- metafor::forest(
     metaGeneral,
     cex = 0.75,
     ylim = c(-1, max(unlist(studyIndex)) + addAbove),

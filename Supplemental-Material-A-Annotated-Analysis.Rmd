@@ -230,6 +230,11 @@ dtMedical <- list(
   raw.post = read.csv("data/S3_Medical/raw/AOTM_Post.csv"),
   raw.daily = read.csv("data/S3_Medical/raw/AOTM_Daily.csv")
 )
+
+# goal-directedness coding
+goal_topics <- read.csv("data/goal_topics/outgroup_interactions-all_ppt_goals_with_topics.csv")
+goal_directedness_coding <- read.csv("data/goal_topics/outgroup_interaction_need_topics_goal_directedness_coding.csv")
+
 ```
 
 ## Data Cleaning & Data Exclusions  
@@ -801,8 +806,8 @@ between <- df %>%
     AvRelatedness = mean(relatedness.daily.all, na.rm = T),
     AvThermo = mean(thermometerDutch_1, na.rm = T),
     AvWB = mean(ExWB_1, na.rm = T),
-    AvAccidental = mean(interaction_accidental, na.rm = TRUE),
-    AvVoluntary = mean(interaction_voluntary, na.rm = TRUE),
+    AvAccidental = mean(interaction_accidental+50, na.rm = TRUE),
+    AvVoluntary = mean(interaction_voluntary+50, na.rm = TRUE),
     AvMeaningful = mean(interaction_meaningful, na.rm = TRUE)
   ) %>%
   ungroup() %>%
@@ -832,6 +837,10 @@ workerInteractionType <- dtWorker$full %>%
     OutgroupInteractionNum = as.numeric(as.factor(OutgroupInteraction))-1,
     NonOutgroupInteractionNum = as.numeric(as.factor(NonOutgroupInteraction))-1
   ) %>%
+  mutate(
+    interaction_accidental = interaction_accidental+50,
+    interaction_voluntary = interaction_voluntary+50
+  ) %>%
   group_by(PID) %>%
   mutate(
     # Center ( https://quantpsy.org/pubs/yaremych_preacher_hedeker_(in.press).pdf )
@@ -841,7 +850,21 @@ workerInteractionType <- dtWorker$full %>%
     OutgroupInteractionM = mean(OutgroupInteractionNum, na.rm = TRUE),
     NonOutgroupInteractionM = mean(NonOutgroupInteractionNum, na.rm = TRUE)
   ) %>%
-  ungroup
+  ungroup %>%
+  mutate(
+    keyMotiveFulfilled = keyMotiveFulfilled+50,
+    keymotive_fulfillemt_1 = keymotive_fulfillemt_1+50,
+    competence.daily.all = competence.daily.all+50,
+    autonomy.daily.all = autonomy.daily.all+50,
+    relatedness.daily.all = relatedness.daily.all+50,
+    competence_1 = competence_1+50,
+    autonomy_1 = autonomy_1+50,
+    relatedness_1 = relatedness_1+50,
+    quality_overall_1 = quality_overall_1+50,
+    interaction_quality = interaction_quality+50,
+    ExWB_1 = ExWB_1+50,
+    OutgroupInteractionLab = as.character(OutgroupInteraction)
+  )
 
 # Create variables centered and standardized within Participant
 # i.e., divide into trait and state
@@ -873,7 +896,8 @@ workerWithinBetween <-
 
 workerOutWithinBetween <-
   MlTraitState(
-    data = workerInteractionType %>% filter(OutgroupInteraction == "Yes"),
+    data = workerInteractionType %>% 
+      filter(OutgroupInteraction == "Yes"),
     id = "PID",
     selection =
       c(
@@ -904,8 +928,8 @@ workerContactFreq <- dtWorker$full %>%
     AvAttitude = mean(thermometerDutch_1, na.rm = TRUE),
     AvWellBeing = mean(ExWB_1, na.rm = TRUE),
     AvQualityComb = mean(interaction_quality, na.rm = TRUE),
-    AvAccidental = mean(interaction_accidental, na.rm = TRUE),
-    AvVoluntary = mean(interaction_voluntary, na.rm = TRUE),
+    AvAccidental = mean(interaction_accidental+50, na.rm = TRUE),
+    AvVoluntary = mean(interaction_voluntary+50, na.rm = TRUE),
     AvMeaningful = mean(interaction_meaningful, na.rm = TRUE)
   ) %>%
   mutate(
@@ -1150,7 +1174,10 @@ studentInteractionType <- dtStudents$full %>%
     OutgroupInteractionM = mean(OutgroupInteractionNum, na.rm = TRUE),
     NonOutgroupInteractionM = mean(NonOutgroupInteractionNum, na.rm = TRUE)
   ) %>%
-  ungroup
+  ungroup %>%
+  mutate(
+    OutgroupInteractionLab = as.character(OutgroupInteraction)
+  )
 
 # select a subset of IDs to display in plots
 studentPltIDs <-
@@ -1200,7 +1227,8 @@ studentWithinBetween <-
   )
 studentOutWithinBetween <-
   MlTraitState(
-    data = studentInteractionType %>% filter(OutgroupInteraction == "Yes"),
+    data = studentInteractionType %>%
+      filter(OutgroupInteraction == "Yes"),
     id = "PID",
     selection =
       c(
@@ -1285,7 +1313,11 @@ df <- df %>%
     OutgroupInteractionM = mean(OutgroupInteractionNum, na.rm = TRUE),
     NonOutgroupInteractionM = mean(NonOutgroupInteractionNum, na.rm = TRUE)
   ) %>%
-  ungroup
+  ungroup %>%
+  mutate(
+    exWB = (exWB+100)/2,
+    OutgroupInteractionLab = as.character(OutgroupInteraction)
+  )
 
 # rename interaction accidental
 df$interaction_accidental <- df$InteractionContextAccidental
@@ -1515,7 +1547,8 @@ rm(remergePP, PP)
 # divide into trait and state
 medicalOutWithinBetween <-
   MlTraitState(
-    data = df %>% filter(OutgroupInteraction == "Yes"),
+    data = df %>%
+      filter(OutgroupInteraction == "Yes"),
     id = "PID",
     selection =
       c(
@@ -1747,22 +1780,26 @@ workerInteractionType %>%
 ```{r workerVarDescr}
 workerDescr <- workerInteractionType %>%
   select(
+    Attitudes = thermometerDutch_1,
     `Core Need` = keyMotiveFulfilled,
     Competence = competence.daily.all,
     Autonomy = autonomy.daily.all,
     Relatedness = relatedness.daily.all,
     Quality = quality_overall_1,
-    Attitudes = thermometerDutch_1
+    Accidental = interaction_accidental,
+    Voluntary = interaction_voluntary
   )
 workerDescrOut <- workerInteractionType %>%
   filter(OutgroupInteraction == "Yes") %>%
   select(
+    Attitudes = thermometerDutch_1,
     `Core Need` = keyMotiveFulfilled,
     Competence = competence.daily.all,
     Autonomy = autonomy.daily.all,
     Relatedness = relatedness.daily.all,
     Quality = quality_overall_1,
-    Attitudes = thermometerDutch_1
+    Accidental = interaction_accidental,
+    Voluntary = interaction_voluntary
   )
 
 workerDescr %>%
@@ -1866,8 +1903,8 @@ workerMlCor <-
   MlCorMat(
     data = workerInteractionType,
     id = "PID",
-    selection = c("keyMotiveFulfilled", "competence.daily.all", "autonomy.daily.all", "relatedness.daily.all", "quality_overall_1", "thermometerDutch_1"),
-    labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Quality", "Attitudes NL")
+    selection = c("keyMotiveFulfilled", "competence.daily.all", "autonomy.daily.all", "relatedness.daily.all", "quality_overall_1", "interaction_accidental", "interaction_voluntary", "thermometerDutch_1"),
+    labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Quality", "Accidental", "Voluntary", "Attitudes NL")
   ) 
 
 workerMlCor %>%
@@ -4439,22 +4476,28 @@ studentInteractionType %>%
 ```{r studentVarDescr}
 studentDescr <- studentInteractionType %>%
   select(
+    Attitudes = AttitudesDutch,
+    `Well-being` = ExWB, 
     `Core Need` = KeyNeedFullfillment,
     Competence = Competence,
     Autonomy = Autonomy,
     Relatedness = Relatedness,
     Quality = quality_overall,
-    Attitudes = AttitudesDutch
+    Accidental = interaction_accidental,
+    Voluntary = interaction_voluntary
   )
 studentDescrOut <- studentInteractionType %>%
   filter(OutgroupInteraction == "Yes") %>%
   select(
+    Attitudes = AttitudesDutch,
+    `Well-being` = ExWB, 
     `Core Need` = KeyNeedFullfillment,
     Competence = Competence,
     Autonomy = Autonomy,
     Relatedness = Relatedness,
     Quality = quality_overall,
-    Attitudes = AttitudesDutch
+    Accidental = interaction_accidental,
+    Voluntary = interaction_voluntary
   )
 
 studentDescr %>%
@@ -4556,8 +4599,8 @@ studentMlCor <-
   MlCorMat(
     data = studentInteractionType,
     id = "PID",
-    selection = c("KeyNeedFullfillment", "Competence", "Autonomy", "Relatedness", "quality_overall", "AttitudesDutch"),
-    labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Quality", "Attitudes NL")
+    selection = c("KeyNeedFullfillment", "Competence", "Autonomy", "Relatedness", "quality_overall", "interaction_accidental", "interaction_voluntary", "AttitudesDutch"),
+    labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Quality", "Accidental", "Voluntary", "Attitudes NL")
   ) 
 
 studentMlCor %>%
@@ -4590,8 +4633,8 @@ studentOutMlCor <-
   MlCorMat(
     data = studentInteractionType %>% filter(OutgroupInteraction == "Yes"),
     id = "PID",
-    selection = c("KeyNeedFullfillment", "Competence", "Autonomy", "Relatedness", "quality_overall", "AttitudesDutch"),
-    labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Quality", "Attitudes NL")
+    selection = c("KeyNeedFullfillment", "Competence", "Autonomy", "Relatedness", "quality_overall", "interaction_accidental", "interaction_voluntary", "AttitudesDutch"),
+    labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Quality", "Accidental", "Voluntary", "Attitudes NL")
   ) 
 
 studentOutMlCor %>%
@@ -7194,27 +7237,31 @@ dtMedical$full %>%
 
 ```{r medicalVarDescr}
 medicalDescr <- dtMedical$full %>%
-  select(
+  transmute(
+    Attitudes = AttitudesDutch,
+    `Well-being` = exWB, 
     `Core Need` = KeyNeedFulfillment,
     Competence = Competence,
     Autonomy = Autonomy,
     Relatedness = Relatedness,
     AllportsCondition = AllportsCondition,
     Quality = qualityOverall,
-    Attitudes = AttitudesDutch, 
-    `Well-being` = exWB
+    Accidental = interaction_accidental,
+    Voluntary = interaction_voluntary
   )
 medicalDescrOut <- dtMedical$full %>%
   filter(OutgroupInteraction == "Yes") %>%
   select(
+    Attitudes = AttitudesDutch,
+    `Well-being` = exWB,
     `Core Need` = KeyNeedFulfillment,
     Competence = Competence,
     Autonomy = Autonomy,
     Relatedness = Relatedness,
     AllportsCondition = AllportsCondition,
     Quality = qualityOverall,
-    Attitudes = AttitudesDutch,
-    `Well-being` = exWB
+    Accidental = interaction_accidental,
+    Voluntary = interaction_voluntary
   )
 
 medicalDescr %>%
@@ -7316,8 +7363,8 @@ medicalMlCor <-
   MlCorMat(
     data = dtMedical$full,
     id = "PID",
-    selection = c("KeyNeedFulfillment", "Competence", "Autonomy", "Relatedness", "AllportsCondition", "qualityOverall", "AttitudesDutch", "exWB"),
-    labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Allport", "Quality", "Attitudes NL", "Well-being")
+    selection = c("KeyNeedFulfillment", "Competence", "Autonomy", "Relatedness", "AllportsCondition", "qualityOverall", "interaction_accidental", "interaction_voluntary", "AttitudesDutch", "exWB"),
+    labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Allport", "Quality", "Accidental", "Voluntary", "Attitudes NL", "Well-being")
   ) 
 
 medicalMlCor %>%
@@ -7350,8 +7397,8 @@ medicalOutMlCor <-
   MlCorMat(
     data = dtMedical$full %>% filter(OutgroupInteraction == "Yes"),
     id = "PID",
-    selection = c("KeyNeedFulfillment", "Competence", "Autonomy", "Relatedness", "AllportsCondition", "qualityOverall", "AttitudesDutch", "exWB"),
-    labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Allport", "Quality", "Attitudes NL", "Well-being")
+    selection = c("KeyNeedFulfillment", "Competence", "Autonomy", "Relatedness", "AllportsCondition", "qualityOverall", "interaction_accidental", "interaction_voluntary", "AttitudesDutch", "exWB"),
+    labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Allport", "Quality", "Accidental", "Voluntary", "Attitudes NL", "Well-being")
   ) 
 
 medicalOutMlCor %>%
@@ -10621,7 +10668,6 @@ summ(
 ```
 
 
-
 # **Forest Plots of Main Analyses**  
 
 ## Contact Hypothesis  
@@ -11446,7 +11492,452 @@ robustMetaSDT <-
 ![Core Need Fulfillment predicting Outgroup Attitudes, while controlling for self-determination theory needs (intergroup contact sample).](Figures/forestParametricFERobustSDT.png)
 
 
-# **General Contact Hypothesis Test across Studies**  
+# **Robustness: Goal-Directedness across Studies**  
+
+```{r}
+#| label: topic_data_prep
+
+# prep general data
+dt_goal_s1 <- workerOutWithinBetween %>%
+  transmute(
+    study = as.numeric(1),
+    PID = PID,
+    TIDnum = as.numeric(TID),
+    TID = paste(PPDate, str_to_title(daytime)),
+    OutgroupInteraction = OutgroupInteraction,
+    NonOutgroupInteraction = NonOutgroupInteraction,
+    Attitude = thermometerDutch_1,
+    AttitudeC = thermometerDutch_1_zwc,
+    AttitudeZ = thermometerDutch_1_zwc,
+    CoreNeed = keymotive_fulfillemt_1,
+    CoreNeedC = keymotive_fulfillemt_1_cwc,
+    CoreNeedZ = keymotive_fulfillemt_1_zwc,
+    InteractionQuality = interaction_quality,
+    InteractionQualityC = interaction_quality_cwc,
+    InteractionQualityZ = interaction_quality_zwc,
+    Quality = quality_overall_1,
+    QualityC = quality_overall_1_cwc,
+    QualityZ = quality_overall_1_zwc,
+    WellBeing = ExWB_1,
+    WellBeingC = ExWB_1_cwc,
+    WellBeingZ = ExWB_1_zwc,
+    InteractionAccidental = interaction_accidental,
+    InteractionAccidentalC = interaction_accidental_cwc,
+    InteractionAccidentalZ = interaction_accidental_zwc,
+    Competence = competence_1,
+    CompetenceC = competence_1_cwc,
+    CompetenceZ = competence_1_zwc,
+    Autonomy = autonomy_1,
+    AutonomyC = autonomy_1_cwc,
+    AutonomyZ = autonomy_1_zwc,
+    Relatednesss = relatedness_1,
+    RelatednesssC = relatedness_1_cwc,
+    RelatednesssZ = relatedness_1_zwc,
+    motive = keyMotive
+  )
+dt_goal_s2 <- studentOutWithinBetween %>%
+  transmute(
+    study = as.numeric(2),
+    PID = PID,
+    TIDnum = TIDnum,
+    TID = TID,
+    OutgroupInteraction = OutgroupInteraction,
+    NonOutgroupInteraction = NonOutgroupInteraction,
+    Attitude = AttitudesDutch,
+    AttitudeC = AttitudesDutch_cwc,
+    AttitudeZ = AttitudesDutch_zwc,
+    CoreNeed = KeyNeedFullfillment,
+    CoreNeedC = KeyNeedFullfillment_cwc,
+    CoreNeedZ = KeyNeedFullfillment_zwc,
+    InteractionQuality = interaction_quality,
+    InteractionQualityC = interaction_quality_cwc,
+    InteractionQualityZ = interaction_quality_zwc,
+    Quality = quality_overall,
+    QualityC = quality_overall_cwc,
+    QualityZ = quality_overall_zwc,
+    WellBeing = ExWB,
+    WellBeingC = ExWB_cwc,
+    WellBeingZ = ExWB_zwc,
+    InteractionAccidental = interaction_accidental,
+    InteractionAccidentalC = interaction_accidental_cwc,
+    InteractionAccidentalZ = interaction_accidental_zwc,
+    Competence = Competence,
+    CompetenceC = Competence_cwc,
+    CompetenceZ = Competence_zwc,
+    Autonomy = Autonomy,
+    AutonomyC = Autonomy_cwc,
+    AutonomyZ = Autonomy_zwc,
+    Relatednesss = Relatedness,
+    RelatednesssC = Relatedness_cwc,
+    RelatednesssZ = Relatedness_zwc,
+    motive = KeyNeed
+  )
+dt_goal_s3 <- medicalOutWithinBetween %>%
+  transmute(
+    study = as.numeric(3),
+    PID = PID,
+    TIDnum = TIDnum,
+    TID = TID,
+    OutgroupInteraction = OutgroupInteraction,
+    NonOutgroupInteraction = NonOutgroupInteraction,
+    Attitude = AttitudesDutch,
+    AttutudeC = AttitudesDutch_cwc,
+    AttitudeZ = AttitudesDutch_zwc,
+    CoreNeed = KeyNeedFulfillment,
+    CoreNeedC = KeyNeedFulfillment_cwc,
+    CoreNeedZ = KeyNeedFulfillment_zwc,
+    Allport = AllportsCondition,
+    AllportC = AllportsCondition_cwc,
+    AllportZ = AllportsCondition_zwc,
+    InteractionQuality = interaction_quality,
+    InteractionQualityC = interaction_quality_cwc,
+    InteractionQualityZ = interaction_quality_zwc,
+    Quality = qualityOverall,
+    QualityC = qualityOverall_cwc,
+    QualityZ = qualityOverall_zwc,
+    WellBeing = exWB,
+    WellBeingC = exWB_cwc,
+    WellBeingZ = exWB_zwc,
+    InteractionAccidental = interaction_accidental,
+    InteractionAccidentalC = interaction_accidental_cwc,
+    InteractionAccidentalZ = interaction_accidental_zwc,
+    Competence = Competence,
+    CompetenceC = Competence_cwc,
+    CompetenceZ = Competence_zwc,
+    Autonomy = Autonomy,
+    AutonomyC = Autonomy_cwc,
+    AutonomyZ = Autonomy_zwc,
+    Relatednesss = Relatedness,
+    RelatednesssC = Relatedness_cwc,
+    RelatednesssZ = Relatedness_zwc,
+    motive = KeyNeed
+  )
+
+dt_goal_all <- bind_rows(list(dt_goal_s1,
+                              dt_goal_s2,
+                              dt_goal_s3)) %>%
+  filter(motive != "") %>%
+  filter(!is.na(motive))
+
+rm(
+  dt_goal_s1,
+  dt_goal_s2,
+  dt_goal_s3
+)
+
+# topic coding for export
+dt_topic_coding <- goal_directedness_coding
+
+# prep goal data
+dt_goal_coding <- goal_topics %>%
+  left_join(
+    goal_directedness_coding %>% select(-top_n_words, -starts_with("representative_")),
+    by = "topic"
+  ) %>%
+  mutate(
+    study = as.numeric(gsub("S", "", study)),
+    PID = as.numeric(PID)
+  ) %>% 
+  as_tibble
+
+# join goal data to ESM data
+dt_goal_joined <- 
+  dt_goal_all %>%
+  left_join(
+    dt_goal_coding %>% mutate(motive = text),
+    keep = FALSE,
+    # pretty messy merge because the export excluded empty and duplicate motives but should work
+    by = c("motive", "study", "PID"), #"motive",
+    multiple = "first"
+  ) %>%
+  filter(!is.na(text)) # remove unmatched
+```
+
+### Goal-Directedness Distribution
+
+```{r}
+#| label: goal_distribution
+
+dt_goal_directedness <- 
+  dt_goal_joined %>%
+  # filter(study == 2) %>% 
+  # remove after full coding
+  mutate(
+    practical_need_dum = ifelse(practical_need == 2, 1, practical_need)-.5,
+    psychological_need_dum = ifelse(psychological_need == 2, 1, psychological_need)-.5,
+  )
+rm(
+  dt_goal_all,
+  dt_goal_coding,
+  dt_goal_joined
+)
+
+lab_mapping <- c("no need", "vague need", "clear need")
+goal_directedness_dist <- dt_goal_directedness %>%
+  select(
+    practical_need,
+    psychological_need
+  ) %>% 
+  mutate(
+    practical_need_label = lab_mapping[match(practical_need, c(0, 1, 2))],
+    psychological_need_label = lab_mapping[match(psychological_need, c(0, 1, 2))]
+  ) %>%
+  group_by(
+    practical_need,
+    practical_need_label,
+    psychological_need,
+    psychological_need_label
+  ) %>%
+  summarise(count = n()) %>%
+  ungroup() %>%
+  na.omit %>%
+  mutate(
+    perc = count/sum(count)*100
+  )
+
+ggplot(
+  goal_directedness_dist,
+  aes (
+    x = reorder(practical_need_label, practical_need),
+    y = reorder(psychological_need_label, psychological_need),
+    fill = count,
+    label = paste0(format(round(perc, 2), nsmall = 2), "%")
+  )) +
+  geom_tile() +
+  geom_text(col = "white") +
+  labs(x = "Practical Motive",
+       y = "Psychological Motive",
+       title = "Goal Directedness Coding") +
+  theme(legend.key.size = unit(0.75, "cm"))
+```
+
+### Model Selection
+
+```{r}
+goal_directedness_model <-
+  list(
+    null = Attitude ~ 1,
+    wb_need = Attitude ~ CoreNeedC,
+    wb_need_direct = Attitude ~ CoreNeedC * practical_need_dum + CoreNeedC * psychological_need_dum
+  )
+goal_directedness_model_type <-
+  list(
+    intercept = ~ 1 | PID,
+    slope_need = ~ 1 + CoreNeedC | PID,
+    slope_need_direct = ~ 1 + CoreNeedC + practical_need_dum + psychological_need_dum | PID
+  )
+
+# Goal Directedness Null Model
+lmeNull <-
+  lme(goal_directedness_model$null,
+      random = goal_directedness_model_type$intercept,
+      na.action = na.omit,
+      data = dt_goal_directedness)
+# Well-being ~ Need
+lmeInterceptNeed <-
+  lme(goal_directedness_model$wb_need,
+      random = goal_directedness_model_type$intercept,
+      na.action = na.omit,
+      data = dt_goal_directedness)
+lmeSlopeNeed <-
+  lme(goal_directedness_model$wb_need,
+      random = goal_directedness_model_type$slope_need,
+      na.action = na.omit,
+      data = dt_goal_directedness)
+# lmeSlopeDirect <-
+#   lme(goal_directedness_model$wb_need_direct,
+#       random = goal_directedness_model_type$slope_need_direct,
+#       na.action = na.omit,
+#       control = lmeControl(opt = "optim", maxIter = 100, msMaxIter = 100),
+#       data = df)
+
+anova(lmeNull, 
+      lmeInterceptNeed,
+      lmeSlopeNeed) %>%
+  as.data.frame() %>%
+  select(-call) %>%
+  mutate(
+    L.Ratio = round(L.Ratio, 3),
+    `p-value` = ifelse(`p-value`>=.001, round(`p-value`, 3), "< .001")
+  ) %>%
+  replace(is.na(.), "") %>%
+  rownames_to_column(., var = "Description") %>%
+  mutate(Description = gsub(".*\\$", "", Description)) %>%
+  kbl(
+    .,
+    caption = "Model Comparison",
+    format = "html",
+    linesep = "",
+    booktabs = T,
+    align = c("l", rep("c", ncol(.)-1)),
+    digits = 3
+  ) %>%
+  kable_styling(position = "left")
+```
+
+### Overall Results
+
+#### Quality
+
+```{r}
+
+summ(lmer(
+  Quality ~ CoreNeedC * practical_need_dum + CoreNeedC * psychological_need_dum + 
+    (1 + CoreNeedC + practical_need_dum + psychological_need_dum | study/PID), #study/PID
+  data = dt_goal_directedness
+))
+
+summ(
+  lmer(
+    QualityZ ~ CoreNeedZ * practical_need_dum + CoreNeedZ * psychological_need_dum + 
+      (1 + CoreNeedZ + practical_need_dum + psychological_need_dum | study/PID), #study/PID
+    data = dt_goal_directedness
+  )
+)
+```
+
+#### Attitudes
+
+```{r}
+
+summ(lmer(
+  Attitude ~ CoreNeedC * practical_need_dum + CoreNeedC * psychological_need_dum + 
+    (1 + CoreNeedC + practical_need_dum + psychological_need_dum | study/PID), #study/PID
+  data = dt_goal_directedness
+))
+
+summ(
+  lmer(
+    AttitudeZ ~ CoreNeedZ * practical_need_dum + CoreNeedZ * psychological_need_dum + 
+      (1 + CoreNeedZ + practical_need_dum + psychological_need_dum | study/PID), #study/PID
+    data = dt_goal_directedness
+  )
+)
+```
+
+### Study follow-up
+
+#### Study 1
+
+##### Quality
+
+```{r}
+
+summ(lmer(
+  Quality ~ CoreNeedC * practical_need_dum + CoreNeedC * psychological_need_dum + 
+    (1 + CoreNeedC + practical_need_dum + psychological_need_dum | PID), #study/PID
+  data = dt_goal_directedness %>% filter(study == 1)
+))
+
+summ(
+  lmer(
+    QualityZ ~ CoreNeedZ * practical_need_dum + CoreNeedZ * psychological_need_dum + 
+      (1 + CoreNeedZ + practical_need_dum + psychological_need_dum | PID), #study/PID
+    data = dt_goal_directedness %>% filter(study == 1)
+  )
+)
+```
+
+##### Attitudes
+
+```{r}
+
+summ(lmer(
+  Attitude ~ CoreNeedC * practical_need_dum + CoreNeedC * psychological_need_dum + 
+    (1 + CoreNeedC + practical_need_dum + psychological_need_dum | PID), #study/PID
+  data = dt_goal_directedness %>% filter(study == 1)
+))
+
+summ(
+  lmer(
+    AttitudeZ ~ CoreNeedZ * practical_need_dum + CoreNeedZ * psychological_need_dum + 
+      (1 + CoreNeedZ + practical_need_dum + psychological_need_dum | PID), #study/PID
+    data = dt_goal_directedness %>% filter(study == 1)
+  )
+)
+```
+
+#### Study 2
+
+##### Quality
+
+```{r}
+
+summ(lmer(
+  Quality ~ CoreNeedC * practical_need_dum + CoreNeedC * psychological_need_dum + 
+    (1 + CoreNeedC + practical_need_dum + psychological_need_dum | PID), #study/PID
+  data = dt_goal_directedness %>% filter(study == 2)
+))
+
+summ(
+  lmer(
+    QualityZ ~ CoreNeedZ * practical_need_dum + CoreNeedZ * psychological_need_dum + 
+      (1 + CoreNeedZ + practical_need_dum + psychological_need_dum | PID), #study/PID
+    data = dt_goal_directedness %>% filter(study == 2)
+  )
+)
+```
+
+##### Attitudes
+
+```{r}
+
+summ(lmer(
+  Attitude ~ CoreNeedC * practical_need_dum + CoreNeedC * psychological_need_dum + 
+    (1 + CoreNeedC + practical_need_dum + psychological_need_dum | PID), #study/PID
+  data = dt_goal_directedness %>% filter(study == 2)
+))
+
+summ(
+  lmer(
+    AttitudeZ ~ CoreNeedZ * practical_need_dum + CoreNeedZ * psychological_need_dum + 
+      (1 + CoreNeedZ + practical_need_dum + psychological_need_dum | PID), #study/PID
+    data = dt_goal_directedness %>% filter(study == 2)
+  )
+)
+```
+
+#### Study 3
+
+##### Quality
+
+```{r}
+
+summ(lmer(
+  Quality ~ CoreNeedC * practical_need_dum + CoreNeedC * psychological_need_dum + 
+    (1 + CoreNeedC + practical_need_dum + psychological_need_dum | PID), #study/PID
+  data = dt_goal_directedness %>% filter(study == 3)
+))
+
+summ(
+  lmer(
+    QualityZ ~ CoreNeedZ * practical_need_dum + CoreNeedZ * psychological_need_dum + 
+      (1 + CoreNeedZ + practical_need_dum + psychological_need_dum | PID), #study/PID
+    data = dt_goal_directedness %>% filter(study == 3)
+  )
+)
+```
+
+##### Attitudes
+
+```{r}
+
+summ(lmer(
+  Attitude ~ CoreNeedC * practical_need_dum + CoreNeedC * psychological_need_dum + 
+    (1 + CoreNeedC + practical_need_dum + psychological_need_dum | PID), #study/PID
+  data = dt_goal_directedness %>% filter(study == 3)
+))
+
+summ(
+  lmer(
+    AttitudeZ ~ CoreNeedZ * practical_need_dum + CoreNeedZ * psychological_need_dum + 
+      (1 + CoreNeedZ + practical_need_dum + psychological_need_dum | PID), #study/PID
+    data = dt_goal_directedness %>% filter(study == 3)
+  )
+)
+```
+
+# **Robustness: General Contact Hypothesis Test across Studies**  
 
 Because between-person analyses were individually underpowered, we also combined the three data sets for a global test of of the general contact hypothesis. These analyses should in practice mirror the results of the meta analysis estimates from the forest plots above. However, given the availability of the full data, this approach offers additional support for the general effects and should clear up discrepancies between studies.
 
@@ -11937,6 +12428,134 @@ We find that the additional third-level random slopes, indeed do not add signifi
 We also export all relevant data for the Methods and Results section, which are written in a separate RMarkdown file and is linked to the full $\LaTeX{}$ manuscript file in Overleaf.   
 
 ```{r dataExport}
+# prep general data
+
+dt_exp_s1 <- workerWithinBetween %>%
+  transmute(
+    study = as.numeric(1),
+    PID = PID,
+    TIDnum = as.numeric(TID),
+    TID = paste(PPDate, str_to_title(daytime)),
+    OutgroupInteraction = OutgroupInteraction,
+    NonOutgroupInteraction = NonOutgroupInteraction,
+    OutgroupInteractionLab = OutgroupInteractionLab,
+    Attitude = thermometerDutch_1,
+    AttitudeC = thermometerDutch_1_zwc,
+    AttitudeZ = thermometerDutch_1_zwc,
+    CoreNeedRaw = keyMotiveFulfilled,
+    CoreNeed = keyMotiveFulfilled,
+    CoreNeedC = keyMotiveFulfilled_cwc,
+    CoreNeedZ = keyMotiveFulfilled_zwc,
+    InteractionQuality = interaction_quality,
+    InteractionQualityC = interaction_quality_cwc,
+    InteractionQualityZ = interaction_quality_zwc,
+    Quality = quality_overall_1,
+    QualityC = quality_overall_1_cwc,
+    QualityZ = quality_overall_1_zwc,
+    WellBeing = ExWB_1,
+    WellBeingC = ExWB_1_cwc,
+    WellBeingZ = ExWB_1_zwc,
+    InteractionAccidental = interaction_accidental,
+    InteractionAccidentalC = interaction_accidental_cwc,
+    InteractionAccidentalZ = interaction_accidental_zwc,
+    Competence = competence_1,
+    CompetenceC = competence_1_cwc,
+    CompetenceZ = competence_1_zwc,
+    Autonomy = autonomy_1,
+    AutonomyC = autonomy_1_cwc,
+    AutonomyZ = autonomy_1_zwc,
+    Relatednesss = relatedness_1,
+    RelatednesssC = relatedness_1_cwc,
+    RelatednesssZ = relatedness_1_zwc,
+    motive = keyMotive
+  )
+dt_exp_s2 <- studentWithinBetween %>%
+  transmute(
+    study = as.numeric(2),
+    PID = PID,
+    TIDnum = TIDnum,
+    TID = TID,
+    OutgroupInteraction = OutgroupInteraction,
+    NonOutgroupInteraction = NonOutgroupInteraction,
+    OutgroupInteractionLab = OutgroupInteractionLab,
+    Attitude = AttitudesDutch,
+    AttitudeC = AttitudesDutch_cwc,
+    AttitudeZ = AttitudesDutch_zwc,
+    CoreNeed = KeyNeedFullfillment,
+    CoreNeedC = KeyNeedFullfillment_cwc,
+    CoreNeedZ = KeyNeedFullfillment_zwc,
+    InteractionQuality = interaction_quality,
+    InteractionQualityC = interaction_quality_cwc,
+    InteractionQualityZ = interaction_quality_zwc,
+    Quality = quality_overall,
+    QualityC = quality_overall_cwc,
+    QualityZ = quality_overall_zwc,
+    WellBeing = ExWB,
+    WellBeingC = ExWB_cwc,
+    WellBeingZ = ExWB_zwc,
+    InteractionAccidental = interaction_accidental,
+    InteractionAccidentalC = interaction_accidental_cwc,
+    InteractionAccidentalZ = interaction_accidental_zwc,
+    Competence = Competence,
+    CompetenceC = Competence_cwc,
+    CompetenceZ = Competence_zwc,
+    Autonomy = Autonomy,
+    AutonomyC = Autonomy_cwc,
+    AutonomyZ = Autonomy_zwc,
+    Relatednesss = Relatedness,
+    RelatednesssC = Relatedness_cwc,
+    RelatednesssZ = Relatedness_zwc,
+    motive = KeyNeed
+  )
+dt_exp_s3 <- medicalWithinBetween %>%
+  transmute(
+    study = as.numeric(3),
+    PID = PID,
+    TIDnum = TIDnum,
+    TID = TID,
+    OutgroupInteraction = OutgroupInteraction,
+    NonOutgroupInteraction = NonOutgroupInteraction,
+    OutgroupInteractionLab = OutgroupInteractionLab,
+    Attitude = AttitudesDutch,
+    AttutudeC = AttitudesDutch_cwc,
+    AttitudeZ = AttitudesDutch_zwc,
+    CoreNeed = KeyNeedFulfillment,
+    CoreNeedC = KeyNeedFulfillment_cwc,
+    CoreNeedZ = KeyNeedFulfillment_zwc,
+    Allport = AllportsCondition_cwc,
+    AllportZ = AllportsCondition_zwc,
+    InteractionQuality = interaction_quality,
+    InteractionQualityC = interaction_quality_cwc,
+    InteractionQualityZ = interaction_quality_zwc,
+    Quality = qualityOverall,
+    QualityC = qualityOverall_cwc,
+    QualityZ = qualityOverall_zwc,
+    WellBeing = exWB,
+    WellBeingC = exWB_cwc,
+    WellBeingZ = exWB_zwc,
+    InteractionAccidental = interaction_accidental,
+    InteractionAccidentalC = interaction_accidental_cwc,
+    InteractionAccidentalZ = interaction_accidental_zwc,
+    Competence = Competence,
+    CompetenceC = Competence_cwc,
+    CompetenceZ = Competence_zwc,
+    Autonomy = Autonomy,
+    AutonomyC = Autonomy_cwc,
+    AutonomyZ = Autonomy_zwc,
+    Relatednesss = Relatedness,
+    RelatednesssC = Relatedness_cwc,
+    RelatednesssZ = Relatedness_zwc,
+    motive = KeyNeed
+  )
+
+dt_exp_all <- bind_rows(list(dt_exp_s1,
+                             dt_exp_s2,
+                             dt_exp_s3))
+rm(dt_exp_s1,
+   dt_exp_s2,
+   dt_exp_s3)
+
+
 # collect supplementary data files
 # Worker sample
 dtWorkerSupp <- lapply(ls(pattern = "worker"), get)
@@ -11956,7 +12575,7 @@ dtAll <- list(
 )
 
 # collect and export all data files
-save(list = ls(pattern = "dt"), file = "data/wrangled.RData")
+save(list = ls(pattern = "^dt"), file = "data/wrangled.RData")
 ```
 
 # **Software Information**  

@@ -357,3 +357,300 @@ linesep<-function(x,y=character()){
     return(y)
   linesep(x[-length(x)], c(rep('',x[length(x)]-1),'\\addlinespace',y))  
 }
+
+select_best_lmer_model <- function(data, structure, dependent_var, prediction_form, return = "", control = list(opt = "nlmimb"), lmer_scale = FALSE) {
+  # Set the warning option to -1 to suppress all warnings
+  options(warn = -1)
+  # lm data
+  vars <- c(dependent_var, unique(unlist(strsplit(prediction_form, "\\W+"))), unique(unlist(strsplit(structure, "\\W+"))))
+  data_lme <- data %>% 
+    select(all_of(vars)) %>%
+    na.omit
+  
+  # Define model formulas
+  prediction_form_z <- gsub("(\\b[A-Za-z]*)C\\b", "\\1Z", prediction_form, perl = TRUE)
+  dependent_var_z <- paste0(dependent_var, "Z")
+  
+  null_model_formula <- as.formula(paste(dependent_var, "~ 1"))
+  random_model_formula <- as.formula(paste(dependent_var, "~", prediction_form))
+  
+  null_structure <- as.formula(paste("~ 1 |", structure))
+  slope_structure <- as.formula(paste("~ 1 +", paste(unique(unlist(strsplit(prediction_form, "\\W+"))), collapse = " + "), "|", structure))
+  
+  null_lmer <- as.formula(paste0(dependent_var, " ~ 1 + (1 | ", structure, ")"))
+  null_lmer_z <- as.formula(paste0(dependent_var_z, " ~ 1 + (1 | ", structure, ")"))
+  intercept_lmer <- as.formula(paste0(dependent_var, " ~ ", prediction_form, " + (1 | ", structure, ")"))
+  intercept_lmer_z <- as.formula(paste0(dependent_var_z, " ~ ", prediction_form_z, " + (1 | ", structure, ")"))
+  slope_lmer <-
+    as.formula(paste0(
+      dependent_var, " ~ ", prediction_form," + (1 + ",
+      paste(unique(unlist(strsplit(prediction_form, "\\W+"))), collapse = " + "),
+      " | ", structure,")"
+    ))
+  slope_lmer_z <-
+    as.formula(paste0(
+      dependent_var_z, " ~ ", prediction_form_z," + (1 + ",
+      paste(unique(unlist(strsplit(prediction_form_z, "\\W+"))), collapse = " + "),
+      " | ", structure,")"
+    ))
+  
+  # Fit the models
+  
+  # NULL MODEL
+  null_model <- lme(
+    fixed = null_model_formula,
+    random = null_structure,
+    data = data_lme,
+    na.action = na.omit,
+    control = control
+  )
+  lme_null_intervals <- intervals(null_model, which = "fixed")
+  lme_null_ci <- lme_null_intervals$fixed %>% 
+    as_tibble %>%
+    mutate(coef = rownames(lme_null_intervals$fixed)) %>%
+    select(coef, lower, upper)
+  rm(lme_null_intervals)
+  lme_coef_null <- 
+    coef(summary(null_model)) %>% 
+    as_tibble %>%
+    mutate(coef = rownames(coef(summary(null_model)))) %>%
+    left_join(lme_null_ci, by = "coef") %>%
+    transmute(
+      coef = coef,
+      b = Value,
+      se = Std.Error,
+      df = DF,
+      t = `t-value`,
+      p = `p-value`,
+      lwr = lower,
+      upr = upper,
+      coef_latex = paste0(
+        "\\textit{b} = ", format(round(b, 2), nsmall = 2), 
+        ", \\textit{t}(", format(df, big.mark=","), ") = ", format(round(t, 2), nsmall = 2),
+        ", \\textit{p} ", ifelse(p < .001, "< .001", paste0("= ", format(round(p, 3), nsmall = 3))),
+        ", \\textit{95\\%CI}[",  format(round(lwr, 2), nsmall = 2), ", ",  format(round(upr, 2), nsmall = 2), "]"
+      ),
+      coef_html = paste0(
+        "<i>b</i> = ", format(round(b, 2), nsmall = 2), 
+        ", <i>t</i>(", format(df, big.mark=","), ") = ", format(round(t, 2), nsmall = 2),
+        ", <i>p</i> ", ifelse(p < .001, "< .001", paste0("= ", format(round(p, 3), nsmall = 3))),
+        ", <i>95%CI</i>[",  format(round(lwr, 2), nsmall = 2), ", ",  format(round(upr, 2), nsmall = 2), "]"
+      )
+    )
+  
+  lmer_null <- lmer(null_lmer, data = data)
+  lmer_null_ci <- confint(method = "Wald", lmer_null)
+  lmer_null_z <- lmer(null_lmer_z, data = data)
+  lmer_coef_null <- NULL
+  
+  
+  # RANDOM INTERCEPTS MODEL
+  random_intercept_model <- lme(
+    fixed = random_model_formula,
+    random = null_structure,
+    data = data_lme,
+    na.action = na.omit,
+    control = control
+  )
+  lme_intercept_intervals <- intervals(random_intercept_model, which = "fixed")
+  lme_intercept_ci <- lme_intercept_intervals$fixed %>% 
+    as_tibble %>%
+    mutate(coef = rownames(lme_intercept_intervals$fixed)) %>%
+    select(coef, lower, upper)
+  rm(lme_intercept_intervals)
+  lme_coef_intercept <- 
+    coef(summary(random_intercept_model)) %>% 
+    as_tibble %>%
+    mutate(coef = rownames(coef(summary(random_intercept_model)))) %>%
+    left_join(lme_intercept_ci, by = "coef") %>%
+    transmute(
+      coef = coef,
+      b = Value,
+      se = Std.Error,
+      df = DF,
+      t = `t-value`,
+      p = `p-value`,
+      lwr = lower,
+      upr = upper,
+      coef_latex = paste0(
+        "\\textit{b} = ", format(round(b, 2), nsmall = 2), 
+        ", \\textit{t}(", format(df, big.mark=","), ") = ", format(round(t, 2), nsmall = 2),
+        ", \\textit{p} ", ifelse(p < .001, "< .001", paste0("= ", format(round(p, 3), nsmall = 3))),
+        ", \\textit{95\\%CI}[",  format(round(lwr, 2), nsmall = 2), ", ",  format(round(upr, 2), nsmall = 2), "]"
+      ),
+      coef_html = paste0(
+        "<i>b</i> = ", format(round(b, 2), nsmall = 2), 
+        ", <i>t</i>(", format(df, big.mark=","), ") = ", format(round(t, 2), nsmall = 2),
+        ", <i>p</i> ", ifelse(p < .001, "< .001", paste0("= ", format(round(p, 3), nsmall = 3))),
+        ", <i>95%CI</i>[",  format(round(lwr, 2), nsmall = 2), ", ",  format(round(upr, 2), nsmall = 2), "]"
+      )
+    )
+  
+  lmer_intercept <- lmer(intercept_lmer, data = data)
+  lmer_intercept_ci <- confint(method = "Wald", lmer_intercept)
+  lmer_intercept_z <- lmer(intercept_lmer_z, data = data)
+  lmer_coef_intercept <- 
+    summ(lmer_intercept, confint = TRUE, scale = lmer_scale)$coeftable %>%
+    as_tibble %>%
+    transmute(
+      coef = rownames(summ(lmer_intercept)$coeftable),
+      b = Est.,
+      df = d.f.,
+      t = `t val.`,
+      p = p,
+      lwr = `2.5%`,
+      upr = `97.5%`,
+      coef_latex = paste0(
+        "\\textit{b} = ", format(round(b, 2), nsmall = 2), 
+        ", \\textit{t}(", format(df, big.mark=","), ") = ", format(round(t, 2), nsmall = 2),
+        ", \\textit{p} ", ifelse(p < .001, "< .001", paste0("= ", format(round(p, 3), nsmall = 3))),
+        ", \\textit{95\\%CI}[",  format(round(lwr, 2), nsmall = 2), ", ",  format(round(upr, 2), nsmall = 2), "]"
+      ),
+      coef_html = paste0(
+        "<i>b</i> = ", format(round(b, 2), nsmall = 2), 
+        ", <i>t</i>(", format(df, big.mark=","), ") = ", format(round(t, 2), nsmall = 2),
+        ", <i>p</i> ", ifelse(p < .001, "< .001", paste0("= ", format(round(p, 3), nsmall = 3))),
+        ", <i>95%CI</i>[",  format(round(lwr, 2), nsmall = 2), ", ",  format(round(upr, 2), nsmall = 2), "]"
+      )
+    )
+  
+  
+  # RANDOM SLOPES MODEL 
+  random_slope_model <- lme(
+    fixed = random_model_formula,
+    random = slope_structure,
+    data = data_lme,
+    na.action = na.omit,
+    control = control
+  )
+  lme_slope_intervals <- intervals(random_slope_model, which = "fixed")
+  lme_slope_ci <- lme_slope_intervals$fixed %>% 
+    as_tibble %>%
+    mutate(coef = rownames(lme_slope_intervals$fixed)) %>%
+    select(coef, lower, upper)
+  rm(lme_slope_intervals)
+  lme_coef_slope <- 
+    coef(summary(random_slope_model)) %>% 
+    as_tibble %>%
+    mutate(coef = rownames(coef(summary(random_slope_model)))) %>%
+    left_join(lme_slope_ci, by = "coef") %>%
+    transmute(
+      coef = coef,
+      b = Value,
+      se = Std.Error,
+      df = DF,
+      t = `t-value`,
+      p = `p-value`,
+      lwr = lower,
+      upr = upper,
+      coef_latex = paste0(
+        "\\textit{b} = ", format(round(b, 2), nsmall = 2), 
+        ", \\textit{t}(", format(df, big.mark=","), ") = ", format(round(t, 2), nsmall = 2),
+        ", \\textit{p} ", ifelse(p < .001, "< .001", paste0("= ", format(round(p, 3), nsmall = 3))),
+        ", \\textit{95\\%CI}[",  format(round(lwr, 2), nsmall = 2), ", ",  format(round(upr, 2), nsmall = 2), "]"
+      ),
+      coef_html = paste0(
+        "<i>b</i> = ", format(round(b, 2), nsmall = 2), 
+        ", <i>t</i>(", format(df, big.mark=","), ") = ", format(round(t, 2), nsmall = 2),
+        ", <i>p</i> ", ifelse(p < .001, "< .001", paste0("= ", format(round(p, 3), nsmall = 3))),
+        ", <i>95%CI</i>[",  format(round(lwr, 2), nsmall = 2), ", ",  format(round(upr, 2), nsmall = 2), "]"
+      )
+    )
+  
+  lmer_slope <- lmer(slope_lmer, data = data)
+  lmer_slope_ci <- confint(method = "Wald", lmer_slope)
+  lmer_slope_z <- lmer(slope_lmer_z, data = data)
+  lmer_coef_slope <- 
+    summ(lmer_slope, confint = TRUE, scale = lmer_scale)$coeftable %>%
+    as_tibble %>%
+    transmute(
+      coef = rownames(summ(lmer_slope)$coeftable),
+      b = Est.,
+      df = d.f.,
+      t = `t val.`,
+      p = p,
+      lwr = `2.5%`,
+      upr = `97.5%`,
+      coef_latex = paste0(
+        "\\textit{b} = ", format(round(b, 2), nsmall = 2), 
+        ", \\textit{t}(", format(df, big.mark=","), ") = ", format(round(t, 2), nsmall = 2),
+        ", \\textit{p} ", ifelse(p < .001, "< .001", paste0("= ", format(round(p, 3), nsmall = 3))),
+        ", \\textit{95\\%CI}[",  format(round(lwr, 2), nsmall = 2), ", ",  format(round(upr, 2), nsmall = 2), "]"
+      ),
+      coef_html = paste0(
+        "<i>b</i> = ", format(round(b, 2), nsmall = 2), 
+        ", <i>t</i>(", format(df, big.mark=","), ") = ", format(round(t, 2), nsmall = 2),
+        ", <i>p</i> ", ifelse(p < .001, "< .001", paste0("= ", format(round(p, 3), nsmall = 3))),
+        ", <i>95%CI</i>[",  format(round(lwr, 2), nsmall = 2), ", ",  format(round(upr, 2), nsmall = 2), "]"
+      )
+    )
+  
+  
+  # Perform likelihood ratio tests
+  anova_null_intercept <- anova(null_model, random_intercept_model)
+  anova_intercept_slope <- anova(random_intercept_model, random_slope_model)
+  anova_overall <- anova(null_model, random_intercept_model, random_slope_model)
+  
+  
+  # If the random intercept model is significantly worse than the random slope model
+  if ((anova_null_intercept$`p-value`[2] < 0.05 & anova_intercept_slope$`p-value`[2] < 0.05) | return == "slope") {
+    return(
+      list(
+        choice = "random slopes model",
+        anova = anova_overall,
+        
+        lme_model = random_slope_model,
+        lme_ci = lme_slope_ci,
+        lme_coef = lme_coef_slope,
+        
+        lmer_formula = gsub("\\s+", " ", paste(deparse(slope_lmer), collapse = "")),
+        lmer_formula_z = gsub("\\s+", " ", paste(deparse(slope_lmer_z), collapse = "")),
+        lmer_model = lmer_slope,
+        lmer_ci = lmer_slope_ci,
+        lmer_model_z = lmer_slope_z,
+        lmer_coef = lmer_coef_slope
+      )
+    )
+  } else if (anova_null_intercept$`p-value`[2] < 0.05 | return == "intercept") {
+    return(
+      list(
+        choice = "random intercepts model",
+        anova = anova_overall,
+        
+        lme_model = random_intercept_model,
+        lme_ci = lme_intercept_ci,
+        lme_coef = lme_coef_intercept,
+        
+        lmer_formula = gsub("\\s+", " ", paste(deparse(intercept_lmer), collapse = "")),
+        lmer_formula_z = gsub("\\s+", " ", paste(deparse(intercept_lmer_z), collapse = "")),
+        lmer_model = lmer_intercept,
+        lmer_ci = lmer_intercept_ci,
+        lmer_model_z = lmer_intercept_z,
+        lmer_coef = lmer_coef_intercept
+      )
+    )
+  } else {
+    return(
+      list(
+        choice = "null model",
+        anova = anova_overall,
+        
+        lme_model = null_model,
+        lme_ci = lme_null_ci,
+        lme_coef = lme_coef_null,
+        
+        lmer_formula = gsub("\\s+", " ", paste(deparse(null_lmer), collapse = "")),
+        lmer_formula_z = gsub("\\s+", " ", paste(deparse(null_lmer_z), collapse = "")),
+        lmer_model = lmer_null,
+        lmer_ci = lmer_null_ci,
+        lmer_model_z = lmer_null_z,
+        lmer_coef = lmer_coef_null
+      )
+    )
+  }
+}
+
+get_latex_coef <- function(data, coef_name) {
+  latex_out <- data[data$coef == coef_name, "coef_latex"]
+  return(latex_out)
+}

@@ -5,7 +5,7 @@ library(plyr)
 # obj <- mdlTblElements[[i]][[1]]
 # objz <- mdlTblElements[[i]][[2]]
 
-lmerTblPrep <- function (obj, objz = NULL, alpha = 0.05, ...) {
+lmerTblPrep <- function (obj, objz = NULL, name = NULL, alpha = 0.05, ...) {
   # Summarize models
   smry <- summ(obj)
   smryZ <- summ(objz)
@@ -86,10 +86,12 @@ lmerTblPrep <- function (obj, objz = NULL, alpha = 0.05, ...) {
   coefOut <- 
     plyr::join(
       coefOut %>% 
-        mutate(coef = gsub('_cwc|C$', '', coef)), 
+        mutate(coef = gsub('_cwc|C$', '', coef)) %>%
+        mutate(coef = gsub('C:', ':', coef)), 
       coefZOut %>% 
         select(coef, estBeta = est, Beta, BetaStar) %>% 
         mutate(coef = gsub('_zwc|_gmz|Z$', '', coef)) %>%
+        mutate(coef = gsub('Z:', ':', coef)) %>%
         mutate(Beta = ifelse(coef == "(Intercept)", "", Beta)),
       by = "coef"
     )
@@ -137,7 +139,7 @@ lmerTblPrep <- function (obj, objz = NULL, alpha = 0.05, ...) {
   AIC <- AIC(obj)
   BIC <- BIC(obj)
   N <- as.numeric(obj@devcomp$dims["n"])
-  G <- as.numeric(as.data.frame(smry$gvars)["# groups"])
+  G <- as.character(as.data.frame(smry$gvars)["# groups"])
   ICC <- ifelse(
     berryFunctions::is.error(performance::icc(obj)$ICC_adjusted), 
     performance::icc(obj),
@@ -149,6 +151,7 @@ lmerTblPrep <- function (obj, objz = NULL, alpha = 0.05, ...) {
                          format(round(rSqCond, 3), nsmall = 3), 
                          sep = " / ")
   sumstat <- list(
+    name = ifelse(is.null(name), "", name),
     data = data,
     formula = formula,
     groupId = groupNam,

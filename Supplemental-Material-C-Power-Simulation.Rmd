@@ -1,0 +1,515 @@
+---
+title: "Supplemental Information C: Power Simulations"
+subtitle: "Supplemental Material for 'Need Fulfillment During Intergroup Contact: Three Experience Sampling Studies'"
+author:
+- ██████ ██████████^1^
+- ██████████ ████████^1^
+- █████ █████████^1^
+- █████ ██ █████^1^
+- ███ ███████^1^
+- ^1^██████████ ██ █████████, Department of Psychology
+- "Author Information:"
+- "Correspondence concerning this article should be addressed to ██████ ██████████, ██████████ ██ ██████████, █████████ ██ ██████████, █████ ██████████ ███, ████ ██ █████████ ████████████████. E-mail: █████████████████"
+- 'The main manuscript is available at <a href="https://www.doi.org/ToBePublished" target="_blank">doi.org/ToBePublished</a>'
+- 'The data repository for this manuscript is available at <a href="https://osf.io/pr9zs/?view_only=1ea47bb646694632a764dead807ef970" target="_blank">osf.io/pr9zs/?view_only=1ea47bb646694632a764dead807ef970</a>'
+- 'The GitHub repository for this manuscript is available at <a href="https://github.com/maskedForPeerReview" target="_blank">github.com/maskedForPeerReview</a>'
+date: "Last updated: `r format(Sys.time(), '%d %B, %Y')`"
+output: 
+  bookdown::html_document2:
+    fig_caption: yes
+    md_extensions: +footnotes
+    code_folding: hide
+    mathjax: default
+    theme: yeti
+    toc: yes
+    toc_float: yes
+    number_sections: false
+    css: style.css
+    includes:
+      in_header: "_includes/head-custom-rmd.html" 
+editor_options:
+  chunk_output_type: console
+bibliography: references.bib
+csl: apa.csl
+header-includes:
+   - \usepackage{amsmath, nccmath}
+---
+
+<style type="text/css">
+.main-container {
+  max-width: 1300px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.table {
+  margin-left:auto; 
+  margin-right:auto;
+}
+</style>
+
+
+```{r setup, include=FALSE}
+# R Studio Clean-Up
+cat("\014") # clear console
+# rm(list=ls()) # clear workspace - use restart R instead [cmd/alt + shift + F10]
+gc() # garbage collector
+
+# Install and Load Packages
+# !IMPORTANT!
+# BEFORE FIRST RENDER:
+# To install all relevant packages please run "renv::restore()" (or renv::init() and then initiate from lockfile) in the console before the first use to ensure that all packages are using the correct version.
+# to store the packages in a contained library within the project folder: renv::settings$use.cache(FALSE) and add 'RENV_CONFIG_SANDBOX_ENABLED = FALSE' to an '.Renviron' file
+lib <- c(
+  "rmarkdown",
+  "knitr",
+  "remedy",
+  "bookdown",
+  "brms",
+  "psych",
+  "ggplot2",
+  "ggthemes",
+  # "haven",
+  "RColorBrewer",
+  # "plotly",
+  "gridExtra",
+  "ggpattern",
+  "ggridges",
+  "binom",
+  "iterators",
+  "pbkrtest",
+  "plotrix",
+  "RLRsim",
+  "stats",
+  "methods",
+  "utils",
+  "graphics",
+  "grDevices",
+  "car",
+  "testthat",
+  "simr",
+  "data.table",
+  "lme4",
+  "lmerTest",
+  # "nlme",
+  "jtools",
+  # "gtsummary",
+  "sessioninfo",
+  # "tibble",
+  "pander",
+  # "devtools",
+  # "mada",
+  #"tidyr",
+  #"tidyverse",
+  "plyr",
+  "dplyr",
+  # "Hmisc",
+  "kableExtra",
+  # "papaja",
+  "stringr"#,
+  # "stringi",
+  # "reshape2",
+  # "lubridate",
+  # "purrr",
+  # "metafor"
+)
+invisible(lapply(lib, library, character.only = TRUE))
+rm(lib)
+
+# Load Custom Packages
+source("./scripts/functions/fun.panel.R")
+source("./scripts/functions/themes.R")
+# source("./scripts/functions/binaryCor.R")
+# source("./scripts/functions/MlCorMat.R")
+# source("./scripts/functions/MlTbl.R")
+# source("./scripts/functions/metaLmer.R")
+
+# Markdown Options
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file()) # set working directory
+knitr::opts_knit$get("root.dir") # check working directory
+options(
+  scipen = 999,
+  digits = 4,
+  width = 400
+) # removes scientific quotation
+# knitr::opts_chunk$set(echo = TRUE, cache = F, cache.path = rprojroot::find_rstudio_root_file('cache/')) # cache settings
+knitr::knit_hooks$set(
+  error = function(x, options) {
+    paste('\n\n<div class="alert alert-danger">',
+      gsub("##", "\n", gsub("^##\ Error", "**Error**", x)),
+      "</div>",
+      sep = "\n"
+    )
+  },
+  warning = function(x, options) {
+    paste('\n\n<div class="alert alert-warning">',
+      gsub("##", "\n", gsub("^##\ Warning:", "**Warning**", x)),
+      "</div>",
+      sep = "\n"
+    )
+  },
+  message = function(x, options) {
+    paste('\n\n<div class="alert alert-info">',
+      gsub("##", "\n", x),
+      "</div>",
+      sep = "\n"
+    )
+  }
+)
+htmltools::tagList(rmarkdown::html_dependency_font_awesome())
+
+# Global Chunk Options
+knitr::opts_chunk$set(
+  fig.width = 12,
+  fig.height = 8,
+  fig.path = "Figures/",
+  echo = TRUE,
+  cache = TRUE,
+  warning = FALSE,
+  message = FALSE
+)
+
+# set ggplot theme
+theme_set(theme_Publication())
+```
+
+<br/>
+
+<i class="fas fa-exclamation-circle"></i> Note. Boxplots display the interquartile range (IQR, center box), and the whiskers extend 1.5*IQR from the lower and upper hinge. The white point indicates the mean and the white center line indicates the median.   
+
+<br/>
+
+# Data Import  
+
+```{r}
+#| label: import data
+
+load("data/wrangled.RData")
+```
+
+# Extract Effects for Simulation
+
+## Prepare Data
+
+```{r}
+#| label: data prep
+
+# TBD
+```
+
+
+# ML Regression
+
+Run multilevel regression to extract the effect sizes and covariance matrices
+
+```{r}
+#| label: run regression 
+
+# run regresion 
+lmer_quality_contemporary <-
+  lmer(
+    quality_overall_1 ~ 
+      keymotive_fulfillemt_1_cwc + (1 + keymotive_fulfillemt_1_cwc | PID),
+    data = dtWorkerSupp$workerOutWithinBetween
+  )
+lmer_attitude_contemporary <-
+  lmer(
+    thermometerDutch_1 ~ 
+      keymotive_fulfillemt_1_cwc + (1 + keymotive_fulfillemt_1_cwc | PID),
+    data = dtWorkerSupp$workerOutWithinBetween
+  )
+lmer_attitude_need_quality_contemporary <-
+  lmer(
+    thermometerDutch_1 ~
+      keymotive_fulfillemt_1_cwc + quality_overall_1_cwc + (1 + keymotive_fulfillemt_1_cwc + quality_overall_1_cwc | PID),
+    data = dtWorkerSupp$workerOutWithinBetween
+  )
+
+
+
+
+
+
+
+```
+
+
+For the main analyses we have four fixed effects of interest. (1) The effect of need fulfillment on interaction quality: _b_ = `r round(fixef(lmer_quality_contemporary)['keymotive_fulfillemt_1_cwc'], 3)`, (2) the effect of need fulfillment on outgroup attitudes: _b_ = `r round(fixef(lmer_attitude_contemporary)['keymotive_fulfillemt_1_cwc'], 3)`, (3) the effect of need fulfillment on outgroup attitudes while controlling for interaction quality: _b_ = `r round(fixef(lmer_attitude_need_quality_contemporary)['keymotive_fulfillemt_1_cwc'], 3)`, as well as (4) the effect of interaction quality on outgroup attitudes while controlling for need fulfillment: _b_ = `r round(fixef(lmer_attitude_need_quality_contemporary)['quality_overall_1_cwc'], 3)`.
+
+
+# Power Simulation Parameters
+
+```{r}
+#| label: simulation setup
+nsim <- 1000
+progress <- FALSE
+n_ppt <- 250
+n_measure <- 180 # 3 months with 2 measurements per day
+
+# extrapolate data:
+sim_n_quality <- extend(lmer_quality_contemporary, along="PID", n = n_ppt)
+sim_n_attitude <- extend(lmer_attitude_contemporary, along="PID", n = n_ppt)
+sim_n_attitude_full <- extend(lmer_attitude_need_quality_contemporary, along="PID", n = n_ppt)
+
+# extrapolate data:
+sim_t_quality <- extend(lmer_quality_contemporary, within="PID", n = n_measure)
+sim_t_attitude <- extend(lmer_attitude_contemporary, within="PID", n = n_measure)
+sim_t_attitude_full <- extend(lmer_attitude_need_quality_contemporary, within="PID", n = n_measure)
+```
+
+# Power Simulation Participant Numbers
+
+Simulate different participant numbers for all fixed effects.
+
+## Power of `Quality ~ NeedFulfill` for different numbers of participants
+
+```{r}
+#| label: participant simulation Quality NeedFulfill
+#| warning: FALSE
+#| error: FALSE
+
+# Run and plot simulations
+pc_n_quality_need = powerCurve(
+  fit = sim_n_quality,
+  test = simr::fixed("keymotive_fulfillemt_1_cwc", "t"),
+  along = "PID",
+  progress = progress,
+  breaks = seq(1, 12, 1),
+  nsim = nsim
+)
+plot(pc_n_quality_need) +
+  title("Quality given Need Fulfillment [participant numbers]")
+```
+
+## Power of `Attitude ~ NeedFulfill` for different numbers of participants
+
+```{r}
+#| label: participant simulation Attitude NeedFulfill
+#| warning: FALSE
+#| error: FALSE
+
+# Run and plot simulations
+pc_n_attitude_need = powerCurve(
+  fit = sim_n_attitude,
+  test = simr::fixed("keymotive_fulfillemt_1_cwc", "t"),
+  along = "PID",
+  progress = progress,
+  breaks = seq(1, 45, 1),
+  nsim = nsim
+)
+plot(pc_n_attitude_need) +
+  title("Attitudes given Need Fulfillment [participant numbers]")
+```
+
+## Power of `Attitude ~ NeedFulfill + Quality` for different numbers of participants
+
+we expect this to be super small. Keep in mind that the _b_ = `r round(fixef(lmer_attitude_need_quality_contemporary)["keymotive_fulfillemt_1_cwc"],3)`. So even with a large number of participants, we would not expect these effects to be meaningful.
+
+```{r}
+#| label: participant simulation Attitude NeedFulfill given Quality
+#| warning: FALSE
+#| error: FALSE
+
+# Run and plot simulations
+pc_n_attitude_need = powerCurve(
+  fit = sim_n_attitude_full,
+  test = simr::fixed("keymotive_fulfillemt_1_cwc", "t"),
+  along = "PID",
+  progress = progress,
+  breaks = seq(10, 250, 10),
+  nsim = nsim
+)
+plot(pc_n_attitude_need) +
+  title("Attitudes given Need Fulfillment (controling for Quality) [participant numbers]")
+```
+
+## Power of `Attitude ~ Quality` given NeedFulfill for different numbers of participants
+
+```{r}
+#| label: participant simulation Attitude Qaulity given NeedFulfill
+#| warning: FALSE
+#| error: FALSE
+
+# Run and plot simulations
+pc_n_attitude_full_quality = powerCurve(
+  fit = sim_t_attitude_full,
+  test = simr::fixed("quality_overall_1_cwc", "t"),
+  along = "PID",
+  progress = progress,
+  breaks = c(seq(1, 25, 1), seq(30, 100, 10)),
+  nsim = nsim
+)
+plot(pc_n_attitude_full_quality) +
+  title("Attitudes given Quality (controlling for Need Fulfillment) [participant numbers]")
+```
+
+
+# Power Simulation Measurement Numbers
+
+Simulate different number of within person measurements.
+
+## Power of `Quality ~ NeedFulfill` for different numbers of measurements
+
+```{r}
+#| label: measurement simulation Quality NeedFulfill
+#| warning: FALSE
+#| error: FALSE
+
+# Run and plot simulations
+pc_t_quality_need = powerCurve(
+  fit = sim_t_quality,
+  test = simr::fixed("keymotive_fulfillemt_1_cwc", "t"),
+  within = "PID",
+  progress = progress,
+  breaks = seq(1, 20, 1),
+  nsim = nsim
+)
+plot(pc_t_quality_need) +
+  title("Quality given Need Fulfillment [measurement numbers]")
+```
+
+## Power of `Attitude ~ NeedFulfill` for different numbers of measurements
+
+```{r}
+#| label: measurement simulation Attitude NeedFulfill
+#| warning: FALSE
+#| error: FALSE
+
+# Run and plot simulations
+pc_t_attitude_need = powerCurve(
+  fit = sim_t_attitude,
+  test = simr::fixed("keymotive_fulfillemt_1_cwc", "t"),
+  within = "PID",
+  progress = progress,
+  breaks = seq(1, 25, 1),
+  nsim = nsim
+)
+plot(pc_t_attitude_need) +
+  title("Attitudes given Need Fulfillment [measurement numbers]")
+```
+
+## Power of `Attitude ~ NeedFulfill` given Quality for different numbers of measurements
+
+we expect this to be super small. Keep in mind that the _b_ = `r round(fixef(lmer_attitude_need_quality_contemporary)["keymotive_fulfillemt_1_cwc"],3)`. So even with a large number of measurements, we would not expect these effects to be meaningful.
+
+```{r}
+#| label: measurement simulation Attitude NeedFulfill given Quality
+#| warning: FALSE
+#| error: FALSE
+
+# Run and plot simulations
+pc_t_attitude_full_need = powerCurve(
+  fit = sim_t_attitude_full,
+  test = simr::fixed("keymotive_fulfillemt_1_cwc", "t"),
+  within = "PID",
+  progress = progress,
+  breaks = seq(10, 180, 10),
+  nsim = nsim
+)
+plot(pc_t_attitude_full_need) +
+  title("Attitudes given Need Fulfillment (controlling for Quality) [measurement numbers]")
+```
+
+
+## Power of `Attitude ~ Quality` given NeedFulfill for different numbers of measurements
+
+```{r}
+#| label: measurement simulation Attitude Qaulity given NeedFulfill
+#| warning: FALSE
+#| error: FALSE
+
+# Run and plot simulations
+pc_t_attitude_full_quality = powerCurve(
+  fit = sim_t_attitude_full,
+  test = simr::fixed("quality_overall_1_cwc", "t"),
+  within = "PID",
+  progress = progress,
+  breaks = seq(1, 15, 1),
+  nsim = nsim
+)
+plot(pc_t_attitude_full_quality) +
+  title("Attitudes given Quality (controlling for Need Fulfillment) [measurement numbers]")
+```
+
+
+
+# Export data and plots
+
+```{r}
+#| label: export
+
+# save simulations, because this takes for freakin' ever.      
+save(list = ls(pattern = "plt."), 
+     file = "data/S1_Workers/processed/PowerSimPlots.RData")
+
+#load("PowerSimPlots.RData")
+```
+
+# Software Information  
+
+The full session information with all relevant system information and all loaded and installed packages is available in the collapsible section below.  
+
+<details>
+  <summary>System Info</summary>
+  
+  \renewcommand{\arraystretch}{0.8} <!-- decrease line spacing for the table -->
+```{r Reproducibility-SessionInfo-R-environment, echo=FALSE, message=FALSE, warning=FALSE, fig.align="center", out.width='100%', results='asis'}
+df_session_platform <- devtools::session_info()$platform %>%
+  unlist(.) %>%
+  as.data.frame(.) %>%
+  rownames_to_column(.)
+
+colnames(df_session_platform) <- c("Setting", "Value")
+
+kbl(
+  df_session_platform,
+  booktabs = T,
+  align = "l",
+  caption = "R environment session info for reproducibility of results" # complete caption for main document
+) %>%
+  kable_classic(
+    full_width = F,
+    lightable_options = "hover",
+    html_font = "Cambria"
+  )
+```
+  \renewcommand{\arraystretch}{1} <!-- reset row height/line spacing -->
+ </details>
+ <br>
+ <details>
+  <summary>Package Info</summary>
+
+\renewcommand{\arraystretch}{0.6} <!-- decrease line spacing for the table -->
+```{r Reproducibility-SessionInfo-R-packages, echo=FALSE, message=FALSE, warning=FALSE, fig.align="center", out.width='100%', results='asis'}
+df_session_packages <- devtools::session_info()$packages %>%
+  as.data.frame(.) %>%
+  filter(attached == TRUE) %>%
+  dplyr::select(loadedversion, date, source) %>%
+  rownames_to_column()
+
+colnames(df_session_packages) <- c("Package", "Loaded version", "Date", "Source")
+
+kbl(
+  df_session_packages,
+  booktabs = T,
+  align = "l",
+  caption = "Package info for reproducibility of results" # complete caption for main document
+) %>%
+  kable_classic(
+    full_width = F,
+    lightable_options = "hover",
+    html_font = "Cambria"
+  )
+```
+\renewcommand{\arraystretch}{1} <!-- reset row height/line spacing -->
+</details>
+<br>
+<details>
+  <summary>Full Session Info (including loaded but unattached packages --- for troubleshooting only)</summary>
+    `r pander(sessionInfo(), compact = FALSE)`
+</details>
+
+
+--------------------------------------------------------------------
+
+</br>  
+
