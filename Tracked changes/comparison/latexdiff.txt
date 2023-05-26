@@ -1,0 +1,1 @@
+latexdiff main.tex main_rev.tex > main_tracked_change.tex
