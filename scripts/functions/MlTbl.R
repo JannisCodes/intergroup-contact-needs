@@ -5,9 +5,9 @@ library(plyr)
 # obj <- mdlTblElements[[i]][[1]]
 # objz <- mdlTblElements[[i]][[2]]
 
-lmerTblPrep <- function (obj, objz = NULL, name = NULL, alpha = 0.05, ...) {
+lmerTblPrep <- function (obj, objz = NULL, name = NULL, alpha = 0.05, lmer_scale = FALSE, ...) {
   # Summarize models
-  smry <- summ(obj)
+  smry <- summ(obj, scale = lmer_scale)
   smryZ <- summ(objz)
   
   # save grouing variable

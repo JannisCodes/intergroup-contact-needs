@@ -246,7 +246,7 @@ contact_overall <- select_best_lmer_model(
 # interactions::interact_plot(contact_overall$lmer_model, pred = CoreNeed, modx = OutgroupInteraction, interval = TRUE)
 ```
 
-We begin our robustness analysis by testing whether the effect of core need fulfillment is specific to an actual outgroup contact, rather than need fulfillment in general. For this, we analyzed the generalized situational core need fulfillment (either during a contact or about the daytime in general) and tested whether the effect differed during experience sampling measurements with and without outgroup contacts. We start this test by assessing the effect across all three studies, using a three-level hierarchical model, where measurements are nested within participants, and participants are nested within studies. In this overall model, we found no main effect of core need fulfillment (random slopes model, grand-mean standardized to account for all levels of variance; `r get_latex_coef(contact_overall$lmer_coef, "CoreNeed")`) but a significant interaction effect of core need fulfillment and outgroup contact (`r get_latex_coef(contact_overall$lmer_coef, "CoreNeed:OutgroupInteraction")`; also see \tblref{tab:robustnessTblLong} and \fgrref{fig:Robustness}). While the three-level hierarchical model can be sensitive to scaling issues, this already indicates that it is not key need fulfillment in general --- but only key need fulfillment during an outgroup contact that predicts more positive outgroup attitudes. 
+We begin our robustness analysis by testing whether the effect of core need fulfillment is specific to an actual outgroup contact, rather than need fulfillment in general. For this, we analyzed the generalized situational core need fulfillment (either during a contact or about the daytime in general) and tested whether the effect differed during experience sampling measurements with and without outgroup contacts. We start this test by assessing the effect across all three studies, using a three-level hierarchical model, where measurements are nested within participants, and participants are nested within studies. In this overall model, we found no main effect of core need fulfillment (random slopes model, grand-mean standardized to account for all levels of variance; `r get_latex_coef(contact_overall$lmer_coef, "CoreNeed")`) but a significant interaction effect of core need fulfillment and outgroup contact (`r get_latex_coef(contact_overall$lmer_coef, "CoreNeed:OutgroupInteraction")`; also see \tblref{tab:robustnessTblLong}). While the three-level hierarchical model can be sensitive to scaling issues, this already indicates that it is not key need fulfillment in general --- but only key need fulfillment during an outgroup contact that predicts more positive outgroup attitudes. 
 
 ```{r}
 #| label: contact_s1
@@ -317,7 +317,7 @@ contact_study_coef <-
   )
 ```
 
-To ensure that the results are not affected by scaling issues (e.g., study-level variances suppressing person-level variances) or a similar Simpson's paradox, we additionally assess the model within each of the three studies. Within each of the three studies, the effects are more pronounced, so that we also see a significant effect of core need fulfillemnt (all \textit{b} > `r min(abs(contact_study_coef[contact_study_coef$coef == "CoreNeedC", "b"])) %>% round(2) %>% format(nsmall=2)`, all \textit{p} < `r max(contact_study_coef[contact_study_coef$coef == "CoreNeedC", "p"]) %>% round(3) %>% format(nsmall=3)`) as well as outgroup contact itself (all |\textit{b}| > `r min(abs(contact_study_coef[contact_study_coef$coef == "OutgroupInteraction", "b"])) %>% round(2) %>% format(nsmall=2)`, all \textit{p} < `r max(contact_study_coef[contact_study_coef$coef == "OutgroupInteraction", "p"]) %>% round(3) %>% format(nsmall=3)`) but the interaction effect consistently remains the most reliable predictor of outgroup attitudes (all |\textit{b}| > `r min(abs(contact_study_coef[contact_study_coef$coef == "CoreNeedC:OutgroupInteraction", "b"])) %>% round(2) %>% format(nsmall=2)`, all \textit{p} < `r max(contact_study_coef[contact_study_coef$coef == "CoreNeedC:OutgroupInteraction", "p"]) %>% round(3) %>% format(nsmall=3)`, also see \tblref{tab:robustnessTblLong} and \fgrref{fig:Robustness}). There is thus consistent evidence that need fulfillment relates to outgroup attitudes for outgroup contacts in particular but not need fulfillment in general. 
+To ensure that the results are not affected by scaling issues (e.g., study-level variances suppressing person-level variances) or a similar Simpson's paradox, we additionally assess the model within each of the three studies. Within each of the three studies, the effects are more pronounced, so that we also see a significant effect of core need fulfillment (all \textit{b} > `r min(abs(contact_study_coef[contact_study_coef$coef == "CoreNeedC", "b"])) %>% round(2) %>% format(nsmall=2)`, all \textit{p} < `r max(contact_study_coef[contact_study_coef$coef == "CoreNeedC", "p"]) %>% round(3) %>% format(nsmall=3)`) as well as outgroup contact itself (all |\textit{b}| > `r min(abs(contact_study_coef[contact_study_coef$coef == "OutgroupInteraction", "b"])) %>% round(2) %>% format(nsmall=2)`, all \textit{p} < `r max(contact_study_coef[contact_study_coef$coef == "OutgroupInteraction", "p"]) %>% round(3) %>% format(nsmall=3)`) but the interaction effect consistently remains the most reliable predictor of outgroup attitudes (all |\textit{b}| > `r min(abs(contact_study_coef[contact_study_coef$coef == "CoreNeedC:OutgroupInteraction", "b"])) %>% round(2) %>% format(nsmall=2)`, all \textit{p} < `r max(contact_study_coef[contact_study_coef$coef == "CoreNeedC:OutgroupInteraction", "p"]) %>% round(3) %>% format(nsmall=3)`, also see \tblref{tab:robustnessTblLong}). There is thus consistent evidence that need fulfillment relates to outgroup attitudes for outgroup contacts in particular but not need fulfillment in general. 
 
 
 \subsubsection{Interaction intend}
@@ -411,7 +411,7 @@ accidental_study_coef <-
   )
 ```
 
-We again sought to ensure that the results were not affected by scaling issues by additionally assessing the interaction intentionality model within each of the three studies. Within each of the three studies, the effect of core need fulfillemnt became even clearer (all |\textit{b}| > `r min(abs(accidental_study_coef[accidental_study_coef$coef == "CoreNeedC", "b"])) %>% round(2) %>% format(nsmall=2)`, all \textit{p} < `r ifelse(max(accidental_study_coef[accidental_study_coef$coef == "CoreNeedC", "p"]) %>% round(3) %>% format(nsmall=3)<.001, ".001", max(accidental_study_coef[accidental_study_coef$coef == "CoreNeedC", "p"]) %>% round(3) %>% format(nsmall=3))`). But in none of the studies neither outgroup contact intention nor the moderation effect explained a significant amount of variance in outgroup attitudes (all |\textit{b}| < `r max(abs(accidental_study_coef[accidental_study_coef$coef != c("(Intercept)", "CoreNeedC"), "b"])) %>% round(2) %>% format(nsmall=2)` and all \textit{p} > `r min(accidental_study_coef[accidental_study_coef$coef != c("(Intercept)", "CoreNeedC"), "p"]) %>% round(3) %>% format(nsmall=3)`; also see \tblref{tab:robustnessTblLong}). There is thus consistent evidence that need fulfillment is related to outgroup attitudes, even when taking the intentionality of the interaction into account --- at least in our three samples and with a focus on the most significant interactions.
+We again sought to ensure that the results were not affected by scaling issues by additionally assessing the interaction intentionality model within each of the three studies. Within each of the three studies, the effect of core need fulfillment became even clearer (all |\textit{b}| > `r min(abs(accidental_study_coef[accidental_study_coef$coef == "CoreNeedC", "b"])) %>% round(2) %>% format(nsmall=2)`, all \textit{p} < `r ifelse(max(accidental_study_coef[accidental_study_coef$coef == "CoreNeedC", "p"]) %>% round(3) %>% format(nsmall=3)<.001, ".001", max(accidental_study_coef[accidental_study_coef$coef == "CoreNeedC", "p"]) %>% round(3) %>% format(nsmall=3))`). But in none of the studies neither outgroup contact intention nor the moderation effect explained a significant amount of variance in outgroup attitudes (all |\textit{b}| < `r max(abs(accidental_study_coef[accidental_study_coef$coef != c("(Intercept)", "CoreNeedC"), "b"])) %>% round(2) %>% format(nsmall=2)` and all \textit{p} > `r min(accidental_study_coef[accidental_study_coef$coef != c("(Intercept)", "CoreNeedC"), "p"]) %>% round(3) %>% format(nsmall=3)`; also see \tblref{tab:robustnessTblLong}). There is thus consistent evidence that need fulfillment is related to outgroup attitudes, even when taking the intentionality of the interaction into account --- at least in our three samples and with a focus on the most significant interactions.
 
 
 \subsubsection{Well-being outcome}
@@ -647,7 +647,7 @@ need_type_study_coef <-
   )
 ```
 
-When looking at the individual studies, we again saw that the effect of core need fulfillemnt remained the on only clear effect (all |\textit{b}| > `r min(abs(need_type_study_coef[need_type_study_coef$coef == "CoreNeedC", "b"])) %>% round(2) %>% format(nsmall=2)`, all \textit{p} < `r ifelse(max(need_type_study_coef[need_type_study_coef$coef == "CoreNeedC", "p"]) %>% round(3) %>% format(nsmall=3)<.001, ".001", max(need_type_study_coef[need_type_study_coef$coef == "CoreNeedC", "p"]) %>% round(3) %>% format(nsmall=3))`). Additionally, in none of the studies neither motive type dummies nor the moderation effect explained a significant amount of variance in outgroup attitudes (all |\textit{b}| < `r max(abs(need_type_study_coef[need_type_study_coef$coef != c("(Intercept)", "CoreNeedC"), "b"])) %>% round(2) %>% format(nsmall=2)` and all \textit{p} > `r min(need_type_study_coef[need_type_study_coef$coef != c("(Intercept)", "CoreNeedC"), "p"]) %>% round(3) %>% format(nsmall=3)`; also see \tblref{tab:robustnessTblLong}). We, thus, find consistent evidence that need fulfillment is related to outgroup attitudes, even when taking the type of need into account --- at least in our three samples.
+When looking at the individual studies, we again saw that the effect of core need fulfillment remained the on only clear effect (all |\textit{b}| > `r min(abs(need_type_study_coef[need_type_study_coef$coef == "CoreNeedC", "b"])) %>% round(2) %>% format(nsmall=2)`, all \textit{p} < `r ifelse(max(need_type_study_coef[need_type_study_coef$coef == "CoreNeedC", "p"]) %>% round(3) %>% format(nsmall=3)<.001, ".001", max(need_type_study_coef[need_type_study_coef$coef == "CoreNeedC", "p"]) %>% round(3) %>% format(nsmall=3))`). Additionally, in none of the studies neither motive type dummies nor the moderation effect explained a significant amount of variance in outgroup attitudes (all |\textit{b}| < `r max(abs(need_type_study_coef[need_type_study_coef$coef != c("(Intercept)", "CoreNeedC"), "b"])) %>% round(2) %>% format(nsmall=2)` and all \textit{p} > `r min(need_type_study_coef[need_type_study_coef$coef != c("(Intercept)", "CoreNeedC"), "p"]) %>% round(3) %>% format(nsmall=3)`; also see \tblref{tab:robustnessTblLong}). We, thus, find consistent evidence that need fulfillment is related to outgroup attitudes, even when taking the type of need into account --- at least in our three samples.
 
 \subsubsection{Specific psychological needs}
 
@@ -787,7 +787,7 @@ need_sdt_study_coef_other <- need_sdt_study_coef %>%
 ```
 
 
-When looking at the individual studies, we again saw that core need fulfillemnt remained a consistent predictor of outgroup attitudes, even after accounting for the self-determination theory need (all |\textit{b}| > `r min(abs(need_sdt_study_coef[need_sdt_study_coef$coef == "CoreNeedC", "b"])) %>% round(2) %>% format(nsmall=2)`, all \textit{p} < `r ifelse(max(need_sdt_study_coef[need_sdt_study_coef$coef == "CoreNeedC", "p"]) %>% round(3) %>% format(nsmall=3)<.001, ".001", max(need_sdt_study_coef[need_sdt_study_coef$coef == "CoreNeedC", "p"]) %>% round(3) %>% format(nsmall=3))`). However, across all three studies the fulfillment of relatedness motives also emerged as a consistent predictor of outgroup attitudes (all |\textit{b}| > `r min(abs(need_sdt_study_coef[need_sdt_study_coef$coef == "RelatednesssC", "b"])) %>% round(2) %>% format(nsmall=2)`, all \textit{p} < `r ifelse(max(need_sdt_study_coef[need_sdt_study_coef$coef == "RelatednesssC", "p"]) %>% round(3) %>% format(nsmall=3)<.001, ".001", max(need_sdt_study_coef[need_sdt_study_coef$coef == "RelatednesssC", "p"]) %>% round(3) %>% format(nsmall=3))`). Additionally, in the larger studies 2 and 3 competence fulfillment was also related to more positive outgroup attitudes (study 2: `r get_latex_coef(need_sdt_study_coef %>% filter(study == 2), "CompetenceC")`, study 3: `r get_latex_coef(need_sdt_study_coef %>% filter(study == 3), "CompetenceC")`). None of the autonomy fulfillment effects reached statistical significance nor did the competence fulfillment during study 1 (see \tblref{tab:robustnessTblLong} for the full results). In short, find that across our samples, relatedness fulfillment (and to a smaller extend competence fulfillment) are instrumental in understanding when an outgroup contact leads to more positive outgroup attitudes. Importantly, even when considering these effects situational core need fulfillment remains a strong and consistent predictor of outgroup attitudes. In some cases, we even find that core need fulfillment takes on some of the variance that would otherwise be explained by the self-determination theory needs (see Online Supplemental Material A).
+When looking at the individual studies, we again saw that core need fulfillment remained a consistent predictor of outgroup attitudes, even after accounting for the self-determination theory need (all |\textit{b}| > `r min(abs(need_sdt_study_coef[need_sdt_study_coef$coef == "CoreNeedC", "b"])) %>% round(2) %>% format(nsmall=2)`, all \textit{p} < `r ifelse(max(need_sdt_study_coef[need_sdt_study_coef$coef == "CoreNeedC", "p"]) %>% round(3) %>% format(nsmall=3)<.001, ".001", max(need_sdt_study_coef[need_sdt_study_coef$coef == "CoreNeedC", "p"]) %>% round(3) %>% format(nsmall=3))`). However, across all three studies the fulfillment of relatedness motives also emerged as a consistent predictor of outgroup attitudes (all |\textit{b}| > `r min(abs(need_sdt_study_coef[need_sdt_study_coef$coef == "RelatednesssC", "b"])) %>% round(2) %>% format(nsmall=2)`, all \textit{p} < `r ifelse(max(need_sdt_study_coef[need_sdt_study_coef$coef == "RelatednesssC", "p"]) %>% round(3) %>% format(nsmall=3)<.001, ".001", max(need_sdt_study_coef[need_sdt_study_coef$coef == "RelatednesssC", "p"]) %>% round(3) %>% format(nsmall=3))`). Additionally, in the larger studies 2 and 3 competence fulfillment was also related to more positive outgroup attitudes (study 2: `r get_latex_coef(need_sdt_study_coef %>% filter(study == 2), "CompetenceC")`, study 3: `r get_latex_coef(need_sdt_study_coef %>% filter(study == 3), "CompetenceC")`). None of the autonomy fulfillment effects reached statistical significance nor did the competence fulfillment during study 1 (see \tblref{tab:robustnessTblLong} for the full results). In short, find that across our samples, relatedness fulfillment (and to a smaller extend competence fulfillment) are instrumental in understanding when an outgroup contact leads to more positive outgroup attitudes. Importantly, even when considering these effects situational core need fulfillment remains a strong and consistent predictor of outgroup attitudes. In some cases, we even find that core need fulfillment takes on some of the variance that would otherwise be explained by the self-determination theory needs (see Online Supplemental Material A).
 
 
 <!-- TABLES -->
@@ -799,42 +799,45 @@ When looking at the individual studies, we again saw that core need fulfillemnt 
 # collect models for table
 mdlRobustTblElements <- list(
   # Contact specific
-  contact_overall = c(contact_overall$lmer_model, contact_overall$lmer_model_z),
-  contact_s1 = c(contact_s1$lmer_model, contact_s1$lmer_model_z),
-  contact_s2 = c(contact_s2$lmer_model, contact_s2$lmer_model_z),
-  contact_s3 = c(contact_s3$lmer_model, contact_s3$lmer_model_z),
+  contact_overall = c(contact_overall$lmer_model, contact_overall$lmer_model_z, TRUE),
+  contact_s1 = c(contact_s1$lmer_model, contact_s1$lmer_model_z, FALSE),
+  contact_s2 = c(contact_s2$lmer_model, contact_s2$lmer_model_z, FALSE),
+  contact_s3 = c(contact_s3$lmer_model, contact_s3$lmer_model_z, FALSE),
   # Accidental
-  accidental_overall = c(accidental_overall$lmer_model, accidental_overall$lmer_model_z),
-  accidental_s1 = c(accidental_s1$lmer_model, accidental_s1$lmer_model_z),
-  accidental_s2 = c(accidental_s2$lmer_model, accidental_s2$lmer_model_z),
-  accidental_s3 = c(accidental_s3$lmer_model, accidental_s3$lmer_model_z),
+  accidental_overall = c(accidental_overall$lmer_model, accidental_overall$lmer_model_z, TRUE),
+  accidental_s1 = c(accidental_s1$lmer_model, accidental_s1$lmer_model_z, FALSE),
+  accidental_s2 = c(accidental_s2$lmer_model, accidental_s2$lmer_model_z, FALSE),
+  accidental_s3 = c(accidental_s3$lmer_model, accidental_s3$lmer_model_z, FALSE),
   # well-being core
-  wellbeing_core_overall = c(wellbeing_core_overall$lmer_model, wellbeing_core_overall$lmer_model_z),
-  wellbeing_core_s1 = c(wellbeing_core_s1$lmer_model, wellbeing_core_s1$lmer_model_z),
-  wellbeing_core_s2 = c(wellbeing_core_s2$lmer_model, wellbeing_core_s2$lmer_model_z),
-  wellbeing_core_s3 = c(wellbeing_core_s3$lmer_model, wellbeing_core_s3$lmer_model_z),
+  wellbeing_core_overall = c(wellbeing_core_overall$lmer_model, wellbeing_core_overall$lmer_model_z, TRUE),
+  wellbeing_core_s1 = c(wellbeing_core_s1$lmer_model, wellbeing_core_s1$lmer_model_z, FALSE),
+  wellbeing_core_s2 = c(wellbeing_core_s2$lmer_model, wellbeing_core_s2$lmer_model_z, FALSE),
+  wellbeing_core_s3 = c(wellbeing_core_s3$lmer_model, wellbeing_core_s3$lmer_model_z, FALSE),
   # # POTENTIALLT well-being full
   # c(wellbeing_full_overall$lmer_model, wellbeing_full_s1$lmer_model_z),
   # c(wellbeing_full_s1$lmer_model, wellbeing_full_s1$lmer_model_z),
   # c(wellbeing_full_s2$lmer_model, wellbeing_full_s2$lmer_model_z),
   # c(wellbeing_full_s3$lmer_model, wellbeing_full_s3$lmer_model_z),
   # Need type
-  need_type_overall = c(need_type_overall$lmer_model, need_type_overall$lmer_model_z),
-  need_type_s1 = c(need_type_s1$lmer_model, need_type_s1$lmer_model_z),
-  need_type_s2 = c(need_type_s2$lmer_model, need_type_s2$lmer_model_z),
-  need_type_s3 = c(need_type_s3$lmer_model, need_type_s3$lmer_model_z),
+  need_type_overall = c(need_type_overall$lmer_model, need_type_overall$lmer_model_z, TRUE),
+  need_type_s1 = c(need_type_s1$lmer_model, need_type_s1$lmer_model_z, FALSE),
+  need_type_s2 = c(need_type_s2$lmer_model, need_type_s2$lmer_model_z, FALSE),
+  need_type_s3 = c(need_type_s3$lmer_model, need_type_s3$lmer_model_z, FALSE),
   # Need SDT
-  need_sdt_overall = c(need_sdt_overall$lmer_model, need_sdt_overall$lmer_model_z),
-  need_sdt_s1 = c(need_sdt_s1$lmer_model, need_sdt_s1$lmer_model_z),
-  need_sdt_s2 = c(need_sdt_s2$lmer_model, need_sdt_s2$lmer_model_z),
-  need_sdt_s3 = c(need_sdt_s3$lmer_model, need_sdt_s3$lmer_model_z)
+  need_sdt_overall = c(need_sdt_overall$lmer_model, need_sdt_overall$lmer_model_z, TRUE),
+  need_sdt_s1 = c(need_sdt_s1$lmer_model, need_sdt_s1$lmer_model_z, FALSE),
+  need_sdt_s2 = c(need_sdt_s2$lmer_model, need_sdt_s2$lmer_model_z, FALSE),
+  need_sdt_s3 = c(need_sdt_s3$lmer_model, need_sdt_s3$lmer_model_z, FALSE)
   )
 
 
 
 mdlRobustPrep <- list()
 for (i in 1:length(mdlRobustTblElements)) {
-  mdlRobustPrep[[names(mdlRobustTblElements)[[i]]]] <- lmerTblPrep(mdlRobustTblElements[[i]][[1]], mdlRobustTblElements[[i]][[2]], name = names(mdlRobustTblElements)[[i]])
+  mdlRobustPrep[[names(mdlRobustTblElements)[[i]]]] <- lmerTblPrep(obj = mdlRobustTblElements[[i]][[1]], 
+                                                                   objz = mdlRobustTblElements[[i]][[2]], 
+                                                                   lmer_scale = mdlRobustTblElements[[i]][[3]],
+                                                                   name = names(mdlRobustTblElements)[[i]])
 }
 
 # extract important elements
@@ -896,11 +899,10 @@ robustTblLong <- robustTblLong %>%
     ),
     coef = mapvalues(
       robustTblLong$coef,
-      from = c("R2Marg_R2Cond"),
-      to = c("$R^2_{marginal}$ / $R^2_{conditional}$")
+      from = c("R2Marg_R2Cond", "practical_need_dum", "psychological_need_dum", "CoreNeed:practical_need_dum", "CoreNeed:psychological_need_dum"),
+      to = c("$R^2_{marginal}$ / $R^2_{conditional}$", "practical need", "psychological need", "CoreNeed:practical need", "CoreNeed:psychological need")
     )
   )
-
 
 mdlTblRobustLong <- 
   robustTblLong %>%
@@ -918,7 +920,7 @@ mdlTblRobustLong <-
   ) %>%
   kable_classic() %>%
   add_header_above(., c(" ", "Overall" = 2, "Study 1" = 2, "Study 2" = 2, "Study 3" = 2)) %>%
-  pack_rows(index = table(robustTblLong$group)) %>%
+  pack_rows(index = table(factor(robustTblLong$group, levels = unique(robustTblLong$group)))) %>%
   kableExtra::footnote(
     .,
     general = c("**** $p$ < .0001, *** $p$ < .001, ** $p$ < .01, * $p$ < .05"), 
