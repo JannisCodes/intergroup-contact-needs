@@ -8,9 +8,10 @@ descriptive statistics of the included variables are available in
 
 In addition to the measurement of whether or not participants had an
 intergroup interaction and their situational core need fulfillment, we
-also measured a set of general psychological needs.
+also included a number of variables that allowed us to assess the
+robustness of our results.
 
-\subsubsection{General Psychological Needs}
+\subsubsection{Specific Psychological Needs}
 
 In addition to the intergroup contact dummy and situational core need
 reported in the main text, we included a common measure of three
@@ -26,131 +27,252 @@ contact: ``\textit{I shared information about myself.}'' and
 items were rated on a continuous slider scale from very little (-50) to
 a great deal (+50).
 
+\subsubsection{Interaction Intend}
+
+To assess whether an interaction was accidental (vs.~planned), we asked
+participants with a single item to report the extend to which ``The
+interaction with -X- was accidental''. The respondents were asked to
+report this context variable for all interactions they reported on using
+a continuous slider ranging from ``not at all'' (0), through ``very
+little'' (33) and ``somewhat'' (66), to ``a great deal'' (100). In all
+studies the scale showed a right skew (\textit{mean} = 29.60,
+\textit{sd} = 33.68).
+
+\subsubsection{Goal-directedness}
+
+To assess whether the need content (i.e., the motives) would impact the
+effect of the need fulfillment experiences, we manually coded the topics
+we extracted during the topic modeling on two dimensions of how much
+they reflect a practical and a psychological goal-directedness. We chose
+practical and psychological needs specifically as our dimensions to
+account for differences in the types of needs that participants commonly
+reported. With practical motives we refer to specific, tangible goals or
+tasks that participants aimed to accomplish during the interaction.
+These instrumental goals are usually observable, concrete, and often
+centered on external outcomes, such as acquiring resources, completing
+tasks, and addressing immediate challenges \citep[][]{}. With
+psychological motives we refer to underlying motives or desires that are
+more abstract and relate to personal fulfillment and well-being. In
+contrast to practical needs, psychological needs delve into the
+subjective and internal aspects of human experiences. These needs
+pertain to emotions, social connections, and cognitive processes,
+reflecting individuals' quest for personal growth, well-being, and
+thriving in social relationships \citep[][]{}. Note that with this
+approach any particular motive can include a practical and/or a
+psychological goal-directedness but can also be classified as not having
+any goal at all. The full coding protocol we developed with examples for
+each of the codes is available in our Online Supplemental Material D.
+After an initial training, each of the two coders independently coded
+the 47 topics on the two dimensions, using one of three options each
+(i.e., 0 = no goal, 1 = vague goal, 2 = clear goal). Inter-rater
+reliability assessments showed that for both the practical as well as
+the psychological needs, agreement was not optimal using the three
+answer options (agreement practical = 0.72\%, agreement psychological =
+0.78\%). However, most disagreements were, if a need was present,
+whether that need was vague (1) or concrete (2). We, thus, collapsed
+these two categories making the ratings binary (need absent vs.~need
+present). With the simpler coding, inter-rater agreement for practical
+needs (0.93\%) and the psychological need (0.96\%) were much more
+reliable. Using Cohen's \(\kappa\) as our measure of inter-rater
+reliability, we find that both the practical need coding
+(\textit{Cohen's} \(\kappa\) = 0.80, 95\%CI{[}0.58, 1.00{]}) as well as
+the psychological need coding (\textit{Cohen's} \(\kappa\) = 0.86,
+95\%CI{[}0.67, 1.00{]}) were very good. We thus proceeded with this
+collapsed coding. After resolving coder disagreements and merging the
+codings back to the free-text responses, we found that a majority of
+responses showed both a practical as well as a psychological need
+(57.95\%) and only few responses had no goal at all (1.03\%) with the
+remaining 41.02\% having either a practical or a psychological need only
+(see Online Supplemental Material A for more detailed tables and
+visualizations).
+
+\subsubsection{Well-being}
+
+We measured experienced well-being using a visual analog scale adapted
+from \citet{davies2022}. Participants were asked to respond to the the
+question ``How do you feel right now?'' using a continuous visual slider
+ranging from ``very sad''(-100) to ``very happy'' (100). The well-being
+ratings were generally normally distributed (\textit{mean} = 64.80,
+\textit{sd} = 19.25).
+
 \subsection{Results}
 
-\subsubsection{Study 1}
+To build further confidence in our results, we assessed a number of
+additional models that might offer alternative explanations. We will
+discuss the results in sequential order --- in every case first
+considering the a global test of the model across the three studies and
+only then assessing whether the global three-level regression model
+suppresses any important person-level variations within the studies.
 
-To build further confidence in our results, we assessed two additional
-models that might offer alternative explanations. First, to ensure that
-the effect of core need fulfillment is specific to an actual contact, we
-compared the effect to core need fulfillment in situations without an
-intergroup contact. For this, we analyzed the generalized situational
-core need fulfillment (either during a contact or about the daytime in
-general) and tested whether the effect differed during experience
-sampling measurements with and without outgroup contacts. We found no
-main effect of core need fulfillment (random slopes model; \textit{b} =
--0.10, \textit{t}(1,199) = -2.22, \textit{p} = 0.026,
-\textit{95\%CI}{[}-0.18, -0.01{]}) but a significant interaction effect
-of core need fulfillment and outgroup contact (\textit{b} = 0.13,
-\textit{t}(1,199) = 4.31, \textit{p} \textless{} .001,
-\textit{95\%CI}{[}0.07, 0.18{]}; also see \tblref{tab:robustnessTblLong}
-and \fgrref{fig:Robustness}). Together with a significant main effect of
-having an outgroup contact, this indicates that it is not key need
-fulfillment in general --- but only key need fulfillment during an
-outgroup contact that predicts more positive outgroup attitudes.
+\subsubsection{Contact specific}
 
-In a final step, we controlled for other fundamental psychological needs
-during the contact. We focus on the three commonly considered
-self-determination needs (SDT): competence, autonomy, and relatedness.
-We find that the core need fulfillment adds significantly above a model
-with only the self-determination theory needs (random slopes models;
-\(\chi^2\)(6, \textit{N} = 21) = 19.60, \textit{p} = 0.003). We also
-find that next to relatedness (\textit{b} = 0.10, \textit{t}(361) =
-4.04, \textit{p} \textless{} .001, \textit{95\%CI}{[}0.05, 0.14{]}), the
-core need explains the most variance in outgroup attitudes after an
-outgroup contact (\textit{b} = 0.09, \textit{t}(361) = 2.23, \textit{p}
-= 0.026, \textit{95\%CI}{[}0.01, 0.18{]}). When compared to the model
-with only the SDT needs, the core need fulfillment flexibly takes on
-some of the explained variance of all three fundamental needs
-(competence and autonomy needs turning non-significant; all \textit{b}
-\textless{} 0.05, all \textit{p} \textgreater{} 0.544). For full results
-see see \tblref{tab:robustnessTblLong} and \fgrref{fig:Robustness}, and
-Online Supplementary Material A. There is, thus, considerable evidence
-lending confidence to the stability and relevance of psychological need
-fulfillment as a predictor of positive outgroup attitudes for natural
-intergroup contacts.
+We begin our robustness analysis by testing whether the effect of core
+need fulfillment is specific to an actual outgroup contact, rather than
+need fulfillment in general. For this, we analyzed the generalized
+situational core need fulfillment (either during a contact or about the
+daytime in general) and tested whether the effect differed during
+experience sampling measurements with and without outgroup contacts. We
+start this test by assessing the effect across all three studies, using
+a three-level hierarchical model, where measurements are nested within
+participants, and participants are nested within studies. In this
+overall model, we found no main effect of core need fulfillment (random
+slopes model, grand-mean standardized to account for all levels of
+variance; \textit{b} = 0.62, \textit{t}( 3.187) = 2.89, \textit{p} =
+0.058, \textit{95\%CI}{[} 0.20, 1.03{]}) but a significant interaction
+effect of core need fulfillment and outgroup contact (\textit{b} = 2.44,
+\textit{t}(4,663.172) = 8.62, \textit{p} \textless{} .001,
+\textit{95\%CI}{[} 1.89, 3.00{]}; also see
+\tblref{tab:robustnessTblLong} and \fgrref{fig:Robustness}). While the
+three-level hierarchical model can be sensitive to scaling issues, this
+already indicates that it is not key need fulfillment in general --- but
+only key need fulfillment during an outgroup contact that predicts more
+positive outgroup attitudes.
 
-\subsubsection{Study 2}
+To ensure that the results are not affected by scaling issues (e.g.,
+study-level variances suppressing person-level variances) or a similar
+Simpson's paradox, we additionally assess the model within each of the
+three studies. Within each of the three studies, the effects are more
+pronounced, so that we also see a significant effect of core need
+fulfillemnt (all \textit{b} \textgreater{} 0.06, all \textit{p}
+\textless{} 0.005) as well as outgroup contact itself (all
+\textbar{}\textit{b}\textbar{} \textgreater{} 1.81, all \textit{p}
+\textless{} 0.034) but the interaction effect consistently remains the
+most reliable predictor of outgroup attitudes (all
+\textbar{}\textit{b}\textbar{} \textgreater{} 0.06, all \textit{p}
+\textless{} 0.002, also see \tblref{tab:robustnessTblLong} and
+\fgrref{fig:Robustness}). There is thus consistent evidence that need
+fulfillment relates to outgroup attitudes for outgroup contacts in
+particular but not need fulfillment in general.
 
-Also for Study 2, we checked for alternative models. First, when
-considering generalized situational core need fulfillment together with
-whether an intergroup contact took place, we find that there is only a
-minuscule main effect of core need fulfillment (random slopes model;
-\textit{b} = -0.03, \textit{t}(4,849) = -1.34, \textit{p} = 0.181,
-\textit{95\%CI}{[}-0.08, 0.02{]}) but a stronger interaction effect of
-core need fulfillment and outgroup contact (\textit{b} = 0.06,
-\textit{t}(4,849) = 3.03, \textit{p} = 0.002, \textit{95\%CI}{[}0.02,
-0.10{]}). Together with a significant main effect of having an outgroup
-contact (\textit{b} = 2.88, \textit{t}(4,849) = 3.71, \textit{p}
-\textless{} .001, \textit{95\%CI}{[}1.36, 4.40{]}), this indicates that
-it is not key need fulfillment in general --- but key need fulfillment
-during an outgroup contact that predicts more positive outgroup
-attitudes. This finding is consistent with the results of the previous
-study, albeit with a slightly weaker effect (likely because of the large
-number of measurements that did not include an outgroup interaction; For
-full results see \tblref{tab:robustnessTblLong} and for visual
-comparison see \fgrref{fig:Robustness}).
+\subsubsection{Interaction intend}
 
-In a final step, we again checked whether during the interaction the
-core situational need remains a meaningful predictor even when taking
-other fundamental psychological needs into account. We find that the
-core need fulfillment adds significantly above a model with only the
-self-determination theory needs (random slopes models; \(\chi^2\)(6,
-\textit{N} = 108) = 22.90, \textit{p} \textless{} .001). We find that
-the core need fulfillment explained the most variance in outgroup
-attitudes after an outgroup contact (\textit{b} = 0.08, \textit{t}(823)
-= 2.95, \textit{p} = 0.003, \textit{95\%CI}{[}0.03, 0.13{]}). When
-compared to the model with only the SDT needs, the core need fulfillment
-flexibly takes on some of the explained variance of all of the three
-fundamental needs. However, different from the first study, relatedness
-(\textit{b} = 0.07, \textit{t}(823) = 4.26, \textit{p} \textless{} .001,
-\textit{95\%CI}{[}0.04, 0.10{]}) and autonomy (\textit{b} = 0.02,
-\textit{t}(823) = 0.93, \textit{p} = 0.353, \textit{95\%CI}{[}-0.02,
-0.08{]}) also predicted positive outgroup attitudes in this larger
-sample. For full results see \tblref{tab:robustnessTblLong} and
-\fgrref{fig:Robustness}, and Online Supplementary Material A. This means
-that also within this second sample, the fulfillment of psychological
-needs during intergroup contact remained a key predictor of positive
-outgroup attitudes, even when taking into account several alternative
-models.
+Secondly, to assess whether the need fulfillment mechanism affected by
+whether the interaction was accidental or planned we ran an exploratory
+moderation analysis using the participants' ratings of how much they
+perceived the interaction as `accidental'. It should be noted that we
+asked our participants to focus on most the important interaction (i.e.,
+``\textit{The following questions will be about the interaction \underline{you consider most significant}.}'''\,'\,``;
+emphasis as in original). We again start our analysis approach by
+assessing the model across all three studies, using a three-level
+hierarchical model. In this overall model, we retain the main effect of
+core need fulfillment (random slopes model, grand-mean standardized to
+account for all levels of variance; \textit{b} = 2.87, \textit{t}(
+7.979) = 7.32, \textit{p} \textless{} .001, \textit{95\%CI}{[} 2.10,
+3.64{]}) but neither contact intend nor the moderation effect affect the
+results (all \textbar{}\textit{b}\textbar{} \textless{} 0.27 and all
+\textit{p} \textgreater{} 0.225; see \tblref{tab:robustnessTblLong} for
+full results).
 
-\subsubsection{Study 3}
+We again sought to ensure that the results were not affected by scaling
+issues by additionally assessing the interaction intentionality model
+within each of the three studies. Within each of the three studies, the
+effect of core need fulfillemnt became even clearer (all
+\textbar{}\textit{b}\textbar{} \textgreater{} 0.13, all \textit{p}
+\textless{} 0.006). But in none of the studies neither outgroup contact
+intention nor the moderation effect explained a significant amount of
+variance in outgroup attitudes (all \textbar{}\textit{b}\textbar{}
+\textless{} 0.03 and all \textit{p} \textgreater{} 0.073; also see
+\tblref{tab:robustnessTblLong}). There is thus consistent evidence that
+need fulfillment is related to outgroup attitudes, even when taking the
+intentionality of the interaction into account --- at least in our three
+samples and with a focus on the most significant interactions.
 
-As with the previous two studies, we checked for alternative models of
-the key need fulfillment. First, when considering generalized
-situational core need fulfillment together with whether an intergroup
-contact took place, we find that there is no significant main effect of
-core need fulfillment (random slopes model; \textit{b} = 0.03,
-\textit{t}(3,835) = 1.51, \textit{p} = 0.131, \textit{95\%CI}{[}-0.01,
-0.06{]}) but a stronger interaction effect of core need fulfillment and
-outgroup contact (\textit{b} = 0.17, \textit{t}(3,835) = 7.32,
-\textit{p} \textless{} .001, \textit{95\%CI}{[}0.12, 0.21{]}). Together
-with a significant main effect of having an outgroup contact (\textit{b}
-= 5.41, \textit{t}(3,835) = 6.36, \textit{p} \textless{} .001,
-\textit{95\%CI}{[}3.74, 7.08{]}), this indicates that it is not key need
-fulfillment in general --- but key need fulfillment during an outgroup
-contact that predicts more positive outgroup attitudes. This finding is
-consistent with the results of the previous studies.
+\subsubsection{Well-being outcome}
 
-In a final step, we again checked whether during the interaction the
-core situational need remains a meaningful predictor even when taking
-other fundamental psychological needs into account. We find that the
-core need fulfillment adds additional variance above a model with only
-the self-determination theory needs (random slopes models; \(\chi^2\)(6,
-\textit{N} = 70) = 100.20, \textit{p} \textless{} .001). We find that
-the core need explains the most variance in outgroup attitudes after an
-outgroup contact (\textit{b} = 0.15, \textit{t}(1,598) = 3.88,
-\textit{p} \textless{} .001, \textit{95\%CI}{[}0.07, 0.22{]}). When
-compared to the model with only the SDT needs, the core need fulfillment
-flexibly takes on some of the explained variance of all of the three
-fundamental needs. However, similar to the previous study, in this large
-sample relatedness (\textit{b} = 0.05, \textit{t}(1,598) = 3.31,
-\textit{p} \textless{} .001, \textit{95\%CI}{[}0.02, 0.09{]}),
-competence (\textit{b} = 0.06, \textit{t}(1,598) = 2.73, \textit{p} =
-0.006, \textit{95\%CI}{[}0.02, 0.10{]}) and autonomy (\textit{b} = 0.04,
-\textit{t}(1,598) = 2.12, \textit{p} = 0.034, \textit{95\%CI}{[}-0.01,
-0.08{]}) each also predicted positive outgroup attitudes independently.
-This being said, the regression coefficient for the core need was three
-times larger (with all scaling being equal). For full results see
-\tblref{tab:robustnessTblLong} and \fgrref{fig:Robustness} as well as
-Online Supplementary Material A.
+Thirdly, to build a stronger case for the relevance of need fulfillment
+to minority group members, we exploratorily assessed the effect of need
+fulfilling outgroup interactions on self-reported well-being. We, thus,
+re-ran our main analysis but substituted the outgroup attitudes outcome
+with situational well-being. As with the previous robustness analyses,
+we begin with a global three-level hierarchical model (across the three
+studies). We find that need fulfillment during outgroup contacts,
+indeed, has a similar effect on experienced well-being (random slopes
+model, grand-mean standardized to account for all levels of variance;
+\textit{b} = 3.50, \textit{t}(4.219) = 6.33, \textit{p} = 0.003,
+\textit{95\%CI}{[} 2.42, 4.58{]}). We found the same result when we
+assessed each of the three studies individually. In each of the studies
+situational need fulfillment during the outgroup interaction was related
+with higher well-being ratings by the participants (random slopes model,
+centered within participants; all \textbar{}\textit{b}\textbar{}
+\textgreater{} 0.10, all \textit{p} \textless{} 0.009). We, thus, find
+consistent and meaningful evidence that need fulfilling outgroup
+interactions also relate to higher everyday well-being.
+
+\subsubsection{Need types}
+
+\paragraph{overall}
+
+Fourthly, to assess the role of different types of motives reported by
+our participants, we added our coding of practical and psychological
+goal-directedness as additional predictors to our base model. We thus
+had core need fulfillment predicting outgroup attitudes while also
+accounting for whether the reported motives were capturing practical
+and/or psychological motives. We again ran a global model, across the
+three studies first. We found that core need fulfillment remain a core
+predictor of outgroup attitudes (random slopes model, grand-mean
+standardized to account for all levels of variance; \textit{b} = 2.27,
+\textit{t}( 48.194) = 2.72, \textit{p} = 0.009, \textit{95\%CI}{[} 0.63,
+3.90{]}), even after accounting for different types of motives. None of
+the motive types nor the moderation effects reached statistical
+significance within the overall analysis (all
+\textbar{}\textit{b}\textbar{} \textless{} 1.45 and all \textit{p}
+\textgreater{} 0.073; see \tblref{tab:robustnessTblLong} for full
+results).
+
+\paragraph{Study follow-up}
+
+When looking at the individual studies, we again saw that the effect of
+core need fulfillemnt remained the on only clear effect (all
+\textbar{}\textit{b}\textbar{} \textgreater{} 0.14, all \textit{p}
+\textless{} 0.015). Additionally, in none of the studies neither motive
+type dummies nor the moderation effect explained a significant amount of
+variance in outgroup attitudes (all \textbar{}\textit{b}\textbar{}
+\textless{} 1.53 and all \textit{p} \textgreater{} 0.144; also see
+\tblref{tab:robustnessTblLong}). We, thus, find consistent evidence that
+need fulfillment is related to outgroup attitudes, even when taking the
+type of need into account --- at least in our three samples.
+
+\subsubsection{Specific psychological needs}
+
+In a final step, we checked whether during the interaction the core
+situational need remains a meaningful predictor even when taking other
+fundamental psychological needs into account. We again take a two-step
+approach, starting with cross-study global three-level test and then
+assessing the effects within the individual studies. Within the overall
+model we find that across the studies core need fulfillment remained a
+strong predictor of outgroup attitudes, even after controlling for the
+three self-determination theory need (random slopes model, grand-mean
+standardized to account for all levels of variance; \textit{b} = 1.88,
+\textit{t}(2.705) = 4.75, \textit{p} = 0.022, \textit{95\%CI}{[} 1.11,
+2.66{]}). Within this overall analysis, none of the self-determination
+theory needs independently predicted outgroup attitudes to a
+statistically significant extent (all \textit{p} \textgreater{} 0.095).
+However, some of the effect sizes were largely comparable to that of the
+core need fulfillment (all \textbar{}\textit{b}\textbar{} \textless{}
+2.10, particularly that of relatedness fulfillment; see
+\tblref{tab:robustnessTblLong} for full results).
+
+When looking at the individual studies, we again saw that core need
+fulfillemnt remained a consistent predictor of outgroup attitudes, even
+after accounting for the self-determination theory need (all
+\textbar{}\textit{b}\textbar{} \textgreater{} 0.06, all \textit{p}
+\textless{} 0.033). However, across all three studies the fulfillment of
+relatedness motives also emerged as a consistent predictor of outgroup
+attitudes (all \textbar{}\textit{b}\textbar{} \textgreater{} 0.06, all
+\textit{p} \textless{} 0.001). Additionally, in the larger studies 2 and
+3 competence fulfillment was also related to more positive outgroup
+attitudes (study 2: \textit{b} = 0.05, \textit{t}(841.8) = 2.43,
+\textit{p} = 0.015, \textit{95\%CI}{[} 0.01, 0.10{]}, study 3:
+\textit{b} = 0.06, \textit{t}(30.20) = 2.62, \textit{p} = 0.013,
+\textit{95\%CI}{[} 0.01, 0.10{]}). None of the autonomy fulfillment
+effects reached statistical significance nor did the competence
+fulfillment during study 1 (see \tblref{tab:robustnessTblLong} for the
+full results). In short, find that across our samples, relatedness
+fulfillment (and to a smaller extend competence fulfillment) are
+instrumental in understanding when an outgroup contact leads to more
+positive outgroup attitudes. Importantly, even when considering these
+effects situational core need fulfillment remains a strong and
+consistent predictor of outgroup attitudes. In some cases, we even find
+that core need fulfillment takes on some of the variance that would
+otherwise be explained by the self-determination theory needs (see
+Online Supplemental Material A).
