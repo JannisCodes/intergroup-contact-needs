@@ -888,6 +888,8 @@ workerWithinBetween <-
         "ExWB_1",
         "OutgroupInteraction",
         "NonOutgroupInteraction",
+        "OutgroupInteractionM",
+        "NonOutgroupInteractionM",
         "interaction_accidental", 
         "interaction_voluntary",
         "interaction_meaningful"
@@ -1218,6 +1220,8 @@ studentWithinBetween <-
         "interaction_quality",
         "OutgroupInteraction",
         "NonOutgroupInteraction", 
+        "OutgroupInteractionM",
+        "NonOutgroupInteractionM",
         "InteractionContextvoluntary",
         "interaction_accidental", 
         "interaction_voluntary", 
@@ -1586,6 +1590,8 @@ medicalWithinBetween <-
         "interaction_accidental",
         "OutgroupInteraction",
         "NonOutgroupInteraction",
+        "OutgroupInteractionM",
+        "NonOutgroupInteractionM",
         "interaction_voluntary",
         "interaction_meaningful",
         "interaction_importance"

@@ -164,44 +164,44 @@ table(as.character(workerSampleInfo$nationality))
 ######
 
 # divide into trait and state
-dtWorkerSupp$workerWithinBetween <-
-  MlTraitState(
-    data = dtWorkerSupp$workerInteractionType,
-    id = "PID",
-    selection =
-      c(
-        "keyMotiveFulfilled",
-        "competence.daily.all",
-        "autonomy.daily.all",
-        "relatedness.daily.all",
-        "thermometerDutch_1",
-        "keymotive_fulfillemt_1",
-        "competence_1",
-        "autonomy_1",
-        "relatedness_1", 
-        "quality_overall_1", 
-        "OutgroupInteraction",
-        "NonOutgroupInteraction", 
-        "OutgroupInteractionM",
-        "NonOutgroupInteractionM"
-      )
-  )
-
-dtWorkerSupp$workerOutWithinBetween <-
-  MlTraitState(
-    data = dtWorkerSupp$workerInteractionType %>% filter(OutgroupInteraction == "Yes"),
-    id = "PID",
-    selection =
-      c(
-        "keyMotiveFulfilled",
-        "thermometerDutch_1",
-        "keymotive_fulfillemt_1",
-        "competence_1",
-        "autonomy_1",
-        "relatedness_1", 
-        "quality_overall_1"
-      )
-  )
+# dtWorkerSupp$workerWithinBetween <-
+#   MlTraitState(
+#     data = dtWorkerSupp$workerInteractionType,
+#     id = "PID",
+#     selection =
+#       c(
+#         "keyMotiveFulfilled",
+#         "competence.daily.all",
+#         "autonomy.daily.all",
+#         "relatedness.daily.all",
+#         "thermometerDutch_1",
+#         "keymotive_fulfillemt_1",
+#         "competence_1",
+#         "autonomy_1",
+#         "relatedness_1", 
+#         "quality_overall_1", 
+#         "OutgroupInteraction",
+#         "NonOutgroupInteraction", 
+#         "OutgroupInteractionM",
+#         "NonOutgroupInteractionM"
+#       )
+#   )
+# 
+# dtWorkerSupp$workerOutWithinBetween <-
+#   MlTraitState(
+#     data = dtWorkerSupp$workerInteractionType %>% filter(OutgroupInteraction == "Yes"),
+#     id = "PID",
+#     selection =
+#       c(
+#         "keyMotiveFulfilled",
+#         "thermometerDutch_1",
+#         "keymotive_fulfillemt_1",
+#         "competence_1",
+#         "autonomy_1",
+#         "relatedness_1", 
+#         "quality_overall_1"
+#       )
+#   )
 ```
 
 ```{r workerVarDescr, include=FALSE}
@@ -1038,39 +1038,39 @@ table(as.character(studentSampleInfo$nationality))
 # N within ppt.s 
 ######
 
-# divide into trait and state
-dtStudentSupp$studentWithinBetween <-
-  MlTraitState(
-    data = dtStudentSupp$studentInteractionType,
-    id = "PID",
-    selection =
-      c(
-        "KeyNeedFullfillment",
-        "Competence",
-        "Autonomy",
-        "Relatedness",
-        "AttitudesDutch",
-        "quality_overall",
-        "OutgroupInteraction",
-        "NonOutgroupInteraction",
-        "OutgroupInteractionM",
-        "NonOutgroupInteractionM"
-      )
-  )
-dtStudentSupp$studentOutWithinBetween <-
-  MlTraitState(
-    data = dtStudentSupp$studentInteractionType %>% filter(OutgroupInteraction == "Yes"),
-    id = "PID",
-    selection =
-      c(
-        "KeyNeedFullfillment",
-        "Competence",
-        "Autonomy",
-        "Relatedness",
-        "AttitudesDutch",
-        "quality_overall"
-      )
-  )
+# # divide into trait and state
+# dtStudentSupp$studentWithinBetween <-
+#   MlTraitState(
+#     data = dtStudentSupp$studentInteractionType,
+#     id = "PID",
+#     selection =
+#       c(
+#         "KeyNeedFullfillment",
+#         "Competence",
+#         "Autonomy",
+#         "Relatedness",
+#         "AttitudesDutch",
+#         "quality_overall",
+#         "OutgroupInteraction",
+#         "NonOutgroupInteraction",
+#         "OutgroupInteractionM",
+#         "NonOutgroupInteractionM"
+#       )
+#   )
+# dtStudentSupp$studentOutWithinBetween <-
+#   MlTraitState(
+#     data = dtStudentSupp$studentInteractionType %>% filter(OutgroupInteraction == "Yes"),
+#     id = "PID",
+#     selection =
+#       c(
+#         "KeyNeedFullfillment",
+#         "Competence",
+#         "Autonomy",
+#         "Relatedness",
+#         "AttitudesDutch",
+#         "quality_overall"
+#       )
+#   )
 ```
 
 ```{r studentVarDescr, include=FALSE}
@@ -1982,19 +1982,19 @@ table(medicalSampleInfo$age)
 table(medicalSampleInfo$gender)
 table(as.character(medicalSampleInfo$nationality))
 
-# divide into trait and state
-dtMedicalSupp$medicalWithinBetween <- 
-  MlTraitState(
-    data = dtMedical$full,
-    id = "PID",
-    selection =
-      c(
-        "OutgroupInteraction",
-        "NonOutgroupInteraction",
-        "OutgroupInteractionM",
-        "NonOutgroupInteractionM"
-      )
-  )
+# # divide into trait and state
+# dtMedicalSupp$medicalWithinBetween <- 
+#   MlTraitState(
+#     data = dtMedical$full,
+#     id = "PID",
+#     selection =
+#       c(
+#         "OutgroupInteraction",
+#         "NonOutgroupInteraction",
+#         "OutgroupInteractionM",
+#         "NonOutgroupInteractionM"
+#       )
+#   )
 
 ```
 
@@ -3866,6 +3866,7 @@ mdlTblGeneralLong$coef <- mapvalues(
   )
 )
 
+
 library(huxtable)
 testTbl <- mdlTblGeneralLong %>%
   replace(is.na(.), "") %>%
@@ -4130,6 +4131,7 @@ mdlTblGeneralShort
 # Table of core need and Allports Conditions (potentially two tables — e.g., needs + allport)
 # all lmer models :-)
 # make different options
+# way easier version in robustness analyses!! Check that out first!!
 
 # collect relevant models
 # Study 1:
@@ -4140,9 +4142,9 @@ tblDtS1Needs <- dtWorkerSupp$workerOutWithinBetween %>%
     AttitudeZ = thermometerDutch_1_zwc,
     CoreNeed = keymotive_fulfillemt_1_cwc,
     CoreNeedZ = keymotive_fulfillemt_1_zwc,
-    QualityRaw = quality_overall_1,
-    Quality = quality_overall_1_cwc,
-    QualityZ = quality_overall_1_zwc,
+    QualityRaw = interaction_quality, # quality_overall_1,
+    Quality = interaction_quality_cwc, # quality_overall_1_cwc,
+    QualityZ = interaction_quality_zwc, # quality_overall_1_zwc,
     PID = PID
   )
 # Quality ~ CoreNeed
@@ -4182,9 +4184,9 @@ tblDtS2Needs <- dtStudentSupp$studentOutWithinBetween %>%
     AttitudeZ = AttitudesDutch_zwc,
     CoreNeed = KeyNeedFullfillment_cwc,
     CoreNeedZ = KeyNeedFullfillment_zwc,
-    QualityRaw = quality_overall,
-    Quality = quality_overall_cwc,
-    QualityZ = quality_overall_zwc,
+    QualityRaw = interaction_quality, #quality_overall,
+    Quality = interaction_quality_cwc, #quality_overall_cwc,
+    QualityZ = interaction_quality_zwc, #quality_overall_zwc,
     PID = PID
   )
 # Quality ~ CoreNeed
@@ -4228,9 +4230,9 @@ tblDtS3Needs <- dtMedicalSupp$medicalOutWithinBetween %>%
     CoreNeedZ = KeyNeedFulfillment_zwc,
     Allport = AllportsCondition_cwc,
     AllportZ = AllportsCondition_zwc,
-    QualityRaw = qualityOverall,
-    Quality = qualityOverall_cwc,
-    QualityZ = qualityOverall_zwc,
+    QualityRaw = interaction_quality, #qualityOverall,
+    Quality = interaction_quality_cwc, #qualityOverall_cwc,
+    QualityZ = interaction_quality_zwc, #qualityOverall_zwc,
     PID = PID
   )
 # Quality ~ CoreNeed
@@ -5396,6 +5398,7 @@ metaSubForest(effTheory,
 ```{r Export Path Models, include=FALSE}
 save(shortMdlPath, 
      file = "data/theoryMdlTabl.RData")
+rmarkdown::render("PathModels.Rmd")
 ```
 
 ```{r OsfExport, include=FALSE}
