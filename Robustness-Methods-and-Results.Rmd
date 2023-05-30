@@ -565,7 +565,6 @@ Thirdly, to build a stronger case for the relevance of need fulfillment to minor
 
 \subsubsection{Need types}
 
-\paragraph{overall}
 ```{r}
 #| label: need_type_overall
 #| include: false
@@ -585,7 +584,6 @@ need_type_overall <- select_best_lmer_model(
 
 Fourthly, to assess the role of different types of motives reported by our participants, we added our coding of practical and psychological goal-directedness as additional predictors to our base model. We thus had core need fulfillment predicting outgroup attitudes while also accounting for whether the reported motives were capturing practical and/or psychological motives. We again ran a global model, across the three studies first. We found that core need fulfillment remain a core predictor of outgroup attitudes (random slopes model, grand-mean standardized to account for all levels of variance; `r get_latex_coef(need_type_overall$lmer_coef, "CoreNeed")`), even after accounting for different types of motives. None of the motive types nor the moderation effects reached statistical significance within the overall analysis (all |\textit{b}| < `r max(abs(need_type_overall$lmer_coef[need_type_overall$lmer_coef$coef != c("(Intercept)", "CoreNeed"), "b"])) %>% round(2) %>% format(nsmall=2)` and all \textit{p} > `r min(need_type_overall$lmer_coef[need_type_overall$lmer_coef$coef != c("(Intercept)", "CoreNeed"), "p"]) %>% round(3) %>% format(nsmall=3)`; see \tblref{tab:robustnessTblLong} for full results). 
 
-\paragraph{Study follow-up}
 ```{r}
 #| label: need_type_s1
 #| include: false
