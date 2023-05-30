@@ -1086,7 +1086,7 @@ studentMlCor <-
     # selection = c("KeyNeedFullfillment", "Competence", "Autonomy", "Relatedness", "interaction_quality", "AttitudesDutch"),
     # labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Quality", "Attitudes NL")
     selection = c("KeyNeedFullfillment", "interaction_quality", "AttitudesDutch"),
-    labels = c("Core Need", "Competence", "Quality", "Attitudes NL")
+    labels = c("Core Need", "Quality", "Attitudes NL")
   ) 
 
 studentMlCor %>%
