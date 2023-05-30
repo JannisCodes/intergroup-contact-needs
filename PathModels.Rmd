@@ -34,10 +34,10 @@ path_tikz_fig <- function(data) {
     \\node[mynode,below right=of m](y) {<<lab_y>>};
     \\node[mynode,above left=of m](xd) {<<lab_x_direct>>};
     \\node[mynode,above right=of m](yd) {<<lab_y_direct>>};
-    \\draw[-latex] (xd.east) -- node[above=2mm, align=center] {<<coef_xy_direct>>} (yd.west);
-    \\draw[-latex] (x.north) -- node[auto] {<<coef_xm>>} (m.west);
-    \\draw[-latex] (m.east) -- node[auto] {<<coef_my>>} (y.north);
-    \\draw[-latex] (x.east) -- node[below=2mm, align=center] {<<coef_xy>>} (y.west);
+    \\draw[latex-latex] (xd.east) -- node[above=2mm, align=center] {<<coef_xy_direct>>} (yd.west);
+    \\draw[latex-latex] (x.north) -- node[auto] {<<coef_xm>>} (m.west);
+    \\draw[latex-latex] (m.east) -- node[auto] {<<coef_my>>} (y.north);
+    \\draw[latex-latex] (x.east) -- node[below=2mm, align=center] {<<coef_xy>>} (y.west);
     \\path (xd.north west) ++(-0.2, 6pt) node[above left]{\\textbf{(<<fig_num>>) <<study_num>>}};
 \\end{tikzpicture}
 \\end{center}
@@ -56,10 +56,10 @@ path_tikz <- function(data) {
     \\node[mynode,below right=of m](y) {<<lab_y>>};
     \\node[mynode,above left=of m](xd) {<<lab_x_direct>>};
     \\node[mynode,above right=of m](yd) {<<lab_y_direct>>};
-    \\draw[-latex] (xd.east) -- node[above=2mm, align=center] {<<coef_xy_direct>>} (yd.west);
-    \\draw[-latex] (x.north) -- node[auto] {<<coef_xm>>} (m.west);
-    \\draw[-latex] (m.east) -- node[auto] {<<coef_my>>} (y.north);
-    \\draw[-latex] (x.east) -- node[below=2mm, align=center] {<<coef_xy>>} (y.west);
+    \\draw[latex-latex] (xd.east) -- node[above=2mm, align=center] {<<coef_xy_direct>>} (yd.west);
+    \\draw[latex-latex] (x.north) -- node[auto] {<<coef_xm>>} (m.west);
+    \\draw[latex-latex] (m.east) -- node[auto] {<<coef_my>>} (y.north);
+    \\draw[latex-latex] (x.east) -- node[below=2mm, align=center] {<<coef_xy>>} (y.west);
     \\path (xd.north west) ++(-0.2, 6pt) node[above left]{\\textbf{(<<fig_num>>) <<study_num>>}};
 \\end{tikzpicture}
 ", 

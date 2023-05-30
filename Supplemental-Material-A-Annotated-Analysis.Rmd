@@ -1133,8 +1133,9 @@ studentContactFreq <- dtStudents$full %>%
     AvAttitude = mean(AttitudesDutch, na.rm = TRUE),
     AvWellBeing = mean(ExWB, na.rm = TRUE),
     AvQuality = mean(quality_overall, na.rm = TRUE),
-    AvQualityComb = mean(interaction_quality, na.rm = TRUE),
     AvQualityOut = mean(quality_overall[InteractionDumDutch==1], na.rm = TRUE),
+    AvQualityComb = mean(interaction_quality, na.rm = TRUE),
+    AvQualityCombOut = mean(interaction_quality[InteractionDumDutch==1], na.rm = TRUE),
     AvAccidental = mean(interaction_accidental, na.rm = TRUE),
     AvVoluntary = mean(interaction_voluntary, na.rm = TRUE),
     AvMeaningful = mean(interaction_meaningful, na.rm = TRUE),
@@ -1637,12 +1638,13 @@ medicalContactFreq <-
     AvAttitude = mean(AttitudesDutch, na.rm = TRUE),
     AvWellBeing =  mean(exWB, na.rm = TRUE),
     AvQuality = mean(qualityOverall, na.rm = TRUE),
+    AvQualityOut = mean(qualityOverall[InteractionDumDutch==1], na.rm = TRUE),
+    AvQualityComb = mean(interaction_quality, na.rm = TRUE),
+    AvQualityCombOut = mean(interaction_quality[InteractionDumDutch==1], na.rm = TRUE),
     AvAccidental = mean(interaction_accidental, na.rm = TRUE),
     AvVoluntary = mean(interaction_voluntary, na.rm = TRUE),
     AvMeaningful = mean(interaction_meaningful, na.rm = TRUE),
-    AvImportance = mean(interaction_importance, na.rm = TRUE),
-    AvQualityComb = mean(interaction_quality, na.rm = TRUE),
-    AvQualityOut = mean(qualityOverall[InteractionDumDutch==1], na.rm = TRUE)
+    AvImportance = mean(interaction_importance, na.rm = TRUE)
   ) %>%
   mutate(
     WinSumContactNL = DescTools::Winsorize(SumContactNL),
@@ -1791,7 +1793,7 @@ workerDescr <- workerInteractionType %>%
     Competence = competence.daily.all,
     Autonomy = autonomy.daily.all,
     Relatedness = relatedness.daily.all,
-    Quality = quality_overall_1,
+    Quality = interaction_quality,
     Accidental = interaction_accidental,
     Voluntary = interaction_voluntary
   )
@@ -1803,7 +1805,7 @@ workerDescrOut <- workerInteractionType %>%
     Competence = competence.daily.all,
     Autonomy = autonomy.daily.all,
     Relatedness = relatedness.daily.all,
-    Quality = quality_overall_1,
+    Quality = interaction_quality,
     Accidental = interaction_accidental,
     Voluntary = interaction_voluntary
   )
@@ -1909,7 +1911,7 @@ workerMlCor <-
   MlCorMat(
     data = workerInteractionType,
     id = "PID",
-    selection = c("keyMotiveFulfilled", "competence.daily.all", "autonomy.daily.all", "relatedness.daily.all", "quality_overall_1", "interaction_accidental", "interaction_voluntary", "thermometerDutch_1"),
+    selection = c("keyMotiveFulfilled", "competence.daily.all", "autonomy.daily.all", "relatedness.daily.all", "interaction_quality", "interaction_accidental", "interaction_voluntary", "thermometerDutch_1"),
     labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Quality", "Accidental", "Voluntary", "Attitudes NL")
   ) 
 
@@ -2173,7 +2175,9 @@ workerAvFreQual <- dtWorker$full %>%
     SumContactNLAll = sum(number),
     AvAttitude = mean(thermometerDutch_1, na.rm = TRUE),
     AvQuality = mean(quality_overall_1, na.rm = TRUE),
-    AvQualityOut = mean(quality_overall_1[Contact_dum==1], na.rm = TRUE)
+    AvQualityOut = mean(quality_overall_1[Contact_dum==1], na.rm = TRUE),
+    AvQualityComb = mean(interaction_quality, na.rm = TRUE),
+    AvQualityCombOut = mean(interaction_quality[Contact_dum==1], na.rm = TRUE)
   ) %>%
   mutate(
     WinSumContactNL = DescTools::Winsorize(SumContactNL),
@@ -2182,14 +2186,16 @@ workerAvFreQual <- dtWorker$full %>%
     SumContactNLAll_c = SumContactNLAll - mean(SumContactNLAll, na.rm = TRUE),
     AvAttitude_c = AvAttitude - mean(AvAttitude, na.rm = TRUE),
     AvQuality_c = AvQuality - mean(AvQuality, na.rm = TRUE),
-    AvQualityOut_c = AvQualityOut - mean(AvQualityOut, na.rm = TRUE)
+    AvQualityOut_c = AvQualityOut - mean(AvQualityOut, na.rm = TRUE),
+    AvQualityComb_c = AvQualityComb - mean(AvQualityComb, na.rm = TRUE),
+    AvQualityCombOut_c = AvQualityCombOut - mean(AvQualityCombOut, na.rm = TRUE)
   )
 ```
 
 ```{r WorkerFreqQualCor}
 # correlation panel
 pairs.panels.new(
-  workerAvFreQual %>% select(SumContactNL, SumContactNLAll, AvQuality, AvAttitude),
+  workerAvFreQual %>% select(SumContactNL, SumContactNLAll, AvQualityComb, AvAttitude),
   labels = c(
     "Sum:\nNumer of beeps with Outgroup Contact (NL)",
     "Sum:\nNumber of Outgroup Contacts (NL)",
@@ -2200,7 +2206,7 @@ pairs.panels.new(
 
 # correlation panel with interaction sums winsorized
 pairs.panels.new(
-  workerAvFreQual %>% select(WinSumContactNL, WinSumContactNLAll, AvQuality, AvAttitude),
+  workerAvFreQual %>% select(WinSumContactNL, WinSumContactNLAll, AvQualityComb, AvAttitude),
   labels = c(
     "Sum:\nNumer of beeps with Outgroup Contact (NL)\n[Winsorized]",
     "Sum:\nNumber of Outgroup Contacts (NL)\n[Winsorized]",
@@ -2215,7 +2221,7 @@ Within the data, we find a medium sized correlation between the participants' Av
 ```{r workerModelOlsAttFreqQual}
 # regression
 mdlWorker$lmAttFreqQualX <-
-  lm(AvAttitude ~ SumContactNL_c * AvQualityOut_c, data = workerAvFreQual)
+  lm(AvAttitude ~ SumContactNL_c * AvQualityCombOut_c, data = workerAvFreQual)
 # summary(lmWorkerAttFreqQualX)
 
 summ(
@@ -2230,14 +2236,14 @@ mdlWorker$lmAttFreqQualXEta <-
 
 interactions::interact_plot(
   mdlWorker$lmAttFreqQualX,
-  pred = AvQualityOut_c,
+  pred = AvQualityCombOut_c,
   modx = SumContactNL_c,
   interval = TRUE,
   partial.residuals = TRUE
 )
 
 interactions::johnson_neyman(mdlWorker$lmAttFreqQualX,
-                             pred = AvQualityOut_c,
+                             pred = AvQualityCombOut_c,
                              modx = SumContactNL_c,
                              alpha = .05)
 ```
@@ -2916,12 +2922,12 @@ Given that we now have the perceived interaction quality as our outcome variable
 ```{r workerOutModelMLQltNull}
 # Create and save Model
 mdlWorkerOut$Qlt$lmerNull <-
-  lme4::lmer(quality_overall_1 ~ 1 + (1 | PID), 
+  lme4::lmer(interaction_quality ~ 1 + (1 | PID), 
              data = workerOutWithinBetween) # use optim if it does not converge
 
 mdlWorkerOut$Qlt$lmeNull <-
   lme(
-    quality_overall_1 ~ 1,
+    interaction_quality ~ 1,
     random = ~ 1 | PID,
     data = workerOutWithinBetween,
     control = list(opt = "nlmimb")
@@ -2969,7 +2975,7 @@ We again add the core interaction need fulfillment to the multilevel random inte
 # Create and save Model
 mdlWorkerOut$Qlt$lmeInterceptCore <-
   lme(
-    quality_overall_1 ~ keymotive_fulfillemt_1_cwc,
+    interaction_quality ~ keymotive_fulfillemt_1_cwc,
     random = ~ 1 | PID,
     data = workerOutWithinBetween
   )
@@ -2977,7 +2983,7 @@ mdlWorkerOut$Qlt$lmeInterceptCore <-
 # Get summary with p-values (Satterthwaite's method)
 summ(
   mdlWorkerOut$Qlt$lmerInterceptCore <- 
-    lmer(quality_overall_1 ~ keymotive_fulfillemt_1_cwc + (1 | PID), 
+    lmer(interaction_quality ~ keymotive_fulfillemt_1_cwc + (1 | PID), 
        data = workerOutWithinBetween),
   confint = TRUE,
   digits = 3,
@@ -3049,7 +3055,7 @@ As before, we check whether further letting the effect of core need fulfillment 
 # Create and save Model (optimizer needed to reach convergence)
 mdlWorkerOut$Qlt$lmeSlopesCore <-
   lme(
-    quality_overall_1 ~
+    interaction_quality ~
       keymotive_fulfillemt_1_cwc,
     random = ~ 1 + keymotive_fulfillemt_1_cwc | PID,
     control = lmeControl(opt = "optim"),
@@ -3060,7 +3066,7 @@ mdlWorkerOut$Qlt$lmeSlopesCore <-
 summ(
   mdlWorkerOut$Qlt$lmerSlopesCore <-
     lmer(
-      quality_overall_1 ~
+      interaction_quality ~
         keymotive_fulfillemt_1_cwc +
         (1 + keymotive_fulfillemt_1_cwc | PID),
       data = workerOutWithinBetween
@@ -3101,7 +3107,7 @@ mdlWorkerOut$Qlt$varSlopesCore <-
   lme4::VarCorr(mdlWorkerOut$Qlt$lmeSlopesCore)
 
 ggplot(data = workerOutWithinBetween,
-       aes(y = quality_overall_1, x = keymotive_fulfillemt_1, col = as.factor(PID))) +
+       aes(y = interaction_quality, x = keymotive_fulfillemt_1, col = as.factor(PID))) +
   geom_point(size = 1) + # change size and colour
   labs(y = "Interaction Quality", 
        x = "Key Need Fulfillment",
@@ -3147,7 +3153,7 @@ We thus add both the core need fulfillment and perceived interaction quality to 
 # Create and save Model
 mdlWorkerOut$Att$lmeInterceptCoreQlt <-
   lme(
-    thermometerDutch_1 ~ keymotive_fulfillemt_1_cwc + quality_overall_1_cwc,
+    thermometerDutch_1 ~ keymotive_fulfillemt_1_cwc + interaction_quality_cwc,
     random = ~ 1 | PID,
     data = workerOutWithinBetween
   )
@@ -3156,7 +3162,7 @@ mdlWorkerOut$Att$lmeInterceptCoreQlt <-
 summ(
   mdlWorkerOut$Att$lmerInterceptCoreQlt <- 
     lmer(
-    thermometerDutch_1 ~ keymotive_fulfillemt_1_cwc + quality_overall_1_cwc + (1 | PID),
+    thermometerDutch_1 ~ keymotive_fulfillemt_1_cwc + interaction_quality_cwc + (1 | PID),
     data = workerOutWithinBetween
   ),
   confint = TRUE,
@@ -3233,8 +3239,8 @@ We again check whether further letting the effects vary between participants exp
 mdlWorkerOut$Att$lmeSlopesCoreQlt <-
   lme(
     thermometerDutch_1 ~
-      keymotive_fulfillemt_1_cwc + quality_overall_1_cwc,
-    random = ~ 1 + keymotive_fulfillemt_1_cwc + quality_overall_1_cwc | PID,
+      keymotive_fulfillemt_1_cwc + interaction_quality_cwc,
+    random = ~ 1 + keymotive_fulfillemt_1_cwc + interaction_quality_cwc | PID,
     control = lmeControl(opt = "optim"),
     data = workerOutWithinBetween
   )
@@ -3243,8 +3249,8 @@ mdlWorkerOut$Att$lmeSlopesCoreQlt <-
 summ(
   mdlWorkerOut$Att$lmerSlopesCoreQlt <- lmer(
     thermometerDutch_1 ~
-      keymotive_fulfillemt_1_cwc + quality_overall_1_cwc +
-      (1 + keymotive_fulfillemt_1_cwc + quality_overall_1_cwc | PID),
+      keymotive_fulfillemt_1_cwc + interaction_quality_cwc +
+      (1 + keymotive_fulfillemt_1_cwc + interaction_quality_cwc | PID),
     data = workerOutWithinBetween
   ),
   confint = TRUE,
@@ -4226,13 +4232,13 @@ workerWbModels <-
   list(
     null = ExWB_1 ~ 1,
     wb_need = ExWB_1 ~ keymotive_fulfillemt_1_cwc,
-    wb_need_qual = ExWB_1 ~ keymotive_fulfillemt_1_cwc + quality_overall_1_cwc
+    wb_need_qual = ExWB_1 ~ keymotive_fulfillemt_1_cwc + interaction_quality_cwc
   )
 workerWbModelType <-
   list(
     intercept = ~ 1 | PID,
     slope_need = ~ 1 + keymotive_fulfillemt_1_cwc | PID,
-    slope_need_qual = ~ 1 + keymotive_fulfillemt_1_cwc + quality_overall_1_cwc | PID
+    slope_need_qual = ~ 1 + keymotive_fulfillemt_1_cwc + interaction_quality_cwc | PID
   )
 
 # Well-being Null Model
@@ -4352,7 +4358,7 @@ Random slope model is the best fitting for need fulfillment and interaction qual
 # Get summary with p-values (Satterthwaite's method)
 summ(
   mdlWorkerOut$Wb$lmerSlopeNeedQual <- lmer(
-    ExWB_1 ~ keymotive_fulfillemt_1_cwc + quality_overall_1_cwc + (1 + keymotive_fulfillemt_1_cwc + quality_overall_1_cwc | PID),
+    ExWB_1 ~ keymotive_fulfillemt_1_cwc + interaction_quality_cwc + (1 + keymotive_fulfillemt_1_cwc + interaction_quality_cwc | PID),
     data = workerOutWithinBetween
   ),
   confint = TRUE,
@@ -4367,7 +4373,7 @@ mdlWorkerOut$Att$lmerSlopeNeedQualCI <-
 # all standardized within
 summ(
   mdlWorkerOut$Wb$lmerSlopeNeedQualZ <- lmer(
-    ExWB_1_zwc ~ keymotive_fulfillemt_1_zwc + quality_overall_1_zwc + (1 + keymotive_fulfillemt_1_zwc + quality_overall_1_zwc | PID),
+    ExWB_1_zwc ~ keymotive_fulfillemt_1_zwc + interaction_quality_zwc + (1 + keymotive_fulfillemt_1_zwc + interaction_quality_zwc | PID),
     data = workerOutWithinBetween
   ),
   confint = TRUE,
@@ -4488,7 +4494,7 @@ studentDescr <- studentInteractionType %>%
     Competence = Competence,
     Autonomy = Autonomy,
     Relatedness = Relatedness,
-    Quality = quality_overall,
+    Quality = interaction_quality,
     Accidental = interaction_accidental,
     Voluntary = interaction_voluntary
   )
@@ -4501,7 +4507,7 @@ studentDescrOut <- studentInteractionType %>%
     Competence = Competence,
     Autonomy = Autonomy,
     Relatedness = Relatedness,
-    Quality = quality_overall,
+    Quality = interaction_quality,
     Accidental = interaction_accidental,
     Voluntary = interaction_voluntary
   )
@@ -4605,7 +4611,7 @@ studentMlCor <-
   MlCorMat(
     data = studentInteractionType,
     id = "PID",
-    selection = c("KeyNeedFullfillment", "Competence", "Autonomy", "Relatedness", "quality_overall", "interaction_accidental", "interaction_voluntary", "AttitudesDutch"),
+    selection = c("KeyNeedFullfillment", "Competence", "Autonomy", "Relatedness", "interaction_quality", "interaction_accidental", "interaction_voluntary", "AttitudesDutch"),
     labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Quality", "Accidental", "Voluntary", "Attitudes NL")
   ) 
 
@@ -4639,7 +4645,7 @@ studentOutMlCor <-
   MlCorMat(
     data = studentInteractionType %>% filter(OutgroupInteraction == "Yes"),
     id = "PID",
-    selection = c("KeyNeedFullfillment", "Competence", "Autonomy", "Relatedness", "quality_overall", "interaction_accidental", "interaction_voluntary", "AttitudesDutch"),
+    selection = c("KeyNeedFullfillment", "Competence", "Autonomy", "Relatedness", "interaction_quality", "interaction_accidental", "interaction_voluntary", "AttitudesDutch"),
     labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Quality", "Accidental", "Voluntary", "Attitudes NL")
   ) 
 
@@ -4891,7 +4897,7 @@ Attitude = ContactFreq \times AverageContactQual
 ```{r studentFreqQualCor}
 # correlation panel
 pairs.panels.new(
-  studentContactFreq %>% select(SumContactNL, SumContactNLAll, AvQuality, AvAttitude),
+  studentContactFreq %>% select(SumContactNL, SumContactNLAll, AvQualityComb, AvAttitude),
   labels = c(
     "Sum:\nNumer of beeps with Outgroup Contact (NL)",
     "Sum:\nNumber of Outgroup Contacts (NL)",
@@ -4902,7 +4908,7 @@ pairs.panels.new(
 
 # correlation panel with interaction sums winsorized
 pairs.panels.new(
-  studentContactFreq %>% select(WinSumContactNL, WinSumContactNLAll, AvQuality, AvAttitude),
+  studentContactFreq %>% select(WinSumContactNL, WinSumContactNLAll, AvQualityComb, AvAttitude),
   labels = c(
     "Sum:\nNumer of beeps with Outgroup Contact (NL)\n[Winsorized]",
     "Sum:\nNumber of Outgroup Contacts (NL)\n[Winsorized]",
@@ -4923,12 +4929,14 @@ studentContactFreq <-
     SumContactNLAll_c = SumContactNLAll - mean(SumContactNLAll, na.rm = TRUE),
     AvAttitude_c = AvAttitude - mean(AvAttitude, na.rm = TRUE),
     AvQuality_c = AvQuality - mean(AvQuality, na.rm = TRUE),
-    AvQualityOut_c = AvQualityOut - mean(AvQualityOut, na.rm = TRUE)
+    AvQualityOut_c = AvQualityOut - mean(AvQualityOut, na.rm = TRUE),
+    AvQualityComb_c = AvQualityComb - mean(AvQualityComb, na.rm = TRUE),
+    AvQualityCombOut_c = AvQualityCombOut - mean(AvQualityCombOut, na.rm = TRUE)
   )
 
 # regression
 mdlStudent$lmAttFreqQualX <-
-  lm(AvAttitude ~ SumContactNL_c * AvQualityOut_c, data = studentContactFreq)
+  lm(AvAttitude ~ SumContactNL_c * AvQualityCombOut_c, data = studentContactFreq)
 
 summ(
   mdlStudent$lmAttFreqQualX,
@@ -4946,14 +4954,14 @@ mdlStudent$lmAttFreqQualXEta <-
 interactions::interact_plot(
   mdlStudent$lmAttFreqQualX,
   pred = SumContactNL_c,
-  modx = AvQualityOut_c,
+  modx = AvQualityCombOut_c,
   interval = TRUE,
   partial.residuals = TRUE
 )
 
 interactions::johnson_neyman(mdlStudent$lmAttFreqQualX,
                              pred = SumContactNL_c,
-                             modx = AvQualityOut_c,
+                             modx = AvQualityCombOut_c,
                              alpha = .05)
 ```
 
@@ -5599,11 +5607,11 @@ Given that we now have the perceived interaction quality as our outcome variable
 ```{r studentOutModelMLQltNull}
 # Create and save Model
 mdlStudentOut$Qlt$lmerNull <-
-  lme4::lmer(quality_overall ~ 1 + (1 | PID), 
+  lme4::lmer(interaction_quality ~ 1 + (1 | PID), 
              data = studentOutWithinBetween) # use optim if it does not converge
 mdlStudentOut$Qlt$lmeNull <-
   lme(
-    quality_overall ~ 1,
+    interaction_quality ~ 1,
     random = ~ 1 | PID,
     data = studentOutWithinBetween,
     control = list(opt = "nlmimb")
@@ -5651,7 +5659,7 @@ We again add the core interaction need fulfillment to the multilevel random inte
 # Create and save Model
 mdlStudentOut$Qlt$lmeInterceptCore <-
   lme(
-    quality_overall ~ KeyNeedFullfillment_cwc,
+    interaction_quality ~ KeyNeedFullfillment_cwc,
     random = ~ 1 | PID,
     data = studentOutWithinBetween
   )
@@ -5659,7 +5667,7 @@ mdlStudentOut$Qlt$lmeInterceptCore <-
 # Get summary with p-values (Satterthwaite's method)
 summ(
   mdlStudentOut$Qlt$lmerInterceptCore <- 
-    lmer(quality_overall ~ KeyNeedFullfillment_cwc + (1 | PID), 
+    lmer(interaction_quality ~ KeyNeedFullfillment_cwc + (1 | PID), 
        data = studentOutWithinBetween),
   confint = TRUE,
   digits = 3,
@@ -5730,7 +5738,7 @@ As before, we check whether further letting the effect of core need fulfillment 
 # Create and save Model (optimizer needed to reach convergence)
 mdlStudentOut$Qlt$lmeSlopesCore <-
   lme(
-    quality_overall ~
+    interaction_quality ~
       KeyNeedFullfillment_cwc,
     random = ~ 1 + KeyNeedFullfillment_cwc | PID,
     control = lmeControl(opt = "optim"),
@@ -5741,7 +5749,7 @@ mdlStudentOut$Qlt$lmeSlopesCore <-
 summ(
   mdlStudentOut$Qlt$lmerSlopesCore <-
     lmer(
-      quality_overall ~
+      interaction_quality ~
         KeyNeedFullfillment_cwc +
         (1 + KeyNeedFullfillment_cwc | PID),
       data = studentOutWithinBetween
@@ -5823,7 +5831,7 @@ ggsave(
 )
 
 ggplot(data = studentOutWithinBetween,
-       aes(y = quality_overall, x = KeyNeedFullfillment, group = as.factor(PID))) +
+       aes(y = interaction_quality, x = KeyNeedFullfillment, group = as.factor(PID))) +
   geom_point(size = 1, alpha = .2, position = position_jitter(width = 3, height = 3)) + # change size and colour
   labs(y = "Interaction Quality", 
        x = "Key Need Fulfillment",
@@ -5869,7 +5877,7 @@ We thus add both the core need fulfillment and perceived interaction quality to 
 # Create and save Model
 mdlStudentOut$Att$lmeInterceptCoreQlt <-
   lme(
-    AttitudesDutch ~ KeyNeedFullfillment_cwc + quality_overall_cwc,
+    AttitudesDutch ~ KeyNeedFullfillment_cwc + interaction_quality_cwc,
     random = ~ 1 | PID,
     data = studentOutWithinBetween
   )
@@ -5877,7 +5885,7 @@ mdlStudentOut$Att$lmeInterceptCoreQlt <-
 # Get summary with p-values (Satterthwaite's method)
 summ(
   mdlStudentOut$Att$lmerInterceptCoreQlt <- lmer(
-    AttitudesDutch ~ KeyNeedFullfillment_cwc + quality_overall_cwc + (1 | PID),
+    AttitudesDutch ~ KeyNeedFullfillment_cwc + interaction_quality_cwc + (1 | PID),
     data = studentOutWithinBetween
   ),
   confint = TRUE,
@@ -5954,8 +5962,8 @@ We again check whether further letting the effects vary between participants exp
 mdlStudentOut$Att$lmeSlopesCoreQlt <-
   lme(
     AttitudesDutch ~
-      KeyNeedFullfillment_cwc + quality_overall_cwc,
-    random = ~ 1 + KeyNeedFullfillment_cwc + quality_overall_cwc | PID,
+      KeyNeedFullfillment_cwc + interaction_quality_cwc,
+    random = ~ 1 + KeyNeedFullfillment_cwc + interaction_quality_cwc | PID,
     control = lmeControl(opt = "optim"),
     data = studentOutWithinBetween
   )
@@ -5964,8 +5972,8 @@ mdlStudentOut$Att$lmeSlopesCoreQlt <-
 summ(
   mdlStudentOut$Att$lmerSlopesCoreQlt <- lmer(
     AttitudesDutch ~
-      KeyNeedFullfillment_cwc + quality_overall_cwc +
-      (1 + KeyNeedFullfillment_cwc + quality_overall_cwc | PID),
+      KeyNeedFullfillment_cwc + interaction_quality_cwc +
+      (1 + KeyNeedFullfillment_cwc + interaction_quality_cwc | PID),
     data = studentOutWithinBetween
   ),
   confint = TRUE,
@@ -6995,13 +7003,13 @@ studentWbModels <-
   list(
     null = ExWB ~ 1,
     wb_need = ExWB ~ KeyNeedFullfillment_cwc,
-    wb_need_qual = ExWB ~ KeyNeedFullfillment_cwc + quality_overall_cwc
+    wb_need_qual = ExWB ~ KeyNeedFullfillment_cwc + interaction_quality_cwc
   )
 studentWbModelType <-
   list(
     intercept = ~ 1 | PID,
     slope_need = ~ 1 + KeyNeedFullfillment_cwc | PID,
-    slope_need_qual = ~ 1 + KeyNeedFullfillment_cwc + quality_overall_cwc | PID
+    slope_need_qual = ~ 1 + KeyNeedFullfillment_cwc + interaction_quality_cwc | PID
   )
 
 # Well-being Null Model
@@ -7122,7 +7130,7 @@ Intercept model is the best fitting for need fulfillment and interaction quality
 # Get summary with p-values (Satterthwaite's method)
 summ(
   mdlStudentOut$Wb$lmerInterceptNeedQuality <- lmer(
-    ExWB ~ KeyNeedFullfillment_cwc + quality_overall_cwc + (1 | PID),
+    ExWB ~ KeyNeedFullfillment_cwc + interaction_quality_cwc + (1 | PID),
     data = studentOutWithinBetween
   ),
   confint = TRUE,
@@ -7137,7 +7145,7 @@ mdlStudentOut$Att$lmerInterceptNeedQualityCI <-
 # all standardized within
 summ(
   mdlStudentOut$Wb$lmerInterceptNeedQualityZ <- lmer(
-    ExWB_zwc ~ KeyNeedFullfillment_zwc + quality_overall_zwc + (1 | PID),
+    ExWB_zwc ~ KeyNeedFullfillment_zwc + interaction_quality_zwc + (1 | PID),
     data = studentOutWithinBetween
   ),
   confint = TRUE,
@@ -7251,7 +7259,7 @@ medicalDescr <- dtMedical$full %>%
     Autonomy = Autonomy,
     Relatedness = Relatedness,
     AllportsCondition = AllportsCondition,
-    Quality = qualityOverall,
+    Quality = interaction_quality,
     Accidental = interaction_accidental,
     Voluntary = interaction_voluntary
   )
@@ -7265,7 +7273,7 @@ medicalDescrOut <- dtMedical$full %>%
     Autonomy = Autonomy,
     Relatedness = Relatedness,
     AllportsCondition = AllportsCondition,
-    Quality = qualityOverall,
+    Quality = interaction_quality,
     Accidental = interaction_accidental,
     Voluntary = interaction_voluntary
   )
@@ -7369,7 +7377,7 @@ medicalMlCor <-
   MlCorMat(
     data = dtMedical$full,
     id = "PID",
-    selection = c("KeyNeedFulfillment", "Competence", "Autonomy", "Relatedness", "AllportsCondition", "qualityOverall", "interaction_accidental", "interaction_voluntary", "AttitudesDutch", "exWB"),
+    selection = c("KeyNeedFulfillment", "Competence", "Autonomy", "Relatedness", "AllportsCondition", "interaction_quality", "interaction_accidental", "interaction_voluntary", "AttitudesDutch", "exWB"),
     labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Allport", "Quality", "Accidental", "Voluntary", "Attitudes NL", "Well-being")
   ) 
 
@@ -7403,7 +7411,7 @@ medicalOutMlCor <-
   MlCorMat(
     data = dtMedical$full %>% filter(OutgroupInteraction == "Yes"),
     id = "PID",
-    selection = c("KeyNeedFulfillment", "Competence", "Autonomy", "Relatedness", "AllportsCondition", "qualityOverall", "interaction_accidental", "interaction_voluntary", "AttitudesDutch", "exWB"),
+    selection = c("KeyNeedFulfillment", "Competence", "Autonomy", "Relatedness", "AllportsCondition", "interaction_quality", "interaction_accidental", "interaction_voluntary", "AttitudesDutch", "exWB"),
     labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Allport", "Quality", "Accidental", "Voluntary", "Attitudes NL", "Well-being")
   ) 
 
@@ -7450,12 +7458,14 @@ medicalContactFreq <-
     SumContactNLAll_c = SumContactNLAll - mean(SumContactNLAll, na.rm = TRUE),
     AvAttitude_c = AvAttitude - mean(AvAttitude, na.rm = TRUE),
     AvQuality_c = AvQuality - mean(AvQuality, na.rm = TRUE),
-    AvQualityOut_c = AvQualityOut - mean(AvQualityOut, na.rm = TRUE)
+    AvQualityOut_c = AvQualityOut - mean(AvQualityOut, na.rm = TRUE),
+    AvQualityComb_c = AvQualityComb - mean(AvQualityComb, na.rm = TRUE),
+    AvQualityCombOut_c = AvQualityCombOut - mean(AvQualityCombOut, na.rm = TRUE)
   )
 
 # correlation panel
 pairs.panels.new(
-  medicalContactFreq %>% select(SumContactNL, SumContactNLAll, AvQuality, AvAttitude),
+  medicalContactFreq %>% select(SumContactNL, SumContactNLAll, AvQualityComb, AvAttitude),
   labels = c(
     "Sum:\nNumer of beeps with Outgroup Contact (NL)",
     "Sum:\nNumber of Outgroup Contacts (NL)",
@@ -7466,7 +7476,7 @@ pairs.panels.new(
 
 # correlation panel with interaction sums winsorized
 pairs.panels.new(
-  medicalContactFreq %>% select(WinSumContactNL, WinSumContactNLAll, AvQuality, AvAttitude),
+  medicalContactFreq %>% select(WinSumContactNL, WinSumContactNLAll, AvQualityComb, AvAttitude),
   labels = c(
     "Sum:\nNumer of beeps with Outgroup Contact (NL)\n[Winsorized]",
     "Sum:\nNumber of Outgroup Contacts (NL)\n[Winsorized]",
@@ -7607,7 +7617,7 @@ Attitude = ContactFreq \times AverageContactQual
 ```{r medicalModelOlsAttFreqQual}
 # regression
 mdlMedical$lmAttFreqQualX <-
-  lm(AvAttitude ~ SumContactNL_c * AvQualityOut_c, data = medicalContactFreq)
+  lm(AvAttitude ~ SumContactNL_c * AvQualityCombOut_c, data = medicalContactFreq)
 
 summ(
   mdlMedical$lmAttFreqQualX,
@@ -7621,14 +7631,14 @@ mdlMedical$lmAttFreqQualXEta <-
 interactions::interact_plot(
   mdlMedical$lmAttFreqQualX,
   pred = SumContactNL_c,
-  modx = AvQualityOut_c,
+  modx = AvQualityCombOut_c,
   interval = TRUE,
   partial.residuals = TRUE
 )
 
 interactions::johnson_neyman(mdlMedical$lmAttFreqQualX,
                              pred = SumContactNL_c,
-                             modx = AvQualityOut_c,
+                             modx = AvQualityCombOut_c,
                              alpha = .05)
 ```
 
@@ -8213,11 +8223,11 @@ Given that we now have the perceived interaction quality as our outcome variable
 ```{r medicalOutModelMLQltNull}
 # Create and save Model
 mdlMedicalOut$Qlt$lmerNull <-
-  lme4::lmer(qualityOverall ~ 1 + (1 | PID), 
+  lme4::lmer(interaction_quality ~ 1 + (1 | PID), 
              data = medicalOutWithinBetween) # use optim if it does not converge
 mdlMedicalOut$Qlt$lmeNull <-
   mdlMedicalOut$Qlt$lmeNull <-lme(
-    qualityOverall ~ 1,
+    interaction_quality ~ 1,
     random = ~ 1 | PID,
     na.action = na.omit,
     data = medicalOutWithinBetween,
@@ -8264,7 +8274,7 @@ We then add the fulfillment of Allport's conditions to the multilevel random int
 # Create and save Model
 mdlMedicalOut$Qlt$lmeInterceptAllport <-
   lme(
-    qualityOverall ~ AllportsCondition_cwc,
+    interaction_quality ~ AllportsCondition_cwc,
     random = ~ 1 | PID,
     na.action = na.omit,
     data = medicalOutWithinBetween
@@ -8274,7 +8284,7 @@ mdlMedicalOut$Qlt$lmeInterceptAllport <-
 summ(
   mdlMedicalOut$Qlt$lmerInterceptAllport <-
     lmer(
-      qualityOverall ~ AllportsCondition_cwc + (1 | PID),
+      interaction_quality ~ AllportsCondition_cwc + (1 | PID),
       data = medicalOutWithinBetween
     ),
   confint = TRUE,
@@ -8333,7 +8343,7 @@ In a next step, we check whether further letting the effect of Allport's conditi
 # Create and save Model (optimizer needed to reach convergence)
 mdlMedicalOut$Qlt$lmeSlopesAllport <-
   lme(
-    qualityOverall ~
+    interaction_quality ~
       AllportsCondition_cwc,
     random = ~ 1 + AllportsCondition_cwc | PID,
     na.action = na.omit,
@@ -8345,7 +8355,7 @@ mdlMedicalOut$Qlt$lmeSlopesAllport <-
 summ(
   mdlMedicalOut$Qlt$lmerSlopesAllport <-
     lmer(
-      qualityOverall ~
+      interaction_quality ~
         AllportsCondition_cwc +
         (1 + AllportsCondition_cwc | PID),
       data = medicalOutWithinBetween
@@ -8427,7 +8437,7 @@ ggsave(
 )
 
 ggplot(data = medicalOutWithinBetween,
-       aes(y = qualityOverall, x = AllportsCondition, group = as.factor(PID))) +
+       aes(y = interaction_quality, x = AllportsCondition, group = as.factor(PID))) +
   geom_point(size = 1, alpha = .15, position = position_jitter(width = 3, height = 3)) + # change size and colour
   labs(y = "Interaction Quality", 
        x = "Fulfillment Allport's Conditions",
@@ -8476,7 +8486,7 @@ We thus add both Allport's conditions and perceived interaction quality to a ran
 # Create and save Model
 mdlMedicalOut$Att$lmeInterceptAllportQlt <-
   lme(
-    AttitudesDutch ~ AllportsCondition_cwc + qualityOverall_cwc,
+    AttitudesDutch ~ AllportsCondition_cwc + interaction_quality_cwc,
     random = ~ 1 | PID,
     na.action = na.omit,
     data = medicalOutWithinBetween
@@ -8486,7 +8496,7 @@ mdlMedicalOut$Att$lmeInterceptAllportQlt <-
 summ(
   mdlMedicalOut$Att$lmerInterceptAllportQlt <-
     lmer(
-      AttitudesDutch ~ AllportsCondition_cwc + qualityOverall_cwc + (1 | PID),
+      AttitudesDutch ~ AllportsCondition_cwc + interaction_quality_cwc + (1 | PID),
       data = medicalOutWithinBetween
     ),
   confint = TRUE,
@@ -8549,8 +8559,8 @@ We again check whether further letting the effects vary between participants exp
 mdlMedicalOut$Att$lmeSlopesAllportQlt <-
   lme(
     AttitudesDutch ~
-      AllportsCondition_cwc + qualityOverall_cwc,
-    random = ~ 1 + AllportsCondition_cwc + qualityOverall_cwc | PID,
+      AllportsCondition_cwc + interaction_quality_cwc,
+    random = ~ 1 + AllportsCondition_cwc + interaction_quality_cwc | PID,
     na.action = na.omit,
     control = lmeControl(opt = "optim"),
     data = medicalOutWithinBetween
@@ -8560,8 +8570,8 @@ mdlMedicalOut$Att$lmeSlopesAllportQlt <-
 summ(
   mdlMedicalOut$Att$lmerSlopesAllportQlt <- lmer(
     AttitudesDutch ~
-      AllportsCondition_cwc + qualityOverall_cwc +
-      (1 + AllportsCondition_cwc + qualityOverall_cwc | PID),
+      AllportsCondition_cwc + interaction_quality_cwc +
+      (1 + AllportsCondition_cwc + interaction_quality_cwc | PID),
     data = medicalOutWithinBetween,
     control = lmerControl(optimizer="bobyqa", optCtrl=list(maxfun=2e5))
   ),
@@ -8613,12 +8623,12 @@ grid.arrange(
 # Plot prediction model
 mdlMedicalOut$Att$predSlopesAllportQlt <- 
   medicalOutWithinBetween %>% 
-  filter(complete.cases(AllportsCondition, qualityOverall)) %>%
+  filter(complete.cases(AllportsCondition, interaction_quality)) %>%
   filter(PID %in% medicalOutPltIDs) %>%
   select(AttitudesDutch, TIDnum, PID) %>% 
   mutate(measure = predict(mdlMedicalOut$Att$lmeSlopesAllportQlt,
                            medicalOutWithinBetween %>% 
-                             filter(complete.cases(AllportsCondition, qualityOverall)) %>%
+                             filter(complete.cases(AllportsCondition, interaction_quality)) %>%
                              filter(PID %in% medicalOutPltIDs),
                            re.form = NA
                            )
@@ -8912,7 +8922,7 @@ We again do not need to calculate an unconditional model for the perceived inter
 # Create and save Model
 mdlMedicalOut$Qlt$lmeInterceptCore <-
   lme(
-    qualityOverall ~ KeyNeedFulfillment_cwc,
+    interaction_quality ~ KeyNeedFulfillment_cwc,
     random = ~ 1 | PID,
     na.action = na.omit,
     data = medicalOutWithinBetween
@@ -8922,7 +8932,7 @@ mdlMedicalOut$Qlt$lmeInterceptCore <-
 summ(
   mdlMedicalOut$Qlt$lmerInterceptCore <-
     lmer(
-      qualityOverall ~ KeyNeedFulfillment_cwc + (1 | PID),
+      interaction_quality ~ KeyNeedFulfillment_cwc + (1 | PID),
       data = medicalOutWithinBetween
     ),
   confint = TRUE,
@@ -8981,7 +8991,7 @@ As before, we check whether further letting the effect of core need fulfillment 
 # Create and save Model (optimizer needed to reach convergence)
 mdlMedicalOut$Qlt$lmeSlopesCore <-
   lme(
-    qualityOverall ~
+    interaction_quality ~
       KeyNeedFulfillment_cwc,
     random = ~ 1 + KeyNeedFulfillment_cwc | PID,
     na.action = na.omit,
@@ -8993,7 +9003,7 @@ mdlMedicalOut$Qlt$lmeSlopesCore <-
 summ(
   mdlMedicalOut$Qlt$lmerSlopesCore <-
     lmer(
-      qualityOverall ~
+      interaction_quality ~
         KeyNeedFulfillment_cwc +
         (1 + KeyNeedFulfillment_cwc | PID),
       data = medicalOutWithinBetween
@@ -9078,7 +9088,7 @@ ggsave(
 )
 
 ggplot(data = medicalOutWithinBetween,
-       aes(y = qualityOverall, x = KeyNeedFulfillment, group = as.factor(PID))) +
+       aes(y = interaction_quality, x = KeyNeedFulfillment, group = as.factor(PID))) +
   geom_point(size = 1, alpha = .15, position = position_jitter(width = 3, height = 3)) + # change size and colour
   labs(y = "Interaction Quality", 
        x = "Keyneed Fulfillment",
@@ -9124,7 +9134,7 @@ We thus add both the core need fulfillment and perceived interaction quality to 
 # Create and save Model
 mdlMedicalOut$Att$lmeInterceptCoreQlt <-
   lme(
-    AttitudesDutch ~ KeyNeedFulfillment_cwc + qualityOverall_cwc,
+    AttitudesDutch ~ KeyNeedFulfillment_cwc + interaction_quality_cwc,
     random = ~ 1 | PID,
     na.action = na.omit,
     data = medicalOutWithinBetween
@@ -9134,7 +9144,7 @@ mdlMedicalOut$Att$lmeInterceptCoreQlt <-
 summ(
   mdlMedicalOut$Att$lmerInterceptCoreQlt <-
     lmer(
-      AttitudesDutch ~ KeyNeedFulfillment_cwc + qualityOverall_cwc + (1 | PID),
+      AttitudesDutch ~ KeyNeedFulfillment_cwc + interaction_quality_cwc + (1 | PID),
       data = medicalOutWithinBetween
     ),
   confint = TRUE,
@@ -9198,8 +9208,8 @@ We again check whether further letting the effects vary between participants exp
 mdlMedicalOut$Att$lmeSlopesCoreQlt <-
   lme(
     AttitudesDutch ~
-      KeyNeedFulfillment_cwc + qualityOverall_cwc,
-    random = ~ 1 + KeyNeedFulfillment_cwc + qualityOverall_cwc | PID,
+      KeyNeedFulfillment_cwc + interaction_quality_cwc,
+    random = ~ 1 + KeyNeedFulfillment_cwc + interaction_quality_cwc | PID,
     na.action = na.omit,
     control = lmeControl(opt = "optim"),
     data = medicalOutWithinBetween
@@ -9209,8 +9219,8 @@ mdlMedicalOut$Att$lmeSlopesCoreQlt <-
 summ(
   mdlMedicalOut$Att$lmerSlopesCoreQlt <- lmer(
     AttitudesDutch ~
-      KeyNeedFulfillment_cwc + qualityOverall_cwc +
-      (1 + KeyNeedFulfillment_cwc + qualityOverall_cwc | PID),
+      KeyNeedFulfillment_cwc + interaction_quality_cwc +
+      (1 + KeyNeedFulfillment_cwc + interaction_quality_cwc | PID),
     data = medicalOutWithinBetween,
     control = lmerControl(optimizer="bobyqa", optCtrl=list(maxfun=2e5))
   ),
@@ -9262,12 +9272,12 @@ grid.arrange(
 # Plot prediction model
 mdlMedicalOut$Att$predSlopesCoreQlt <- 
   medicalOutWithinBetween %>% 
-  filter(complete.cases(KeyNeedFulfillment, qualityOverall)) %>%
+  filter(complete.cases(KeyNeedFulfillment, interaction_quality)) %>%
   filter(PID %in% medicalOutPltIDs) %>%
   select(AttitudesDutch, TIDnum, PID) %>% 
   mutate(measure = predict(mdlMedicalOut$Att$lmeSlopesCoreQlt,
                            medicalOutWithinBetween %>% 
-                             filter(complete.cases(KeyNeedFulfillment, qualityOverall)) %>%
+                             filter(complete.cases(KeyNeedFulfillment, interaction_quality)) %>%
                              filter(PID %in% medicalOutPltIDs),
                            re.form = NA
                            )
@@ -10519,13 +10529,13 @@ medicalWbModels <-
   list(
     null = exWB ~ 1,
     wb_need = exWB ~ KeyNeedFulfillment_cwc,
-    wb_need_qual = exWB ~ KeyNeedFulfillment_cwc + qualityOverall_cwc
+    wb_need_qual = exWB ~ KeyNeedFulfillment_cwc + interaction_quality_cwc
   )
 medicalWbModelType <-
   list(
     intercept = ~ 1 | PID,
     slope_need = ~ 1 + KeyNeedFulfillment_cwc | PID,
-    slope_need_qual = ~ 1 + KeyNeedFulfillment_cwc + qualityOverall_cwc | PID
+    slope_need_qual = ~ 1 + KeyNeedFulfillment_cwc + interaction_quality_cwc | PID
   )
 
 # Well-being Null Model
@@ -10649,7 +10659,7 @@ Random slopes model is the best fitting for need fulfillment and interaction qua
 # Get summary with p-values (Satterthwaite's method)
 summ(
   mdlMedicalOut$Wb$lmerSlopeNeedQual <- lmer(
-    exWB ~ KeyNeedFulfillment_cwc + qualityOverall_cwc + (1 + KeyNeedFulfillment_cwc + qualityOverall_cwc | PID),
+    exWB ~ KeyNeedFulfillment_cwc + interaction_quality_cwc + (1 + KeyNeedFulfillment_cwc + interaction_quality_cwc | PID),
     data = medicalOutWithinBetween
   ),
   confint = TRUE,
@@ -10664,7 +10674,7 @@ mdlMedicalOut$Att$lmerSlopeNeedQualCI <-
 # all standardized within
 summ(
   mdlMedicalOut$Wb$lmerSlopeNeedQualZ <- lmer(
-    exWB_zwc ~ KeyNeedFulfillment_zwc + qualityOverall_zwc + (1 + KeyNeedFulfillment_zwc + qualityOverall_zwc | PID),
+    exWB_zwc ~ KeyNeedFulfillment_zwc + interaction_quality_zwc + (1 + KeyNeedFulfillment_zwc + interaction_quality_zwc | PID),
     data = medicalOutWithinBetween
   ),
   confint = TRUE,
@@ -10711,7 +10721,7 @@ lmMetaTbl <- lmMetaTbl %>% arrange(coef)
 # extract parameter names
   name <- "Contact Hypothesis — Aggregate Linear Regression"
   var <- as.character(unique(lmMetaTbl$coef))[!as.character(unique(lmMetaTbl$coef)) %in% c("(Intercept)")]
-  names <- qdap::mgsub(c("SumContactNL", "AvQuality", "SumContactNL.AvQuality"),
+  names <- qdap::mgsub(c("SumContactNL", "AvQualityComb", "SumContactNL.AvQualityComb"),
                        c("Number of Outgroup Contacts","Average Interaction Quality", "Contact X Quality"), 
                        var)
   studies <- as.character(unique(lmMetaTbl$sample))
@@ -11020,9 +11030,9 @@ tblDtS1Needs <- workerOutWithinBetween %>%
     AttitudeZ = thermometerDutch_1_zwc,
     CoreNeed = keymotive_fulfillemt_1_cwc,
     CoreNeedZ = keymotive_fulfillemt_1_zwc,
-    QualityRaw = quality_overall_1,
-    Quality = quality_overall_1_cwc,
-    QualityZ = quality_overall_1_zwc,
+    QualityRaw = interaction_quality,
+    Quality = interaction_quality_cwc,
+    QualityZ = interaction_quality_zwc,
     PID = PID
   )
 # Quality ~ CoreNeed
@@ -11062,9 +11072,9 @@ tblDtS2Needs <- studentOutWithinBetween %>%
     AttitudeZ = AttitudesDutch_zwc,
     CoreNeed = KeyNeedFullfillment_cwc,
     CoreNeedZ = KeyNeedFullfillment_zwc,
-    QualityRaw = quality_overall,
-    Quality = quality_overall_cwc,
-    QualityZ = quality_overall_zwc,
+    QualityRaw = interaction_quality,
+    Quality = interaction_quality_cwc,
+    QualityZ = interaction_quality_zwc,
     PID = PID
   )
 # Quality ~ CoreNeed
@@ -11108,9 +11118,9 @@ tblDtS3Needs <- medicalOutWithinBetween %>%
     CoreNeedZ = KeyNeedFulfillment_zwc,
     Allport = AllportsCondition_cwc,
     AllportZ = AllportsCondition_zwc,
-    QualityRaw = qualityOverall,
-    Quality = qualityOverall_cwc,
-    QualityZ = qualityOverall_zwc,
+    QualityRaw = interaction_quality,
+    Quality = interaction_quality_cwc,
+    QualityZ = interaction_quality_zwc,
     PID = PID
   )
 # Quality ~ CoreNeed
@@ -11521,9 +11531,9 @@ dt_goal_s1 <- workerOutWithinBetween %>%
     InteractionQuality = interaction_quality,
     InteractionQualityC = interaction_quality_cwc,
     InteractionQualityZ = interaction_quality_zwc,
-    Quality = quality_overall_1,
-    QualityC = quality_overall_1_cwc,
-    QualityZ = quality_overall_1_zwc,
+    Quality = interaction_quality,
+    QualityC = interaction_quality_cwc,
+    QualityZ = interaction_quality_zwc,
     WellBeing = ExWB_1,
     WellBeingC = ExWB_1_cwc,
     WellBeingZ = ExWB_1_zwc,
@@ -11558,9 +11568,9 @@ dt_goal_s2 <- studentOutWithinBetween %>%
     InteractionQuality = interaction_quality,
     InteractionQualityC = interaction_quality_cwc,
     InteractionQualityZ = interaction_quality_zwc,
-    Quality = quality_overall,
-    QualityC = quality_overall_cwc,
-    QualityZ = quality_overall_zwc,
+    Quality = interaction_quality,
+    QualityC = interaction_quality_cwc,
+    QualityZ = interaction_quality_zwc,
     WellBeing = ExWB,
     WellBeingC = ExWB_cwc,
     WellBeingZ = ExWB_zwc,
@@ -11598,9 +11608,9 @@ dt_goal_s3 <- medicalOutWithinBetween %>%
     InteractionQuality = interaction_quality,
     InteractionQualityC = interaction_quality_cwc,
     InteractionQualityZ = interaction_quality_zwc,
-    Quality = qualityOverall,
-    QualityC = qualityOverall_cwc,
-    QualityZ = qualityOverall_zwc,
+    Quality = interaction_quality,
+    QualityC = interaction_quality_cwc,
+    QualityZ = interaction_quality_zwc,
     WellBeing = exWB,
     WellBeingC = exWB_cwc,
     WellBeingZ = exWB_zwc,
@@ -11992,7 +12002,7 @@ allMlS1 <- workerInteractionType %>%
     OutgroupInteraction,
     NonOutgroupInteraction,
     KeyNeedFullfillment = keyMotiveFulfilled,
-    qualityOverall = quality_overall_1,
+    qualityOverall = interaction_quality,
     Competence = competence.daily.all, 
     Autonomy = autonomy.daily.all, 
     Relatedness = relatedness.daily.all
@@ -12005,7 +12015,7 @@ allMlS2 <- studentInteractionType %>%
     OutgroupInteraction,
     NonOutgroupInteraction,
     KeyNeedFullfillment, 
-    qualityOverall = quality_overall,
+    qualityOverall = interaction_quality,
     Competence, 
     Autonomy, 
     Relatedness
@@ -12018,7 +12028,7 @@ allMlS3 <- dtMedical$full %>%
     OutgroupInteraction,
     NonOutgroupInteraction,
     KeyNeedFullfillment = KeyNeedFulfillment, 
-    qualityOverall,
+    qualityOverall = interaction_quality,
     Competence, 
     Autonomy, 
     Relatedness
@@ -12073,7 +12083,7 @@ It should be noted that this first step does not account for the fact that the p
 ```{r cor across the three studies}
 # correlation panel
 pairs.panels.new(
-  avAll %>% select(SumContactNL, SumContactNLAll, AvQualityOut, AvAttitude),
+  avAll %>% select(SumContactNL, SumContactNLAll, AvQualityCombOut, AvAttitude),
   labels = c(
     "Sum:\nNumer of beeps with Outgroup Contact (NL)",
     "Sum:\nNumber of Outgroup Contacts (NL)",
@@ -12084,7 +12094,7 @@ pairs.panels.new(
 
 # correlation panel with interaction sums winsorized
 pairs.panels.new(
-  avAll %>% select(WinSumContactNL, WinSumContactNLAll, AvQualityOut, AvAttitude),
+  avAll %>% select(WinSumContactNL, WinSumContactNLAll, AvQualityCombOut, AvAttitude),
   labels = c(
     "Sum:\nNumer of beeps with Outgroup Contact (NL)\n[Winsorized]",
     "Sum:\nNumber of Outgroup Contacts (NL)\n[Winsorized]",
@@ -12104,7 +12114,7 @@ We begin with the liner ordinary least squares regression. For this purpose, we 
 ```{r OLS regression across the three studies}
 lmAllAttFreqQualX <-
   lm(
-    AvAttitude ~ SumContactNL_c * AvQualityOut_c + SumContactNL_c * study2 + AvQualityOut_c * study2,
+    AvAttitude ~ SumContactNL_c * AvQualityCombOut_c + SumContactNL_c * study2 + AvQualityCombOut_c * study2,
     data = avAll
   )
 
@@ -12455,9 +12465,9 @@ dt_exp_s1 <- workerWithinBetween %>%
     InteractionQuality = interaction_quality,
     InteractionQualityC = interaction_quality_cwc,
     InteractionQualityZ = interaction_quality_zwc,
-    Quality = quality_overall_1,
-    QualityC = quality_overall_1_cwc,
-    QualityZ = quality_overall_1_zwc,
+    Quality = interaction_quality,
+    QualityC = interaction_quality_cwc,
+    QualityZ = interaction_quality_zwc,
     WellBeing = ExWB_1,
     WellBeingC = ExWB_1_cwc,
     WellBeingZ = ExWB_1_zwc,
@@ -12493,9 +12503,9 @@ dt_exp_s2 <- studentWithinBetween %>%
     InteractionQuality = interaction_quality,
     InteractionQualityC = interaction_quality_cwc,
     InteractionQualityZ = interaction_quality_zwc,
-    Quality = quality_overall,
-    QualityC = quality_overall_cwc,
-    QualityZ = quality_overall_zwc,
+    Quality = interaction_quality,
+    QualityC = interaction_quality_cwc,
+    QualityZ = interaction_quality_zwc,
     WellBeing = ExWB,
     WellBeingC = ExWB_cwc,
     WellBeingZ = ExWB_zwc,
@@ -12533,9 +12543,9 @@ dt_exp_s3 <- medicalWithinBetween %>%
     InteractionQuality = interaction_quality,
     InteractionQualityC = interaction_quality_cwc,
     InteractionQualityZ = interaction_quality_zwc,
-    Quality = qualityOverall,
-    QualityC = qualityOverall_cwc,
-    QualityZ = qualityOverall_zwc,
+    Quality = interaction_quality,
+    QualityC = interaction_quality_cwc,
+    QualityZ = interaction_quality_zwc,
     WellBeing = exWB,
     WellBeingC = exWB_cwc,
     WellBeingZ = exWB_zwc,

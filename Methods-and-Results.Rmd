@@ -209,7 +209,7 @@ workerMlCor <-
   MlCorMat(
     data = dtWorkerSupp$workerInteractionType,
     id = "PID",
-    selection = c("keyMotiveFulfilled", "competence.daily.all", "autonomy.daily.all", "relatedness.daily.all", "quality_overall_1", "thermometerDutch_1"),
+    selection = c("keyMotiveFulfilled", "competence.daily.all", "autonomy.daily.all", "relatedness.daily.all", "interaction_quality", "thermometerDutch_1"),
     labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Quality", "Attitudes NL")
   ) 
 
@@ -240,7 +240,7 @@ workerOutMlCor <-
   MlCorMat(
     data = dtWorkerSupp$workerInteractionType %>% filter(OutgroupInteraction == "Yes"),
     id = "PID",
-    selection = c("keymotive_fulfillemt_1", "competence_1", "autonomy_1", "relatedness_1", "quality_overall_1", "thermometerDutch_1"),
+    selection = c("keymotive_fulfillemt_1", "competence_1", "autonomy_1", "relatedness_1", "interaction_quality", "thermometerDutch_1"),
     labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Quality", "Attitudes NL")
   )
 
@@ -295,12 +295,13 @@ dtWorkerSupp$workerAvFreQual <-
     SumContactNL_c = SumContactNL - mean(SumContactNL, na.rm = TRUE),
     SumContactNLAll_c = SumContactNLAll - mean(SumContactNLAll, na.rm = TRUE),
     AvAttitude_c = AvAttitude - mean(AvAttitude, na.rm = TRUE),
-    AvQuality_c = AvQuality - mean(AvQuality, na.rm = TRUE)
+    AvQuality_c = AvQuality - mean(AvQuality, na.rm = TRUE),
+    AvQualityComb_c = AvQualityComb - mean(AvQualityComb, na.rm = TRUE)
   )
 
 # correlation panel
 pairs.panels.new(
-  dtWorkerSupp$workerAvFreQual %>% select(SumContactNL, SumContactNLAll, AvQuality, AvAttitude),
+  dtWorkerSupp$workerAvFreQual %>% select(SumContactNL, SumContactNLAll, AvQualityComb, AvAttitude),
   labels = c(
     "Sum:\nNumer of beeps with Outgroup Contact (NL)",
     "Sum:\nNumber of Outgroup Contacts (NL)",
@@ -311,7 +312,7 @@ pairs.panels.new(
 
 # correlation panel with interaction sums winsorized
 pairs.panels.new(
-  dtWorkerSupp$workerAvFreQual %>% select(WinSumContactNL, WinSumContactNLAll, AvQuality, AvAttitude),
+  dtWorkerSupp$workerAvFreQual %>% select(WinSumContactNL, WinSumContactNLAll, AvQualityComb, AvAttitude),
   labels = c(
     "Sum:\nNumer of beeps with Outgroup Contact (NL)\n[Winsorized]",
     "Sum:\nNumber of Outgroup Contacts (NL)\n[Winsorized]",
@@ -330,7 +331,7 @@ pContactAvgMin <- format(round(min(rContactAvg$P[rownames(rContactAvg$P) != "AvA
 
 # Average Interaction Quality and their Average Outgroup Attitudes
 rAttitudeQuality <- dtWorkerSupp$workerAvFreQual %>% 
-  select(AvQuality, AvAttitude) %>%
+  select(AvQualityComb, AvAttitude) %>%
   as.matrix %>%
   rcorr
 ```
@@ -341,7 +342,7 @@ mdlWorker <- list()
 
 # regression
 mdlWorker$lmAttFreqQualX <-
-  lm(AvAttitude ~ SumContactNL_c * AvQuality_c, data = dtWorkerSupp$workerAvFreQual)
+  lm(AvAttitude ~ SumContactNL_c * AvQualityComb_c, data = dtWorkerSupp$workerAvFreQual)
 # summary(lmWorkerAttFreqQualX)
 
 summ(
@@ -355,14 +356,14 @@ mdlWorker$lmAttFreqQualXEta <-
 
 interactions::interact_plot(
   mdlWorker$lmAttFreqQualX,
-  pred = AvQuality_c,
+  pred = AvQualityComb_c,
   modx = SumContactNL_c,
   interval = TRUE,
   partial.residuals = TRUE
 )
 
 interactions::johnson_neyman(mdlWorker$lmAttFreqQualX,
-                             pred = AvQuality_c,
+                             pred = AvQualityComb_c,
                              modx = SumContactNL_c,
                              alpha = .05)
 
@@ -697,12 +698,12 @@ ggsave(
 ```{r workerOutModelMLQltNull, include=FALSE}
 # Create and save Model
 mdlWorkerOut$Qlt$lmerNull <-
-  lme4::lmer(quality_overall_1 ~ 1 + (1 | PID), 
+  lme4::lmer(interaction_quality ~ 1 + (1 | PID), 
              data = dtWorkerSupp$workerOutWithinBetween) # use optim if it does not converge
 
 mdlWorkerOut$Qlt$lmeNull <-
   mdlWorkerOut$Qlt$lmeNull <- lme(
-    quality_overall_1 ~ 1,
+    interaction_quality ~ 1,
     random = ~ 1 | PID,
     data = dtWorkerSupp$workerOutWithinBetween,
     na.action=na.omit,
@@ -732,7 +733,7 @@ mdlWorkerOut$Qlt$IccPercNull <-
 # Create and save Model
 mdlWorkerOut$Qlt$lmeInterceptCore <-
   lme(
-    quality_overall_1 ~ keymotive_fulfillemt_1_cwc,
+    interaction_quality ~ keymotive_fulfillemt_1_cwc,
     random = ~ 1 | PID,
     na.action=na.omit,
     data = dtWorkerSupp$workerOutWithinBetween
@@ -742,7 +743,7 @@ mdlWorkerOut$Qlt$lmeInterceptCore <-
 summ(
   mdlWorkerOut$Qlt$lmerInterceptCore <-
     lmer(
-      quality_overall_1 ~ keymotive_fulfillemt_1_cwc + (1 | PID),
+      interaction_quality ~ keymotive_fulfillemt_1_cwc + (1 | PID),
       data = dtWorkerSupp$workerOutWithinBetween
     ),
   confint = TRUE,
@@ -783,7 +784,7 @@ mdlWorkerOut$Qlt$varInterceptCore <-
 # Create and save Model (optimizer needed to reach convergence)
 mdlWorkerOut$Qlt$lmeSlopesCore <-
   lme(
-    quality_overall_1 ~
+    interaction_quality ~
       keymotive_fulfillemt_1_cwc,
     random = ~ 1 + keymotive_fulfillemt_1_cwc | PID,
     control = lmeControl(opt = "optim"),
@@ -795,7 +796,7 @@ mdlWorkerOut$Qlt$lmeSlopesCore <-
 summ(
   mdlWorkerOut$Qlt$lmerSlopesCore <-
     lmer(
-      quality_overall_1 ~
+      interaction_quality ~
         keymotive_fulfillemt_1_cwc +
         (1 + keymotive_fulfillemt_1_cwc | PID),
       data = dtWorkerSupp$workerOutWithinBetween
@@ -839,7 +840,7 @@ mdlWorkerOut$Qlt$varSlopesCore <-
 # Create and save Model
 mdlWorkerOut$Att$lmeInterceptCoreQlt <-
   lme(
-    thermometerDutch_1 ~ keymotive_fulfillemt_1_cwc + quality_overall_1_cwc,
+    thermometerDutch_1 ~ keymotive_fulfillemt_1_cwc + interaction_quality_cwc,
     random = ~ 1 | PID,
     na.action=na.omit,
     data = dtWorkerSupp$workerOutWithinBetween
@@ -849,7 +850,7 @@ mdlWorkerOut$Att$lmeInterceptCoreQlt <-
 summ(
   mdlWorkerOut$Att$lmerInterceptCoreQlt <-
     lmer(
-      thermometerDutch_1 ~ keymotive_fulfillemt_1_cwc + quality_overall_1_cwc + (1 | PID),
+      thermometerDutch_1 ~ keymotive_fulfillemt_1_cwc + interaction_quality_cwc + (1 | PID),
       data = dtWorkerSupp$workerOutWithinBetween
     ),
   confint = TRUE,
@@ -892,8 +893,8 @@ mdlWorkerOut$Att$varInterceptCoreQlt <-
 mdlWorkerOut$Att$lmeSlopesCoreQlt <-
   lme(
     thermometerDutch_1 ~
-      keymotive_fulfillemt_1_cwc + quality_overall_1_cwc,
-    random = ~ 1 + keymotive_fulfillemt_1_cwc + quality_overall_1_cwc | PID,
+      keymotive_fulfillemt_1_cwc + interaction_quality_cwc,
+    random = ~ 1 + keymotive_fulfillemt_1_cwc + interaction_quality_cwc | PID,
     control = lmeControl(opt = "optim"),
     na.action=na.omit,
     data = dtWorkerSupp$workerOutWithinBetween
@@ -903,8 +904,8 @@ mdlWorkerOut$Att$lmeSlopesCoreQlt <-
 summ(
   mdlWorkerOut$Att$lmerSlopesCoreQlt <- lmer(
     thermometerDutch_1 ~
-      keymotive_fulfillemt_1_cwc + quality_overall_1_cwc +
-      (1 + keymotive_fulfillemt_1_cwc + quality_overall_1_cwc | PID),
+      keymotive_fulfillemt_1_cwc + interaction_quality_cwc +
+      (1 + keymotive_fulfillemt_1_cwc + interaction_quality_cwc | PID),
     data = dtWorkerSupp$workerOutWithinBetween
   ),
   confint = TRUE,
@@ -984,7 +985,7 @@ ggsave(
 )
 ```
 
-The main proposal of our article is that the success of an outgroup contact might be explained by whether or not the contact fulfilled the person's core situational need. This should, in turn, be reflected in higher perceived contact quality and more positive outgroup attitudes. We sequentially test whether the fulfillment of the core need during an interaction is (1) related to more positive outgroup attitudes, (2) higher perceived contact quality, and (3) whether the variance explained by the core need is subsumed by the perceived contact quality if considered jointly. We find that in the multilevel models, the fulfillment of core situational needs during outgroup contacts was associated with more positive outgroup attitudes (random slopes model; `r MlCoeffLatex(lmeMdl = mdlWorkerOut$Att$lmeSlopesCore, lmerCI = mdlWorkerOut$Att$lmerSlopesCoreCI, varName = "keymotive_fulfillemt_1_cwc")`) and also related to higher perceived contact quality (random intercept model; `r MlCoeffLatex(lmeMdl = mdlWorkerOut$Qlt$lmeInterceptCore, lmerCI = mdlWorkerOut$Qlt$lmerInterceptCoreCI, varName = "keymotive_fulfillemt_1_cwc")`). Moreover, when we consider the influences of core need fulfillment and contact quality on outgroup attitudes jointly, we find that the two predictors share a large part of the variance explained in outgroup attitudes, so that perceived contact quality showed a strong effect on outgroup attitudes (random slopes model; `r MlCoeffLatex(lmeMdl = mdlWorkerOut$Att$lmeSlopesCoreQlt, lmerCI = mdlWorkerOut$Att$lmerSlopesCoreQltCI, varName = "quality_overall_1_cwc")`) and only little unique variance is still explained by core need fulfillment (`r MlCoeffLatex(lmeMdl = mdlWorkerOut$Att$lmeSlopesCoreQlt, lmerCI = mdlWorkerOut$Att$lmerSlopesCoreQltCI, varName = "keymotive_fulfillemt_1_cwc")`, also see \fgrref[-A]{fig:MainPaths}). We thus find support for our hypotheses and can conclude that in this data set the fulfillment of core situational needs had a significant influence on outgroup attitudes. Additionally, this effect seemingly addresses the same variance that is accounted for by perceived contact quality. 
+The main proposal of our article is that the success of an outgroup contact might be explained by whether or not the contact fulfilled the person's core situational need. This should, in turn, be reflected in higher perceived contact quality and more positive outgroup attitudes. We sequentially test whether the fulfillment of the core need during an interaction is (1) related to more positive outgroup attitudes, (2) higher perceived contact quality, and (3) whether the variance explained by the core need is subsumed by the perceived contact quality if considered jointly. We find that in the multilevel models, the fulfillment of core situational needs during outgroup contacts was associated with more positive outgroup attitudes (random slopes model; `r MlCoeffLatex(lmeMdl = mdlWorkerOut$Att$lmeSlopesCore, lmerCI = mdlWorkerOut$Att$lmerSlopesCoreCI, varName = "keymotive_fulfillemt_1_cwc")`) and also related to higher perceived contact quality (random intercept model; `r MlCoeffLatex(lmeMdl = mdlWorkerOut$Qlt$lmeInterceptCore, lmerCI = mdlWorkerOut$Qlt$lmerInterceptCoreCI, varName = "keymotive_fulfillemt_1_cwc")`). Moreover, when we consider the influences of core need fulfillment and contact quality on outgroup attitudes jointly, we find that the two predictors share a large part of the variance explained in outgroup attitudes, so that perceived contact quality showed a strong effect on outgroup attitudes (random slopes model; `r MlCoeffLatex(lmeMdl = mdlWorkerOut$Att$lmeSlopesCoreQlt, lmerCI = mdlWorkerOut$Att$lmerSlopesCoreQltCI, varName = "interaction_quality_cwc")`) and only little unique variance is still explained by core need fulfillment (`r MlCoeffLatex(lmeMdl = mdlWorkerOut$Att$lmeSlopesCoreQlt, lmerCI = mdlWorkerOut$Att$lmerSlopesCoreQltCI, varName = "keymotive_fulfillemt_1_cwc")`, also see \fgrref[-A]{fig:MainPaths}). We thus find support for our hypotheses and can conclude that in this data set the fulfillment of core situational needs had a significant influence on outgroup attitudes. Additionally, this effect seemingly addresses the same variance that is accounted for by perceived contact quality. 
 
 <!-- \faQuestionCircle\ Are we sure that we don't want some sort of bootstrapped indirect effect?  -->
 
@@ -1078,7 +1079,7 @@ studentMlCor <-
   MlCorMat(
     data = dtStudentSupp$studentInteractionType,
     id = "PID",
-    selection = c("KeyNeedFullfillment", "Competence", "Autonomy", "Relatedness", "quality_overall", "AttitudesDutch"),
+    selection = c("KeyNeedFullfillment", "Competence", "Autonomy", "Relatedness", "interaction_quality", "AttitudesDutch"),
     labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Quality", "Attitudes NL")
   ) 
 
@@ -1109,7 +1110,7 @@ studentOutMlCor <-
   MlCorMat(
     data = dtStudentSupp$studentInteractionType %>% filter(OutgroupInteraction == "Yes"),
     id = "PID",
-    selection = c("KeyNeedFullfillment", "Competence", "Autonomy", "Relatedness", "quality_overall", "AttitudesDutch"),
+    selection = c("KeyNeedFullfillment", "Competence", "Autonomy", "Relatedness", "interaction_quality", "AttitudesDutch"),
     labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Quality", "Attitudes NL")
   )
 
@@ -1162,12 +1163,13 @@ dtStudentSupp$studentContactFreq <-
     SumContactNL_c = SumContactNL - mean(SumContactNL, na.rm = TRUE),
     SumContactNLAll_c = SumContactNLAll - mean(SumContactNLAll, na.rm = TRUE),
     AvAttitude_c = AvAttitude - mean(AvAttitude, na.rm = TRUE),
-    AvQuality_c = AvQuality - mean(AvQuality, na.rm = TRUE)
+    AvQuality_c = AvQuality - mean(AvQuality, na.rm = TRUE),
+    AvQualityComb_c = AvQualityComb - mean(AvQualityComb, na.rm = TRUE)
   )
 
 # correlation panel
 pairs.panels.new(
-  dtStudentSupp$studentContactFreq %>% select(SumContactNL, SumContactNLAll, AvQuality, AvAttitude),
+  dtStudentSupp$studentContactFreq %>% select(SumContactNL, SumContactNLAll, AvQualityComb, AvAttitude),
   labels = c(
     "Sum:\nNumer of beeps with Outgroup Contact (NL)",
     "Sum:\nNumber of Outgroup Contacts (NL)",
@@ -1178,7 +1180,7 @@ pairs.panels.new(
 
 # correlation panel with interaction sums winsorized
 pairs.panels.new(
-  dtStudentSupp$studentContactFreq %>% select(WinSumContactNL, WinSumContactNLAll, AvQuality, AvAttitude),
+  dtStudentSupp$studentContactFreq %>% select(WinSumContactNL, WinSumContactNLAll, AvQualityComb, AvAttitude),
   labels = c(
     "Sum:\nNumer of beeps with Outgroup Contact (NL)\n[Winsorized]",
     "Sum:\nNumber of Outgroup Contacts (NL)\n[Winsorized]",
@@ -1194,7 +1196,7 @@ mdlStudent <- list()
 
 # regression
 mdlStudent$lmAttFreqQualX <-
-  lm(AvAttitude ~ SumContactNL_c * AvQuality_c, data = dtStudentSupp$studentContactFreq)
+  lm(AvAttitude ~ SumContactNL_c * AvQualityComb_c, data = dtStudentSupp$studentContactFreq)
 
 summ(
   mdlStudent$lmAttFreqQualX,
@@ -1208,14 +1210,14 @@ mdlStudent$lmAttFreqQualXEta <-
 interactions::interact_plot(
   mdlStudent$lmAttFreqQualX,
   pred = SumContactNL_c,
-  modx = AvQuality_c,
+  modx = AvQualityComb_c,
   interval = TRUE,
   partial.residuals = TRUE
 )
 
 interactions::johnson_neyman(mdlStudent$lmAttFreqQualX,
                              pred = SumContactNL_c,
-                             modx = AvQuality_c,
+                             modx = AvQualityComb_c,
                              alpha = .05)
 ```
 
@@ -1619,11 +1621,11 @@ ggsave(
 ```{r studentOutModelMLQltNull, include=FALSE}
 # Create and save Model
 mdlStudentOut$Qlt$lmerNull <-
-  lme4::lmer(quality_overall ~ 1 + (1 | PID), 
+  lme4::lmer(interaction_quality ~ 1 + (1 | PID), 
              data = dtStudentSupp$studentOutWithinBetween) # use optim if it does not converge
 mdlStudentOut$Qlt$lmeNull <-
   mdlStudentOut$Qlt$lmeNull <-lme(
-    quality_overall ~ 1,
+    interaction_quality ~ 1,
     random = ~ 1 | PID,
     data = dtStudentSupp$studentOutWithinBetween,
     control = list(opt = "nlmimb")
@@ -1652,7 +1654,7 @@ mdlStudentOut$Qlt$IccPercNull <-
 # Create and save Model
 mdlStudentOut$Qlt$lmeInterceptCore <-
   lme(
-    quality_overall ~ KeyNeedFullfillment_cwc,
+    interaction_quality ~ KeyNeedFullfillment_cwc,
     random = ~ 1 | PID,
     data = dtStudentSupp$studentOutWithinBetween
   )
@@ -1661,7 +1663,7 @@ mdlStudentOut$Qlt$lmeInterceptCore <-
 summ(
   mdlStudentOut$Qlt$lmerInterceptCore <-
     lmer(
-      quality_overall ~ KeyNeedFullfillment_cwc + (1 | PID),
+      interaction_quality ~ KeyNeedFullfillment_cwc + (1 | PID),
       data = dtStudentSupp$studentOutWithinBetween
     ),
   confint = TRUE,
@@ -1702,7 +1704,7 @@ mdlStudentOut$Qlt$varInterceptCore <-
 # Create and save Model (optimizer needed to reach convergence)
 mdlStudentOut$Qlt$lmeSlopesCore <-
   lme(
-    quality_overall ~
+    interaction_quality ~
       KeyNeedFullfillment_cwc,
     random = ~ 1 + KeyNeedFullfillment_cwc | PID,
     control = lmeControl(opt = "optim"),
@@ -1713,7 +1715,7 @@ mdlStudentOut$Qlt$lmeSlopesCore <-
 summ(
   mdlStudentOut$Qlt$lmerSlopesCore <-
     lmer(
-      quality_overall ~
+      interaction_quality ~
         KeyNeedFullfillment_cwc +
         (1 + KeyNeedFullfillment_cwc | PID),
       data = dtStudentSupp$studentOutWithinBetween
@@ -1800,7 +1802,7 @@ ggsave(
 # Create and save Model
 mdlStudentOut$Att$lmeInterceptCoreQlt <-
   lme(
-    AttitudesDutch ~ KeyNeedFullfillment_cwc + quality_overall_cwc,
+    AttitudesDutch ~ KeyNeedFullfillment_cwc + interaction_quality_cwc,
     random = ~ 1 | PID,
     data = dtStudentSupp$studentOutWithinBetween
   )
@@ -1809,7 +1811,7 @@ mdlStudentOut$Att$lmeInterceptCoreQlt <-
 summ(
   mdlStudentOut$Att$lmerInterceptCoreQlt <-
     lmer(
-      AttitudesDutch ~ KeyNeedFullfillment_cwc + quality_overall_cwc + (1 | PID),
+      AttitudesDutch ~ KeyNeedFullfillment_cwc + interaction_quality_cwc + (1 | PID),
       data = dtStudentSupp$studentOutWithinBetween
     ),
   confint = TRUE,
@@ -1852,8 +1854,8 @@ mdlStudentOut$Att$varInterceptCoreQlt <-
 mdlStudentOut$Att$lmeSlopesCoreQlt <-
   lme(
     AttitudesDutch ~
-      KeyNeedFullfillment_cwc + quality_overall_cwc,
-    random = ~ 1 + KeyNeedFullfillment_cwc + quality_overall_cwc | PID,
+      KeyNeedFullfillment_cwc + interaction_quality_cwc,
+    random = ~ 1 + KeyNeedFullfillment_cwc + interaction_quality_cwc | PID,
     control = lmeControl(opt = "optim"),
     data = dtStudentSupp$studentOutWithinBetween
   )
@@ -1862,8 +1864,8 @@ mdlStudentOut$Att$lmeSlopesCoreQlt <-
 summ(
   mdlStudentOut$Att$lmerSlopesCoreQlt <- lmer(
     AttitudesDutch ~
-      KeyNeedFullfillment_cwc + quality_overall_cwc +
-      (1 + KeyNeedFullfillment_cwc + quality_overall_cwc | PID),
+      KeyNeedFullfillment_cwc + interaction_quality_cwc +
+      (1 + KeyNeedFullfillment_cwc + interaction_quality_cwc | PID),
     data = dtStudentSupp$studentOutWithinBetween,
     control = lmerControl(optimizer="bobyqa", optCtrl=list(maxfun=2e5))
   ),
@@ -1945,7 +1947,7 @@ ggsave(
 )
 ```
 
-We again sequentially tested the core need model as we did for Study 1. We find that in the multilevel models, the fulfillment of core situational needs during outgroup contacts was associated with more positive outgroup attitudes (random slopes model; `r MlCoeffLatex(lmeMdl = mdlStudentOut$Att$lmeSlopesCore, lmerCI = mdlStudentOut$Att$lmerSlopesCoreCI, varName = "KeyNeedFullfillment_cwc")`) and also predicted higher perceived interaction quality (random slopes model; `r MlCoeffLatex(lmeMdl = mdlStudentOut$Qlt$lmeSlopesCore, lmerCI = mdlStudentOut$Qlt$lmerSlopesCoreCI, varName = "KeyNeedFullfillment_cwc")`). Additionally, if we consider the influences of core need fulfillment and interaction quality on outgroup attitudes jointly, we again find that much of the explained variance is shared by the predictor variables, so that perceived interaction quality remains a strong predictor (random slopes model; `r MlCoeffLatex(lmeMdl = mdlStudentOut$Att$lmeSlopesCoreQlt, lmerCI = mdlStudentOut$Att$lmerSlopesCoreQltCI, varName = "quality_overall_cwc")`) and only little unique variance is still explained by core need fulfillment (`r MlCoeffLatex(lmeMdl = mdlStudentOut$Att$lmeSlopesCoreQlt, lmerCI = mdlStudentOut$Att$lmerSlopesCoreQltCI, varName = "KeyNeedFullfillment_cwc")`; also see \fgrref[-B]{fig:MainPaths} and \tblref{tab:intergroupNeedsTblLong} for full results). These results are consistent with the results in Study 1. We, thus, find support for our hypotheses that the fulfillment of core situational needs had a significant influence on perceived interaction quality and outgroup attitudes. 
+We again sequentially tested the core need model as we did for Study 1. We find that in the multilevel models, the fulfillment of core situational needs during outgroup contacts was associated with more positive outgroup attitudes (random slopes model; `r MlCoeffLatex(lmeMdl = mdlStudentOut$Att$lmeSlopesCore, lmerCI = mdlStudentOut$Att$lmerSlopesCoreCI, varName = "KeyNeedFullfillment_cwc")`) and also predicted higher perceived interaction quality (random slopes model; `r MlCoeffLatex(lmeMdl = mdlStudentOut$Qlt$lmeSlopesCore, lmerCI = mdlStudentOut$Qlt$lmerSlopesCoreCI, varName = "KeyNeedFullfillment_cwc")`). Additionally, if we consider the influences of core need fulfillment and interaction quality on outgroup attitudes jointly, we again find that much of the explained variance is shared by the predictor variables, so that perceived interaction quality remains a strong predictor (random slopes model; `r MlCoeffLatex(lmeMdl = mdlStudentOut$Att$lmeSlopesCoreQlt, lmerCI = mdlStudentOut$Att$lmerSlopesCoreQltCI, varName = "interaction_quality_cwc")`) and only little unique variance is still explained by core need fulfillment (`r MlCoeffLatex(lmeMdl = mdlStudentOut$Att$lmeSlopesCoreQlt, lmerCI = mdlStudentOut$Att$lmerSlopesCoreQltCI, varName = "KeyNeedFullfillment_cwc")`; also see \fgrref[-B]{fig:MainPaths} and \tblref{tab:intergroupNeedsTblLong} for full results). These results are consistent with the results in Study 1. We, thus, find support for our hypotheses that the fulfillment of core situational needs had a significant influence on perceived interaction quality and outgroup attitudes. 
 
 \section{Study 3}
 
@@ -2001,7 +2003,7 @@ medicalMlCor <-
   MlCorMat(
     data = dtMedical$full,
     id = "PID",
-    selection = c("KeyNeedFulfillment", "Competence", "Autonomy", "Relatedness", "AllportsCondition", "qualityOverall", "AttitudesDutch"),
+    selection = c("KeyNeedFulfillment", "Competence", "Autonomy", "Relatedness", "AllportsCondition", "interaction_quality", "AttitudesDutch"),
     labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Allport", "Quality", "Attitudes NL")
   ) 
 
@@ -2032,7 +2034,7 @@ medicalOutMlCor <-
   MlCorMat(
     data = dtMedical$full %>% filter(OutgroupInteraction == "Yes"),
     id = "PID",
-    selection = c("KeyNeedFulfillment", "Competence", "Autonomy", "Relatedness", "AllportsCondition", "qualityOverall", "AttitudesDutch"),
+    selection = c("KeyNeedFulfillment", "Competence", "Autonomy", "Relatedness", "AllportsCondition", "interaction_quality", "AttitudesDutch"),
     labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Allport", "Quality", "Attitudes NL")
   )
 
@@ -2086,12 +2088,13 @@ dtMedicalSupp$medicalContactFreq <-
     SumContactNL_c = SumContactNL - mean(SumContactNL, na.rm = TRUE),
     SumContactNLAll_c = SumContactNLAll - mean(SumContactNLAll, na.rm = TRUE),
     AvAttitude_c = AvAttitude - mean(AvAttitude, na.rm = TRUE),
-    AvQuality_c = AvQuality - mean(AvQuality, na.rm = TRUE)
+    AvQuality_c = AvQuality - mean(AvQuality, na.rm = TRUE),
+    AvQualityComb_c = AvQualityComb - mean(AvQualityComb, na.rm = TRUE)
   )
 
 # correlation panel
 pairs.panels.new(
-  dtMedicalSupp$medicalContactFreq %>% select(SumContactNL, SumContactNLAll, AvQuality, AvAttitude),
+  dtMedicalSupp$medicalContactFreq %>% select(SumContactNL, SumContactNLAll, AvQualityComb, AvAttitude),
   labels = c(
     "Sum:\nNumer of beeps with Outgroup Contact (NL)",
     "Sum:\nNumber of Outgroup Contacts (NL)",
@@ -2102,7 +2105,7 @@ pairs.panels.new(
 
 # correlation panel with interaction sums winsorized
 pairs.panels.new(
-  dtMedicalSupp$medicalContactFreq %>% select(WinSumContactNL, WinSumContactNLAll, AvQuality, AvAttitude),
+  dtMedicalSupp$medicalContactFreq %>% select(WinSumContactNL, WinSumContactNLAll, AvQualityComb, AvAttitude),
   labels = c(
     "Sum:\nNumer of beeps with Outgroup Contact (NL)\n[Winsorized]",
     "Sum:\nNumber of Outgroup Contacts (NL)\n[Winsorized]",
@@ -2118,7 +2121,7 @@ mdlMedical <- list()
 
 # regression
 mdlMedical$lmAttFreqQualX <-
-  lm(AvAttitude ~ SumContactNL_c * AvQuality_c, data = dtMedicalSupp$medicalContactFreq)
+  lm(AvAttitude ~ SumContactNL_c * AvQualityComb_c, data = dtMedicalSupp$medicalContactFreq)
 
 summ(
   mdlMedical$lmAttFreqQualX,
@@ -2132,14 +2135,14 @@ mdlMedical$lmAttFreqQualXEta <-
 interactions::interact_plot(
   mdlMedical$lmAttFreqQualX,
   pred = SumContactNL_c,
-  modx = AvQuality_c,
+  modx = AvQualityComb_c,
   interval = TRUE,
   partial.residuals = TRUE
 )
 
 interactions::johnson_neyman(mdlMedical$lmAttFreqQualX,
                              pred = SumContactNL_c,
-                             modx = AvQuality_c,
+                             modx = AvQualityComb_c,
                              alpha = .05)
 ```
 
@@ -2384,11 +2387,11 @@ mdlMedicalOut$Att$IccPercNull <-
 ```{r medicalOutModelMLQltNull, include=FALSE}
 # Create and save Model
 mdlMedicalOut$Qlt$lmerNull <-
-  lme4::lmer(qualityOverall ~ 1 + (1 | PID), 
+  lme4::lmer(interaction_quality ~ 1 + (1 | PID), 
              data = dtMedicalSupp$medicalOutWithinBetween) # use optim if it does not converge
 mdlMedicalOut$Qlt$lmeNull <-
   mdlMedicalOut$Qlt$lmeNull <-lme(
-    qualityOverall ~ 1,
+    interaction_quality ~ 1,
     random = ~ 1 | PID,
     na.action = na.omit,
     data = dtMedicalSupp$medicalOutWithinBetween,
@@ -2596,7 +2599,7 @@ ggsave(
 # Create and save Model
 mdlMedicalOut$Qlt$lmeInterceptCore <-
   lme(
-    qualityOverall ~ KeyNeedFulfillment_cwc,
+    interaction_quality ~ KeyNeedFulfillment_cwc,
     random = ~ 1 | PID,
     na.action = na.omit,
     data = dtMedicalSupp$medicalOutWithinBetween
@@ -2606,7 +2609,7 @@ mdlMedicalOut$Qlt$lmeInterceptCore <-
 summ(
   mdlMedicalOut$Qlt$lmerInterceptCore <-
     lmer(
-      qualityOverall ~ KeyNeedFulfillment_cwc + (1 | PID),
+      interaction_quality ~ KeyNeedFulfillment_cwc + (1 | PID),
       data = dtMedicalSupp$medicalOutWithinBetween
     ),
   confint = TRUE,
@@ -2647,7 +2650,7 @@ mdlMedicalOut$Qlt$varInterceptCore <-
 # Create and save Model (optimizer needed to reach convergence)
 mdlMedicalOut$Qlt$lmeSlopesCore <-
   lme(
-    qualityOverall ~
+    interaction_quality ~
       KeyNeedFulfillment_cwc,
     random = ~ 1 + KeyNeedFulfillment_cwc | PID,
     na.action = na.omit,
@@ -2659,7 +2662,7 @@ mdlMedicalOut$Qlt$lmeSlopesCore <-
 summ(
   mdlMedicalOut$Qlt$lmerSlopesCore <-
     lmer(
-      qualityOverall ~
+      interaction_quality ~
         KeyNeedFulfillment_cwc +
         (1 + KeyNeedFulfillment_cwc | PID),
       data = dtMedicalSupp$medicalOutWithinBetween
@@ -2749,7 +2752,7 @@ ggsave(
 # Create and save Model
 mdlMedicalOut$Att$lmeInterceptCoreQlt <-
   lme(
-    AttitudesDutch ~ KeyNeedFulfillment_cwc + qualityOverall_cwc,
+    AttitudesDutch ~ KeyNeedFulfillment_cwc + interaction_quality_cwc,
     random = ~ 1 | PID,
     na.action = na.omit,
     data = dtMedicalSupp$medicalOutWithinBetween
@@ -2759,7 +2762,7 @@ mdlMedicalOut$Att$lmeInterceptCoreQlt <-
 summ(
   mdlMedicalOut$Att$lmerInterceptCoreQlt <-
     lmer(
-      AttitudesDutch ~ KeyNeedFulfillment_cwc + qualityOverall_cwc + (1 | PID),
+      AttitudesDutch ~ KeyNeedFulfillment_cwc + interaction_quality_cwc + (1 | PID),
       data = dtMedicalSupp$medicalOutWithinBetween
     ),
   confint = TRUE,
@@ -2802,8 +2805,8 @@ mdlMedicalOut$Att$varInterceptCoreQlt <-
 mdlMedicalOut$Att$lmeSlopesCoreQlt <-
   lme(
     AttitudesDutch ~
-      KeyNeedFulfillment_cwc + qualityOverall_cwc,
-    random = ~ 1 + KeyNeedFulfillment_cwc + qualityOverall_cwc | PID,
+      KeyNeedFulfillment_cwc + interaction_quality_cwc,
+    random = ~ 1 + KeyNeedFulfillment_cwc + interaction_quality_cwc | PID,
     na.action = na.omit,
     control = lmeControl(opt = "optim"),
     data = dtMedicalSupp$medicalOutWithinBetween
@@ -2813,8 +2816,8 @@ mdlMedicalOut$Att$lmeSlopesCoreQlt <-
 summ(
   mdlMedicalOut$Att$lmerSlopesCoreQlt <- lmer(
     AttitudesDutch ~
-      KeyNeedFulfillment_cwc + qualityOverall_cwc +
-      (1 + KeyNeedFulfillment_cwc + qualityOverall_cwc | PID),
+      KeyNeedFulfillment_cwc + interaction_quality_cwc +
+      (1 + KeyNeedFulfillment_cwc + interaction_quality_cwc | PID),
     data = dtMedicalSupp$medicalOutWithinBetween,
     control = lmerControl(optimizer="bobyqa", optCtrl=list(maxfun=2e5))
   ),
@@ -2866,12 +2869,12 @@ grid.arrange(
 # Plot prediction model
 mdlMedicalOut$Att$predSlopesCoreQlt <- 
   dtMedicalSupp$medicalOutWithinBetween %>% 
-  filter(complete.cases(KeyNeedFulfillment, qualityOverall)) %>%
+  filter(complete.cases(KeyNeedFulfillment, interaction_quality)) %>%
   filter(PID %in% dtMedicalSupp$medicalOutPltIDs) %>%
   select(AttitudesDutch, TIDnum, PID) %>% 
   mutate(measure = predict(mdlMedicalOut$Att$lmeSlopesCoreQlt,
                            dtMedicalSupp$medicalOutWithinBetween %>% 
-                             filter(complete.cases(KeyNeedFulfillment, qualityOverall)) %>%
+                             filter(complete.cases(KeyNeedFulfillment, interaction_quality)) %>%
                              filter(PID %in% dtMedicalSupp$medicalOutPltIDs),
                            re.form = NA
                            )
@@ -2898,7 +2901,7 @@ ggsave(
 )
 ```
 
-We tested the situational core needs model analogous to the previous studies. We find that the fulfillment of the core need during outgroup contacts was associated with more positive outgroup attitudes (random slopes model; `r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesCore, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreCI, varName = "KeyNeedFulfillment_cwc")`) and also predicted higher perceived interaction quality (random slopes model; `r MlCoeffLatex(lmeMdl = mdlMedicalOut$Qlt$lmeSlopesCore, lmerCI = mdlMedicalOut$Qlt$lmerSlopesCoreCI, varName = "KeyNeedFulfillment_cwc")`). Additionally, once we consider the influences of core need fulfillment and interaction quality on outgroup attitudes jointly, we find that perceived interaction quality is a substantially stronger predictor (random slopes model; `r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreQlt, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreQltCI, varName = "qualityOverall_cwc")`) and the unique variance explained by core need fulfillment was roughly half of its original effect size (`r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreQlt, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreQltCI, varName = "KeyNeedFulfillment_cwc")`; also see \fgrref[-C]{fig:MainPaths} and \tblref{tab:intergroupNeedsTblLong} for full results). As with the previous two studies, these results indicate that in this data set outgroup attitudes were significantly predicted by the fulfillment of core situational needs and the results suggest that this explained variance is shared with perceived interaction quality. 
+We tested the situational core needs model analogous to the previous studies. We find that the fulfillment of the core need during outgroup contacts was associated with more positive outgroup attitudes (random slopes model; `r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesCore, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreCI, varName = "KeyNeedFulfillment_cwc")`) and also predicted higher perceived interaction quality (random slopes model; `r MlCoeffLatex(lmeMdl = mdlMedicalOut$Qlt$lmeSlopesCore, lmerCI = mdlMedicalOut$Qlt$lmerSlopesCoreCI, varName = "KeyNeedFulfillment_cwc")`). Additionally, once we consider the influences of core need fulfillment and interaction quality on outgroup attitudes jointly, we find that perceived interaction quality is a substantially stronger predictor (random slopes model; `r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreQlt, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreQltCI, varName = "interaction_quality_cwc")`) and the unique variance explained by core need fulfillment was roughly half of its original effect size (`r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesCoreQlt, lmerCI = mdlMedicalOut$Att$lmerSlopesCoreQltCI, varName = "KeyNeedFulfillment_cwc")`; also see \fgrref[-C]{fig:MainPaths} and \tblref{tab:intergroupNeedsTblLong} for full results). As with the previous two studies, these results indicate that in this data set outgroup attitudes were significantly predicted by the fulfillment of core situational needs and the results suggest that this explained variance is shared with perceived interaction quality. 
 
 <!-- \faQuestionCircle\ Are we sure that we don't want some sort of bootstrapped indirect effect?  -->
 
@@ -3082,7 +3085,7 @@ ggsave(
 # Create and save Model
 mdlMedicalOut$Qlt$lmeInterceptAllport <-
   lme(
-    qualityOverall ~ AllportsCondition_cwc,
+    interaction_quality ~ AllportsCondition_cwc,
     random = ~ 1 | PID,
     na.action = na.omit,
     data = dtMedicalSupp$medicalOutWithinBetween
@@ -3092,7 +3095,7 @@ mdlMedicalOut$Qlt$lmeInterceptAllport <-
 summ(
   mdlMedicalOut$Qlt$lmerInterceptAllport <-
     lmer(
-      qualityOverall ~ AllportsCondition_cwc + (1 | PID),
+      interaction_quality ~ AllportsCondition_cwc + (1 | PID),
       data = dtMedicalSupp$medicalOutWithinBetween
     ),
   confint = TRUE,
@@ -3133,7 +3136,7 @@ mdlMedicalOut$Qlt$varInterceptAllport <-
 # Create and save Model (optimizer needed to reach convergence)
 mdlMedicalOut$Qlt$lmeSlopesAllport <-
   lme(
-    qualityOverall ~
+    interaction_quality ~
       AllportsCondition_cwc,
     random = ~ 1 + AllportsCondition_cwc | PID,
     na.action = na.omit,
@@ -3145,7 +3148,7 @@ mdlMedicalOut$Qlt$lmeSlopesAllport <-
 summ(
   mdlMedicalOut$Qlt$lmerSlopesAllport <-
     lmer(
-      qualityOverall ~
+      interaction_quality ~
         AllportsCondition_cwc +
         (1 + AllportsCondition_cwc | PID),
       data = dtMedicalSupp$medicalOutWithinBetween
@@ -3232,7 +3235,7 @@ ggsave(
 # Create and save Model
 mdlMedicalOut$Att$lmeInterceptAllportQlt <-
   lme(
-    AttitudesDutch ~ AllportsCondition_cwc + qualityOverall_cwc,
+    AttitudesDutch ~ AllportsCondition_cwc + interaction_quality_cwc,
     random = ~ 1 | PID,
     na.action = na.omit,
     data = dtMedicalSupp$medicalOutWithinBetween
@@ -3242,7 +3245,7 @@ mdlMedicalOut$Att$lmeInterceptAllportQlt <-
 summ(
   mdlMedicalOut$Att$lmerInterceptAllportQlt <-
     lmer(
-      AttitudesDutch ~ AllportsCondition_cwc + qualityOverall_cwc + (1 | PID),
+      AttitudesDutch ~ AllportsCondition_cwc + interaction_quality_cwc + (1 | PID),
       data = dtMedicalSupp$medicalOutWithinBetween
     ),
   confint = TRUE,
@@ -3285,8 +3288,8 @@ mdlMedicalOut$Att$varInterceptAllportQlt <-
 mdlMedicalOut$Att$lmeSlopesAllportQlt <-
   lme(
     AttitudesDutch ~
-      AllportsCondition_cwc + qualityOverall_cwc,
-    random = ~ 1 + AllportsCondition_cwc + qualityOverall_cwc | PID,
+      AllportsCondition_cwc + interaction_quality_cwc,
+    random = ~ 1 + AllportsCondition_cwc + interaction_quality_cwc | PID,
     na.action = na.omit,
     control = lmeControl(opt = "optim"),
     data = dtMedicalSupp$medicalOutWithinBetween
@@ -3296,8 +3299,8 @@ mdlMedicalOut$Att$lmeSlopesAllportQlt <-
 summ(
   mdlMedicalOut$Att$lmerSlopesAllportQlt <- lmer(
     AttitudesDutch ~
-      AllportsCondition_cwc + qualityOverall_cwc +
-      (1 + AllportsCondition_cwc + qualityOverall_cwc | PID),
+      AllportsCondition_cwc + interaction_quality_cwc +
+      (1 + AllportsCondition_cwc + interaction_quality_cwc | PID),
     data = dtMedicalSupp$medicalOutWithinBetween,
     control = lmerControl(optimizer="bobyqa", optCtrl=list(maxfun=2e5))
   ),
@@ -3349,12 +3352,12 @@ grid.arrange(
 # Plot prediction model
 mdlMedicalOut$Att$predSlopesAllportQlt <- 
   dtMedicalSupp$medicalOutWithinBetween %>% 
-  filter(complete.cases(AllportsCondition, qualityOverall)) %>%
+  filter(complete.cases(AllportsCondition, interaction_quality)) %>%
   filter(PID %in% dtMedicalSupp$medicalOutPltIDs) %>%
   select(AttitudesDutch, TIDnum, PID) %>% 
   mutate(measure = predict(mdlMedicalOut$Att$lmeSlopesAllportQlt,
                            dtMedicalSupp$medicalOutWithinBetween %>% 
-                             filter(complete.cases(AllportsCondition, qualityOverall)) %>%
+                             filter(complete.cases(AllportsCondition, interaction_quality)) %>%
                              filter(PID %in% dtMedicalSupp$medicalOutPltIDs),
                            re.form = NA
                            )
@@ -3381,7 +3384,7 @@ ggsave(
 )
 ```
 
-We tested the impact of Allport's conditions in the same manner as we tested our core needs model. In the multilevel models, we find that the fulfillment of Allport's Conditions during outgroup contacts was associated with more positive outgroup attitudes (random slopes model; `r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesAllport, lmerCI = mdlMedicalOut$Att$lmerSlopesAllportCI, varName = "AllportsCondition_cwc")`) and also predicted higher perceived interaction quality (random slopes model; `r MlCoeffLatex(lmeMdl = mdlMedicalOut$Qlt$lmeSlopesAllport, lmerCI = mdlMedicalOut$Qlt$lmerSlopesAllportCI, varName = "AllportsCondition_cwc")`). Moreover, when we considered the influences of Allport's Conditions and interaction quality on outgroup attitudes jointly, we found that perceived interaction quality was a substantially stronger predictor (random slopes model; `r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesAllportQlt, lmerCI = mdlMedicalOut$Att$lmerSlopesAllportQltCI, varName = "qualityOverall_cwc")`) and the unique variance explained by Allport's Conditions was less than half of its original effect size (`r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesAllportQlt, lmerCI = mdlMedicalOut$Att$lmerSlopesAllportQltCI, varName = "AllportsCondition_cwc")`; also see \tblref{tab:intergroupNeedsTblLong}). These results indicate that in this data set the fulfillment of Allport's conditions had a significant influence on outgroup attitudes and this effect is likely, related to the effect of perceived interaction quality. 
+We tested the impact of Allport's conditions in the same manner as we tested our core needs model. In the multilevel models, we find that the fulfillment of Allport's Conditions during outgroup contacts was associated with more positive outgroup attitudes (random slopes model; `r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesAllport, lmerCI = mdlMedicalOut$Att$lmerSlopesAllportCI, varName = "AllportsCondition_cwc")`) and also predicted higher perceived interaction quality (random slopes model; `r MlCoeffLatex(lmeMdl = mdlMedicalOut$Qlt$lmeSlopesAllport, lmerCI = mdlMedicalOut$Qlt$lmerSlopesAllportCI, varName = "AllportsCondition_cwc")`). Moreover, when we considered the influences of Allport's Conditions and interaction quality on outgroup attitudes jointly, we found that perceived interaction quality was a substantially stronger predictor (random slopes model; `r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesAllportQlt, lmerCI = mdlMedicalOut$Att$lmerSlopesAllportQltCI, varName = "interaction_quality_cwc")`) and the unique variance explained by Allport's Conditions was less than half of its original effect size (`r MlCoeffLatex(lmeMdl = mdlMedicalOut$Att$lmeSlopesAllportQlt, lmerCI = mdlMedicalOut$Att$lmerSlopesAllportQltCI, varName = "AllportsCondition_cwc")`; also see \tblref{tab:intergroupNeedsTblLong}). These results indicate that in this data set the fulfillment of Allport's conditions had a significant influence on outgroup attitudes and this effect is likely, related to the effect of perceived interaction quality. 
 
 \subsubsection{Compare Fulfillment of Core Need and Allport's Conditions}
 
@@ -3618,7 +3621,7 @@ avAll$study2 <- relevel(as.factor(avAll$study),"S2")
 ```{r OLS regression across the three studies, include=FALSE}
 lmAllAttFreqQualX <-
   lm(
-    AvAttitude ~ SumContactNL_c * AvQualityOut_c + SumContactNL_c * study2 + AvQualityOut_c * study2,
+    AvAttitude ~ SumContactNL_c * AvQualityCombOut_c + SumContactNL_c * study2 + AvQualityCombOut_c * study2,
     data = avAll
   )
 
@@ -3653,7 +3656,7 @@ lmAllFstatLatex <- paste(
 )
 ```
 
-A second stability test is checking whether the within person effects translate to a broader aggregated between subjects effect, which would mirror common cross-sectional practices. During the main analyses, we have thus far shown that participants held more positive outgroup attitudes following intergroup contacts and that perceived interaction quality was associated with more positive outgroup attitudes following an intergroup contact. We have, however, not brought the two quantity and quality elements of the contact hypothesis together in a single analysis. To jointly test the effects of contact frequency and average interaction quality, we ran a linear regression model where average outgroup attitudes were predicted by the number of interactions and the average interaction quality ratings of all participants across the three studies. We did so while controlling for the possible effects of study-specific differences. To include the study-membership as a control variable, we used the student sample (Study 2) as the reference group because it was both the largest and the most homogeneous study. Looking at the overall model, we found that the model predicted `r format(round(fit$r.squared*100, 2), nsmall = 2)`\% of the variance in average outgroup attitudes (`r lmAllFstatLatex`). Looking at the individual effects, we found that only the number of outgroup interactions has a clear association with average outgroup attitudes (`r LmCoeffLatex(lmMdl = lmAllAttFreqQualX, varName = "SumContactNL_c", ci = TRUE)`). The average interaction quality perceptions had a much smaller effect (`r LmCoeffLatex(lmMdl = lmAllAttFreqQualX, varName = "AvQualityOut_c", ci = TRUE)`), and importantly we found no interaction effect at all. In short, the effect of interaction frequency did not depend on the average interaction quality.
+A second stability test is checking whether the within person effects translate to a broader aggregated between subjects effect, which would mirror common cross-sectional practices. During the main analyses, we have thus far shown that participants held more positive outgroup attitudes following intergroup contacts and that perceived interaction quality was associated with more positive outgroup attitudes following an intergroup contact. We have, however, not brought the two quantity and quality elements of the contact hypothesis together in a single analysis. To jointly test the effects of contact frequency and average interaction quality, we ran a linear regression model where average outgroup attitudes were predicted by the number of interactions and the average interaction quality ratings of all participants across the three studies. We did so while controlling for the possible effects of study-specific differences. To include the study-membership as a control variable, we used the student sample (Study 2) as the reference group because it was both the largest and the most homogeneous study. Looking at the overall model, we found that the model predicted `r format(round(fit$r.squared*100, 2), nsmall = 2)`\% of the variance in average outgroup attitudes (`r lmAllFstatLatex`). Looking at the individual effects, we found that only the number of outgroup interactions has a clear association with average outgroup attitudes (`r LmCoeffLatex(lmMdl = lmAllAttFreqQualX, varName = "SumContactNL_c", ci = TRUE)`). The average interaction quality perceptions had a much smaller effect (`r LmCoeffLatex(lmMdl = lmAllAttFreqQualX, varName = "AvQualityCombOut_c", ci = TRUE)`), and importantly we found no interaction effect at all. In short, the effect of interaction frequency did not depend on the average interaction quality.
 
 \subsection{Robustness}
 To check for spurious relationships, we test three additional models. These three models assess whether the effect is indeed specific to intergroup contact, whether the need fulfillment effect is a affected by whether the contact was planned or accidental, and whether the motivational mechanism also holds for direct well-being benefits for the minority members. We describe the full methods and results for the robustness analyses in \appref{app:AppendixRobustness}. We use a two-staged analysis approach for the robustness analyses. We first test the model `globally' --- across the three studies --- in a three level multilevel regression (i.e., measurements nested within participants, and participants nested within studies). Only in a second step do check for study-specific idiosyncrasies. 
@@ -3702,13 +3705,13 @@ Overall, we find that our situation need fulfillment model is consistent across 
 # OLS 
 # Study 1:
 mdlWorker$lmAttFreqQualX <-
-  lm(AvAttitude ~ SumContactNL_c * AvQuality_c, data = dtWorkerSupp$workerAvFreQual)
+  lm(AvAttitude ~ SumContactNL_c * AvQualityComb_c, data = dtWorkerSupp$workerAvFreQual)
 # Study 2:
 mdlStudent$lmAttFreqQualX <-
-  lm(AvAttitude ~ SumContactNL_c * AvQuality_c, data = dtStudentSupp$studentContactFreq)
+  lm(AvAttitude ~ SumContactNL_c * AvQualityComb_c, data = dtStudentSupp$studentContactFreq)
 # Study 3: 
 mdlMedical$lmAttFreqQualX <-
-  lm(AvAttitude ~ SumContactNL_c * AvQuality_c, data = dtMedicalSupp$medicalContactFreq)
+  lm(AvAttitude ~ SumContactNL_c * AvQualityComb_c, data = dtMedicalSupp$medicalContactFreq)
 
 # tabModelTest <- tab_model(mdlWorker$lmAttFreqQualX,
 #                           mdlStudent$lmAttFreqQualX,
@@ -3803,11 +3806,11 @@ names(mdlTblGeneralLm) <- gsub("Eta2_partial", "ES", names(mdlTblGeneralLm))
 lmAllAttFreqQualX2 <-
   lm(
     AvAttitude ~ 
-      SumContactNL_c * AvQualityOut_c + 
+      SumContactNL_c * AvQualityCombOut_c + 
       SumContactNL_c * studyNum1 + 
       SumContactNL_c * studyNum3 + 
-      AvQualityOut_c * studyNum1 + 
-      AvQualityOut_c * studyNum3,
+      AvQualityCombOut_c * studyNum1 + 
+      AvQualityCombOut_c * studyNum3,
     data = avAll
   )
 
@@ -3835,15 +3838,15 @@ mdlTblGeneralLong <-
                              filter(
                                coef %in% c(
                                  "(Intercept)",
-                                 "AvQualityOut",
-                                 "AvQuality",
+                                 "AvQualityCombOut",
+                                 "AvQualityComb",
                                  "studyNum1",
                                  "studyNum3",
-                                 "SumContactNL:AvQualityOut",
+                                 "SumContactNL:AvQualityCombOut",
                                  "SumContactNL:studyNum1",
                                  "SumContactNL:studyNum3", 
-                                 "AvQualityOut:studyNum1",
-                                 "AvQualityOut:studyNum3",
+                                 "AvQualityCombOut:studyNum1",
+                                 "AvQualityCombOut:studyNum3",
                                  "R2_R2_adjusted"
                                )
                              ) %>%
@@ -4854,7 +4857,7 @@ lmMetaTbl <- lmMetaTbl %>% arrange(coef)
 # extract parameter names
   name <- "Contact Hypothesis — Aggregate Linear Regression"
   var <- as.character(unique(lmMetaTbl$coef))[!as.character(unique(lmMetaTbl$coef)) %in% c("(Intercept)")]
-  names <- qdap::mgsub(c("SumContactNL", "AvQuality", "SumContactNL.AvQuality"),
+  names <- qdap::mgsub(c("SumContactNL", "AvQualityComb", "SumContactNL.AvQualityComb"),
                        c("Number of Outgroup Contacts","Average Interaction Quality", "Contact X Quality"), 
                        var)
   studies <- as.character(unique(lmMetaTbl$sample))
@@ -4991,7 +4994,7 @@ for(i in 1:length(var)){
                       gsub('Student', 'Study 2',
                       gsub('Medical', 'Study 3', sample)
                            ))) %>%
-    arrange(match(effect, c("SumContactNL", "AvQuality", "SumContactNL.AvQuality")), 
+    arrange(match(effect, c("SumContactNL", "AvQualityComb", "SumContactNL.AvQualityComb")), 
             match(sample, c("Study 1", "Study 2", "Study 3", "RE")))
   
     alpha <- 0.05
@@ -5272,7 +5275,7 @@ GeneralLmerMeta <- metaLmerOut(GeneralLmerMetaTbl,
       
 ```
 
-```{generalForestPltComb, include=FALSE}
+```{r generalForestPltComb, include=FALSE}
 effGeneral <- rbind(
   eff %>%
     filter(coef != "(Intercept)") %>%
@@ -5417,7 +5420,7 @@ write.csv(
       "competence_1",
       "autonomy_1",
       "relatedness_1",
-      "quality_overall_1",
+      "interaction_quality",
       "OutgroupInteraction",
       "NonOutgroupInteraction"
     ),
@@ -5435,7 +5438,7 @@ write.csv(
       "Autonomy",
       "Relatedness",
       "AttitudesDutch",
-      "quality_overall",
+      "interaction_quality",
       "OutgroupInteraction",
       "NonOutgroupInteraction"
     ),
@@ -5451,7 +5454,7 @@ write.csv(
       "OutgroupInteraction",
       "NonOutgroupInteraction",
       "AttitudesDutch",
-      "qualityOverall",
+      "interaction_quality",
       "AllportsCondition",
       "KeyNeedFulfillment",
       "Competence",
@@ -5479,7 +5482,7 @@ osfExport$dtWorkerSupp$workerInteractionType <- dtWorkerSupp$workerInteractionTy
     "competence_1",
     "autonomy_1",
     "relatedness_1", 
-     "quality_overall_1", 
+     "interaction_quality", 
     "OutgroupInteraction",
     "NonOutgroupInteraction"
   )
@@ -5503,7 +5506,7 @@ osfExport$dtStudentSupp$studentInteractionType <- dtStudentSupp$studentInteracti
     "Autonomy",
     "Relatedness",
     "AttitudesDutch",
-    "quality_overall",
+    "interaction_quality",
     "OutgroupInteraction",
     "NonOutgroupInteraction"
   )
@@ -5541,9 +5544,9 @@ osfExport$dtMedicalSupp$medicalWithinBetween <- dtMedicalSupp$medicalWithinBetwe
     "AttitudesDutch",
     "AttitudesDutch_cwc",
     "AttitudesDutch_zwc",
-    "qualityOverall",
-    "qualityOverall_cwc",
-    "qualityOverall_zwc",
+    "interaction_quality",
+    "interaction_quality_cwc",
+    "interaction_quality_zwc",
     "AllportsCondition",
     "AllportsCondition_cwc",
     "AllportsCondition_zwc",
@@ -5568,9 +5571,9 @@ osfExport$dtMedicalSupp$medicalOutWithinBetween <- dtMedicalSupp$medicalOutWithi
     "AttitudesDutch",
     "AttitudesDutch_cwc",
     "AttitudesDutch_zwc",
-    "qualityOverall",
-    "qualityOverall_cwc",
-    "qualityOverall_zwc",
+    "interaction_quality",
+    "interaction_quality_cwc",
+    "interaction_quality_zwc",
     "AllportsCondition",
     "AllportsCondition_cwc",
     "AllportsCondition_zwc",
@@ -5601,7 +5604,7 @@ osfExport$dtMedical$full <- dtMedical$full %>%
     "Autonomy", 
     "Relatedness", 
     "AllportsCondition", 
-    "qualityOverall"
+    "interaction_quality"
   )
 
 osfExport$dtMedicalSupp$medicalContactFreq <- dtMedicalSupp$medicalContactFreq
