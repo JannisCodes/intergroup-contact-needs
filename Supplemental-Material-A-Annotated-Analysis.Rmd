@@ -12446,6 +12446,12 @@ We also export all relevant data for the Methods and Results section, which are 
 ```{r dataExport}
 # prep general data
 
+workerWithinBetween %>% 
+  select(
+    OutgroupInteractionLab,
+    
+  )
+
 dt_exp_s1 <- workerWithinBetween %>%
   transmute(
     study = as.numeric(1),
@@ -12474,15 +12480,15 @@ dt_exp_s1 <- workerWithinBetween %>%
     InteractionAccidental = interaction_accidental,
     InteractionAccidentalC = interaction_accidental_cwc,
     InteractionAccidentalZ = interaction_accidental_zwc,
-    Competence = competence_1,
-    CompetenceC = competence_1_cwc,
-    CompetenceZ = competence_1_zwc,
-    Autonomy = autonomy_1,
-    AutonomyC = autonomy_1_cwc,
-    AutonomyZ = autonomy_1_zwc,
-    Relatednesss = relatedness_1,
-    RelatednesssC = relatedness_1_cwc,
-    RelatednesssZ = relatedness_1_zwc,
+    Competence = competence.daily.all,
+    CompetenceC = competence.daily.all_cwc,
+    CompetenceZ = competence.daily.all_zwc,
+    Autonomy = autonomy.daily.all,
+    AutonomyC = autonomy.daily.all_cwc,
+    AutonomyZ = autonomy.daily.all_zwc,
+    Relatednesss = relatedness.daily.all,
+    RelatednesssC = relatedness.daily.all_cwc,
+    RelatednesssZ = relatedness.daily.all_zwc,
     motive = keyMotive
   )
 dt_exp_s2 <- studentWithinBetween %>%

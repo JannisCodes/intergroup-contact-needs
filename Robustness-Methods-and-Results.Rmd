@@ -791,6 +791,212 @@ When looking at the individual studies, we again saw that core need fulfillment 
 <!-- TABLES -->
 
 ```{r}
+#| label: descrFullWideAppB
+
+vars_full <- c(
+  "Core Need" = "CoreNeed",
+  "Competence" = "Competence",
+  "Autonomy" = "Autonomy",
+  "Relatednesss" = "Relatednesss",
+  "Outgroup Interaction" = "OutgroupInteraction",
+  "Accidental" = "InteractionAccidental",
+  "Quality" = "Quality",
+  "Attitudes NL" = "Attitude"
+)
+
+dt_exp_all <- dt_exp_all %>% 
+  mutate(
+    OutgroupInteraction = (OutgroupInteraction-1.5)
+  )
+
+s1_MlCor_full <- 
+  MlCorMat(
+    data = dt_exp_all %>% filter(study == 1),
+    id = "PID",
+    selection = setdiff(as.character(vars_full), c("InteractionAccidental", "Quality")),
+    labels = setdiff(names(vars_full), c("Accidental", "Quality"))
+  ) 
+s2_MlCor_full <- 
+  MlCorMat(
+    data = dt_exp_all %>% filter(study == 2),
+    id = "PID",
+    selection = as.character(vars_full),
+    labels = names(vars_full)
+  ) 
+s3_MlCor_full <- 
+  MlCorMat(
+    data = dt_exp_all %>% filter(study == 3),
+    id = "PID",
+    selection = as.character(vars_full),
+    labels = names(vars_full)
+  ) 
+all_MlCor_full <- 
+  MlCorMat(
+    data = dt_exp_all,
+    id = "PID",
+    selection = as.character(vars_full),
+    labels = names(vars_full)
+  ) 
+
+
+rbind(
+  s1_MlCor_full %>%
+    t %>%
+    as.data.frame %>%
+    rownames_to_column(., "Variable") %>%
+    add_column(Accidental = "",
+               .before = "Attitudes NL") %>%
+    add_column(Quality = "",
+               .before = "Attitudes NL"),
+  s2_MlCor_full %>%
+    t %>%
+    as.data.frame %>%
+    rownames_to_column(., "Variable"),
+  s3_MlCor_full %>%
+    t %>%
+    as.data.frame %>%
+    rownames_to_column(., "Variable"),
+  all_MlCor_full %>%
+    t %>%
+    as.data.frame %>%
+    rownames_to_column(., "Variable")
+) %>%
+  kbl(.,
+      format = "latex",
+      caption = "Full Sample: Correlation Table and Descriptive Statistics",
+      booktabs = TRUE,
+      align = c("l", rep("c", ncol(.) - 1)))  %>%
+  kable_classic() %>%
+  add_header_above(
+    .,
+    c(
+      "",
+      "Correlations" = ncol(s3_MlCor_full),
+      "Descriptives" = nrow(s3_MlCor_full) - ncol(s3_MlCor_full)
+    )
+  ) %>%
+  pack_rows("Study 1", 1, ncol(s1_MlCor_full)) %>%
+  pack_rows("Study 2", ncol(s1_MlCor_full) + 1,
+            sum(ncol(s1_MlCor_full), ncol(s2_MlCor_full))) %>%
+  pack_rows("Study 3", sum(ncol(s1_MlCor_full), ncol(s2_MlCor_full)) + 1,  
+            sum(ncol(s1_MlCor_full), ncol(s2_MlCor_full), ncol(s3_MlCor_full))) %>%
+  pack_rows("Across Studies", sum(ncol(s1_MlCor_full), ncol(s2_MlCor_full), ncol(s3_MlCor_full)) + 1,  
+            sum(ncol(s1_MlCor_full), ncol(s2_MlCor_full), ncol(s3_MlCor_full), ncol(all_MlCor_full))) %>% # fix table position
+  footnote(
+    general = c(
+      "Upper triangle: Between-person correlations;",
+      "Lower triangle: Within-person correlations;",
+      "*** p < .001, ** p < .01,  * p < .05",
+      "Interaction Intent and Interaction Quality were only measured for outgroup interactions in Study 1."
+    )
+  ) %>%
+  kable_styling(latex_options = "scale_down") %>%
+  gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
+  gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
+  save_kable("Tables/descrFullWideAppB.tex")
+
+```
+
+```{r}
+#| label: descrOutWideAppB
+
+vars_out <- c(
+  "Core Need" = "CoreNeed",
+  "Competence" = "Competence",
+  "Autonomy" = "Autonomy",
+  "Relatednesss" = "Relatednesss",
+  "Practical Need" = "practical_need_dum",
+  "Psychological Need" = "psychological_need_dum",
+  "Accidental" = "InteractionAccidental",
+  "Quality" = "Quality",
+  "Attitudes NL" = "Attitude"
+)
+
+s1_MlCor_out <- 
+  MlCorMat(
+    data = dt_goal_directedness %>% filter(study == 1, OutgroupInteraction == "Yes"),
+    id = "PID",
+    selection = as.character(vars_out),
+    labels = names(vars_out)
+  ) 
+s2_MlCor_out <- 
+  MlCorMat(
+    data = dt_goal_directedness %>% filter(study == 2, OutgroupInteraction == "Yes"),
+    id = "PID",
+    selection = as.character(vars_out),
+    labels = names(vars_out)
+  ) 
+s3_MlCor_out <- 
+  MlCorMat(
+    data = dt_goal_directedness %>% filter(study == 3, OutgroupInteraction == "Yes"),
+    id = "PID",
+    selection = as.character(vars_out),
+    labels = names(vars_out)
+  ) 
+all_MlCor_out <- 
+  MlCorMat(
+    data = dt_goal_directedness %>% filter(OutgroupInteraction == "Yes"),
+    id = "PID",
+    selection = as.character(vars_out),
+    labels = names(vars_out)
+  ) 
+
+
+rbind(
+  s1_MlCor_out %>%
+    t %>%
+    as.data.frame %>%
+    rownames_to_column(., "Variable"),
+  s2_MlCor_out %>%
+    t %>%
+    as.data.frame %>%
+    rownames_to_column(., "Variable"),
+  s3_MlCor_out %>%
+    t %>%
+    as.data.frame %>%
+    rownames_to_column(., "Variable"),
+  all_MlCor_out %>%
+    t %>%
+    as.data.frame %>%
+    rownames_to_column(., "Variable")
+) %>%
+  kbl(.,
+      format = "latex",
+      caption = "Outgroup Interaction Sample: Correlation Table and Descriptive Statistics",
+      booktabs = TRUE,
+      align = c("l", rep("c", ncol(.) - 1)))  %>%
+  kable_classic() %>%
+  add_header_above(
+    .,
+    c(
+      "",
+      "Correlations" = ncol(s3_MlCor_out),
+      "Descriptives" = nrow(s3_MlCor_out) - ncol(s3_MlCor_out)
+    )
+  ) %>%
+  pack_rows("Study 1", 1, ncol(s1_MlCor_out)) %>%
+  pack_rows("Study 2", ncol(s1_MlCor_out) + 1,
+            sum(ncol(s1_MlCor_out), ncol(s2_MlCor_out))) %>%
+  pack_rows("Study 3", sum(ncol(s1_MlCor_out), ncol(s2_MlCor_out)) + 1,  
+            sum(ncol(s1_MlCor_out), ncol(s2_MlCor_out), ncol(s3_MlCor_out))) %>%
+  pack_rows("Across Studies", sum(ncol(s1_MlCor_out), ncol(s2_MlCor_out), ncol(s3_MlCor_out)) + 1,  
+            sum(ncol(s1_MlCor_out), ncol(s2_MlCor_out), ncol(s3_MlCor_out), ncol(all_MlCor_out))) %>% # fix table position
+  footnote(
+    general = c(
+      "Upper triangle: Between-person correlations;",
+      "Lower triangle: Within-person correlations;",
+      "*** p < .001, ** p < .01,  * p < .05"
+    )
+  ) %>%
+  kable_styling(latex_options = "scale_down") %>%
+  gsub("\\begin{table}", "\\begin{table}\n\\begin{minipage}[t][\\textheight][t]{\\textwidth}", ., fixed = TRUE) %>% # fix table position
+  gsub("\\end{table}", "\\end{minipage}\n\\end{table}", ., fixed = TRUE) %>% # fix table position
+  save_kable("Tables/descrOutWideAppB.tex")
+
+```
+
+
+```{r}
 #| label: robustnessTblLong
 #| include: false
 
