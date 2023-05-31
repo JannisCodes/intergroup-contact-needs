@@ -792,6 +792,7 @@ When looking at the individual studies, we again saw that core need fulfillment 
 
 ```{r}
 #| label: descrFullWideAppB
+#| include: false
 
 vars_full <- c(
   "Core Need" = "CoreNeed",
@@ -899,6 +900,7 @@ rbind(
 
 ```{r}
 #| label: descrOutWideAppB
+#| include: false
 
 vars_out <- c(
   "Core Need" = "CoreNeed",
