@@ -11,9 +11,9 @@ This repository brings together the full manuscript (syncronized from Overleaf) 
 
 The full annotated analysis code is available as part of [Supplemental Material A: Annotated Analysis](https://janniscodes.github.io/intergroup-contact-needs/Supplemental-Material-A-Annotated-Analysis).
 
-The full, commented code and graphical output of our power simulations is available as [Supplemental Material B: Power Simulation](https://janniscodes.github.io/intergroup-contact-needs/Supplemental-Material-B-Power-Simulation)
+The full, commented code and graphical output of our power simulations is available as [Supplemental Material B: Power Simulation](https://janniscodes.github.io/intergroup-contact-needs/Supplemental-Material-B-Power-Simulation).
 
-The supplemental materials for the BERT topic model is available as our [Supplemental Material C: Motives Topic Model](https://janniscodes.github.io/bert-migrant-need-content/Supplemental-Material-C-BERT-topic-model-outgroup)
+The supplemental materials for the BERT topic model is available as our [Supplemental Material C: Motives Topic Model](https://janniscodes.github.io/bert-migrant-need-content/Supplemental-Material-C-BERT-topic-model-outgroup).
 
 Please note that the full repository will remain 'private' and anonymized until after the manuscript has been accepted for publication (to allow for blind peer review).
 
