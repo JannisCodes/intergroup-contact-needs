@@ -1,7 +1,7 @@
 % define document type (i.e., template. Here: A4 APA manuscript with 12pt font)
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL main.tex       Wed May 31 19:42:22 2023
-%DIF ADD main_rev.tex   Wed May 31 19:26:30 2023
+%DIF ADD main_rev.tex   Thu Jun  1 18:27:28 2023
 \documentclass[man, 12pt, a4paper, mask]{apa7}
 
 % change margins (e.g., for margin comments):
@@ -125,11 +125,7 @@ breaklinks=true,
 \DeclareLanguageMapping{american}{american-apa}
 
 % add reference library file
-%DIF 117c118
-%DIF < \addbibresource{../../references.bib}
-%DIF -------
-\addbibresource{../../references.bib} %DIF > 
-%DIF -------
+\addbibresource{../../references.bib}
 
 % Title and header
 %DIF 120-121c121-122
@@ -169,7 +165,7 @@ Correspondence concerning this article should be addressed to Jannis Kreienkamp,
 %DIF 149c150
 %DIF < One challenge of modern intergroup contact research has been the question of when and why an interaction is perceived as positive and leads to better intergroup relations. We propose to consider situational psychological needs during everyday intergroup contact. We conducted three extensive longitudinal studies with recent migrants, to capture their interactions with the majority outgroup (total \textit{N} of measurements = 10,297). The novel psychological needs mechanism is consistently a strong predictor of positive attitudes during intergroup interactions and these positive effects emerged via perceived interaction quality. The situational needs model is robust to alternative models and outperforms Allport's contact conditions. As one of the first studies to test intergroup contact theory using extensive longitudinal data, we offer insight into the mechanisms of positive intergroup contact during real-life interactions and find situational motivations to be a key building block of understanding and addressing positive intergroup interactions.
 %DIF -------
-One challenge of modern intergroup contact research has been the question of when and why an interaction is perceived as positive and leads to better intergroup relations. We propose to consider the fulfillment of situationally relevant needs during everyday intergroup contact. We conducted three extensive longitudinal studies with recent migrants, to capture their interactions with the majority outgroup (total \textit{N} of measurements = 10,297; total \textit{N} participants = 207). The novel need fulfillment mechanism is consistently a strong predictor of perceived interaction quality as well as positive outgroup attitudes following intergroup interactions. The situational needs model is robust to alternative models and works at least as well as Allport's contact conditions. As one of the first studies to test intergroup contact theory using extensive longitudinal data, we offer insight into the mechanisms of positive intergroup contact during real-life interactions and find situational motivations to be a key building block of understanding and addressing positive intergroup interactions. %DIF > 
+One challenge of modern intergroup contact research has been the question of when and why an interaction is perceived as positive and improves intergroup relations. We propose to consider the perceived fulfillment of the situationally most relevant need. We conducted three intensive longitudinal studies with recent migrants, to capture their interactions with the majority outgroup ($N_{measurements}$ = 10,297; $N_{participants}$ = 207). The core need fulfillment mechanism is consistently a strong predictor of perceived interaction quality and positive outgroup attitudes following intergroup interactions. The model is specific to outgroup contact, robust to various need types, and works at least as well as Allport's contact conditions. As one of the first studies to test intergroup contact theory using intensive longitudinal data, we offer insight into the mechanisms of positive intergroup contact during real-life interactions and find situational motivations to be a key building block for understanding and addressing positive intergroup interactions. %DIF > 
 %DIF -------
 
 %DIF 151c152
@@ -371,7 +367,7 @@ Importantly, as we still fail to understand when and why an interaction is perce
 
 % Aim / Solution v.02: look at need fulfillment as a mechanism in daily interactions of migrants
 % Proposal Paragraph:
-We propose that \DIFdelbegin \DIFdel{the }\DIFdelend \DIFaddbegin \DIFadd{one }\DIFaddend key to understanding how an interaction is perceived is to examine the level of need fulfillment it provided to an individual. As an example, if someone seeks acceptance by their interaction partner, and this need is fulfilled during the interaction, the person should rate the interaction and the group of the interaction partner more favorably. To test this \DIFaddbegin \DIFadd{idea}\DIFaddend , we collected three sets of real-life data from recent immigrants, assessing their daily interactions with majority group members, tracking situational needs, interaction quality, \DIFaddbegin \DIFadd{well-being, }\DIFaddend and outgroup attitudes. 
+We propose that \DIFdelbegin \DIFdel{the }\DIFdelend \DIFaddbegin \DIFadd{one }\DIFaddend key to understanding how an interaction is perceived is to examine the level of need fulfillment it provided to an individual. As an example, if someone seeks acceptance by their interaction partner, and this need is fulfilled during the interaction, the person should rate the interaction and the group of the interaction partner more favorably. To test this \DIFaddbegin \DIFadd{idea}\DIFaddend , we collected three sets of real-life data from recent immigrants, assessing their daily interactions with majority group members, tracking situational needs, interaction quality, and outgroup attitudes. 
 
 \section{Need Mechanism in Intergroup Contact}
 % Motivational mechanism:
@@ -403,7 +399,7 @@ We propose that \DIFdelbegin \DIFdel{the }\DIFdelend \DIFaddbegin \DIFadd{one }\
 We propose that the literature on motivation and psychological needs may help us }\DIFdelend \DIFaddbegin \citep[e.g.,][]{Pettigrew1998}\DIFadd{.
 }
 
-\DIFadd{In this article, we focus on the role of motivation and need fulfillment to }\DIFaddend understand when and why exactly an interaction is perceived as positive. \DIFaddbegin \DIFadd{We propose need fulfillment in particular because needs are a fundamental aspect of the human experience that governs a significant number of emotional, cognitive, and behavioral facets }\citep[][]{kreienkamp2022d, kruglanski2002}\DIFadd{. Importantly, need fulfillment has particularly been highlighted in explaining the success of (close) relationships, psychosocial functioning, as well as reducing conflict between groups --- all of which are essential to positive intergroup interactions.
+\DIFadd{In this article, we focus on the role of motivation and need fulfillment to }\DIFaddend understand when and why exactly an interaction is perceived as positive. \DIFaddbegin \DIFadd{We propose need fulfillment in particular because needs are a fundamental aspect of the human experience that governs a significant number of emotional, cognitive, and behavioral facets }\citep[][]{Kreienkamp2022d, kruglanski2002}\DIFadd{. Importantly, need fulfillment has particularly been highlighted in explaining the success of (close) relationships, psychosocial functioning, as well as reducing conflict between groups --- all of which are essential to positive intergroup interactions.
 }\DIFaddend 
 
 %DIF <  ALTERNATIVE: SHORTER BUT NOT FOCUSED ON ALLPORT'S CONDITIONS (WHICH WE TEST LATER)
@@ -490,7 +486,7 @@ Firstly, }\DIFdelend \DIFaddbegin \DIFadd{we would like to address a number of c
 }
 
 \DIFadd{In terms of methodological considerations, it is important to note }\DIFaddend we tested most of our hypotheses using multilevel regression models, where measurement occasions (level 1) were nested within participants (level 2). This approach is tolerant to missing data and uneven case numbers within participants. Furthermore, we use a hierarchical modeling approach and report the final model in-text \DIFdelbegin %DIFDELCMD < \citep[][; for the full modeling process see Supplementary Material A]{Snijders2012}%%%
-\DIFdelend \DIFaddbegin \citep[][; for the full modeling process see Supplementary Material A]{snijders2012}\DIFaddend . Secondly, statistical power estimations for intensive longitudinal- and multilevel models are notoriously difficult due to the complex covariance structures. However, our participant- and measurement numbers are \DIFdelbegin \DIFdel{within the highest percentiles of }\DIFdelend \DIFaddbegin \DIFadd{among the largest }\DIFaddend sample sizes found within the \DIFdelbegin \DIFdel{broader }\DIFdelend intensive longitudinal literature \citep[e.g.,][]{AanhetRot2012}. Additionally, power simulations after the first study showed that our data was sufficiently powered for even small effect sizes \DIFaddbegin \DIFadd{(see Supplemental Material A)}\DIFaddend . The sample sizes were only increased to allow for between-subjects comparisons and future, more complicated, time-series modeling.
+\DIFdelend \DIFaddbegin \citep[][; for the full modeling process see Supplementary Material A]{snijders2012}\DIFaddend . Secondly, statistical power estimations for intensive longitudinal- and multilevel models are notoriously difficult due to the complex covariance structures. However, our participant- and measurement numbers are \DIFdelbegin \DIFdel{within the highest percentiles of }\DIFdelend \DIFaddbegin \DIFadd{among the largest }\DIFaddend sample sizes found within the \DIFdelbegin \DIFdel{broader }\DIFdelend intensive longitudinal literature \citep[e.g.,][]{AanhetRot2012}. Additionally, power simulations after the first study showed that our data was sufficiently powered for even small effect sizes \DIFdelbegin \DIFdel{. The sample sizes were only increased }\DIFdelend \DIFaddbegin \DIFadd{(see Supplemental Material B). In particular, we found that even our smallest effects of interest would be detectable with 22 participants and 24 measurements per person (assuming the effect sizes of Study 1 and focusing on a power of .8 with a .05 alpha level; see Supplemental Material B for the full analyses). We only increased the participant sample sizes in Studies 2 and 3 }\DIFaddend to allow for \DIFdelbegin \DIFdel{between-subjects comparisons and future, more complicated , time-series modeling}\DIFdelend \DIFaddbegin \DIFadd{between-participant effects across studies and more complicated trajectory analyses, which are not necessary for the hypotheses tested here}\DIFaddend .
 
 Finally, for our most comprehensive study (Study 3) we preregistered both the hypotheses as well as the analysis plan \citep[available at][]{KreienkampMasked2021f}. All studies received ethical approval from University Masked for Peer Review and none of the data has been published elsewhere. The detailed hypotheses and analysis plan are available in \appref{app:AppendixHypotheses}. The full surveys, code, and materials are available in our open science repository \citep[including a complete codebook;][]{KreienkampMasked2022a}. Additionally, the fully annotated analyses are available in Supplementary \DIFdelbegin \DIFdel{Material A}\DIFdelend \DIFaddbegin \DIFadd{Materials A, B, and C}\DIFaddend .
 
@@ -527,7 +523,8 @@ experience sampling measurement. The sample consisted of relatively
 young, educated, and western migrants from the global north (\(M_{age}\)
 = 24.35, \(SD_{age}\) = 4.73, 19 women, 15 students). The sample
 accurately describes the largest groups of migrants in the region
-\citep[][]{GemeenteGroningen2015}.
+\DIFdelbegin %DIFDELCMD < \citep[][]{GemeenteGroningen2015}%%%
+\DIFdelend \DIFaddbegin \citep[see][for a recent report on the largest migrant groups and see Supplemental Material A for a full overview of the demographic composition, including country of origin]{GemeenteGroningen2015}\DIFaddend .
 
 \subsubsection{Procedure}
 
@@ -593,8 +590,13 @@ strongly agree (+50). The self-determination theory need measurements
 
 \DIFdelbegin \DIFdel{As an explanatory mechanism, we assessed }\DIFdelend \DIFaddbegin \DIFadd{To assess }\DIFaddend ratings of the perceived interaction quality\DIFdelbegin \DIFdel{. As our main measurement}\DIFdelend , participants
 rated the statement ``\textit{Overall the interaction was …}'' on two
-continuous slider scales measuring pleasantness
-\citep[from unpleasant (-50) to pleasant (+50)) and meaningfulness (from superficial (-50) to meaningful (+50); both items adapted from][]{Downie2008}.
+continuous slider scales measuring pleasantness \DIFdelbegin %DIFDELCMD < \citep[from unpleasant (-50) to pleasant (+50)) and meaningfulness (from superficial (-50) to meaningful (+50); both items adapted from][]{Downie2008}%%%
+\DIFdel{. }\DIFdelend \DIFaddbegin \DIFadd{(from unpleasant (-50)
+to pleasant (+50)) and meaningfulness (from superficial (-50) to
+meaningful (+50)). The items formed a coherent concept within the
+participants (\(r_{within}\) = 0.54, }\textit{\DIFadd{p}} \DIFadd{\textless{} .001). We
+adapted the from }\citet[][]{Downie2008}\DIFadd{, who validated the approach.
+}\DIFaddend 
 
 \paragraph{Outgroup Attitudes}
 
@@ -618,10 +620,10 @@ is indeed associated with significantly more positive outgroup attitudes
 (\textit{b} = 2.48, \textit{t}(1,200) = 4.37, \textit{p} \textless{}
 .001, \textit{95\%CI}{[}1.37, 3.59{]}), even after controlling for
 having an interaction with a non-Dutch (which did not relate to outgroup
-attitudes independently). Additionally, while \DIFdelbegin \DIFdel{multi-level }\DIFdelend \DIFaddbegin \DIFadd{multilevel }\DIFaddend regressions
-are generally robust against unequal cell sizes, we correct for
-inequalities by using centered predictors and reintroducing the means as
-level two predictors (\DIFdelbegin %DIFDELCMD < \citealp{Yaremych2021}%%%
+attitudes independently). Additionally, while \DIFdelbegin \DIFdel{multi-level }\DIFdelend \DIFaddbegin \DIFadd{multilevel }\DIFaddend regressions are
+generally robust against unequal cell sizes, we correct for inequalities
+by using centered predictors and reintroducing the means as level two
+predictors (\DIFdelbegin %DIFDELCMD < \citealp{Yaremych2021}%%%
 \DIFdelend \DIFaddbegin \citealp{yaremych2021a}\DIFaddend ; for full results see
 \tblref{tab:intergroupGeneralTblLong}, \fgrref{fig:ContactHypothesis},
 and Online Supplementary Material
@@ -697,7 +699,8 @@ compensated for their participation with partial course credits ---
 depending on their participation. The sample consisted of relatively
 young migrants, who were mostly from the global north (\(M_{age}\) =
 20.24, \(SD_{age}\) = 2.12, 84 women). The sample fairly accurately
-describes the local population of international students.
+describes the local population of international students \DIFaddbegin \DIFadd{(see
+Supplemental Materials A for additional demographic information)}\DIFaddend .
 
 \subsubsection{Procedure}
 
@@ -753,7 +756,10 @@ strongly agree (100). \DIFaddbegin \DIFadd{See }\tblref{tab:descrFullWide} \DIFa
 
 \paragraph{Perceived Interaction Quality}
 
-The ratings of the perceived contact quality were identical to Study 1.
+The ratings of the perceived contact quality were identical to Study \DIFdelbegin \DIFdel{1.
+}\DIFdelend \DIFaddbegin \DIFadd{1
+(item correlation: \(r_{within}\) = 0.39, }\textit{\DIFadd{p}} \DIFadd{\textless{} .001).
+}\DIFaddend 
 
 \paragraph{Outgroup Attitudes}
 
@@ -847,7 +853,8 @@ participants. Participants were compensated in the same manner as during
 Study 1. The sample consisted of relatively young migrants (\(M_{age}\)
 = 22.68, \(SD_{age}\) = 3.10, 59 women). The sample fairly accurately
 describes the local population of young international medical
-professionals.
+professionals \DIFaddbegin \DIFadd{(see Supplemental Materials A for additional demographic
+information)}\DIFaddend .
 
 \subsubsection{Procedure}
 
@@ -872,7 +879,7 @@ members (\DIFdelbegin \DIFdel{2.13--87.18\%of individual }\DIFdelend \DIFaddbegi
 }\DIFaddend experience sampling measurements; 1,702 of all 4,107 experience sampling
 responses).
 
-\paragraph{Psychological Needs}
+\paragraph{\DIFdelbegin \DIFdel{Psychological Needs}\DIFdelend \DIFaddbegin \DIFadd{Need Fulfillment}\DIFaddend }
 
 The measurement of the core situational need and its fulfillment was
 identical to Study 2.
@@ -899,7 +906,14 @@ information see Online Supplementary Material A.
 
 \paragraph{Perceived Interaction Quality}
 
-The ratings of the perceived interaction quality were identical to Study
+The ratings of the perceived \DIFaddbegin \DIFadd{contact quality were identical to Study 1
+and 2 (item correlation: \(r_{within}\) = 0.46, }\textit{\DIFadd{p}} \DIFadd{\textless{}
+.001).
+}
+
+\paragraph{\DIFadd{Perceived Interaction Quality}}
+
+\DIFadd{The ratings of the perceived }\DIFaddend interaction quality were identical to Study
 1.
 
 \paragraph{Outgroup Attitudes}
@@ -1139,11 +1153,11 @@ important interaction (i.e.,
 emphasis as in original). This was also reflected in a relatively low
 mean and consistent right skew of the `accidental' item. Nonetheless,
 there remained a substantial variance in the item and we continued with
-the moderation analysis. We found that both in the overall test as in
+the moderation analysis. We found that both in the overall test and in
 all studies individually key need fulfillment remained a strong
 predictor of outgroup attitudes, even when accounting for differences in
 whether the interaction was accidental (rather than planned). Moreover,
-in none of the analysis did we see a moderation effect of interaction
+in none of the analyses did we see a moderation effect of interaction
 intent nor did we find a main effect of interaction intent. There is,
 thus, consistent evidence that the need fulfillment mechanism was not
 meaningfully different for more accidental interactions.
@@ -1154,7 +1168,7 @@ meaningfully different for more accidental interactions.
 \DIFadd{Given the well-established criticism that more positive outgroup
 attitudes might not always be beneficial for minority group members
 }\citep[e.g.,][]{reimer2023}\DIFadd{, we conducted an additional exploratory
-analysis assessing the effect of need fulfilling outgroup interactions
+analysis assessing the effect of need-fulfilling outgroup interactions
 on reported well-being. Experienced well-being is a common indicator of
 health and an important life quality measurement in itself, especially
 for migrants or other minority groups }\citep[e.g.,][]{bhugra2011}\DIFadd{. We
@@ -1349,7 +1363,8 @@ A second limitation lies in our methodology. While extensive longitudinal data i
 \DIFaddbegin \DIFadd{A third limitation lies in the outcome variable we chose. As we have focused on outgroup attitudes to ensure comparability to the past literature of the contact hypothesis and to replicate the most reliable patterns within ESM data }\citep[][]{Pettigrew2006}\DIFadd{. However, especially for disadvantaged minority members positive outgroup attitudes may entail negative downstream consequences such as a reduced endorsement of social change --- even in the face of injustice }\citep[e.g.,][]{dixon2012}\DIFadd{. We have additionally tested our need-fulfillment mechanism for well-being reports to test the direct benefits of the mechanism to lived realities. However, we are among the first to collect intensive longitudinal data on the experience of minority migrants and it remains an open empirical question whether the more positive outgroup attitudes following need-fulfilling interactions might ironically exacerbate inequalities for the disadvantaged group }\citep[also see][]{reimer2023}\DIFadd{. 
 }
 
-\DIFaddend Finally, our conceptualization of core situational needs has been focused on the most essential test of a motivational mechanism. This comes at the expense of specificity in the situational \DIFdelbegin \DIFdel{needs }\DIFdelend \DIFaddbegin \DIFadd{motives }\DIFaddend (i.e., we have not explored whether different \DIFdelbegin \DIFdel{types of needs }\DIFdelend \DIFaddbegin \DIFadd{individual motives }\DIFaddend have stronger effects on interaction quality and outgroup attitudes). Such an investigation would be possible with the adaptive measurement we used (e.g., by \DIFdelbegin \DIFdel{clustering or classifying the free text entries}\DIFdelend \DIFaddbegin \DIFadd{looking at the differential effects of the clustered motives}\DIFaddend ) but would not have been relevant to our theory–focused research question. Nonetheless, future research may explore which exact \DIFdelbegin \DIFdel{needs }\DIFdelend \DIFaddbegin \DIFadd{motives }\DIFaddend are most important in different intergroup contexts. 
+\DIFaddend Finally, our conceptualization of core situational needs has been focused on the most essential test of a motivational mechanism. This comes at the expense of specificity in the situational \DIFdelbegin \DIFdel{needs }\DIFdelend \DIFaddbegin \DIFadd{motives }\DIFaddend (i.e., we have not explored whether different \DIFdelbegin \DIFdel{types of needs }\DIFdelend \DIFaddbegin \DIFadd{individual motives }\DIFaddend have stronger effects on interaction quality and outgroup attitudes). Such an investigation would be possible with the adaptive measurement we used (e.g., by \DIFdelbegin \DIFdel{clustering or classifying the free text entries}\DIFdelend \DIFaddbegin \DIFadd{looking at the differential effects of the clustered motives}\DIFaddend ) but would not have been relevant to our theory–focused research question. \DIFdelbegin \DIFdel{Nonetheless, future research mayexplore which exact needs }\DIFdelend \DIFaddbegin \DIFadd{Identifying cases where a specific minority faces a common need frustration could be instrumental in addressing systemic challenges. Future research may, thus, explore which situations activate or threaten specific motives }\citep[e.g.,][]{gollwitzer1985e, leander2020} \DIFadd{and which exact motives }\DIFaddend are most important in different intergroup contexts. 
+
 
 \subsection{Implications}
 % ESM data
@@ -1357,8 +1372,7 @@ Despite these limitations, we can nonetheless draw a number of implications for 
 
 % Motivation and core needs 
 A broader theoretical implication relates to the role of situational motivation in intergroup contacts. Our results offer a first promising test of \DIFdelbegin \DIFdel{psychological needs }\DIFdelend \DIFaddbegin \DIFadd{a psychological mechanism of need fulfillment }\DIFaddend in intergroup contact. While our results are tentative given their novelty within the field, they were highly consistent across studies and may offer new theoretical avenues. \DIFdelbegin \DIFdel{Psychological needs }\DIFdelend \DIFaddbegin \DIFadd{Experiences of need fulfillment }\DIFaddend are a facet of the human experience that has thus far been underemphasized in the intergroup contact literature. This stands in stark contrast \DIFdelbegin \DIFdel{of }\DIFdelend \DIFaddbegin \DIFadd{to }\DIFaddend the many cognitive \citep[e.g.,][]{Pettigrew1998, Brown2005} and emotional aspects investigated within the field \DIFdelbegin %DIFDELCMD < \citep[e.g.,][]{Stephan2008, Paolini2004}%%%
-\DIFdelend \DIFaddbegin \citep[e.g.,][]{Stephan2008}\DIFaddend . Future research may, therefore, be able to integrate broader theoretical frameworks of intergroup contact (e.g., motivations guiding cognition and affect, which in turn drive behavior. cf., theory of reasoned goal pursuit; \citealp{Ajzen2019}. Also see \DIFdelbegin %DIFDELCMD < \citealp{Kreienkamp2022d}%%%
-\DIFdelend \DIFaddbegin \citealp{kreienkamp2022d}\DIFaddend ). 
+\DIFdelend \DIFaddbegin \citep[e.g.,][]{Stephan2008}\DIFaddend . Future research may, therefore, be able to integrate broader theoretical frameworks of intergroup contact (e.g., motivations guiding cognition and affect, which in turn drive behavior. cf., theory of reasoned goal pursuit; \citealp{Ajzen2019}. Also see \citealp{Kreienkamp2022d}). 
 
 % practical use of needs
 Additionally, situational motivations in intergroup contact also offer promising avenues for practitioners and policy-makers. Intergroup contact theory is among the most implemented psychological theories \citep[e.g.,][]{Pettigrew2006, AlRamiah2012a, Reimer2021}. Given our findings that \DIFdelbegin \DIFdel{psychological needs }\DIFdelend \DIFaddbegin \DIFadd{need fulfillment }\DIFaddend in everyday intergroup contacts \DIFdelbegin \DIFdel{were }\DIFdelend \DIFaddbegin \DIFadd{was }\DIFaddend at least as powerful as Allport's conditions in predicting outgroup attitudes, considerations of people's needs offer a substantially more immediate mechanism to address. In cases where some or all optimal contact conditions are not possible to be fulfilled, needs offer an even more compelling alternative (e.g., where equal status is contextually not possible or in cases where people help despite a lack of institutional support). Additionally, our conceptualization of situational needs offers a clear opportunity for practitioners and interventions. Instead of addressing needs as a one-size fits all solution (e.g., simply focusing on competence needs), one may at times ask outgroup interaction partners what they need during an interaction. This is not to say that we should not explore which \DIFdelbegin \DIFdel{needs }\DIFdelend \DIFaddbegin \DIFadd{motives }\DIFaddend tend to be relevant to specific groups in specific intergroup contact contexts. Rather, during interventions for which data on important need contents are not available or infeasible to collect, a flexible and reactive approach of inquiring momentary intergroup contact needs might be more fruitful.
@@ -1777,7 +1791,7 @@ We assess the stability of our main analyses. We use forest plots (including met
 \end{mdframed}
 
 \paragraph{Embeddedness of code needs}
-We, finally, use the qualitative data from the participants' self-identified core needs to contextualize our results. We leverage machine learning to extract a topic model of the free-text entries across the three studies. We describe the extracted topics and themes and compare them to the need contents usually found and measured within the psychological literature. Full methodological details and visualizations are available in Supplemental Material B.
+We, finally, use the qualitative data from the participants' self-identified core needs to contextualize our results. We leverage machine learning to extract a topic model of the free-text entries across the three studies. We describe the extracted topics and themes and compare them to the need contents usually found and measured within the psychological literature. Full methodological details and visualizations are available in Supplemental Material \DIFdelbegin \DIFdel{B}\DIFdelend \DIFaddbegin \DIFadd{C}\DIFaddend .
 
 \begin{mdframed}[style=mdfhypothesis]
     \addtolength{\leftskip}{1em}
@@ -2230,7 +2244,6 @@ that core need fulfillment takes on some of the variance that would
 otherwise be explained by the self-determination theory needs (see
 Online Supplemental Material A).
 }\DIFaddend 
-
 
 
 %DIF >  Tables
