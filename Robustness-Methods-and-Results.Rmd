@@ -885,8 +885,8 @@ rbind(
             sum(ncol(s1_MlCor_full), ncol(s2_MlCor_full), ncol(s3_MlCor_full), ncol(all_MlCor_full))) %>% # fix table position
   footnote(
     general = c(
-      "Upper triangle: Between-person correlations;",
-      "Lower triangle: Within-person correlations;",
+      "Upper triangle: Within-person correlations;",
+      "Lower triangle: Between-person correlations;",
       "*** p < .001, ** p < .01,  * p < .05",
       "Interaction Intent and Interaction Quality were only measured for outgroup interactions in Study 1."
     )
@@ -985,8 +985,8 @@ rbind(
             sum(ncol(s1_MlCor_out), ncol(s2_MlCor_out), ncol(s3_MlCor_out), ncol(all_MlCor_out))) %>% # fix table position
   footnote(
     general = c(
-      "Upper triangle: Between-person correlations;",
-      "Lower triangle: Within-person correlations;",
+      "Upper triangle: Within-person correlations;",
+      "Lower triangle: Between-person correlations;",
       "*** p < .001, ** p < .01,  * p < .05"
     )
   ) %>%

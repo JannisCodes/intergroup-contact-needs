@@ -12446,12 +12446,6 @@ We also export all relevant data for the Methods and Results section, which are 
 ```{r dataExport}
 # prep general data
 
-workerWithinBetween %>% 
-  select(
-    OutgroupInteractionLab,
-    
-  )
-
 dt_exp_s1 <- workerWithinBetween %>%
   transmute(
     study = as.numeric(1),
