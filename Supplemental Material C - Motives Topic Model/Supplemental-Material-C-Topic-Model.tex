@@ -1,0 +1,112 @@
+% define document type (i.e., template. Here: A4 APA manuscript with 12pt font)
+\documentclass[man, 12pt, a4paper]{apa7}
+
+% add packages
+\usepackage[american]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{csquotes}
+\usepackage{hyperref}
+\usepackage[style=apa, sortcites=true, sorting=nyt, backend=biber, natbib=true, uniquename=false, uniquelist=false, useprefix=true]{biblatex}
+\usepackage{authblk}
+\usepackage{graphicx}
+\usepackage{setspace,caption}
+\usepackage{subcaption}
+\usepackage{enumitem}
+\usepackage{lipsum}
+\usepackage{soul}
+\usepackage{xcolor}
+\usepackage{fourier}
+\usepackage{stackengine}
+\usepackage{scalerel}
+\usepackage{fontawesome}
+\usepackage[normalem]{ulem}
+\usepackage{longtable}
+\usepackage{amsmath}
+\usepackage{afterpage}
+\usepackage{float}
+\usepackage{titling}
+\usepackage{censor}
+\usepackage{tcolorbox}
+
+% formatting links in the PDF file
+\hypersetup{
+pdfpagemode={UseOutlines},
+bookmarksopen=true,
+bookmarksopenlevel=0,
+hypertexnames=false,
+colorlinks   = true, %Colours links instead of ugly boxes
+urlcolor     = blue, %Colour for external hyperlinks
+linkcolor    = blue, %Colour of internal links
+citecolor   = cyan, %Colour of citations
+pdfstartview={FitV},
+unicode,
+breaklinks=true,
+}
+
+% language settings
+\DeclareLanguageMapping{american}{american-apa}
+
+% add reference library file
+\addbibresource{../references.bib}
+
+% Title and header
+\title{Supplemental Information A: Annotated Analyses}
+\shorttitle{SI A: Annotated Analyses}
+%\author{Jannis Kreienkamp, Laura F. Bringmann, Raili F. Engler, Peter de Jonge, Kai Epstude}
+\author{[authors masked for peer review]}
+
+% set indentation size
+\setlength\parindent{1.27cm}
+
+% adapt table and figure labels
+\setcounter{equation}{0}
+\setcounter{figure}{0}
+\setcounter{table}{0}
+\setcounter{page}{1}
+\makeatletter
+\renewcommand{\theequation}{S\arabic{equation}}
+\renewcommand{\thefigure}{S\arabic{figure}}
+\renewcommand{\thetable}{S\arabic{table}}
+
+% Start of the main document:
+\begin{document}
+
+% add title information (incl. title page and abstract)
+\begin{titlepage}
+	{\noindent\Large Supplementary Information for \par}
+	\vspace{0.5cm}
+	{\noindent\Large Need Fulfillment During Intergroup Contact: Three Experience Sampling Studies\par}
+	\vspace{1.5cm}
+	{\noindent\LARGE\bfseries \thetitle \par}
+	\vspace{2cm}
+	{\noindent\Large\itshape \theauthor \par}
+	\vfill
+	%\noindent Corresponding Author: Jannis Kreienkamp\par
+	%\noindent E-mail: j.kreienkamp@rug.nl\par
+	\noindent Corresponding Author: [masked for peer review]\par
+	\noindent E-mail: [masked for peer review]\par
+	\vfill
+
+    % Bottom of the page
+	{\noindent Last updated: \today\par}
+\end{titlepage}
+
+% add title again on page 1 (after title page)
+\begin{center}
+   \textbf{\thetitle} 
+\end{center}
+
+This supplementary information documents the methodology and results of all three studies. As part of our open supplemental materials, we share the full RMarkdown file which offers an annotated version of our all analysis steps. This file offers a transparent and reproducible analysis code, which includes full author commentary. We rendered the RMarkdown as an interactive HTML file, which we host as part of our open GitHub repository. We recommend the rendered version for almost all readers (full R code is also available via the rendered version).
+
+\vspace{.5cm}
+\begin{tcolorbox}
+    \vspace{0.2cm} \centering 
+    \href{https://janniscodes.github.io/intergroup-contact-needs/Supplemental-Material-A-Annotated-Analysis}{https://janniscodes.github.io/intergroup-contact-needs/Supplemental-Material-A-Annotated-Analysis}
+    \vspace{0.2cm} 
+\end{tcolorbox}
+
+For readers interested in the raw files, the raw RMarkdown file is available in our OSF repository \citep[see][]{KreienkampMasked2022a} and can also be accessed as part of the full GitHub repository \citep[][]{KreienkampMasked2022}.
+
+\printbibliography
+
+\end{document}
