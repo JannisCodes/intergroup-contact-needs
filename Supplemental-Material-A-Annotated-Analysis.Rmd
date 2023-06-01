@@ -12458,7 +12458,6 @@ dt_exp_s1 <- workerWithinBetween %>%
     Attitude = thermometerDutch_1,
     AttitudeC = thermometerDutch_1_zwc,
     AttitudeZ = thermometerDutch_1_zwc,
-    CoreNeedRaw = keyMotiveFulfilled,
     CoreNeed = keyMotiveFulfilled,
     CoreNeedC = keyMotiveFulfilled_cwc,
     CoreNeedZ = keyMotiveFulfilled_zwc,
@@ -12533,13 +12532,11 @@ dt_exp_s3 <- medicalWithinBetween %>%
     NonOutgroupInteraction = NonOutgroupInteraction,
     OutgroupInteractionLab = OutgroupInteractionLab,
     Attitude = AttitudesDutch,
-    AttutudeC = AttitudesDutch_cwc,
+    AttitudeC = AttitudesDutch_cwc,
     AttitudeZ = AttitudesDutch_zwc,
     CoreNeed = KeyNeedFulfillment,
     CoreNeedC = KeyNeedFulfillment_cwc,
     CoreNeedZ = KeyNeedFulfillment_zwc,
-    Allport = AllportsCondition_cwc,
-    AllportZ = AllportsCondition_zwc,
     InteractionQuality = interaction_quality,
     InteractionQualityC = interaction_quality_cwc,
     InteractionQualityZ = interaction_quality_zwc,
@@ -12561,7 +12558,10 @@ dt_exp_s3 <- medicalWithinBetween %>%
     Relatednesss = Relatedness,
     RelatednesssC = Relatedness_cwc,
     RelatednesssZ = Relatedness_zwc,
-    motive = KeyNeed
+    motive = KeyNeed,
+    Allport = AllportsCondition,
+    AllportC = AllportsCondition_cwc,
+    AllportZ = AllportsCondition_zwc
   )
 
 dt_exp_all <- bind_rows(list(dt_exp_s1,

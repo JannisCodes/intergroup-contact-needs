@@ -799,7 +799,7 @@ vars_full <- c(
   "Competence" = "Competence",
   "Autonomy" = "Autonomy",
   "Relatednesss" = "Relatednesss",
-  "Outgroup Interaction" = "OutgroupInteraction",
+  #"Outgroup Interaction" = "OutgroupInteraction",
   "Accidental" = "InteractionAccidental",
   "Quality" = "Quality",
   "Attitudes NL" = "Attitude"
@@ -907,8 +907,8 @@ vars_out <- c(
   "Competence" = "Competence",
   "Autonomy" = "Autonomy",
   "Relatednesss" = "Relatednesss",
-  "Practical Need" = "practical_need_dum",
-  "Psychological Need" = "psychological_need_dum",
+  # "Practical Need" = "practical_need_dum",
+  # "Psychological Need" = "psychological_need_dum",
   "Accidental" = "InteractionAccidental",
   "Quality" = "Quality",
   "Attitudes NL" = "Attitude"
@@ -916,28 +916,28 @@ vars_out <- c(
 
 s1_MlCor_out <- 
   MlCorMat(
-    data = dt_goal_directedness %>% filter(study == 1, OutgroupInteraction == "Yes"),
+    data = dt_exp_all %>% filter(study == 1, OutgroupInteractionLab == "Yes", PID != 21), # PP 21 has inflated zero for Accidental
     id = "PID",
     selection = as.character(vars_out),
     labels = names(vars_out)
   ) 
 s2_MlCor_out <- 
   MlCorMat(
-    data = dt_goal_directedness %>% filter(study == 2, OutgroupInteraction == "Yes"),
+    data = dt_exp_all %>% filter(study == 2, OutgroupInteractionLab == "Yes"),
     id = "PID",
     selection = as.character(vars_out),
     labels = names(vars_out)
   ) 
 s3_MlCor_out <- 
   MlCorMat(
-    data = dt_goal_directedness %>% filter(study == 3, OutgroupInteraction == "Yes"),
+    data = dt_exp_all %>% filter(study == 3, OutgroupInteractionLab == "Yes"),
     id = "PID",
     selection = as.character(vars_out),
     labels = names(vars_out)
   ) 
 all_MlCor_out <- 
   MlCorMat(
-    data = dt_goal_directedness %>% filter(OutgroupInteraction == "Yes"),
+    data = dt_exp_all %>% filter(OutgroupInteractionLab == "Yes"),
     id = "PID",
     selection = as.character(vars_out),
     labels = names(vars_out)

@@ -124,7 +124,7 @@ MlCorMat <-
     
     rMlComb <- matrix("", nrow = length(selection), ncol = length(selection))
     rMlComb[upper.tri(rMlComb, diag = FALSE)] <- rMlWitBtw[upper.tri(rMlWitBtw, diag = FALSE)]
-    rMlComb[lower.tri(rMlComb, diag = FALSE)] <- rMlWitStar[upper.tri(rMlWitStar, diag = FALSE)]
+    rMlComb[lower.tri(rMlComb, diag = FALSE)] <- rMlWitStar[lower.tri(rMlWitStar, diag = FALSE)]
     rownames(rMlComb) <- labels
     colnames(rMlComb) <- paste(labels, "", sep="")
     
