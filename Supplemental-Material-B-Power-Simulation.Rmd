@@ -1,5 +1,5 @@
 ---
-title: "Supplemental Information C: Power Simulations"
+title: "Supplemental Information B: Power Simulations"
 subtitle: "Supplemental Material for 'Need Fulfillment During Intergroup Contact: Three Experience Sampling Studies'"
 author:
 - ██████ ██████████^1^
