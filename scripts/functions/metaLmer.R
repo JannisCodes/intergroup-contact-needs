@@ -19,8 +19,8 @@ strLabFix <- function(varIn, ...) {
       "Contact X Quality",
       "Non-Outgroup Interaction",
       "Outgroup Interaction",
-      "Core Need Fulfillment",
-      "Core Need Fulfillment",
+      "Situational Need Fulfillment",
+      "Outgroup Need Fulfillment",
       "Interaction Quality",
       "",
       " X "

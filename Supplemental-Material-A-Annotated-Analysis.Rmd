@@ -1681,12 +1681,12 @@ The first sample we assess is the smaller sojourner study. We will sequentially 
     a. \label{hyp:contactFreq}Participants with more intergroup interactions should have a more favorable outgroup attitudes.
     b. \label{hyp:contactDummy}Outgroup attitudes should be higher after an intergroup interaction compared to a non-outgroup interaction.
     c. \label{hyp:contactFreqQual}Participants with more intergroup interactions should have a more favorable outgroup attitudes depending on the average interaction quality.
-2. \label{hyp:keyNeed}Based on our proposal, intergroup interactions with higher situational core need fulfillment should predict more favorable outgroup attitudes due to more positive interaction quality perceptions.
-    a. \label{hyp:keyNeedPred}Outgroup attitudes should be more favorable after intergroup interactions with high key need fulfillment.
-    b. \label{hyp:keyNeedQual}Interaction Quality should be perceived as more positive after intergroup interactions with higher key need fulfillment.
-    c. \label{hyp:keyNeedMediation}The variance explained in outgroup attitudes by key need fulfillment should to a large extend be assumed by interaction quality.
-    d. \label{hyp:keyNeedContactType}The effect of key need fulfillment on outgroup attitudes should be specific to intergroup interactions and not be due to need fulfillment in general. Thus, the effect of key need fulfillment on outgroup attitudes should stronger for intergroup interact than for ingroup interactions.
-    e. \label{hyp:keyNeedSDT}The effect of key need fulfillment on outgroup attitudes should be persist even when taking other fundamental psychological needs into account. Thus, the effect of key need fulfillment on outgroup attitudes should remain strong even after controlling for autonomy, competence, and relatedness fulfillment during the interaction (cf., self-determination theory). 
+2. \label{hyp:keyNeed}Based on our proposal, intergroup interactions with higher situational need fulfillment should predict more favorable outgroup attitudes due to more positive interaction quality perceptions.
+    a. \label{hyp:keyNeedPred}Outgroup attitudes should be more favorable after intergroup interactions with high situational need fulfillment.
+    b. \label{hyp:keyNeedQual}Interaction Quality should be perceived as more positive after intergroup interactions with higher situational need fulfillment.
+    c. \label{hyp:keyNeedMediation}The variance explained in outgroup attitudes by situational need fulfillment should to a large extend be assumed by interaction quality.
+    d. \label{hyp:keyNeedContactType}The effect of situational need fulfillment on outgroup attitudes should be specific to intergroup interactions and not be due to need fulfillment in general. Thus, the effect of situational need fulfillment on outgroup attitudes should stronger for intergroup interact than for ingroup interactions.
+    e. \label{hyp:keyNeedSDT}The effect of situational need fulfillment on outgroup attitudes should be persist even when taking other fundamental psychological needs into account. Thus, the effect of situational need fulfillment on outgroup attitudes should remain strong even after controlling for autonomy, competence, and relatedness fulfillment during the interaction (cf., self-determination theory). 
 
 ## Data Description
 
@@ -1789,7 +1789,7 @@ workerInteractionType %>%
 workerDescr <- workerInteractionType %>%
   select(
     Attitudes = thermometerDutch_1,
-    `Core Need` = keyMotiveFulfilled,
+    `Situational Need` = keyMotiveFulfilled,
     Competence = competence.daily.all,
     Autonomy = autonomy.daily.all,
     Relatedness = relatedness.daily.all,
@@ -1801,7 +1801,7 @@ workerDescrOut <- workerInteractionType %>%
   filter(OutgroupInteraction == "Yes") %>%
   select(
     Attitudes = thermometerDutch_1,
-    `Core Need` = keyMotiveFulfilled,
+    `Situational Need` = keyMotiveFulfilled,
     Competence = competence.daily.all,
     Autonomy = autonomy.daily.all,
     Relatedness = relatedness.daily.all,
@@ -1878,7 +1878,7 @@ ggplot(
     x = "Response",
     y = "Variable",
     title = "Study 1: Variable Distribution Overall",
-    caption = "Note: Core Need Fulfillment is on a 0 to 100 scale, whereas all other scales are on a -50 to 50 scale."
+    caption = "Note: Situational Need Fulfillment is on a 0 to 100 scale, whereas all other scales are on a -50 to 50 scale."
   ) + 
   theme(
     legend.position = "none" 
@@ -1895,7 +1895,7 @@ ggplot(
     x = "Response",
     y = "Variable",
     title = "Study 1: Variable Distribution Outgroup Interactions",
-    caption = "Note: Core Need Fulfillment is on a 0 to 100 scale, whereas all other scales are on a -50 to 50 scale."
+    caption = "Note: Situational Need Fulfillment is on a 0 to 100 scale, whereas all other scales are on a -50 to 50 scale."
   ) + 
   theme(
     legend.position = "none" 
@@ -1912,7 +1912,7 @@ workerMlCor <-
     data = workerInteractionType,
     id = "PID",
     selection = c("keyMotiveFulfilled", "competence.daily.all", "autonomy.daily.all", "relatedness.daily.all", "interaction_quality", "interaction_accidental", "interaction_voluntary", "thermometerDutch_1"),
-    labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Quality", "Accidental", "Voluntary", "Attitudes NL")
+    labels = c("Situational Need", "Competence", "Autonomy", "Relatedness", "Quality", "Accidental", "Voluntary", "Attitudes NL")
   ) 
 
 workerMlCor %>%
@@ -2569,11 +2569,11 @@ TL;DR: Random slopes don't add much for this super simple model.
 
 ## Need Fulfillment
 
-The main proposal of our article is that the success of an outgroup interaction might be explained by whether or not the interaction fulfilled the person's core situational need. This should, in turn, be due to a higher perceived interaction quality. We will this sequentially test whether the fulfillment of the core need during an interaction is (1) related to more positive outgroup attitudes, (2) higher perceived interaction quality, and (3) whether the variance explained by the core need is assumed by the perceived interaction quality if considered jointly.     
+The main proposal of our article is that the success of an outgroup interaction might be explained by whether or not the interaction fulfilled the person's situational need. This should, in turn, be due to a higher perceived interaction quality. We will this sequentially test whether the fulfillment of the situational need during an interaction is (1) related to more positive outgroup attitudes, (2) higher perceived interaction quality, and (3) whether the variance explained by the situational need is assumed by the perceived interaction quality if considered jointly.     
 
 ### Need fulfillment and Attitudes  
 
-In a first step we, thus, test the relationship between outgroup attitudes and the fulfillment of the core situational need during the interaction.  
+In a first step we, thus, test the relationship between outgroup attitudes and the fulfillment of the situational need during the interaction.  
 
 ##### Unconditional model
 
@@ -2659,7 +2659,7 @@ We thus add the core interaction need fulfillment to the multilevel random inter
   \begin{split}
     \textrm{Level 1:} &
       \begin{aligned}[t]
-        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + e_{ti}
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}SitNeedFulfill_{ti} + e_{ti}
       \end{aligned} \\
     \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
                       &\ \beta_{1i} = \gamma_{10}
@@ -2726,18 +2726,18 @@ mdlWorkerOut$Att$varWithinPercInterceptCore <-
   (1 - (as.numeric(mdlWorkerOut$Att$varInterceptCore[2]) / as.numeric(mdlWorkerOut$Att$varNull[2]))) * 100
 ```
 
-We find that the the model with the added predictor indeed explains more variance in outgroup attitudes than the unconditional model. Looking at the individual coefficients, we find that the situational core need relates significantly to outgroup attitudes. The core need has little explained variance between participants (compared to the null model: Variance Explained = 1 – (Var with Predictor/Var without Predictor); `r format(round(mdlWorkerOut$Att$varBtwPercInterceptCore, 2),nsmall=2)`%). The variance explained within participants is small to medium (`r format(round(mdlWorkerOut$Att$varWithinPercInterceptCore, 2),nsmall=2)`%).  
+We find that the the model with the added predictor indeed explains more variance in outgroup attitudes than the unconditional model. Looking at the individual coefficients, we find that the situational need relates significantly to outgroup attitudes. The situational need has little explained variance between participants (compared to the null model: Variance Explained = 1 – (Var with Predictor/Var without Predictor); `r format(round(mdlWorkerOut$Att$varBtwPercInterceptCore, 2),nsmall=2)`%). The variance explained within participants is small to medium (`r format(round(mdlWorkerOut$Att$varWithinPercInterceptCore, 2),nsmall=2)`%).  
 
 #### random slope
 
-In a next step, we check whether further letting the effect of core need fulfillment vary between participants explains additional variance in outgroup attitudes (i.e., random slope).   
+In a next step, we check whether further letting the effect of situational need fulfillment vary between participants explains additional variance in outgroup attitudes (i.e., random slope).   
 
 \begin{equation}
 (\#eq:workerOutSlopeAttNeedEq)
   \begin{split}
     \textrm{Level 1:} &
       \begin{aligned}[t]
-        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + e_{ti}
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}SitNeedFulfill_{ti} + e_{ti}
       \end{aligned} \\
     \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
                       &\ \beta_{1i} = \gamma_{10} + u_{1i}
@@ -2879,7 +2879,7 @@ ggplot(data = workerOutWithinBetween,
        aes(y = thermometerDutch_1, x = keymotive_fulfillemt_1, col = as.factor(PID))) +
   geom_point(size = 1) + # change size and colour
   labs(y = "Outgroup Attitudes", 
-       x = "Key Need Fulfillment",
+       x = "Situational Need Fulfillment",
        ) + # rename axes
   scale_y_continuous(limits = c(0, 100),
                      breaks = c(0, 20, 40, 60, 80, 100)) + # y axis limits/range (0, 100), break points
@@ -2896,13 +2896,13 @@ ggplot(data = workerOutWithinBetween,
 
 ```
 
-We find that adding the random slopes does add significantly beyond the random intercept model. We also find that the core need remains a strong predictor (even when letting the influence vary between participants).  
+We find that adding the random slopes does add significantly beyond the random intercept model. We also find that the situational need remains a strong predictor (even when letting the influence vary between participants).  
 
 TL;DR: The random slope adds significantly to the prediction model.  
 
 ### Need fulfillment and Interaction Quality   
 
-Based on the assertion that the relationship between core need fulfillment and outgroup attitudes is explained by a higher perceived interaction, the core need fulfillement should also significantly predict perceived interaction quality.  
+Based on the assertion that the relationship between situational need fulfillment and outgroup attitudes is explained by a higher perceived interaction, the situational need fulfillement should also significantly predict perceived interaction quality.  
 
 ##### Unconditional model
 
@@ -2964,7 +2964,7 @@ We again add the core interaction need fulfillment to the multilevel random inte
   \begin{split}
     \textrm{Level 1:} &
       \begin{aligned}[t]
-        \ InteractionQuality_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + e_{ti}
+        \ InteractionQuality_{ti} =  &\ \beta_{0i} + \beta_{1i}SitNeedFulfill_{ti} + e_{ti}
       \end{aligned} \\
     \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
                       &\ \beta_{1i} = \gamma_{10}
@@ -3032,18 +3032,18 @@ mdlWorkerOut$Qlt$varWithinPercInterceptCore <-
   (1 - (as.numeric(mdlWorkerOut$Qlt$varInterceptCore[2]) / as.numeric(mdlWorkerOut$Qlt$varNull[2]))) * 100
 ```
 
-The predictor again adds a significant amount of explained variances beyond the empty model and looking at the slope coefficient, we find that the situational core need fulifillment relates significantly to perceived interaction quality. The core need explained substantial variance between participants (`r format(round(mdlWorkerOut$Qlt$varBtwPercInterceptCore, 2),nsmall=2)`%). The variance explained within participants is also medium (`r format(round(mdlWorkerOut$Qlt$varWithinPercInterceptCore, 2),nsmall=2)`%).  
+The predictor again adds a significant amount of explained variances beyond the empty model and looking at the slope coefficient, we find that the situational need fulifillment relates significantly to perceived interaction quality. The situational need explained substantial variance between participants (`r format(round(mdlWorkerOut$Qlt$varBtwPercInterceptCore, 2),nsmall=2)`%). The variance explained within participants is also medium (`r format(round(mdlWorkerOut$Qlt$varWithinPercInterceptCore, 2),nsmall=2)`%).  
 
 #### random slope
 
-As before, we check whether further letting the effect of core need fulfillment vary between participants explains additional variance in outgroup attitudes (i.e., random slope).   
+As before, we check whether further letting the effect of situational need fulfillment vary between participants explains additional variance in outgroup attitudes (i.e., random slope).   
 
 \begin{equation}
 (\#eq:workerOutSlopeQltNeedEq)
   \begin{split}
     \textrm{Level 1:} &
       \begin{aligned}[t]
-        \ InteractionQuality_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + e_{ti}
+        \ InteractionQuality_{ti} =  &\ \beta_{0i} + \beta_{1i}SitNeedFulfill_{ti} + e_{ti}
       \end{aligned} \\
     \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
                       &\ \beta_{1i} = \gamma_{10} + u_{1i}
@@ -3110,7 +3110,7 @@ ggplot(data = workerOutWithinBetween,
        aes(y = interaction_quality, x = keymotive_fulfillemt_1, col = as.factor(PID))) +
   geom_point(size = 1) + # change size and colour
   labs(y = "Interaction Quality", 
-       x = "Key Need Fulfillment",
+       x = "Situational Need Fulfillment",
        ) + # rename axes
   scale_y_continuous(limits = c(-50, 50)) + # y axis limits/range (0, 100), break points
   #scale_x_continuous(limits = c(90, 130)) + # x axis limits/range
@@ -3125,22 +3125,22 @@ ggplot(data = workerOutWithinBetween,
   theme(legend.position = "none")
 ```
 
-We find that adding the random slopes does not add significantly beyond the random intercept model. This is unusual because this might indicate the the effect is very consistent across participants. However, we also see that when taking the possibility to varying slopes into account, the core need fulfillment remains a significant predictor of perceived interaction quality.  
+We find that adding the random slopes does not add significantly beyond the random intercept model. This is unusual because this might indicate the the effect is very consistent across participants. However, we also see that when taking the possibility to varying slopes into account, the situational need fulfillment remains a significant predictor of perceived interaction quality.  
 
 ### Interaction Needs, Quality, and Attitudes  
 
-In our final main step, we will jointly consider the effect of core need fulfillment and perceived interaction quality on outgroup attitudes. We expect that if the relationship between core need fulfillment and outgroup attitudes is indeed explained by a higher perceived interaction quality, the interaction quality perception should assume the explained variance of the core contact need fulfillment.  
+In our final main step, we will jointly consider the effect of situational need fulfillment and perceived interaction quality on outgroup attitudes. We expect that if the relationship between situational need fulfillment and outgroup attitudes is indeed explained by a higher perceived interaction quality, the interaction quality perception should assume the explained variance of the situational contact need fulfillment.  
 
 #### random intercept with level one predictors  
 
-We thus add both the core need fulfillment and perceived interaction quality to a random intercept model of outgroup attitudes.  
+We thus add both the situational need fulfillment and perceived interaction quality to a random intercept model of outgroup attitudes.  
 
 \begin{equation}
 (\#eq:workerOutInterceptAttQltNeedEq)
   \begin{split}
     \textrm{Level 1:} &
       \begin{aligned}[t]
-        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}SitNeedFulfill_{ti} + \\
                            &\ \beta_{2i}InteractionQuality_{ti} + e_{ti}
       \end{aligned} \\
     \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
@@ -3214,7 +3214,7 @@ mdlWorkerOut$Att$varWithinPercInterceptCoreQlt <-
   (1 - (as.numeric(mdlWorkerOut$Att$varInterceptCoreQlt[2]) / as.numeric(mdlWorkerOut$Att$varNull[2]))) * 100
 ```
 
-Unsurprisingly, the model with the two predictors adds significantly beyond the empty unconditional model. However, more importantly, looking at the coefficients, we find that the effect of core need fulfillemnt indeed is indeed strongly reduced and the variance is explained by the perceived interaction quality. The variance explained in outgroup attitudes is of medium effect size (between: `r format(round(mdlWorkerOut$Att$varBtwPercInterceptCoreQlt,2),nsmall=2)`%, within: `r format(round(mdlWorkerOut$Att$varWithinPercInterceptCoreQlt,2),nsmall=2)`%).  
+Unsurprisingly, the model with the two predictors adds significantly beyond the empty unconditional model. However, more importantly, looking at the coefficients, we find that the effect of situational need fulfillemnt indeed is indeed strongly reduced and the variance is explained by the perceived interaction quality. The variance explained in outgroup attitudes is of medium effect size (between: `r format(round(mdlWorkerOut$Att$varBtwPercInterceptCoreQlt,2),nsmall=2)`%, within: `r format(round(mdlWorkerOut$Att$varWithinPercInterceptCoreQlt,2),nsmall=2)`%).  
 
 #### random slope
 
@@ -3225,7 +3225,7 @@ We again check whether further letting the effects vary between participants exp
   \begin{split}
     \textrm{Level 1:} &
       \begin{aligned}[t]
-        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}SitNeedFulfill_{ti} + \\
                            &\ \beta_{2i}InteractionQuality_{ti} + e_{ti}
       \end{aligned} \\
     \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
@@ -3339,20 +3339,20 @@ To build further confidence in our results, we assess a few additional models th
 
 #### Interaction Type  
 
-To make certain that the effect of core need fulfillment is specific to the interaction we compare the the effect to fulfillment of the situation core need when no outgroup interaction took place.  
+To make certain that the effect of situational need fulfillment is specific to the interaction we compare the the effect to fulfillment of the situational need when no outgroup interaction took place.  
 
 ##### random intercept   
 
-Here we go back to the full dataset and add generalized situational core need fulfillment (either during an interaction or about the daytime in general) and whether an outgroup interaction happened as well as their interaction term to a random intercept model of outgroup attitudes.  
+Here we go back to the full dataset and add generalized situational need fulfillment (either during an interaction or about the daytime in general) and whether an outgroup interaction happened as well as their interaction term to a random intercept model of outgroup attitudes.  
 
 \begin{equation}
 (\#eq:workerInterceptAttIntNeedEq)
   \begin{split}
     \textrm{Level 1:} &
       \begin{aligned}[t]
-        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}SitNeedFulfill_{ti} + \\
                            &\ \beta_{2i}OutgroupInteraction_{ti} + \\
-                           &\ \beta_{3i}KeyNeedFulfillXOutgroupInteraction_{ti} + e_{ti}
+                           &\ \beta_{3i}SitNeedFulfillXOutgroupInteraction_{ti} + e_{ti}
       \end{aligned} \\
     \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
                       &\ \beta_{1i} = \gamma_{10} \\
@@ -3425,7 +3425,7 @@ mdlWorker$varWithinPercInterceptAttCoreInt <-
   (1 - (as.numeric(mdlWorker$varInterceptAttCoreInt[2]) / as.numeric(mdlWorker$varAttNull[2]))) * 100
 ```
 
-We find that the model explains significantly more variance than the empty null model. However, more interestingly, looking at the coefficients, we find that, as seen earlier, having an outgroup interaction has a strong effect on outgroup attitudes. Importantly, we find that there is no main effect of key need fulfillment but a significant interaction effect of core need fulfillment and outgroup contact. This indicates that it is not key need fulfillment in general --- but only key need fulfillment during an outgroup contact that predicts more positive outgroup attitudes.  
+We find that the model explains significantly more variance than the empty null model. However, more interestingly, looking at the coefficients, we find that, as seen earlier, having an outgroup interaction has a strong effect on outgroup attitudes. Importantly, we find that there is no main effect of situational need fulfillment but a significant interaction effect of situational need fulfillment and outgroup contact. This indicates that it is not situational need fulfillment in general --- but only situational need fulfillment during an outgroup contact that predicts more positive outgroup attitudes.  
 
 ##### random slope
 
@@ -3436,9 +3436,9 @@ We again check whether further letting the effects vary between participants exp
   \begin{split}
     \textrm{Level 1:} &
       \begin{aligned}[t]
-        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}SitNeedFulfill_{ti} + \\
                            &\ \beta_{2i}OutgroupInteraction_{ti} + \\
-                           &\ \beta_{3i}KeyNeedFulfillXOutgroupInteraction_{ti} + e_{ti}
+                           &\ \beta_{3i}SitNeedFulfillXOutgroupInteraction_{ti} + e_{ti}
       \end{aligned} \\
     \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
                       &\ \beta_{1i} = \gamma_{10} + u_{1i} \\
@@ -3543,11 +3543,11 @@ ggsave(
 )
 ```
 
-We find that adding the random slopes does add significantly beyond the random intercept model. We also see that when taking the possibility to varying slopes into account, the coefficient interpretations remains consistent (i.e., outgroup contact and its interaction with core need fulfillment remain significant predictors of positive outgroup attitudes).  
+We find that adding the random slopes does add significantly beyond the random intercept model. We also see that when taking the possibility to varying slopes into account, the coefficient interpretations remains consistent (i.e., outgroup contact and its interaction with situational need fulfillment remain significant predictors of positive outgroup attitudes).  
 
 ##### Plot Interaction   
 
-Before we move on, we shortly illustrate the interaction effect of how the effect of core need fulfillment differed by whether an outgroup contact took place or not. To this end we illustrate (1) the raw data points (without taking the nested nature into account), as well as a plot of the model predicted values and their prediction interval (taking the nested structure into account based; similar to an interaction plot).  
+Before we move on, we shortly illustrate the interaction effect of how the effect of situational need fulfillment differed by whether an outgroup contact took place or not. To this end we illustrate (1) the raw data points (without taking the nested nature into account), as well as a plot of the model predicted values and their prediction interval (taking the nested structure into account based; similar to an interaction plot).  
 
 ```{r workerModelInterceptAttCoreIntPlt}
 # visualize interaction
@@ -3572,7 +3572,7 @@ ggplot(data = workerInteractionType,
   scale_x_continuous(limits = c(-50, 50), breaks = seq(-50, 50, by = 10)) +
   labs(
     title = "Without ML stucture",
-    x = "Fulfillment Core Need",
+    x = "Fulfillment Situational Need",
     y = "Outgroup Attitudes",
     fill = "Intergroup Contact",
     linetype = "Intergroup Contact"
@@ -3646,7 +3646,7 @@ ggplot(
   scale_linetype_manual(values = c("dashed", "solid")) +
   scale_fill_manual(values = c("darkgrey", "black")) +
   labs(
-    x = "Fulfillment Core Need",
+    x = "Fulfillment Situational Need",
     y = "Outgroup Attitude (NL)",
     fill = "Intergroup Contact",
     linetype = "Intergroup Contact",
@@ -3710,7 +3710,7 @@ ggplot(
 #   scale_linetype_manual(values = c("dashed", "solid")) +
 #   scale_fill_manual(values = c("darkgrey", "black")) +
 #   labs(
-#     x = "Fulfillment Core Need",
+#     x = "Fulfillment Situational Need",
 #     y = "Outgroup Attitude (NL)",
 #     fill = "Intergroup Contact",
 #     linetype = "Intergroup Contact",
@@ -3731,7 +3731,7 @@ ggplot(
 #     size = .4
 #   ) +
 #   labs(title = "slope Posteriors",
-#        x = "Fulfillment Core Need",
+#        x = "Fulfillment Situational Need",
 #        y = "Outgroup Attitudes (NL)") +
 #   theme_Publication()
 # rm(datNew, brmfit, fitavg, pst)
@@ -3739,18 +3739,18 @@ ggplot(
 
 #### Other psychological needs
 
-In a final step we check whether during the interaction the core situational need is a meaningful predictor even when taking other fundamental psychological needs into account. We focus on the three commonly considered self determination needs: competence, autonomy, and relatedness.  
+In a final step we check whether during the interaction the situational need is a meaningful predictor even when taking other fundamental psychological needs into account. We focus on the three commonly considered self determination needs: competence, autonomy, and relatedness.  
 
 ##### random intercept with level oe predictors  
 
-We add the core need fulfillment with the three self determination needs to a random intercept model of outgroup attitudes.  
+We add the situational need fulfillment with the three self determination needs to a random intercept model of outgroup attitudes.  
 
 \begin{equation}
 (\#eq:workerInterceptAttNeedSdtEq)
   \begin{split}
     \textrm{Level 1:} &
       \begin{aligned}[t]
-        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}SitNeedFulfill_{ti} + \\
                            &\ \beta_{2i}Autonomy_{ti} + \\
                            &\ \beta_{3i}Competence_{ti} + \\
                            &\ \beta_{4i}Relatedness_{ti} + e_{ti}
@@ -3836,7 +3836,7 @@ mdlWorkerOut$Att$varInterceptCoreSdt <-
   lme4::VarCorr(mdlWorkerOut$Att$lmeInterceptCoreSdt)
 ```
 
-We compare the models of the core need and the SDT need fulfillments to a model that only includes the SDT needs. We find that the core need adds significantly above the SDT needs. We find that next to relatedness, the core need explains the most variance and compared to the model with only the SDT needs, the core need fulfillment flexibly takes on some of the explained variance of all of the three fundamental needs (i.e., reduction in SDT beta weights). 
+We compare the models of the situational need and the SDT need fulfillments to a model that only includes the SDT needs. We find that the situational need adds significantly above the SDT needs. We find that next to relatedness, the situational need explains the most variance and compared to the model with only the SDT needs, the situational need fulfillment flexibly takes on some of the explained variance of all of the three fundamental needs (i.e., reduction in SDT beta weights). 
 
 ##### random slope  
 
@@ -3847,7 +3847,7 @@ We again check whether further letting the effects vary between participants exp
   \begin{split}
     \textrm{Level 1:} &
       \begin{aligned}[t]
-        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}SitNeedFulfill_{ti} + \\
                            &\ \beta_{2i}Autonomy_{ti} + \\
                            &\ \beta_{3i}Competence_{ti} + \\
                            &\ \beta_{4i}Relatedness_{ti} + e_{ti}
@@ -3957,25 +3957,25 @@ ggsave(
 )
 ```
 
-We find that adding the random slopes does add significantly beyond the random intercept model. We also see that when taking the possibility to varying slopes into account, the coefficient interpretations remains consistent (i.e., core need and relatedness remain the strongest and only significant predictors). Note however a slight reduction in the p value of the core need fulfillment.   
+We find that adding the random slopes does add significantly beyond the random intercept model. We also see that when taking the possibility to varying slopes into account, the coefficient interpretations remains consistent (i.e., situational need and relatedness remain the strongest and only significant predictors). Note however a slight reduction in the p value of the situational need fulfillment.   
 
 
 #### Interaction Accidental  
 
-To test whether the effect of core need fulfillment is relevant to planned and accidental interactions (i.e., whether 'goal-directed'), we compare the the effect to fulfillment of the situation core need when interactions were accidental or planned.  
+To test whether the effect of situational need fulfillment is relevant to planned and accidental interactions (i.e., whether 'goal-directed'), we compare the the effect to fulfillment of the situational need when interactions were accidental or planned.  
 
 ##### random intercept   
 
-Here we use the interaction dataset and add generalized situational core need fulfillment and whether the interaction was planned or accidental as well as their interaction term to a random intercept model of outgroup attitudes.  
+Here we use the interaction dataset and add generalized situational need fulfillment and whether the interaction was planned or accidental as well as their interaction term to a random intercept model of outgroup attitudes.  
 
 \begin{equation}
 (\#eq:workerInterceptAttAccNeedEq)
   \begin{split}
     \textrm{Level 1:} &
       \begin{aligned}[t]
-        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}SitNeedFulfill_{ti} + \\
                            &\ \beta_{2i}InteractionAccidental_{ti} + \\
-                           &\ \beta_{3i}KeyNeedFulfillXInteractionAccidental_{ti} + e_{ti}
+                           &\ \beta_{3i}SitNeedFulfillXInteractionAccidental_{ti} + e_{ti}
       \end{aligned} \\
     \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
                       &\ \beta_{1i} = \gamma_{10} \\
@@ -4048,7 +4048,7 @@ mdlWorkerOut$Att$varWithinPercInterceptAttCoreAcc <-
   (1 - (as.numeric(mdlWorkerOut$Att$varBtwInterceptAttCoreAcc[2]) / as.numeric(mdlWorkerOut$Att$varNull[2]))) * 100
 ```
 
-We find that the model explains significantly more variance than the empty null model. However, more interestingly, looking at the coefficients, we find that, as seen earlier, having an outgroup interaction has a strong effect on outgroup attitudes. Importantly, we find that there is no main effect of key need fulfillment but a significant interaction effect of core need fulfillment and outgroup contact. This indicates that it is not key need fulfillment in general --- but only key need fulfillment during an outgroup contact that predicts more positive outgroup attitudes.  
+We find that the model explains significantly more variance than the empty null model. However, more interestingly, looking at the coefficients, we find that, as seen earlier, having an outgroup interaction has a strong effect on outgroup attitudes. Importantly, we find that there is no main effect of situational need fulfillment but a significant interaction effect of situational need fulfillment and outgroup contact. This indicates that it is not situational need fulfillment in general --- but only situational need fulfillment during an outgroup contact that predicts more positive outgroup attitudes.  
 
 ##### random slope
 
@@ -4059,9 +4059,9 @@ We again check whether further letting the effects vary between participants exp
   \begin{split}
     \textrm{Level 1:} &
       \begin{aligned}[t]
-        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}SitNeedFulfill_{ti} + \\
                            &\ \beta_{2i}InteractionAccidental_{ti} + \\
-                           &\ \beta_{3i}KeyNeedFulfillXInteractionAccidental_{ti} + e_{ti}
+                           &\ \beta_{3i}SitNeedFulfillXInteractionAccidental_{ti} + e_{ti}
       \end{aligned} \\
     \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
                       &\ \beta_{1i} = \gamma_{10} + u_{1i} \\
@@ -4166,11 +4166,11 @@ ggsave(
 )
 ```
 
-We find that adding the random slopes does add significantly beyond the random intercept model. We also see that when taking the possibility to varying slopes into account, the coefficient interpretations remains consistent (i.e., outgroup contact and its interaction with core need fulfillment remain significant predictors of positive outgroup attitudes).  
+We find that adding the random slopes does add significantly beyond the random intercept model. We also see that when taking the possibility to varying slopes into account, the coefficient interpretations remains consistent (i.e., outgroup contact and its interaction with situational need fulfillment remain significant predictors of positive outgroup attitudes).  
 
 ##### Plot Interaction   
 
-Before we move on, we shortly illustrate the interaction effect of how the effect of core need fulfillment differed by whether an outgroup contact took place or not. To this end we illustrate (1) the raw data points (without taking the nested nature into account), as well as a plot of the model predicted values and their prediction interval (taking the nested structure into account based; similar to an interaction plot).  
+Before we move on, we shortly illustrate the interaction effect of how the effect of situational need fulfillment differed by whether an outgroup contact took place or not. To this end we illustrate (1) the raw data points (without taking the nested nature into account), as well as a plot of the model predicted values and their prediction interval (taking the nested structure into account based; similar to an interaction plot).  
 
 ```{r workerModelInterceptAttCoreAccPlt}
 
@@ -4180,7 +4180,7 @@ interactions::interact_plot(
   modx = interaction_accidental_cwc,
   interval = TRUE,
   partial.residuals = TRUE,
-  x.label = "Keyneed Fulfillment",
+  x.label = "Situational Need Fulfillment",
   y.label = "Outgroup Attitudes",
   legend.main = "Interaction Accidental"
 )
@@ -4209,14 +4209,14 @@ mdlWorkerOut$Att$jnSlopesAttCoreAcc$plot  +
 
 To test whether the need mechanism also extends to the migrants' well-being, we additionally tested the main model would also predict well-being.
 
-Here we use the interaction dataset and add generalized situational core need fulfillment as well as interaction quality in the most complex model.
+Here we use the interaction dataset and add generalized situational need fulfillment as well as interaction quality in the most complex model.
 
 \begin{equation}
 (\#eq:worderOutSlopeWbNeedQualEq)
   \begin{split}
     \textrm{Level 1:} &
       \begin{aligned}[t]
-        \ Well-Being_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+        \ Well-Being_{ti} =  &\ \beta_{0i} + \beta_{1i}SitNeedFulfill_{ti} + \\
                              &\ \beta_{2i}Quality_{ti} + e_{ti}
       \end{aligned} \\
     \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
@@ -4390,12 +4390,12 @@ The second sample we assess is larger study with international psychology studen
     a. \label{hyp:contactFreq}Participants with more intergroup interactions should have a more favorable outgroup attitudes.
     b. \label{hyp:contactDummy}Outgroup attitudes should be higher after an intergroup interaction compared to a non-outgroup interaction.
     c. \label{hyp:contactFreqQual}Participants with more intergroup interactions should have a more favorable outgroup attitudes depending on the average interaction quality.
-2. \label{hyp:keyNeed}Based on our proposal, intergroup interactions with higher situational core need fulfillment should predict more favorable outgroup attitudes due to more positive interaction quality perceptions.
-    a. \label{hyp:keyNeedPred}Outgroup attitudes should be more favorable after intergroup interactions with high key need fulfillment.
-    b. \label{hyp:keyNeedQual}Interaction Quality should be perceived as more positive after intergroup interactions with higher key need fulfillment.
-    c. \label{hyp:keyNeedMediation}The variance explained in outgroup attitudes by key need fulfillment should to a large extend be assumed by interaction quality.
-    d. \label{hyp:keyNeedContactType}The effect of key need fulfillment on outgroup attitudes should be specific to intergroup interactions and not be due to need fulfillment in general. Thus, the effect of key need fulfillment on outgroup attitudes should stronger for intergroup interact than for ingroup interactions.
-    e. \label{hyp:keyNeedSDT}The effect of key need fulfillment on outgroup attitudes should be persist even when taking other fundamental psychological needs into account. Thus, the effect of key need fulfillment on outgroup attitudes should remain strong even after controlling for autonomy, competence, and relatedness fulfillment during the interaction (cf., self-determination theory).  
+2. \label{hyp:keyNeed}Based on our proposal, intergroup interactions with higher situational need fulfillment should predict more favorable outgroup attitudes due to more positive interaction quality perceptions.
+    a. \label{hyp:keyNeedPred}Outgroup attitudes should be more favorable after intergroup interactions with high situational need fulfillment.
+    b. \label{hyp:keyNeedQual}Interaction Quality should be perceived as more positive after intergroup interactions with higher situational need fulfillment.
+    c. \label{hyp:keyNeedMediation}The variance explained in outgroup attitudes by situational need fulfillment should to a large extend be assumed by interaction quality.
+    d. \label{hyp:keyNeedContactType}The effect of situational need fulfillment on outgroup attitudes should be specific to intergroup interactions and not be due to need fulfillment in general. Thus, the effect of situational need fulfillment on outgroup attitudes should stronger for intergroup interact than for ingroup interactions.
+    e. \label{hyp:keyNeedSDT}The effect of situational need fulfillment on outgroup attitudes should be persist even when taking other fundamental psychological needs into account. Thus, the effect of situational need fulfillment on outgroup attitudes should remain strong even after controlling for autonomy, competence, and relatedness fulfillment during the interaction (cf., self-determination theory).  
 
 We will test our main hypotheses for this study in a sequential manner.  
 
@@ -4490,7 +4490,7 @@ studentDescr <- studentInteractionType %>%
   select(
     Attitudes = AttitudesDutch,
     `Well-being` = ExWB, 
-    `Core Need` = KeyNeedFullfillment,
+    `Situational Need` = KeyNeedFullfillment,
     Competence = Competence,
     Autonomy = Autonomy,
     Relatedness = Relatedness,
@@ -4503,7 +4503,7 @@ studentDescrOut <- studentInteractionType %>%
   select(
     Attitudes = AttitudesDutch,
     `Well-being` = ExWB, 
-    `Core Need` = KeyNeedFullfillment,
+    `Situational Need` = KeyNeedFullfillment,
     Competence = Competence,
     Autonomy = Autonomy,
     Relatedness = Relatedness,
@@ -4612,7 +4612,7 @@ studentMlCor <-
     data = studentInteractionType,
     id = "PID",
     selection = c("KeyNeedFullfillment", "Competence", "Autonomy", "Relatedness", "interaction_quality", "interaction_accidental", "interaction_voluntary", "AttitudesDutch"),
-    labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Quality", "Accidental", "Voluntary", "Attitudes NL")
+    labels = c("Situational Need", "Competence", "Autonomy", "Relatedness", "Quality", "Accidental", "Voluntary", "Attitudes NL")
   ) 
 
 studentMlCor %>%
@@ -4646,7 +4646,7 @@ studentOutMlCor <-
     data = studentInteractionType %>% filter(OutgroupInteraction == "Yes"),
     id = "PID",
     selection = c("KeyNeedFullfillment", "Competence", "Autonomy", "Relatedness", "interaction_quality", "interaction_accidental", "interaction_voluntary", "AttitudesDutch"),
-    labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Quality", "Accidental", "Voluntary", "Attitudes NL")
+    labels = c("Situational Need", "Competence", "Autonomy", "Relatedness", "Quality", "Accidental", "Voluntary", "Attitudes NL")
   ) 
 
 studentOutMlCor %>%
@@ -5269,11 +5269,11 @@ TL;DR: Random slopes adds significantly.
 
 ## Need Fulfillment  
 
-The main proposal of our article is that the success of an outgroup interaction might be explained by whether or not the interaction fulfilled the person's core situational need. This should, in turn, be due to a higher perceived interaction quality. We will this sequentially test whether the fulfillment of the core need during an interaction is (1) related to more positive outgroup attitudes, (2) higher perceived interaction quality, and (3) whether the variance explained by the core need is assumed by the perceived interaction quality if considered jointly.     
+The main proposal of our article is that the success of an outgroup interaction might be explained by whether or not the interaction fulfilled the person's situational need. This should, in turn, be due to a higher perceived interaction quality. We will this sequentially test whether the fulfillment of the situational need during an interaction is (1) related to more positive outgroup attitudes, (2) higher perceived interaction quality, and (3) whether the variance explained by the situational need is assumed by the perceived interaction quality if considered jointly.     
 
 ### Need fulfillment and Attitudes  
 
-In a first step we, thus, test the relationship between outgroup attitudes and the fulfillment of the core situational need during the interaction.  
+In a first step we, thus, test the relationship between outgroup attitudes and the fulfillment of the situational need during the interaction.  
 
 ##### Unconditional model  
 
@@ -5355,7 +5355,7 @@ We then add the core interaction need fulfillment to the multilevel random inter
   \begin{split}
     \textrm{Level 1:} &
       \begin{aligned}[t]
-        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + e_{ti}
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}SitNeedFulfill_{ti} + e_{ti}
       \end{aligned} \\
     \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
                       &\ \beta_{1i} = \gamma_{10}
@@ -5424,18 +5424,18 @@ mdlStudentOut$Att$varWithinPercInterceptCore <-
   (1 - (as.numeric(mdlStudentOut$Att$varInterceptCore[2]) / as.numeric(mdlStudentOut$Att$varNull[2]))) * 100
 ```
 
-We find that the the model with the added predictor indeed explains more variance in outgroup attitudes than the unconditional model. Looking at the individual coefficients, we find that the situational core need relates significantly to outgroup attitudes. The core need has little explained variance between participants (compared to the null model: Variance Explained = 1 – (Var with Predictor/Var without Predictor); `r format(round(mdlStudentOut$Att$varBtwPercInterceptCore, 2),nsmall=2)`%). The variance explained within participants is small to medium (`r format(round(mdlStudentOut$Att$varWithinPercInterceptCore, 2),nsmall=2)`%).   
+We find that the the model with the added predictor indeed explains more variance in outgroup attitudes than the unconditional model. Looking at the individual coefficients, we find that the situational need relates significantly to outgroup attitudes. The situational need has little explained variance between participants (compared to the null model: Variance Explained = 1 – (Var with Predictor/Var without Predictor); `r format(round(mdlStudentOut$Att$varBtwPercInterceptCore, 2),nsmall=2)`%). The variance explained within participants is small to medium (`r format(round(mdlStudentOut$Att$varWithinPercInterceptCore, 2),nsmall=2)`%).   
 
 #### random slope
 
-In a next step, we check whether further letting the effect of core need fulfillment vary between participants explains additional variance in outgroup attitudes (i.e., random slope).  
+In a next step, we check whether further letting the effect of situational need fulfillment vary between participants explains additional variance in outgroup attitudes (i.e., random slope).  
 
 \begin{equation}
 (\#eq:studentOutSlopeAttNeedEq)
   \begin{split}
     \textrm{Level 1:} &
       \begin{aligned}[t]
-        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + e_{ti}
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}SitNeedFulfill_{ti} + e_{ti}
       \end{aligned} \\
     \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
                       &\ \beta_{1i} = \gamma_{10} + u_{1i}
@@ -5566,7 +5566,7 @@ ggplot(data = studentOutWithinBetween,
        aes(y = AttitudesDutch, x = KeyNeedFullfillment, group = as.factor(PID))) +
   geom_point(size = 1, alpha = .2, position = position_jitter(width = 3, height = 3)) + # change size and colour
   labs(y = "Outgroup Attitudes", 
-       x = "Key Need Fulfillment",
+       x = "Situational Need Fulfillment",
        ) + # rename axes
   scale_y_continuous(limits = c(0, 100)) + # y axis limits/range (0, 100), break points
   #scale_x_continuous(limits = c(90, 130)) + # x axis limits/range
@@ -5581,13 +5581,13 @@ ggplot(data = studentOutWithinBetween,
   theme(legend.position = "none")
 ```
 
-We find that adding the random slopes does add significantly beyond the random intercept model. We also find that the core need remains a strong predictor (even when letting the influence vary between participants).  
+We find that adding the random slopes does add significantly beyond the random intercept model. We also find that the situational need remains a strong predictor (even when letting the influence vary between participants).  
 
 TL;DR: The random slope adds significantly to the prediction model.  
 
 ### Need fulfillment and Interaction Quality   
 
-Based on the assertion that the relationship between core need fulfillment and outgroup attitudes is explained by a higher perceived interaction, the core need fulfillment should also significantly predict perceived interaction quality.  
+Based on the assertion that the relationship between situational need fulfillment and outgroup attitudes is explained by a higher perceived interaction, the situational need fulfillment should also significantly predict perceived interaction quality.  
 
 ##### Unconditional model
 
@@ -5648,7 +5648,7 @@ We again add the core interaction need fulfillment to the multilevel random inte
   \begin{split}
     \textrm{Level 1:} &
       \begin{aligned}[t]
-        \ InteractionQuality_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + e_{ti}
+        \ InteractionQuality_{ti} =  &\ \beta_{0i} + \beta_{1i}SitNeedFulfill_{ti} + e_{ti}
       \end{aligned} \\
     \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
                       &\ \beta_{1i} = \gamma_{10}
@@ -5716,18 +5716,18 @@ mdlStudentOut$Qlt$varWithinPercInterceptCore <-
   (1 - (as.numeric(mdlStudentOut$Qlt$varInterceptCore[2]) / as.numeric(mdlStudentOut$Qlt$varNull[2]))) * 100
 ```
 
-The predictor again adds a significant amount of explained variances beyond the empty model and looking at the slope coefficient, we find that the situational core need fulfillment relates significantly to perceived interaction quality. The core need explained substantial variance between participants (`r format(round(mdlStudentOut$Qlt$varBtwPercInterceptCore, 2),nsmall=2)`%). The variance explained within participants is also medium (`r format(round(mdlStudentOut$Qlt$varWithinPercInterceptCore, 2),nsmall=2)`%).  
+The predictor again adds a significant amount of explained variances beyond the empty model and looking at the slope coefficient, we find that the situational need fulfillment relates significantly to perceived interaction quality. The situational need explained substantial variance between participants (`r format(round(mdlStudentOut$Qlt$varBtwPercInterceptCore, 2),nsmall=2)`%). The variance explained within participants is also medium (`r format(round(mdlStudentOut$Qlt$varWithinPercInterceptCore, 2),nsmall=2)`%).  
 
 #### random slope
 
-As before, we check whether further letting the effect of core need fulfillment vary between participants explains additional variance in outgroup attitudes (i.e., random slope).   
+As before, we check whether further letting the effect of situational need fulfillment vary between participants explains additional variance in outgroup attitudes (i.e., random slope).   
 
 \begin{equation}
 (\#eq:studentOutSlopeQltNeedEq)
   \begin{split}
     \textrm{Level 1:} &
       \begin{aligned}[t]
-        \ InteractionQuality_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + e_{ti}
+        \ InteractionQuality_{ti} =  &\ \beta_{0i} + \beta_{1i}SitNeedFulfill_{ti} + e_{ti}
       \end{aligned} \\
     \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
                       &\ \beta_{1i} = \gamma_{10} + u_{1i}
@@ -5834,7 +5834,7 @@ ggplot(data = studentOutWithinBetween,
        aes(y = interaction_quality, x = KeyNeedFullfillment, group = as.factor(PID))) +
   geom_point(size = 1, alpha = .2, position = position_jitter(width = 3, height = 3)) + # change size and colour
   labs(y = "Interaction Quality", 
-       x = "Key Need Fulfillment",
+       x = "Situational Need Fulfillment",
        ) + # rename axes
   scale_y_continuous(limits = c(0, 100)) + # y axis limits/range (0, 100), break points
   #scale_x_continuous(limits = c(90, 130)) + # x axis limits/range
@@ -5853,18 +5853,18 @@ We find that adding the random slopes does add significantly beyond the random i
 
 ### Interaction Needs, Quality, and Attitudes  
 
-In our final main step, we will jointly consider the effect of core need fulfillment and perceived interaction quality on outgroup attitudes. We expect that if the relationship between core need fulfillment and outgroup attitudes is indeed explained by a higher perceived interaction quality, the interaction quality perception should assume the explained variance of the core contact need fulfillment.  
+In our final main step, we will jointly consider the effect of situational need fulfillment and perceived interaction quality on outgroup attitudes. We expect that if the relationship between situational need fulfillment and outgroup attitudes is indeed explained by a higher perceived interaction quality, the interaction quality perception should assume the explained variance of the situational contact need fulfillment.  
 
 #### random intercept with level one predictors  
 
-We thus add both the core need fulfillment and perceived interaction quality to a random intercept model of outgroup attitudes.  
+We thus add both the situational need fulfillment and perceived interaction quality to a random intercept model of outgroup attitudes.  
 
 \begin{equation}
 (\#eq:studentOutInterceptAttQltNeedEq)
   \begin{split}
     \textrm{Level 1:} &
       \begin{aligned}[t]
-        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}SitNeedFulfill_{ti} + \\
                            &\ \beta_{2i}InteractionQuality_{ti} + e_{ti}
       \end{aligned} \\
     \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
@@ -5937,7 +5937,7 @@ mdlStudentOut$Att$varWithinPercInterceptCoreQlt <-
   (1 - (as.numeric(mdlStudentOut$Att$varInterceptCoreQlt[2]) / as.numeric(mdlStudentOut$Att$varNull[2]))) * 100
 ```
 
-Unsurprisingly, the model with the two predictors adds significantly beyond the empty unconditional model. However, more importantly, looking at the coefficients, we find that the effect of core need fulfillment indeed is indeed strongly reduced and the variance is explained by the perceived interaction quality. The variance explained in outgroup attitudes is of medium effect size (between: `r format(round(mdlStudentOut$Att$varBtwPercInterceptCoreQlt,2),nsmall=2)`%, within: `r format(round(mdlStudentOut$Att$varWithinPercInterceptCoreQlt,2),nsmall=2)`%).  
+Unsurprisingly, the model with the two predictors adds significantly beyond the empty unconditional model. However, more importantly, looking at the coefficients, we find that the effect of situational need fulfillment indeed is indeed strongly reduced and the variance is explained by the perceived interaction quality. The variance explained in outgroup attitudes is of medium effect size (between: `r format(round(mdlStudentOut$Att$varBtwPercInterceptCoreQlt,2),nsmall=2)`%, within: `r format(round(mdlStudentOut$Att$varWithinPercInterceptCoreQlt,2),nsmall=2)`%).  
 
 #### random slope
 
@@ -5948,7 +5948,7 @@ We again check whether further letting the effects vary between participants exp
   \begin{split}
     \textrm{Level 1:} &
       \begin{aligned}[t]
-        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}SitNeedFulfill_{ti} + \\
                            &\ \beta_{2i}InteractionQuality_{ti} + e_{ti}
       \end{aligned} \\
     \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
@@ -6063,20 +6063,20 @@ To build further confidence in our results, we assess a few additional models th
 
 #### Interaction Type  
 
-To make certain that the effect of core need fulfillment is specific to the interaction we compare the the effect to fulfillment of the situation core need when no outgroup interaction took place.  
+To make certain that the effect of situational need fulfillment is specific to the interaction we compare the the effect to fulfillment of the situational need when no outgroup interaction took place.  
 
 ##### random intercept   
 
-Here we go back to the full dataset and add generalized situational core need fulfillment (either during an interaction or about the daytime in general) and whether an outgroup interaction happened as well as their interaction term to a random intercept model of outgroup attitudes.  
+Here we go back to the full dataset and add generalized situational need fulfillment (either during an interaction or about the daytime in general) and whether an outgroup interaction happened as well as their interaction term to a random intercept model of outgroup attitudes.  
 
 \begin{equation}
 (\#eq:studentInterceptAttIntNeedEq)
   \begin{split}
     \textrm{Level 1:} &
       \begin{aligned}[t]
-        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}SitNeedFulfill_{ti} + \\
                            &\ \beta_{2i}OutgroupInteraction_{ti} + \\
-                           &\ \beta_{3i}KeyNeedFulfillXOutgroupInteraction_{ti} + e_{ti}
+                           &\ \beta_{3i}SitNeedFulfillXOutgroupInteraction_{ti} + e_{ti}
       \end{aligned} \\
     \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
                       &\ \beta_{1i} = \gamma_{10} \\
@@ -6149,7 +6149,7 @@ mdlStudent$varWithinPercInterceptAttCoreInt <-
   (1 - (as.numeric(mdlStudent$varInterceptAttCoreInt[2]) / as.numeric(mdlStudent$varAttNull[2]))) * 100
 ```
 
-We find that the model explains significantly more variance than the empty null model. However, more interestingly, looking at the coefficients, we find that, as seen earlier, having an outgroup interaction has a strong effect on outgroup attitudes. Importantly, we find that there is a main effect of key need fulfillment but also a significant interaction effect of core need fulfillment and outgroup contact. This indicates that it is not simply key need fulfillment in general --- but especially key need fulfillment during an outgroup contact that predicts more positive outgroup attitudes.  
+We find that the model explains significantly more variance than the empty null model. However, more interestingly, looking at the coefficients, we find that, as seen earlier, having an outgroup interaction has a strong effect on outgroup attitudes. Importantly, we find that there is a main effect of situational need fulfillment but also a significant interaction effect of situational need fulfillment and outgroup contact. This indicates that it is not simply situational need fulfillment in general --- but especially situational need fulfillment during an outgroup contact that predicts more positive outgroup attitudes.  
 
 ##### random slope
 
@@ -6160,9 +6160,9 @@ We again check whether further letting the effects vary between participants exp
   \begin{split}
     \textrm{Level 1:} &
       \begin{aligned}[t]
-        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}SitNeedFulfill_{ti} + \\
                            &\ \beta_{2i}OutgroupInteraction_{ti} + \\
-                           &\ \beta_{3i}KeyNeedFulfillXOutgroupInteraction_{ti} + e_{ti}
+                           &\ \beta_{3i}SitNeedFulfillXOutgroupInteraction_{ti} + e_{ti}
       \end{aligned} \\
     \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
                       &\ \beta_{1i} = \gamma_{10} + u_{1i} \\
@@ -6268,11 +6268,11 @@ ggsave(
 )
 ```
 
-We find that adding the random slopes does add significantly beyond the random intercept model. We also see that when taking the possibility to varying slopes into account, the coefficient interpretations remains consistent (i.e., outgroup contact and its interaction with core need fulfillment remain important predictors of positive outgroup attitudes).  
+We find that adding the random slopes does add significantly beyond the random intercept model. We also see that when taking the possibility to varying slopes into account, the coefficient interpretations remains consistent (i.e., outgroup contact and its interaction with situational need fulfillment remain important predictors of positive outgroup attitudes).  
 
 ##### Plot Interaction   
 
-Before we move on, we shortly illustrate the interaction effect of how the effect of core need fulfillment differed by whether an outgroup contact took place or not. To this end we illustrate (1) the raw data points (without taking the nested nature into account), as well as a plot of the model predicted values and their prediction interval (taking the nested structure into account based; similar to an interaction plot).  
+Before we move on, we shortly illustrate the interaction effect of how the effect of situational need fulfillment differed by whether an outgroup contact took place or not. To this end we illustrate (1) the raw data points (without taking the nested nature into account), as well as a plot of the model predicted values and their prediction interval (taking the nested structure into account based; similar to an interaction plot).  
 
 ```{r studentModelInterceptAttCoreIntPlt}
 # visualize interaction
@@ -6297,7 +6297,7 @@ ggplot(data = studentInteractionType,
   scale_x_continuous(limits = c(0, 100), breaks = seq(0, 100, by = 10)) +
   labs(
     title = "Without ML stucture",
-    x = "Fulfillment Core Need",
+    x = "Fulfillment Situational Need",
     y = "Outgroup Attitudes",
     fill = "Intergroup Contact",
     linetype = "Intergroup Contact"
@@ -6372,7 +6372,7 @@ ggplot(
   scale_linetype_manual(values = c("dashed", "solid")) +
   scale_fill_manual(values = c("darkgrey", "black")) +
   labs(
-    x = "Fulfillment Core Need",
+    x = "Fulfillment Situational Need",
     y = "Outgroup Attitude (NL)",
     fill = "Intergroup Contact",
     linetype = "Intergroup Contact",
@@ -6436,7 +6436,7 @@ ggplot(
 #   scale_linetype_manual(values = c("dashed", "solid")) +
 #   scale_fill_manual(values = c("darkgrey", "black")) +
 #   labs(
-#     x = "Fulfillment Core Need",
+#     x = "Fulfillment situational need",
 #     y = "Outgroup Attitude (NL)",
 #     fill = "Intergroup Contact",
 #     linetype = "Intergroup Contact",
@@ -6457,13 +6457,13 @@ ggplot(
 # #     size = .4
 # #   ) +
 # #   labs(title = "slope Posteriors",
-# #        x = "Fulfillment Core Need",
+# #        x = "Fulfillment situational need",
 # #        y = "Outgroup Attitudes (NL)") +
 # #   theme_Publication()
 # # rm(datNew, brmfit, fitavg, pst)
 ```
 
-The plots indicate that especially once we take the nested data structure into account we can see a substantially stronger effect of core need fulfillment on outgroup attitudes during outgroup contacts than without outgroup contacts.  
+The plots indicate that especially once we take the nested data structure into account we can see a substantially stronger effect of situational need fulfillment on outgroup attitudes during outgroup contacts than without outgroup contacts.  
 
 #### Other psychological needs
 
@@ -6471,14 +6471,14 @@ In a final step we check whether during the interaction the core situational nee
 
 ##### random intercept with level one predictors  
 
-We add the core need fulfillment with the three self determination needs to a random intercept model of outgroup attitudes.  
+We add the situational need fulfillment with the three self determination needs to a random intercept model of outgroup attitudes.  
 
 \begin{equation}
 (\#eq:studentInterceptAttNeedSdtEq)
   \begin{split}
     \textrm{Level 1:} &
       \begin{aligned}[t]
-        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}SitNeedFulfill_{ti} + \\
                            &\ \beta_{2i}Autonomy_{ti} + \\
                            &\ \beta_{3i}Competence_{ti} + \\
                            &\ \beta_{4i}Relatedness_{ti} + e_{ti}
@@ -6565,7 +6565,7 @@ mdlStudentOut$Att$varInterceptCoreSdt <-
   lme4::VarCorr(mdlStudentOut$Att$lmeInterceptCoreSdt)
 ```
 
-We find that the the model with the added predictor indeed explains more variance in outgroup attitudes than the unconditional model and we find that adding the core need adds further explained variance --- beyond the self determination needs. Looking at the individual coefficients, we find that the situational core need relates significantly to outgroup attitudes, that it is a stronger predictor than any of the self determination theory needs and that it assumes some of the variance explained by the self determination theory needs (when compared to a model without the core need). 
+We find that the the model with the added predictor indeed explains more variance in outgroup attitudes than the unconditional model and we find that adding the situational need adds further explained variance --- beyond the self determination needs. Looking at the individual coefficients, we find that the situational need relates significantly to outgroup attitudes, that it is a stronger predictor than any of the self determination theory needs and that it assumes some of the variance explained by the self determination theory needs (when compared to a model without the situational need). 
 
 ##### random slope  
 
@@ -6576,7 +6576,7 @@ We again check whether further letting the effects vary between participants exp
   \begin{split}
     \textrm{Level 1:} &
       \begin{aligned}[t]
-        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}SitNeedFulfill_{ti} + \\
                            &\ \beta_{2i}Autonomy_{ti} + \\
                            &\ \beta_{3i}Competence_{ti} + \\
                            &\ \beta_{4i}Relatedness_{ti} + e_{ti}
@@ -6631,7 +6631,7 @@ studentRed2 <-
 # Problem because some PPTs have 100 on all measures (SD = 0) AND/OR
 # For some all cor = 1 or -1
 # Removing these PPTs or their measurement beeps doesn't help
-# However, removing eithe the Core Need, Autonomy, or Relatedness from the random slopes lets the model converge
+# However, removing eithe the situational need, Autonomy, or Relatedness from the random slopes lets the model converge
 # FOR NOW: Autonomy removed from random slopes because weakest predictor
 mdlStudentOut$Att$lmeSlopesCoreSdt <-
   nlme::lme(
@@ -6727,24 +6727,24 @@ ggsave(
 )
 ```
 
-We find that adding the random slopes does add significantly beyond the random intercept model. We also see that when taking the possibility to varying slopes into account, the coefficient interpretations remains consistent (i.e., core need and relatedness remain the strongest and only significant predictors).   
+We find that adding the random slopes does add significantly beyond the random intercept model. We also see that when taking the possibility to varying slopes into account, the coefficient interpretations remains consistent (i.e., situational need and relatedness remain the strongest and only significant predictors).   
 
 #### Interaction Accidental  
 
-To test whether the effect of core need fulfillment is relevant to planned and accidental interactions (i.e., whether 'goal-directed'), we compare the the effect to fulfillment of the situation core need when interactions were accidental or planned.  
+To test whether the effect of situational need fulfillment is relevant to planned and accidental interactions (i.e., whether 'goal-directed'), we compare the the effect to fulfillment of the situational need when interactions were accidental or planned.  
 
 ##### random intercept   
 
-Here we use the interaction dataset and add generalized situational core need fulfillment and whether the interaction was planned or accidental as well as their interaction term to a random intercept model of outgroup attitudes.  
+Here we use the interaction dataset and add generalized situational need fulfillment and whether the interaction was planned or accidental as well as their interaction term to a random intercept model of outgroup attitudes.  
 
 \begin{equation}
 (\#eq:studentOutInterceptAttAccNeedEq)
   \begin{split}
     \textrm{Level 1:} &
       \begin{aligned}[t]
-        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}SitNeedFulfill_{ti} + \\
                            &\ \beta_{2i}InteractionAccidental_{ti} + \\
-                           &\ \beta_{3i}KeyNeedFulfillXInteractionAccidental_{ti} + e_{ti}
+                           &\ \beta_{3i}SitNeedFulfillXInteractionAccidental_{ti} + e_{ti}
       \end{aligned} \\
     \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
                       &\ \beta_{1i} = \gamma_{10} \\
@@ -6817,7 +6817,7 @@ mdlStudentOut$Att$varWithinPercInterceptAttCoreAcc <-
   (1 - (as.numeric(mdlStudentOut$Att$varBtwInterceptAttCoreAcc[2]) / as.numeric(mdlStudentOut$Att$varNull[2]))) * 100
 ```
 
-We find that the model explains significantly more variance than the empty null model. However, more interestingly, looking at the coefficients, we find that, as seen earlier, having an outgroup interaction has a strong effect on outgroup attitudes. Importantly, we find that there is no main effect of key need fulfillment but a significant interaction effect of core need fulfillment and outgroup contact. This indicates that it is not key need fulfillment in general --- but only key need fulfillment during an outgroup contact that predicts more positive outgroup attitudes.  
+We find that the model explains significantly more variance than the empty null model. However, more interestingly, looking at the coefficients, we find that, as seen earlier, having an outgroup interaction has a strong effect on outgroup attitudes. Importantly, we find that there is no main effect of situational need fulfillment but a significant interaction effect of situational need fulfillment and outgroup contact. This indicates that it is not situational need fulfillment in general --- but only situational need fulfillment during an outgroup contact that predicts more positive outgroup attitudes.  
 
 ##### random slope
 
@@ -6828,9 +6828,9 @@ We again check whether further letting the effects vary between participants exp
   \begin{split}
     \textrm{Level 1:} &
       \begin{aligned}[t]
-        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}SitNeedFulfill_{ti} + \\
                            &\ \beta_{2i}InteractionAccidental_{ti} + \\
-                           &\ \beta_{3i}KeyNeedFulfillXInteractionAccidental_{ti} + e_{ti}
+                           &\ \beta_{3i}SitNeedFulfillXInteractionAccidental_{ti} + e_{ti}
       \end{aligned} \\
     \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
                       &\ \beta_{1i} = \gamma_{10} + u_{1i} \\
@@ -6936,11 +6936,11 @@ grid.arrange(
 # )
 ```
 
-We find that adding the random slopes does add significantly beyond the random intercept model. We also see that when taking the possibility to varying slopes into account, the coefficient interpretations remains consistent (i.e., outgroup contact and its interaction with core need fulfillment remain significant predictors of positive outgroup attitudes).  
+We find that adding the random slopes does add significantly beyond the random intercept model. We also see that when taking the possibility to varying slopes into account, the coefficient interpretations remains consistent (i.e., outgroup contact and its interaction with situational need fulfillment remain significant predictors of positive outgroup attitudes).  
 
 ##### Plot Interaction   
 
-Before we move on, we shortly illustrate the interaction effect of how the effect of core need fulfillment differed by whether an outgroup contact took place or not. To this end we illustrate (1) the raw data points (without taking the nested nature into account), as well as a plot of the model predicted values and their prediction interval (taking the nested structure into account based; similar to an interaction plot).  
+Before we move on, we shortly illustrate the interaction effect of how the effect of situational need fulfillment differed by whether an outgroup contact took place or not. To this end we illustrate (1) the raw data points (without taking the nested nature into account), as well as a plot of the model predicted values and their prediction interval (taking the nested structure into account based; similar to an interaction plot).  
 
 ```{r studentOutModelInterceptAttCoreAccPlt}
 
@@ -6979,14 +6979,14 @@ mdlStudentOut$Att$jnSlopesAttCoreAcc$plot  +
 
 To test whether the need mechanism also extends to the migrants' well-being, we additionally tested the main model would also predict well-being.
 
-Here we use the interaction dataset and add generalized situational core need fulfillment as well as interaction quality in the most complex model.
+Here we use the interaction dataset and add generalized situational need fulfillment as well as interaction quality in the most complex model.
 
 \begin{equation}
 (\#eq:studentOutSlopeWbNeedQualEq)
   \begin{split}
     \textrm{Level 1:} &
       \begin{aligned}[t]
-        \ Well-Being_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+        \ Well-Being_{ti} =  &\ \beta_{0i} + \beta_{1i}SitNeedFulfill_{ti} + \\
                              &\ \beta_{2i}Quality_{ti} + e_{ti}
       \end{aligned} \\
     \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
@@ -7254,7 +7254,7 @@ medicalDescr <- dtMedical$full %>%
   transmute(
     Attitudes = AttitudesDutch,
     `Well-being` = exWB, 
-    `Core Need` = KeyNeedFulfillment,
+    `Situational Need` = KeyNeedFulfillment,
     Competence = Competence,
     Autonomy = Autonomy,
     Relatedness = Relatedness,
@@ -7268,7 +7268,7 @@ medicalDescrOut <- dtMedical$full %>%
   select(
     Attitudes = AttitudesDutch,
     `Well-being` = exWB,
-    `Core Need` = KeyNeedFulfillment,
+    `Situational Need` = KeyNeedFulfillment,
     Competence = Competence,
     Autonomy = Autonomy,
     Relatedness = Relatedness,
@@ -7378,7 +7378,7 @@ medicalMlCor <-
     data = dtMedical$full,
     id = "PID",
     selection = c("KeyNeedFulfillment", "Competence", "Autonomy", "Relatedness", "AllportsCondition", "interaction_quality", "interaction_accidental", "interaction_voluntary", "AttitudesDutch", "exWB"),
-    labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Allport", "Quality", "Accidental", "Voluntary", "Attitudes NL", "Well-being")
+    labels = c("Situational Need", "Competence", "Autonomy", "Relatedness", "Allport", "Quality", "Accidental", "Voluntary", "Attitudes NL", "Well-being")
   ) 
 
 medicalMlCor %>%
@@ -7412,7 +7412,7 @@ medicalOutMlCor <-
     data = dtMedical$full %>% filter(OutgroupInteraction == "Yes"),
     id = "PID",
     selection = c("KeyNeedFulfillment", "Competence", "Autonomy", "Relatedness", "AllportsCondition", "interaction_quality", "interaction_accidental", "interaction_voluntary", "AttitudesDutch", "exWB"),
-    labels = c("Core Need", "Competence", "Autonomy", "Relatedness", "Allport", "Quality", "Accidental", "Voluntary", "Attitudes NL", "Well-being")
+    labels = c("Situational Need", "Competence", "Autonomy", "Relatedness", "Allport", "Quality", "Accidental", "Voluntary", "Attitudes NL", "Well-being")
   ) 
 
 medicalOutMlCor %>%
@@ -7906,7 +7906,7 @@ TL;DR: Random slopes adds significantly. Outgroup interactions still good predic
 
 ## Allport's Conditions
 
-We begin our main analysis by outgroup attitudes after an intergroup contact are indeed explained by whether or not Allport's conditions were fulfilled. This should, in turn, be due to a higher perceived interaction quality. We will this sequentially test whether the fulfillment of the core need during an interaction is (1) related to more positive outgroup attitudes, (2) higher perceived interaction quality, and (3) whether the variance explained by the core need is assumed by the perceived interaction quality if considered jointly.     
+We begin our main analysis by outgroup attitudes after an intergroup contact are indeed explained by whether or not Allport's conditions were fulfilled. This should, in turn, be due to a higher perceived interaction quality. We will this sequentially test whether the fulfillment of the situational need during an interaction is (1) related to more positive outgroup attitudes, (2) higher perceived interaction quality, and (3) whether the variance explained by the situational need is assumed by the perceived interaction quality if considered jointly.     
 
 ### Allport and Attitudes  
 
@@ -8534,7 +8534,7 @@ mdlMedicalOut$Att$varInterceptAllportQlt <-
   lme4::VarCorr(mdlMedicalOut$Att$lmeInterceptAllportQlt)
 ```
 
-Unsurprisingly, the model with the two predictors adds significantly beyond the empty unconditional model. However, more importantly, looking at the coefficients, we find that the effect of Allport's conditions is indeed is indeed strongly reduced and the variance is explained by the perceived interaction quality. Notably in this sample, the reduction of variance explained is not a much as we saw with core need fulfillment in previous studies.  
+Unsurprisingly, the model with the two predictors adds significantly beyond the empty unconditional model. However, more importantly, looking at the coefficients, we find that the effect of Allport's conditions is indeed is indeed strongly reduced and the variance is explained by the perceived interaction quality. Notably in this sample, the reduction of variance explained is not a much as we saw with situational need fulfillment in previous studies.  
 
 #### random slope
 
@@ -8674,7 +8674,7 @@ We jump right in with the random intercept model because we have already assesse
   \begin{split}
     \textrm{Level 1:} &
       \begin{aligned}[t]
-        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + e_{ti}
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}SitNeedFulfill_{ti} + e_{ti}
       \end{aligned} \\
     \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
                       &\ \beta_{1i} = \gamma_{10}
@@ -8732,18 +8732,18 @@ mdlMedicalOut$Att$varInterceptCore <-
   lme4::VarCorr(mdlMedicalOut$Att$lmeInterceptCore)
 ```
 
-We find that the the model with the added predictor indeed explains more variance in outgroup attitudes than the unconditional model. Looking at the individual coefficients, we find that the situational core need relates significantly to outgroup attitudes.  
+We find that the the model with the added predictor indeed explains more variance in outgroup attitudes than the unconditional model. Looking at the individual coefficients, we find that the situational need relates significantly to outgroup attitudes.  
 
 #### random slope
 
-In a next step, we check whether further letting the effect of core need fulfillment vary between participants explains additional variance in outgroup attitudes (i.e., random slope).  
+In a next step, we check whether further letting the effect of situational need fulfillment vary between participants explains additional variance in outgroup attitudes (i.e., random slope).  
 
 \begin{equation}
 (\#eq:medicalOutSlopeAttNeedEq)
   \begin{split}
     \textrm{Level 1:} &
       \begin{aligned}[t]
-        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + e_{ti}
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}SitNeedFulfill_{ti} + e_{ti}
       \end{aligned} \\
     \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
                       &\ \beta_{1i} = \gamma_{10} + u_{1i}
@@ -8894,13 +8894,13 @@ ggplot(data = medicalOutWithinBetween,
   theme(legend.position = "none")
 ```
 
-We find that adding the random slopes does add significantly beyond the random intercept model. We also find that the core need remains a strong predictor (even when letting the influence vary between participants).  
+We find that adding the random slopes does add significantly beyond the random intercept model. We also find that the situational need remains a strong predictor (even when letting the influence vary between participants).  
 
 TL;DR: The random slope adds significantly to the prediction model.  
 
 ### Need fulfillment and Interaction Quality   
 
-Based on the assertion that the relationship between core need fulfillment and outgroup attitudes is explained by a higher perceived interaction, the core need fulfillment should also significantly predict perceived interaction quality.  
+Based on the assertion that the relationship between situational need fulfillment and outgroup attitudes is explained by a higher perceived interaction, the situational need fulfillment should also significantly predict perceived interaction quality.  
 
 #### random intercept with level one predictor  
 
@@ -8911,7 +8911,7 @@ We again do not need to calculate an unconditional model for the perceived inter
   \begin{split}
     \textrm{Level 1:} &
       \begin{aligned}[t]
-        \ InteractionQuality_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + e_{ti}
+        \ InteractionQuality_{ti} =  &\ \beta_{0i} + \beta_{1i}SitNeedFulfill_{ti} + e_{ti}
       \end{aligned} \\
     \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
                       &\ \beta_{1i} = \gamma_{10}
@@ -8969,18 +8969,18 @@ mdlMedicalOut$Qlt$varInterceptCore <-
   lme4::VarCorr(mdlMedicalOut$Qlt$lmeInterceptCore)
 ```
 
-The predictor again adds a significant amount of explained variances beyond the empty model and looking at the slope coefficient, we find that the situational core need fulfillment relates significantly to perceived interaction quality. 
+The predictor again adds a significant amount of explained variances beyond the empty model and looking at the slope coefficient, we find that the situational need fulfillment relates significantly to perceived interaction quality. 
 
 #### random slope
 
-As before, we check whether further letting the effect of core need fulfillment vary between participants explains additional variance in outgroup attitudes (i.e., random slope).   
+As before, we check whether further letting the effect of situational need fulfillment vary between participants explains additional variance in outgroup attitudes (i.e., random slope).   
 
 \begin{equation}
 (\#eq:medicalOutSlopeQltNeedEq)
   \begin{split}
     \textrm{Level 1:} &
       \begin{aligned}[t]
-        \ InteractionQuality_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + e_{ti}
+        \ InteractionQuality_{ti} =  &\ \beta_{0i} + \beta_{1i}SitNeedFulfill_{ti} + e_{ti}
       \end{aligned} \\
     \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
                       &\ \beta_{1i} = \gamma_{10} + u_{1i}
@@ -9106,22 +9106,22 @@ ggplot(data = medicalOutWithinBetween,
   theme(legend.position = "none")
 ```
 
-We find that adding the random slopes does add significantly beyond the random intercept model and situation key need fulfillment remains a meaningful predictor of outgroup attitudes.   
+We find that adding the random slopes does add significantly beyond the random intercept model and situation situational need fulfillment remains a meaningful predictor of outgroup attitudes.   
 
 ### Interaction Needs, Quality, and Attitudes  
 
-In our final main step, we will jointly consider the effect of core need fulfillment and perceived interaction quality on outgroup attitudes. We expect that if the relationship between core need fulfillment and outgroup attitudes is indeed explained by a higher perceived interaction quality, the interaction quality perception should assume the explained variance of the core contact need fulfillment.  
+In our final main step, we will jointly consider the effect of situational need fulfillment and perceived interaction quality on outgroup attitudes. We expect that if the relationship between situational need fulfillment and outgroup attitudes is indeed explained by a higher perceived interaction quality, the interaction quality perception should assume the explained variance of the core contact need fulfillment.  
 
 #### random intercept with level one predictors  
 
-We thus add both the core need fulfillment and perceived interaction quality to a random intercept model of outgroup attitudes.  
+We thus add both the situational need fulfillment and perceived interaction quality to a random intercept model of outgroup attitudes.  
 
 \begin{equation}
 (\#eq:medicalOutInterceptAttQltNeedEq)
   \begin{split}
     \textrm{Level 1:} &
       \begin{aligned}[t]
-        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}SitNeedFulfill_{ti} + \\
                            &\ \beta_{2i}InteractionQuality_{ti} + e_{ti}
       \end{aligned} \\
     \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
@@ -9183,7 +9183,7 @@ mdlMedicalOut$Att$varInterceptCoreQlt <-
   lme4::VarCorr(mdlMedicalOut$Att$lmeInterceptCoreQlt)
 ```
 
-Unsurprisingly, the model with the two predictors adds significantly beyond the empty unconditional model. However, more importantly, looking at the coefficients, we find that the effect of core need fulfillment indeed is indeed strongly reduced and the variance is explained by the perceived interaction quality. However, similar to the equivalent analysis of Allport's conditions and interaction quality, the effect of need fulfillment remains a significant predictor of outgroup attitudes when controlling for perceived interaction quality.  
+Unsurprisingly, the model with the two predictors adds significantly beyond the empty unconditional model. However, more importantly, looking at the coefficients, we find that the effect of situational need fulfillment indeed is indeed strongly reduced and the variance is explained by the perceived interaction quality. However, similar to the equivalent analysis of Allport's conditions and interaction quality, the effect of need fulfillment remains a significant predictor of outgroup attitudes when controlling for perceived interaction quality.  
 
 #### random slope
 
@@ -9194,7 +9194,7 @@ We again check whether further letting the effects vary between participants exp
   \begin{split}
     \textrm{Level 1:} &
       \begin{aligned}[t]
-        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}SitNeedFulfill_{ti} + \\
                            &\ \beta_{2i}InteractionQuality_{ti} + e_{ti}
       \end{aligned} \\
     \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
@@ -9304,11 +9304,11 @@ ggsave(
 )
 ```
 
-The random slopes add significant explained variance to the model. When we consider the influences of core need fulfillment and interaction quality on outgroup attitudes jointly, we find that perceived interaction quality is a substantially stronger predictor and the unique variance explained by core need fulfillment was roughly half of its original effect size.
+The random slopes add significant explained variance to the model. When we consider the influences of situational need fulfillment and interaction quality on outgroup attitudes jointly, we find that perceived interaction quality is a substantially stronger predictor and the unique variance explained by situational need fulfillment was roughly half of its original effect size.
 
-## Compare Fulfillment of Core Need and Allport's Conditions
+## Compare Fulfillment of Situational Need and Allport's Conditions
 
-To compare the models using either Allport's conditions or the core need fulfillment to predict outgroup attitudes, we first assess relative model performance indices (i.e., Akaike information criterion, and Bayesian information criterion), and then consider the two predictors in a joint model to see whether the two approaches predict the same variance in outgroup attitudes.
+To compare the models using either Allport's conditions or the situational need fulfillment to predict outgroup attitudes, we first assess relative model performance indices (i.e., Akaike information criterion, and Bayesian information criterion), and then consider the two predictors in a joint model to see whether the two approaches predict the same variance in outgroup attitudes.
 
 ### Model fit parameters
 
@@ -9347,7 +9347,7 @@ performance::compare_performance(
 )
 ```
 
-When comparing the model selection indices we find that the fulfillment of the situation core need, indeed performs slightly better than the model using Allport's conditions. 
+When comparing the model selection indices we find that the fulfillment of the situational need, indeed performs slightly better than the model using Allport's conditions. 
 
 ### Joint model  
 
@@ -9355,14 +9355,14 @@ We then consider the two predictors in a joint model to see whether the two appr
 
 #### random intercept model
 
-We begin by adding both the core need fulfillment and Allport's conditions to a random intercept model of outgroup attitudes.  
+We begin by adding both the situational need fulfillment and Allport's conditions to a random intercept model of outgroup attitudes.  
 
 \begin{equation}
 (\#eq:medicalOutInterceptAttNeedAllportEq)
   \begin{split}
     \textrm{Level 1:} &
       \begin{aligned}[t]
-        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}SitNeedFulfill_{ti} + \\
                            &\ \beta_{2i}Allport_{ti} + e_{ti}
       \end{aligned} \\
     \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
@@ -9424,7 +9424,7 @@ mdlMedicalOut$Att$varInterceptCoreAllport <-
   lme4::VarCorr(mdlMedicalOut$Att$lmeInterceptCoreAllport)
 ```
 
-For the random intercept model we find that the fulfillment of situational core needs adds significant explained variance beyond a model that only includes Allport's conditions. When looking at the regression parameters in the joint model we additionally find that the fulfillment of core situational needs is ever so slightly a stronger predictor of outgroup attitudes.  
+For the random intercept model we find that the fulfillment of situational needs adds significant explained variance beyond a model that only includes Allport's conditions. When looking at the regression parameters in the joint model we additionally find that the fulfillment of core situational needs is ever so slightly a stronger predictor of outgroup attitudes.  
 
 #### random slope
 
@@ -9435,7 +9435,7 @@ We again check whether further letting the effects vary between participants exp
   \begin{split}
     \textrm{Level 1:} &
       \begin{aligned}[t]
-        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}SitNeedFulfill_{ti} + \\
                            &\ \beta_{2i}Allport_{ti} + e_{ti}
       \end{aligned} \\
     \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
@@ -9545,7 +9545,7 @@ ggsave(
 )
 ```
 
-Again, the random slopes add significantly to the model. When considering the predictors jointly in the random slopes model, we find that both significantly predict outgroup attitudes with similar sized regression parameters. This indicates that, although both Allport's conditions and the core need fulfillment seem to (in part) work through perceived interaction quality, they explain different aspects of the variance in outgroup attitudes and do not constitute one another.  
+Again, the random slopes add significantly to the model. When considering the predictors jointly in the random slopes model, we find that both significantly predict outgroup attitudes with similar sized regression parameters. This indicates that, although both Allport's conditions and the situational need fulfillment seem to (in part) work through perceived interaction quality, they explain different aspects of the variance in outgroup attitudes and do not constitute one another.  
 
 ## Robustness
 
@@ -9553,20 +9553,20 @@ To build further confidence in our results, we assess a few additional models th
 
 #### Interaction Type  
 
-To make certain that the effect of core need fulfillment is specific to the interaction we compare the the effect to fulfillment of the situation core need when no outgroup interaction took place.  
+To make certain that the effect of situational need fulfillment is specific to the interaction we compare the the effect to fulfillment of the situational need when no outgroup interaction took place.  
 
 ##### random intercept   
 
-Here we go back to the full dataset and add generalized situational core need fulfillment (either during an interaction or about the daytime in general) and whether an outgroup interaction happened as well as their interaction term to a random intercept model of outgroup attitudes.  
+Here we go back to the full dataset and add generalized situational need fulfillment (either during an interaction or about the daytime in general) and whether an outgroup interaction happened as well as their interaction term to a random intercept model of outgroup attitudes.  
 
 \begin{equation}
 (\#eq:medicalInterceptAttIntNeedEq)
   \begin{split}
     \textrm{Level 1:} &
       \begin{aligned}[t]
-        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}SitNeedFulfill_{ti} + \\
                            &\ \beta_{2i}OutgroupInteraction_{ti} + \\
-                           &\ \beta_{3i}KeyNeedFulfillXOutgroupInteraction_{ti} + e_{ti}
+                           &\ \beta_{3i}SitNeedFulfillXOutgroupInteraction_{ti} + e_{ti}
       \end{aligned} \\
     \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
                       &\ \beta_{1i} = \gamma_{10} \\
@@ -9650,7 +9650,7 @@ mdlMedical$varInterceptAttCoreInt <-
   lme4::VarCorr(mdlMedical$lmeInterceptAttCoreInt)
 ```
 
-We find that the model explains significantly more variance than the empty null model. However, more interestingly, looking at the coefficients, we find that, as seen earlier, having an outgroup interaction has a strong effect on outgroup attitudes. Importantly, we find that there is no main effect of key need fulfillment by itself but the effect is qualified by a significant interaction effect of core need fulfillment and outgroup contact. This indicates that it is not simply key need fulfillment in general --- but especially key need fulfillment during an outgroup contact that predicts more positive outgroup attitudes.  
+We find that the model explains significantly more variance than the empty null model. However, more interestingly, looking at the coefficients, we find that, as seen earlier, having an outgroup interaction has a strong effect on outgroup attitudes. Importantly, we find that there is no main effect of situational need fulfillment by itself but the effect is qualified by a significant interaction effect of situational need fulfillment and outgroup contact. This indicates that it is not simply situational need fulfillment in general --- but especially situational need fulfillment during an outgroup contact that predicts more positive outgroup attitudes.  
 
 ##### random slope
 
@@ -9661,9 +9661,9 @@ We again check whether further letting the effects vary between participants exp
   \begin{split}
     \textrm{Level 1:} &
       \begin{aligned}[t]
-        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}SitNeedFulfill_{ti} + \\
                            &\ \beta_{2i}OutgroupInteraction_{ti} + \\
-                           &\ \beta_{3i}KeyNeedFulfillXOutgroupInteraction_{ti} + e_{ti}
+                           &\ \beta_{3i}SitNeedFulfillXOutgroupInteraction_{ti} + e_{ti}
       \end{aligned} \\
     \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
                       &\ \beta_{1i} = \gamma_{10} + u_{1i} \\
@@ -9771,11 +9771,11 @@ ggsave(
 )
 ```
 
-We find that adding the random slopes does add significantly beyond the random intercept model. We also see that when taking the possibility to varying slopes into account, the coefficient interpretations remains consistent (i.e., outgroup contact and its interaction with core need fulfillment remain important predictors of positive outgroup attitudes).  
+We find that adding the random slopes does add significantly beyond the random intercept model. We also see that when taking the possibility to varying slopes into account, the coefficient interpretations remains consistent (i.e., outgroup contact and its interaction with situational need fulfillment remain important predictors of positive outgroup attitudes).  
 
 ##### Plot Interaction   
 
-Before we move on, we shortly illustrate the interaction effect of how the effect of core need fulfillment differed by whether an outgroup contact took place or not. To this end we illustrate (1) the raw data points (without taking the nested nature into account), as well as a plot of the model predicted values and their prediction interval (taking the nested structure into account based; similar to an interaction plot).  
+Before we move on, we shortly illustrate the interaction effect of how the effect of situational need fulfillment differed by whether an outgroup contact took place or not. To this end we illustrate (1) the raw data points (without taking the nested nature into account), as well as a plot of the model predicted values and their prediction interval (taking the nested structure into account based; similar to an interaction plot).  
 
 ```{r medicalModelInterceptAttCoreIntPlt}
 # visualize interaction
@@ -9800,7 +9800,7 @@ ggplot(data = dtMedical$full,
   scale_x_continuous(limits = c(0, 100), breaks = seq(0, 100, by = 10)) +
   labs(
     title = "Without ML stucture",
-    x = "Fulfillment Core Need",
+    x = "Fulfillment Situational Need",
     y = "Outgroup Attitudes",
     fill = "Intergroup Contact",
     linetype = "Intergroup Contact"
@@ -9875,7 +9875,7 @@ ggplot(
   scale_linetype_manual(values = c("dashed", "solid")) +
   scale_fill_manual(values = c("darkgrey", "black")) +
   labs(
-    x = "Fulfillment Core Need",
+    x = "Fulfillment Situational Need",
     y = "Outgroup Attitude (NL)",
     fill = "Intergroup Contact",
     linetype = "Intergroup Contact",
@@ -9939,7 +9939,7 @@ ggplot(
 #   scale_linetype_manual(values = c("dashed", "solid")) +
 #   scale_fill_manual(values = c("darkgrey", "black")) +
 #   labs(
-#     x = "Fulfillment Core Need",
+#     x = "Fulfillment situational need",
 #     y = "Outgroup Attitude (NL)",
 #     fill = "Intergroup Contact",
 #     linetype = "Intergroup Contact",
@@ -9960,13 +9960,13 @@ ggplot(
 # #     size = .4
 # #   ) +
 # #   labs(title = "slope Posteriors",
-# #        x = "Fulfillment Core Need",
+# #        x = "Fulfillment situational need",
 # #        y = "Outgroup Attitudes (NL)") +
 # #   theme_Publication()
 # # rm(datNew, brmfit, fitavg, pst)
 ```
 
-The plots indicate that especially once we take the nested data structure into account we can see a substantially stronger effect of core need fulfillment on outgroup attitudes during outgroup contacts than without outgroup contacts.  
+The plots indicate that especially once we take the nested data structure into account we can see a substantially stronger effect of situational need fulfillment on outgroup attitudes during outgroup contacts than without outgroup contacts.  
 
 #### Other psychological needs
 
@@ -9974,14 +9974,14 @@ In a final step we check whether during the interaction the core situational nee
 
 ##### random intercept with level one predictors  
 
-We add the core need fulfillment with the three self determination needs to a random intercept model of outgroup attitudes.  
+We add the situational need fulfillment with the three self determination needs to a random intercept model of outgroup attitudes.  
 
 \begin{equation}
 (\#eq:medicalInterceptAttNeedSdtEq)
   \begin{split}
     \textrm{Level 1:} &
       \begin{aligned}[t]
-        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}SitNeedFulfill_{ti} + \\
                            &\ \beta_{2i}Autonomy_{ti} + \\
                            &\ \beta_{3i}Competence_{ti} + \\
                            &\ \beta_{4i}Relatedness_{ti} + e_{ti}
@@ -10060,7 +10060,7 @@ mdlMedicalOut$Att$varInterceptCoreSdt <-
   lme4::VarCorr(mdlMedicalOut$Att$lmeInterceptCoreSdt)
 ```
 
-We find that the the model with the added predictor indeed explains more variance in outgroup attitudes than the unconditional model and we find that adding the core need adds further explained variance --- beyond the self determination needs. Looking at the individual coefficients, we find that the situational core need relates significantly to outgroup attitudes, that it is a stronger predictor than any of the self determination theory needs and that it assumes some of the variance explained by the self determination theory needs (when compared to a model without the core need). 
+We find that the the model with the added predictor indeed explains more variance in outgroup attitudes than the unconditional model and we find that adding the situational need adds further explained variance --- beyond the self determination needs. Looking at the individual coefficients, we find that the situational need relates significantly to outgroup attitudes, that it is a stronger predictor than any of the self determination theory needs and that it assumes some of the variance explained by the self determination theory needs (when compared to a model without the situational need). 
 
 ##### random slope  
 
@@ -10071,7 +10071,7 @@ We again check whether further letting the effects vary between participants exp
   \begin{split}
     \textrm{Level 1:} &
       \begin{aligned}[t]
-        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}SitNeedFulfill_{ti} + \\
                            &\ \beta_{2i}Autonomy_{ti} + \\
                            &\ \beta_{3i}Competence_{ti} + \\
                            &\ \beta_{4i}Relatedness_{ti} + e_{ti}
@@ -10254,25 +10254,25 @@ medicalSdtCompP <-
 medicalSdtCompChiSq <- paste0("$chi^2$(", medicalSdtCompDf, ", <i>N</i> = ", medicalSdtCompN, ") = ", medicalSdtCompChi, ", <i>p</i> ", medicalSdtCompP)
 ```
 
-When compared to the model with only the SDT needs, the core need fulfillment flexibly takes on some of the explained variance of all of the three fundamental needs. However, similar to the previous study, in this large sample relatedness, competence, and autonomy each predicted positive outgroup attitudes independently. However, the regression coefficient is three times as large for the core need fulfillment (with all scaling being equal). 
+When compared to the model with only the SDT needs, the situational need fulfillment flexibly takes on some of the explained variance of all of the three fundamental needs. However, similar to the previous study, in this large sample relatedness, competence, and autonomy each predicted positive outgroup attitudes independently. However, the regression coefficient is three times as large for the situational need fulfillment (with all scaling being equal). 
 
 
 #### Interaction Accidental  
 
-To test whether the effect of core need fulfillment is relevant to planned and accidental interactions (i.e., whether 'goal-directed'), we compare the the effect to fulfillment of the situation core need when interactions were accidental or planned.  
+To test whether the effect of situational need fulfillment is relevant to planned and accidental interactions (i.e., whether 'goal-directed'), we compare the the effect to fulfillment of the situational need when interactions were accidental or planned.  
 
 ##### random intercept   
 
-Here we use the interaction dataset and add generalized situational core need fulfillment and whether the interaction was planned or accidental as well as their interaction term to a random intercept model of outgroup attitudes.  
+Here we use the interaction dataset and add generalized situational need fulfillment and whether the interaction was planned or accidental as well as their interaction term to a random intercept model of outgroup attitudes.  
 
 \begin{equation}
 (\#eq:medicalOutInterceptAttAccNeedEq)
   \begin{split}
     \textrm{Level 1:} &
       \begin{aligned}[t]
-        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}SitNeedFulfill_{ti} + \\
                            &\ \beta_{2i}InteractionAccidental_{ti} + \\
-                           &\ \beta_{3i}KeyNeedFulfillXInteractionAccidental_{ti} + e_{ti}
+                           &\ \beta_{3i}SitNeedFulfillXInteractionAccidental_{ti} + e_{ti}
       \end{aligned} \\
     \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
                       &\ \beta_{1i} = \gamma_{10} \\
@@ -10346,7 +10346,7 @@ mdlMedicalOut$Att$varWithinPercInterceptAttCoreAcc <-
   (1 - (as.numeric(mdlMedicalOut$Att$varBtwInterceptAttCoreAcc[2]) / as.numeric(mdlMedicalOut$Att$varNull[2]))) * 100
 ```
 
-We find that the model explains significantly more variance than the empty null model. However, more interestingly, looking at the coefficients, we find that, as seen earlier, having an outgroup interaction has a strong effect on outgroup attitudes. Importantly, we find that there is no main effect of key need fulfillment but a significant interaction effect of core need fulfillment and outgroup contact. This indicates that it is not key need fulfillment in general --- but only key need fulfillment during an outgroup contact that predicts more positive outgroup attitudes.  
+We find that the model explains significantly more variance than the empty null model. However, more interestingly, looking at the coefficients, we find that, as seen earlier, having an outgroup interaction has a strong effect on outgroup attitudes. Importantly, we find that there is no main effect of situational need fulfillment but a significant interaction effect of situational need fulfillment and outgroup contact. This indicates that it is not situational need fulfillment in general --- but only situational need fulfillment during an outgroup contact that predicts more positive outgroup attitudes.  
 
 ##### random slope
 
@@ -10357,9 +10357,9 @@ We again check whether further letting the effects vary between participants exp
   \begin{split}
     \textrm{Level 1:} &
       \begin{aligned}[t]
-        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+        \ Attitude_{ti} =  &\ \beta_{0i} + \beta_{1i}SitNeedFulfill_{ti} + \\
                            &\ \beta_{2i}InteractionAccidental_{ti} + \\
-                           &\ \beta_{3i}KeyNeedFulfillXInteractionAccidental_{ti} + e_{ti}
+                           &\ \beta_{3i}SitNeedFulfillXInteractionAccidental_{ti} + e_{ti}
       \end{aligned} \\
     \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
                       &\ \beta_{1i} = \gamma_{10} + u_{1i} \\
@@ -10464,11 +10464,11 @@ grid.arrange(
 # )
 ```
 
-We find that adding the random slopes does add significantly beyond the random intercept model. We also see that when taking the possibility to varying slopes into account, the coefficient interpretations remains consistent (i.e., outgroup contact and its interaction with core need fulfillment remain significant predictors of positive outgroup attitudes).  
+We find that adding the random slopes does add significantly beyond the random intercept model. We also see that when taking the possibility to varying slopes into account, the coefficient interpretations remains consistent (i.e., outgroup contact and its interaction with situational need fulfillment remain significant predictors of positive outgroup attitudes).  
 
 ##### Plot Interaction   
 
-Before we move on, we shortly illustrate the interaction effect of how the effect of core need fulfillment differed by whether an outgroup contact took place or not. To this end we illustrate (1) the raw data points (without taking the nested nature into account), as well as a plot of the model predicted values and their prediction interval (taking the nested structure into account based; similar to an interaction plot).  
+Before we move on, we shortly illustrate the interaction effect of how the effect of situational need fulfillment differed by whether an outgroup contact took place or not. To this end we illustrate (1) the raw data points (without taking the nested nature into account), as well as a plot of the model predicted values and their prediction interval (taking the nested structure into account based; similar to an interaction plot).  
 
 ```{r medicalOutModelInterceptAttCoreAccPlt}
 
@@ -10506,14 +10506,14 @@ mdlMedicalOut$Att$jnSlopesAttCoreAcc$plot  +
 
 To test whether the need mechanism also extends to the migrants' well-being, we additionally tested the main model would also predict well-being.
 
-Here we use the interaction dataset and add generalized situational core need fulfillment as well as interaction quality in the most complex model.
+Here we use the interaction dataset and add generalized situational need fulfillment as well as interaction quality in the most complex model.
 
 \begin{equation}
 (\#eq:medicalOutSlopeWbNeedQualEq)
   \begin{split}
     \textrm{Level 1:} &
       \begin{aligned}[t]
-        \ Well-Being_{ti} =  &\ \beta_{0i} + \beta_{1i}KeyNeedFulfill_{ti} + \\
+        \ Well-Being_{ti} =  &\ \beta_{0i} + \beta_{1i}SitNeedFulfill_{ti} + \\
                              &\ \beta_{2i}Quality_{ti} + e_{ti}
       \end{aligned} \\
     \textrm{Level 2:} &\ \beta_{0i} = \gamma_{00} + u_{0i} \\
@@ -11018,7 +11018,7 @@ GeneralLmerMeta <- metaLmerOut(GeneralLmerMetaTbl,
 
 ![Summary of mixed models results of the contemporaneous contact effects.](Figures/forestParametricFEGeneralLmer.png)
 
-## Core Need Fulfillment   
+## Situational Need Fulfillment   
 
 ```{r metaTheory, include=FALSE}
 # collect relevant models
@@ -11245,7 +11245,7 @@ TheoryMetaQualityNeed <-
     lmerDataTbl = theoryMetaTblNoAllport %>% filter(formula == "QualityRaw ~ CoreNeed"),
     type = "FE",
     name = "TheoryQualityCore",
-    title = "Quality ~ CoreNeed"
+    title = "Quality ~ Situational Need"
   )
 
 TheoryMetaAttitudeNeed <-
@@ -11253,7 +11253,7 @@ TheoryMetaAttitudeNeed <-
     lmerDataTbl = theoryMetaTblNoAllport %>% filter(formula == "Attitude ~ CoreNeed"),
     type = "FE",
     name = "TheoryAttitudeCore",
-    title = "Attitude ~ CoreNeed"
+    title = "Attitude ~ Situational Need"
   )
 
 TheoryMetaAttitudeNeedQuality <-
@@ -11261,15 +11261,15 @@ TheoryMetaAttitudeNeedQuality <-
     lmerDataTbl = theoryMetaTblNoAllport %>% filter(formula == "Attitude ~ CoreNeed + Quality"),
     type = "FE",
     name = "TheoryAttitudeCoreQuality",
-    title = "Attitude ~ CoreNeed + Quality"
+    title = "Attitude ~ Situational Need + Quality"
   )
 ```
 
-![Core Need Fulfillment predicting Interaction Quality.](Figures/forestParametricFETheoryQualityCore.png)
+![Situational Need Fulfillment predicting Interaction Quality.](Figures/forestParametricFETheoryQualityCore.png)
 
-![Core Need Fulfillment predicting Outgroup Attitudes.](Figures/forestParametricFETheoryAttitudeCore.png)
+![Situational Need Fulfillment predicting Outgroup Attitudes.](Figures/forestParametricFETheoryAttitudeCore.png)
 
-![Core Need Fulfillment and Interaction Quality predicting Outgroup Attitudes.](Figures/forestParametricFETheoryAttitudeCoreQuality.png)
+![Situational Need Fulfillment and Interaction Quality predicting Outgroup Attitudes.](Figures/forestParametricFETheoryAttitudeCoreQuality.png)
 
 ## Robustness Analyses  
 
@@ -11505,7 +11505,7 @@ robustMetaSDT <-
 
 ![Need Fulfillment and Intergroup Contact predicting Outgroup Attitudes (full sample).](Figures/forestParametricFERobustContact.png)
 
-![Core Need Fulfillment predicting Outgroup Attitudes, while controlling for self-determination theory needs (intergroup contact sample).](Figures/forestParametricFERobustSDT.png)
+![Situational Need Fulfillment predicting Outgroup Attitudes, while controlling for self-determination theory needs (intergroup contact sample).](Figures/forestParametricFERobustSDT.png)
 
 
 # **Robustness: Goal-Directedness across Studies**  

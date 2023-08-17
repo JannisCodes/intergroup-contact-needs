@@ -98,9 +98,9 @@ for (study in studies) {
 
 coreNeedPathS1 <-
   data.frame(
-    lab_x_direct = "Core Need\\\\Fulfillment",
+    lab_x_direct = "Situational Need\\\\Fulfillment",
     lab_y_direct   = "Outgroup\\\\Attitudes",
-    lab_x   = "Core Need\\\\Fulfillment",
+    lab_x   = "Situational Need\\\\Fulfillment",
     lab_m   = "Interaction\\\\Quality",
     lab_y   = "Outgroup\\\\Attitudes",
     coef_xy_direct = pathCoeffs$Study1$xy_direct,
@@ -112,9 +112,9 @@ coreNeedPathS1 <-
   )
 coreNeedPathS2 <-
   data.frame(
-    lab_x_direct = "Core Need\\\\Fulfillment",
+    lab_x_direct = "Situational Need\\\\Fulfillment",
     lab_y_direct   = "Outgroup\\\\Attitudes",
-    lab_x   = "Core Need\\\\Fulfillment",
+    lab_x   = "Situational Need\\\\Fulfillment",
     lab_m   = "Interaction\\\\Quality",
     lab_y   = "Outgroup\\\\Attitudes",
     coef_xy_direct = pathCoeffs$Study2$xy_direct,
@@ -126,9 +126,9 @@ coreNeedPathS2 <-
   )
 coreNeedPathS3 <-
   data.frame(
-    lab_x_direct = "Core Need\\\\Fulfillment",
+    lab_x_direct = "Situational Need\\\\Fulfillment",
     lab_y_direct   = "Outgroup\\\\Attitudes",
-    lab_x   = "Core Need\\\\Fulfillment",
+    lab_x   = "Situational Need\\\\Fulfillment",
     lab_m   = "Interaction\\\\Quality",
     lab_y   = "Outgroup\\\\Attitudes",
     coef_xy_direct = pathCoeffs$Study3$xy_direct,
