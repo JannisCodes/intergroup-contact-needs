@@ -15,7 +15,7 @@ The full, commented code and graphical output of our power simulations is availa
 
 The supplemental materials for the BERT topic model is available as our [Supplemental Material C: Motives Topic Model](https://janniscodes.github.io/bert-migrant-need-content/Supplemental-Material-C-BERT-topic-model-outgroup).
 
-Please note that the full repository will remain 'private' and anonymized until after the manuscript has been accepted for publication (to allow for blind peer review).
+<!-- Please note that the full repository will remain 'private' and anonymized until after the manuscript has been accepted for publication (to allow for blind peer review). -->
 
 
 
