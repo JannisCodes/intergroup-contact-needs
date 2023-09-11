@@ -1,0 +1,1152 @@
+% define document type (i.e., template. Here: A4 APA manuscript with 12pt font)
+\documentclass[man, 12pt, a4paper]{apa7}
+
+% change margins (e.g., for margin comments):
+%\usepackage{geometry}
+% \geometry{
+% a4paper,
+% marginparwidth=30mm,
+% right=50mm,
+%}
+
+% add packages
+\usepackage[american]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{csquotes}
+\usepackage{hyperref}
+\usepackage[style=apa, sortcites=true, sorting=nyt, backend=biber, natbib=true, uniquename=false, uniquelist=false, useprefix=true]{biblatex}
+\usepackage{authblk}
+\usepackage{graphicx}
+\usepackage{setspace,caption}
+\usepackage{subcaption}
+\usepackage{enumitem}
+\usepackage{lipsum}
+\usepackage{soul}
+\usepackage{xcolor}
+\usepackage{fourier}
+\usepackage{stackengine}
+\usepackage{scalerel}
+\usepackage{fontawesome5}
+\usepackage[normalem]{ulem}
+% \usepackage{longtable}
+\usepackage{amsmath}
+\usepackage{ntheorem}
+\usepackage{afterpage}
+\usepackage{float}
+\usepackage{array}
+\usepackage{censor}
+\usepackage{pdflscape}
+\usepackage{lscape}
+\usepackage{pdfpages}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{adjustbox}
+\usepackage{makecell}
+\usepackage{tabu}
+
+% make warning with red triangle
+\newcommand\Warning[1][2ex]{%
+  \renewcommand\stacktype{L}%
+  \scaleto{\stackon[1.3pt]{\color{red}$\triangle$}{\tiny\bfseries !}}{#1}}%
+
+% make question with red triangle
+\newcommand\Question[1][2ex]{%
+  \renewcommand\stacktype{L}%
+  \scaleto{\stackon[1.3pt]{\color{red}$\triangle$}{\tiny\bfseries ?}}{#1}}%
+  
+% add definition sections
+\theoremstyle{break}
+\newtheorem{definition}{Definition}
+
+% add hypothesis sections
+\theoremstyle{plain}
+\theoremseparator{:}
+\newtheorem{hyp}{Hypothesis}
+
+\newtheorem{subhyp}{Hypothesis}
+   \renewcommand\thesubhyp{\thehyp\alph{subhyp}}
+
+% add quote section
+\usepackage{csquotes}
+
+% framed box section
+\usepackage{framed}
+\emergencystretch=1em
+
+% formatting links in the PDF file
+\hypersetup{
+pdfpagemode={UseOutlines},
+bookmarksopen=true,
+bookmarksopenlevel=0,
+hypertexnames=false,
+colorlinks   = true, %Colours links instead of ugly boxes
+urlcolor     = blue, %Colour for external hyperlinks
+linkcolor    = blue, %Colour of internal links
+citecolor   = cyan, %Colour of citations
+pdfstartview={FitV},
+unicode,
+breaklinks=true,
+}
+
+% language settings
+\DeclareLanguageMapping{american}{american-apa}
+
+% add reference library file
+\addbibresource{references.bib}
+
+% Title and header
+\title{Psychological Needs During Intergroup Contact}
+\shorttitle{Needs in Intergroup Contact}
+
+% Authors
+\author[*,1,2]{Jannis Kreienkamp}
+\author[1,2]{Maximilian Agostini}
+\author[1,2]{Laura F. Bringmann}
+\author[1,2]{Peter de Jonge}
+\author[1,2]{Kai Epstude}
+\affiliation{\hfill}
+
+\affil[1]{University of Groningen, Department of Psychology}
+\affil[2]{Author-order to be discussed; currently alphabetic by last name.}
+
+
+\authornote{
+   \addORCIDlink{* Jannis Kreienkamp}{0000-0002-1831-5604}\\
+   \addORCIDlink{Maximilian Agostini}{0000-0001-6435-7621}\\
+   \addORCIDlink{Laura F. Bringmann}{0000-0002-8091-9935}\\
+   \addORCIDlink{Peter de Jonge}{0000-0002-0866-6929}\\
+   \addORCIDlink{Kai Epstude}{0000-0001-9817-3847}
+
+We have no known conflict of interest to declare. The authors received no specific funding for this work. Source data and  software is available at \url{https://janniscodes.github.io/intergroup-contact-needs/}. Protocols, materials, analysis data, and code are available at \url{osf.io}. 
+
+Correspondence concerning this article should be addressed to Jannis Kreienkamp, Department of Psychology, University of Groningen, Grote Kruisstraat 2/1, 9712 TS Groningen (The Netherlands).  E-mail: j.kreienkamp@rug.nl}
+
+\leftheader{Kreienkamp}
+
+% Abstract
+\abstract{
+Abstract goes here.
+
+\noindent\textbf{Public significance statement}: Significance Statement goes here.
+}
+
+\keywords{Intergroup Contact, Psychological Needs, Outgroup Attitudes, Interaction Quality, Extensive Longitudinal Data}
+
+
+% set indentation size
+\setlength\parindent{1.27cm}
+
+% Start of the main document:
+\begin{document}
+
+% add title information (incl. title page and abstract)
+\maketitle
+
+% **CHEAT SHEET / LEGEND**
+%
+% Comments:
+% '%' starts a comment in LaTeX (not printed)
+% '\todo[inline]{} makes orange boxes in PDF
+% '\marginpar{}' notes in margins
+% '\footnote{}' footnote
+% '\Warning' important note indicator in PDF (triangle with exclamation mark)
+% '\Question' question note indicator in PDF (triangle with question mark)
+%
+% Citation (with Natbib citation style):
+% '\citep[e.g.][p. 15]{CitationKey}' citation in parentheses "(e.g., Berry, 2003, p. 15)"
+% '\citet{CitationKey}' citation in text "Berry (2003)"
+% '\citealt' and '\citealp' alternate citation without parentheses
+% '\citeauthor' and '\citeyear' only year or author
+% 
+% Headings:
+% '\part{}' and '\chapter{}' only relevant for multi-part or multi-chapter documents
+% '\section{}' heading level 1
+% '\subsection{}' heading level 2
+% '\subsubsection{}' heading level 3
+% '\paragraph{}' heading level 4
+% '\subparagraph{}' heading level 5
+%
+% formatting:
+% '\textbf{}' text bold font
+% '\textit{}' text italic font
+% '\underline{}' text underline
+% '\sout{}' text strike out
+% '\textsc{}' text small caps
+% '\vspace{1em}' add vertical space
+% '\hspace{1em}' add horizontal space
+% '\\' new line (i.e., line break)
+% '\pagebreak' start new page (i.e., page break)
+% '\noindent' do not indent current line (e.g., current paragraph)
+% 'begin{center}...end{center}' center text or object
+%
+% Math mode:
+% '$\alpha = .8$' mathematical equation inline
+% '$$\hat{y} = b_0 + b_1x$$' mathematical equation in its own line
+% '\begin{equation}...\end{equation}' multi-line equation
+% '\approx' approximate symbol
+% '\neq' not equal
+% '\bar' mean bar over letter
+% '\pm' plus minus sign 
+% '^{}' superscript
+% '_{}' subscript
+% '\fraq{numerator}{denominator}' fraction
+% '\sqrt[n]{}' square root
+% '\sum_{k=1}^n' sum for 1 through n
+%
+% Insert things from elsewhere:
+% '\input{filename}' inputs the raw (tex) file as a command (e.g., tables and R-Markdown imports)
+% '\include{filename}' includes section on new page (incl. possible auxiliary info)
+% '\includegraphics[settings]{filename}' add a figure or graph
+% '\caption{}' adds a caption to a table or figure
+% '\label{}' labels sections, tables, figures, etc. so that they can be referred to.
+% '\ref{}' refer to a labelled sections, tables, figures, etc.
+% '\begin{enumerate}...\end{enumerate}' numbered list
+% '\begin{itemize}...\end{itemize}' bullet-ed list
+% '\item' item in list section 
+%
+% Symbols:
+% '\&' and sign
+% '\%' percent sign
+% '\_' three dotes
+% '\#' hash symbol
+% ------------------------------------------------------------------
+
+% Migrant Example Pathways
+\textbf{Relevance (Version 1 of 2): Migrant Example Version:}
+
+Conflict between social groups and their individual members remains a prevalent feature of the modern human condition. One of the main examples to date are the struggles of many migrants across the world, hoping to build a positive relationship with the majority group. One of the main ameliorations proposed by social psychologists has been the intergroup contact hypothesis. In its most essential interpretation, the intergroup contact hypothesis postulates that prejudice can be reduced and favorable attitudes increased if members of two groups have frequent and positive contact \citep[e.g.,][]{Allport1954b, Hewstone1996, Pettigrew1998}. Over the past 70 years, a plethora of studies and interventions have shown the general effectiveness of positive intergroup contact \citep[e.g.,][]{Pettigrew2006}. However, even though a central assumption of intergroup contact theory has been that the contact should be positive, relatively little research has thus far explained when and why people perceive their everyday inter-group interactions as positive.
+
+% Full Migrant Pathway
+\textbf{Relevance (Version 2 of 2): Full Migrant Focus Version:}
+
+The adaptation of migrants in new cultural contexts has become an important issue for many societies around the world. A major aspect of such migrant adaptation arguably unfolds during the daily interactions migrants have with the cultural majority members \citep{Maxwell2017, Sam2010}. One of the main social psychological theories proposed for understanding how contact between groups functions has been the ’intergroup contact hypothesis’. In its most essential interpretation, the intergroup contact hypothesis postulates that prejudice can be reduced and favorable attitudes increased if members of two groups have frequent and positive contact \citep[e.g.,][]{Allport1954b, Hewstone1996, Pettigrew1998}. Over the past 70 years, a plethora of studies and interventions have shown the general effectiveness of positive intergroup contact \citep[e.g.,][]{Pettigrew2006}. However, even though a central assumption of intergroup contact theory has been that the contact should be positive, relatively little research has thus far explained when and why people perceive their everyday inter-group interactions as positive.
+
+% Old Relevance: Conflict is a problem, positive contact as solution, but little research on when daily contact is perceived positive
+%Conflict between social groups and their individual members remains a prevalent feature of the modern human condition. Experiences of prejudices, discrimination, and animosities with other groups continue to plague the everyday lives of many people around the world. One of the main ameliorations proposed by social psychologists has been the intergroup contact hypothesis. In its most essential interpretation, the intergroup contact hypothesis postulates that frequent and positive contact with an out-group reduces prejudice and increases favorable attitudes towards the other group \citep[e.g.,][]{Allport1954b, Hewstone1996, Pettigrew1998}. And even though over the past 70 years, a plethora of studies and interventions have shown the general effectiveness of positive intergroup contact \citep[e.g.,][]{Pettigrew2006}, relatively little research has thus far explained when and why people's everyday inter-group interactions are perceived as positive.
+
+% Problem v.02: theoretical interaction quality central to understanding outcomes, practical many impactful negative interactions in everyday life
+\textbf{Problem Illustration Paragraph:}
+
+Importantly, not understanding when and why an interaction is perceived as positive presents substantial theoretical and practical obstacles. There is now consistent evidence that negative intergroup contacts lead to worse attitudes, prejudice, and future interaction motivation \citep[e.g.,][]{Barlow2012, Prati2021, Graf2014}. Theoretically, understanding whether an interaction is perceived as positive or negative (i.e., interaction quality) thus sits at the heart of when the intergroup contact hypothesis is successful (e.g., Brown et al. \citeyear{Brown2007}, Tropp et al. \citeyear{Tropp2016}; also cf. Allport’s original sentiment, Allport \citeyear{Allport1954b}). Practically, policymakers and practitioners are thus far often under-prepared to deal with the occurrences of negative interactions, especially in every-day life contexts. Understanding the psychological mechanisms of when and why interactions are perceived as positive is, thus, an important issue for understanding whether an interaction leads to better intergroup perceptions, especially during everyday interactions outside the lab.
+
+% Aim / Solution v.02: look at need fulfillment as mechanism in daily interactions of migrants
+\textbf{Proposal Paragraph:}
+
+In this article, we propose that the fulfillment of fundamental psychological needs might offer a psycho-social mechanism for understanding and explaining contact quality and positive outgroup attitudes. That is to say, that if a person, for example, seeks to feel accepted by their interaction partner and this need is fulfilled during the interaction, the person should rate the interaction and the group of the interaction partner more favorably. To test this, we collected three sets of real-life data from recent immigrants, tracking situational needs, interaction quality, and outgroup attitudes, following their daily interactions with majority group members. 
+
+\section{Need Mechanism in Intergroup Contact}
+% Motivational mechanism:
+% interaction quality is important
+% past research has either focused on conditions or cognitive-affective processes
+% neither are necessary or explain why an interaction is positive
+
+Several meta-analytic reviews found that positive intergroup contact reduces prejudice and increases positive attitudes in experimental and cross-sectional studies \citep[][]{Tropp2005, Pettigrew2006, Davies2011}, as well as in intergroup contact interventions outside the lab \citep[][]{Beelmann2014, Lemmer2015}. It is widely accepted that equal status, common goals, collaboration, and structural support during the interaction form the optimal conditions for such positive contact effects \citep[Allport's Optimal Contact conditions;][]{Allport1954b, Pettigrew1969}. However, a major meta-analysis of these contact conditions showed that contact resulted in more positive intergroup relations even when Allport's conditions were not met \citep[][]{Pettigrew2006}. It, thus, remains unclear when and why exactly an interaction is perceived as positive and what factors (beyond Allport's conditions) explain positive contact effects\footnote{It should be noted here that following Allport's original conditions, several additional conditions of optimal contact were proposed \citep[for a critical discussion see][]{Pettigrew1986}. Similarly, since the early 21\textsuperscript{st} century many psychological processes during intergroup contact were examined \citep[e.g. see,][]{Paolini2021}. Among others, researchers have for example explored different forms of social categorizations \citep[][]{Pettigrew1998}, the salience of social categories \citep[][]{Brown2005}, intimacy \citep[e.g.,][]{Marinucci2021} and attachment \citep[e.g.,][]{Tropp2021}, threat and intergroup anxiety \citep[e.g.,][]{Stephan2008, Paolini2004}, and to a lesser extent knowledge about the other group \citep[][]{Pettigrew2008c}. However, all these advances share the underlying criticism that they are not geared towards understanding when and why an interaction is perceived as positive.}. We propose that we may look to the literature on motivation and psychological needs to understand when and why exactly an interaction is perceived as positive.
+
+% ALTERNATIVE: SHORTER BUT NOT FOCUSED ON ALLPORT'S CONDITIONS (WHICH WE TEST LATER)
+% Several meta-analytic reviews found that positive intergroup contact reduces prejudice and increases positive attitudes in experimental and cross-sectional studies \citep[][]{Tropp2005, Pettigrew2006, Davies2011}, as well as in intergroup contact interventions outside the lab \citep[][]{Beelmann2014, Lemmer2015}. Past research has either focused on conditions under which interactions tend to have favorable effects \citep[e.g., Allport's optimal conditions;][]{Allport1954b, Pettigrew1969} or has investigated cognitive-affective processes during contact \citep[e.g., group salience, intimacy, attachment, or intergroup anxiety;][]{Brown2005, Marinucci2021, Tropp2021, Paolini2004}. However, neither the contact conditions nor the cognitive-affective processes are particularly well equipped to explain when and why an interaction will be perceived as positive. We propose that we may look to the literature on motivation and psychological needs to understand when and why exactly an interaction is perceived as positive.
+
+
+% Important in broader field: needs have been found to be important in broader intergroup relations and interpersonal contact literature.
+Although considerations of psychological needs and motivations have remained markedly absent within the intergroup contact literature, the concepts are in no way foreign to the broader topic of intergroup relations. Psychological needs have for example found fruitful utility in reconciliation research \citep[][]{Shnabel2008}, the study of minority's discrimination experiences \citep[][]{Celebi2017}, and in non-intergroup interactions \citep[][]{Downie2008}. 
+% On the most general level, research on intergroup conflicts has, for example, shown that addressing the group-specific needs predicts willingness to reconcile with the other group \citep[][]{Shnabel2008}. For the case of refugee migrants in their relationship with a majority group, a recent study found that identity needs will buffer against discrimination experiences and will protect personal health \citep[][]{Celebi2017}. Additionally, within the field of interpersonal relations, we find first evidence that the fulfillment of fundamental psychological needs might predict perceived interaction quality in non-intergroup interactions \citep[][]{Downie2008}. 
+% Promising for intergroup contact: Asked for in intergroup contact reviews and first research looked at social change
+And even within the field of intergroup contact the idea of need fulfillment as a psychological mechanism is not entirely novel. \citet{Dovidio2017} in their narrative review have suggested that understanding psychological needs might be essential to constructive intergroup contact. And recently first empirical research has even found psychological need fulfillment during intergroup contacts to predict support for social change \citep[][]{Hassler2021}. There is thus initial evidence to suggest that need fulfillment during intergroup contact might offer a promising psychological mechanism to understand perceived interaction quality and positive outgroup attitudes. 
+
+% Difficult to test general mechanism: Either consider too many needs (situationally relevant but not feasible) or too few (feasible but not transferable). Solution: ask for main need + rating of main need  
+% MAYBE MOVE THIS TO 'The Present Research Section'
+One reason why motivational considerations might have remained absent from the intergroup contact literature is that there is an overwhelming number of individual needs or goals that might be relevant to a person during an intergroup interaction. Researchers considering the motivational content would, thus, either test few hyper-specific needs that might not be transferable to other intergroup contexts or they may need to assess a broad range of fundamental psychological needs. To avoid this predicament we propose to start by using adaptive and responsive survey designs that allow a tailored approach based on the participants inputs \citep[e.g.,][]{Tourangeau2017}. In particular, we propose to ask the participants to report their main goal during the interaction in a short open-ended question (i.e., situation core need) and with reference to their own response the participants can then indicate how much this need was fulfilled during the interaction (i.e., need fulfillment). Such an adaptive approach would allow us to test the fundamental psychological mechanism of whether situational psychological needs indeed predict perceived interaction quality and positive outgroup attitudes. 
+
+\section{Real-Life Process Data}
+While we have argued that a need fulfillment mechanism is relevant to intergroup contact generally, its flexible and broad applicability might be ideally suited to address the pressing issue of understanding natural intergroup contacts outside the lab. Investigations of such 'real-life interactions' often suffer from the difficulty that past intergroup contact research has either focused on the mechanisms of individual interactions in artificial lab studies or has focused on longer-term recall self-reports of natural interactions \citep[e.g.,][]{Pettigrew2006}. Even with extended intervention studies, the most fine-grained data available is usually limited to pre-post-control designs. Such empirical practices stand, however, in stark contrast to many of the theoretical advances that have focused on the dynamic nature of intergroup relations \citep[e.g.,][]{Pettigrew1998}, as well as the core idea of the contact hypothesis, which was focused on the daily interactions of people \citep[see][]{Allport1954b}. As a result, prominent figures within the intergroup contact field have called for studies that collect longitudinal \citep[][]{Pettigrew1998, Pettigrew2008, Pettigrew2008b, Pettigrew2011} and real-life experience-sampling data outside the lab \citep[][]{MacInnis2015, McKeown2017, Dixon2005}. Such data would be able to capture real-life interactions that include interaction-specific mechanism information close the actual experience\footnote{Additionally, such experience-sampling data can be collected close to the intergroup interactions and would, thus, largely mitigate recall biases. Moreover, because data is nested within participants, experience-sampling data often allows to capture large amounts of high-quality data with relatively few participants.}.
+
+% Used to be difficult but technological and methodological developments (e.g., FormR + HLM) → collect large body of intensive longitudinal data
+In the past, such data collections were often unfeasible because they were either physically impractical or too expensive. However, recent technological developments allow us to easily collect experience sampling data on mobile devices \citep[e.g.,][]{Keil2020} or using web-based applications \citep[e.g.,][]{Arslan2020}. At the same time, analytical methods for such more complex data have become more readily available, making the analyses more approachable \citep[see, e.g.,][]{ODonnell2021}. Given these, technological and methodological developments, we were able to collect a large amount of real-life data following the daily intergroup interactions of recent migrants with the majority group members.  
+
+\section{The Present Research}
+The aim of this paper is essentially threefold. First, our study is among the first to test the fundamental tenets of intergroup contact and Allport's conditions in real-life extensive longitudinal data. Second, we test whether the fulfillment situational psychological needs is meaningfully related to more positive outgroup attitudes following intergroup interactions. And third, we test the role of interaction quality in  the relationship of psychological need fulfillment and outgroup attitudes. Based on this we formulated three main hypotheses:
+\begin{enumerate}[label=H\arabic*:]
+    \item Based on the most general understanding of the contact hypothesis, an increase in frequency and quality of contact should jointly account for changes in more favorable outgroup attitudes across extensive longitudinal data.
+    \item Based on Allport’s optimal contact conditions, intergroup interactions with equal status, common goals, collaboration, and structural support should predict more favorable outgroup attitudes due to more positive interaction quality perceptions within the extensive longitudinal data.
+    \item Based on our proposal, intergroup interactions with higher situational core need fulfillment should predict more favorable outgroup attitudes due to more positive interaction quality perceptions within the extensive longitudinal data.
+\end{enumerate}
+Beyond these main hypotheses we have formulated several sub-hypotheses that form the basis for our analysis plan (these sub-hypotheses also include several robustness checks and are available in Appendix \ref{app:AppendixHypotheses}). Given the more complex data structure of the extensive longitudinal data, we opted to test our hypotheses using a multilevel regression model, where the measurement occasions (level 1) were nested within the participants (level 2). Given that more complex dynamic modeling procedures are not necessary to test these more basic hypotheses, we will focus on the contemporaneous effect of the data (e.g., need fulfillment during the intergroup interaction predicts outgroup attitudes following the interaction). Such an approach is also tolerant to missing data and uneven case numbers within participants.
+
+To test our main hypotheses, we collected three independent sets of extensive longitudinal data (Studies 1–3). The full surveys are available in Supplementary Materials A as well as in our open science repository (including a complete codebook, see OSF-REFERENCE). Our most comprehensive study (Study 3) was fully preregistered  \citep[available at][]{Kreienkamp2021f}. The fully annotated analyses are available in Supplementary Material B. As is common with multilevel analyses, we use a hierarchical modeling approach and always report the final model in-text (for the full modeling process see Supplementary Material B).
+
+\section{Study 1}
+
+Based on our main hypotheses, the aim of our first study is to
+specifically test the general contact hypothesis, the influence of core
+need fulfillment, and perceived interaction quality during intergroup
+contacts. To this aim, we conducted an intensive longitudinal survey
+study with recent migrants to the Netherlands. Data was collected from
+May 5\textsuperscript{th} through June 6\textsuperscript{th}, 2018 (and
+all participants started the study within the first two days).
+
+The full surveys are available in our Online Supplementary Material A
+and the full data description is available in Online Supplementary
+Materials B. Correlations and descriptive statistics of the included
+variables are available in Table \ref{tab:descrFullLong} and Table
+\ref{tab:descrOutLong}.
+
+\subsection{Methods}
+
+\subsubsection{Participants}
+
+After receiving ethical approval from the University of Groningen, we
+recruited 23 migrants using the local paid participant pool and
+specifically targeted non-Dutch migrants to participate in our study.
+Participants reported on their interactions for at least 30 days with
+two daily measures (capturing the morning and afternoon). With this
+design, we aimed at getting 50-60 measurements per participant
+(\textit{M} = 53.26, \textit{SD} = 16.72, \textit{total N} = 1225). This
+is a common number of measurements found in experience sampling studies
+and offers sufficient power to model processes within and between
+participants \citep[e.g., for a systematic review see][]{AanhetRot2012}.
+Participants were compensated for their participation with up to 34
+Euros -- each two Euros for pre- and post-questionnaire as well as 50
+Eurocents for every experience sampling measurement occasion. The sample
+consisted of relatively young, educated, and western migrants from the
+global north (\(M_{age}\) = 24.35, \(SD_{age}\) = 4.73, 19 women, 15
+students). The sample accurately describes one of the largest groups of
+migrants in the region \citep[][]{GemeenteGroningen2015}.
+
+\subsubsection{Procedure}
+
+The study itself consisted of three main parts, an introductory
+pre-measurement, and the daily experience sampling measurements, as well
+as a concluding post-measurement. After giving informed consent,
+participants started by filling in an online pre-questionnaire assessing
+demographics and general information about their immigration. Over the
+next thirty days, the participants then were invited twice a day (at 12
+pm and 7pm) to reflect upon their interactions, psychological need
+fulfillments, and current attitudes towards the Dutch outgroup
+(\textit{median duration} = 2M 22S, \textit{MAD duration} = 1M 19S).
+General compliance was high (85.90\% of all invited surveys were filled
+in)\footnote{Two participants completed only two days (among the others, participation was 93.70\%)}.
+The response rates were approximately equal during mornings (\textit{n}
+= 621) and afternoons (\textit{n} = 604) and most measurements were
+completed within four hours of the invitation. After the final day of
+daily diary measurements, participants were invited to fill in a longer
+post measurement survey that mirrored the pre-measurement. All key
+variables for this study were part of the short daily diary surveys.
+
+\subsubsection{Materials}
+
+\paragraph{Intergroup Contact}
+
+To test the prerequisite effect of intergroup contact, every experience
+sampling measurement started with the question
+``\textit{Did you meet a Dutch person this morning [/afternoon]? (In person interaction for at least 10 minutes)}''.
+Our participants recorded between 2--51 (3.23--91.07\% of individual
+daily diary measurements; 31.59\% of all 1225 daily diary
+responses)\footnote{Two participants only recorded two daily diary measurements each and non of these included outgroup contacts. These participants are removed from any analyses including outgroup contacts.}.
+
+\paragraph{Psychological Needs}
+
+Irrespective of whether participants had an interaction with Dutch
+people or not, everyone answered a short series of questions on
+psychological need fulfillment. However, whereas participants with
+interactions reported on the need fulfillment during the interaction,
+people without interactions with Dutch people judged the past daytime
+period in general. To assess the fulfillment of psychological needs, we
+included two types of need measurement: (1) the core situational need
+and (2) general self-determination theory needs.
+
+For the core situational need, we asked participants in an open ended
+text field:
+``\textit{What was your most important goal [during the interaction / this morning / this afternoon]?}''.
+Then, with reference to the text entry, we asked how much this core need
+was fulfilled during the interaction or the past daytime period:
+``\textit{[The interaction / You] fulfilled your goal: [-previous text entry-]}''
+on a continuous slider scale ranging from strongly disagree (-50) to
+strongly agree (+50).
+
+We, additionally, included a common measure of three self-determination
+theory needs \citep[see][]{Downie2008}. The items were introduced either
+by ``\textit{During the interaction:}'' or
+``\textit{This morning [/afternoon]:}'' and measured autonomy
+(``\textit{I was myself.}''), competence
+(``\textit{I felt competent.}''), and relatedness (without intergroup
+contact ``\textit{I had a strong need to belong}''; with intergroup
+contact: ``\textit{I shared information about myself.}'' and
+``\textit{The other(s) shared information about themselves.}''). All
+items were rated on a continuous slider scale from very little (-50) to
+a great deal (+50).
+
+\paragraph{Perceived Interaction Quality}
+
+As an explanatory mechanism, we assessed ratings of the perceived
+interaction quality. As our main measurement, participants rated the
+statement ``\textit{Overall the interaction was …}'' on two continuous
+slider scales measuring pleasantness
+\citep[from unpleasant (-50) to pleasant (+50)) and meaningfulness (from superficial (-50) to meaningful (+50); both items adapted from][]{Downie2008}.
+
+\paragraph{Outgroup Attitudes}
+
+At the end of every daily diary measurement we asked all participants
+about their current attitudes towards the Dutch -- our main dependent
+variable. To assess the momentary outgroup evaluation we used the common
+feeling thermometer: ``How favorable do you feel towards the Dutch?''
+\citep[][]{Lavrakas2008}. Participants then rated their attitude on a
+continuous slider scale from ``very cold -- 0'' through ``no feeling --
+50'' to ``very warm -- 100''. Both the question phrasing as well as the
+tick labels were consistent with large-scale panel surveys
+\citep[e.g.,][]{DeBell2010}.
+
+\subsection{Results}
+
+\subsubsection{Contact Hypothesis}
+
+We tested the most general contact hypothesis in two steps. First, we
+assessed whether more intergroup interactions were related to to more
+positive outgroup attitudes. Second, we tested whether a potential
+positive effect on outgroup attitudes depended on the interaction
+quality (jointly with the number of interactions). We find that neither
+the number of interactions nor the number of daily diary responses with
+an interaction were significantly related with the average outgroup
+attitudes (all \textbar{} \textit{r} \textbar{} \textless{} 0.03, all
+\textit{p} \textgreater{} 0.887). This is to say that within our data,
+participants with more outgroup interactions did not have significantly
+more positive outgroup attitudes. This might be due to the aggregation
+within the participants or the small sample size of between participant
+data. Nonetheless, the aggregated data does not support the notion that
+simply having more interactions with an outgroup results in more
+positive outgroup attitudes.
+
+However, despite the missing relationship with the number of
+interactions, we find a medium sized correlation between the
+participants' Average Interaction Quality and their Average Outgroup
+Attitudes. Thus within our data participants with a higher quality
+outgroup interactions also held more positive attitudes towards that
+group. And when considering the number of interactions and average
+interaction quality jointly in a linear regression, we additionally find
+a statistically significant interaction term (\textit{b} = -0.05,
+\textit{t}(17) = -2.95, \textit{p} = 0.009, \(\eta_p^2\) = 0.34).
+Looking at a floodlight analysis of the effect, we find that in our
+sample with an increasing number of interactions the positive effect of
+average interaction quality becomes weaker. However, it should be noted
+that this is based on data aggregating all within participant nuances
+and is only based on 21 people.
+
+We additionally used a multilevel regression to check whether having an
+interaction with an outgroup member had a situational (i.e.,
+contemporaneous) effect within the participants. We find that having an
+outgroup interaction is indeed associated with significantly more
+positive outgroup attitudes within the participants (\textit{b} = 2.48,
+\textit{t}(1200) = 4.36, \textit{p} \textless{} .001,
+\textit{95\%CI}{[}1.36, 3.59{]}), even after controlling for having an
+interaction with a non-Dutch (which did not relate to outgroup attitudes
+independently; For full results see Online Supplementary Materials
+B)\footnote{Interestingly, adding random slopes to this model did not explain additional variance. This is unusual and might indicate the the effect is very consistent across participants. However, the small number of participants, or other measurement issues provide an alternative explanation}.
+Thus, in our first data we find mixed results, where outgroup contacts
+show a positive effect on outgroup attitudes in the moment but these
+results do not translate into average differences between participants,
+keeping in mind that the between-participant analyses in the aggregated
+form are based on a small sample size.
+
+\subsubsection{Core Need}
+
+The main proposal of our article is that the success of an outgroup
+interaction might be explained by whether or not the interaction
+fulfilled the person's core situational need. This should, in turn, be
+due to a higher perceived interaction quality. We sequentially test
+whether the fulfillment of the core need during an interaction is (1)
+related to more positive outgroup attitudes, (2) higher perceived
+interaction quality, and (3) whether the variance explained by the core
+need is assumed by the perceived interaction quality if considered
+jointly.
+
+We find that in the highest multilevel models, the fulfillment of core
+situational needs during outgroup contacts was associated with more
+positive outgroup attitudes (random slopes model; \textit{b} = 0.17,
+\textit{t}(365) = 2.93, \textit{p} = 0.004, \textit{95\%CI}{[}0.06,
+0.29{]}) and also predicted higher perceived interaction quality (random
+intercept model; \textit{b} = 0.42, \textit{t}(365) = 8.07, \textit{p}
+\textless{} .001, \textit{95\%CI}{[}0.32, 0.52{]}). Moreover, when we
+consider the influences of core need fulfillment and interaction quality
+on outgroup attitudes jointly, we find that virtually all variance is
+explained by perceived interaction quality (random slopes mode;
+\textit{b} = 0.23, \textit{t}(364) = 4.22, \textit{p} \textless{} .001,
+\textit{95\%CI}{[}0.12, 0.33{]}) and only little unique variance is
+still explained by core need fulfillment (\textit{b} = 0.04,
+\textit{t}(364) = 0.64, \textit{p} = 0.523, \textit{95\%CI}{[}-0.08,
+0.15{]}). We thus find support for our hypotheses and can conclude that
+in this data set the fulfillment of core situational needs had a
+significant influence on outgroup attitudes. Additionally, this effect
+is likely being explained by its effect through perceived interaction
+quality.
+
+\faQuestionCircle~Are we sure that we don't want some sort of
+bootstrapped indirect effect?
+
+\subsubsection{Robustness}
+
+To build further confidence in our results, we assessed two additional
+models that might offer alternative explanations. First, to ensure that
+the effect of core need fulfillment is specific to an actual
+interaction, we compared the effect to core need fulfillement in
+situations without an interaction. For this, we analyzed the generalized
+situational core need fulfillment (either during an interaction or about
+the daytime in general) and tested whether the effect differed during
+daily diary measurements with and without outgroup contacts. We found no
+main effect of core need fulfillment (random slopes model; \textit{b} =
+-0.10, \textit{t}(1199) = -2.22, \textit{p} = 0.026,
+\textit{95\%CI}{[}-0.18, -0.01{]}) but a significant interaction effect
+of core need fulfillment and outgroup contact (\textit{b} = 0.13,
+\textit{t}(1199) = 4.31, \textit{p} \textless{} .001,
+\textit{95\%CI}{[}0.07, 0.18{]}). Together with a significant main
+effect of having an outgroup contact, this indicates that it is not key
+need fulfillment in general --- but only key need fulfillment during an
+outgroup contact that predicts more positive outgroup attitudes.
+
+In a final step, we controlled for other fundamental psychological needs
+during the interaction. We focus on the three commonly considered self
+determination needs: competence, autonomy, and relatedness. We find that
+the core need adds significantly above a model with only the self
+determination theory needs (random slopes models; \(\chi^2\)(6,
+\textit{N} = 21) = 19.60, \textit{p} = 0.003). We find that next to
+relatedness (\textit{b} = 0.10, \textit{t}(361) = 4.04, \textit{p}
+\textless{} .001, \textit{95\%CI}{[}0.05, 0.14{]}), the core need
+explains the most variance in outgroup attitudes after an outgroup
+contact (\textit{b} = 0.09, \textit{t}(361) = 2.23, \textit{p} = 0.026,
+\textit{95\%CI}{[}0.01, 0.18{]}). When compared to the model with only
+the SDT needs, the core need fulfillment flexibly takes on some of the
+explained variance of all three fundamental needs (competence and
+autonomy needs turning non-significant; all \textit{b} \textless{} 0.05,
+all \textit{p} \textgreater{} 0.544). For full results see Online
+Supplementary Information B.
+
+\section{Study 2}
+
+The aim of Study 2 is similar to Study 1, as we again test the general
+contact hypothesis, the influence of core need fulfillment, and
+perceived interaction quality during intergroup contacts. However, in
+this second study we collected a substantially larger sample of
+international students who recently arrived in the Netherlands and also
+improved the study design (e.g., pop up explanations described later).
+The survey method again offers a large body of ecologically valid data
+on need satisfaction in real-life intergroup contact situations as these
+students will likely interact with the Dutch majority outgroup on a
+daily basis. Data was collected from November 19\textsuperscript{th},
+2018 through January 6\textsuperscript{th}, 2019.
+
+The full surveys are available in our Online Supplementary Material A
+and the full data description is available in Online Supplementary
+Materials B. Correlations and descriptive statistics of the included
+variables are available in Table \ref{tab:descrFullLong} and Table
+\ref{tab:descrOutLong}.
+
+\subsection{Methods}
+
+\subsubsection{Participants}
+
+After receiving ethical approval from the University of Groningen, we
+recruited 113 international students using a local participant pool. We
+specifically targeted non-Dutch students, who had recently arrived in
+the Netherlands. Participants reported on their interactions for at
+least 30 days with two daily measures (capturing the morning and
+afternoon). With this design, we aimed at getting 50-60 measurements per
+participant (\textit{M} = 43.94, \textit{SD} = 15.00, \textit{total N} =
+4965). As with the previous study this should offer sufficient power to
+model processes within participants and will lend stronger weight to
+between-participant results. Participants were compensated for their
+participation with partial course credits --- depending on their
+participation. The sample consisted of relatively young migrants, who
+were mostly from the global north (\(M_{age}\) = 20.24, \(SD_{age}\) =
+2.12, 84 women). The sample fairly accurately describes the local
+population of international students.
+
+\subsubsection{Procedure}
+
+The study procedure mirrored the setup of study one and consisted of
+pre-, daily diary-, and post-measurement. The participants were invited
+for daily diary measurements twice a day (at 12 pm and 7pm) for 30 days
+(\textit{median duration} = 3M 46S, \textit{MAD duration} = 1M 54S).
+General compliance was high (70.87\% of all invited surveys were filled
+in). The response rates were approximately equal during mornings
+(\textit{n} = 2608) and afternoons (\textit{n} = 2357). All key
+variables for this study were part of the short daily diary surveys.
+
+\subsubsection{Materials}
+
+\paragraph{Intergroup Contact}
+
+To measure intergroup contacts, every experience sampling measurement
+started with the question
+``\textit{Did you meet a Dutch person this morning [/afternoon]? (in-person interaction for at least 10 minutes)}''.
+Participants were additionally offered a pop-up explanation: ``With
+in-person interaction, we mean a continued interaction with another
+person (potentially in a group) that lasted at least 10 minutes. This
+interaction should be offline and face-to-face. It should include some
+form of verbal communication and should be uninterrupted to still count
+as the same interaction. Any individual interaction can last minutes or
+hours. If there were multiple interaction partners, we would like you to
+focus on the person that was most important to you during the
+interaction.''. The participants recorded between 1--43 interactions
+with Dutch majority people (1.64--93.75\% of individual daily diary
+measurements; 18.83\% of all 4965 daily diary responses).
+
+\paragraph{Psychological Needs}
+
+For the core situational need, we asked participants in an open ended
+text field:
+``\textit{What was your main goal [during the interaction with X / this morning / this afternoon]?}''.
+Participants could additionally click on a pop-up explanation: ``Your
+main goal during an interaction can vary depending on the interaction.
+It could be to connect with friends, to find or provide help, to achieve
+academic ambitions, work on your fitness, work for a job, or simply to
+get a coffee, just as well as many many other concrete or abstract goals
+that are import to you in the moment. It really depends on your
+subjective experience of the interaction.''. Then, with reference to the
+text entry, we asked how much this core need was fulfilled during the
+interaction or the past daytime period:
+``\textit{During your interaction with X [this morning / this evening] your goal (-previous text entry-) was fulfilled.}''
+on a continuous slider scale ranging from strongly disagree (1) to
+strongly agree (100).
+
+The measurement of the self determination needs was identical to study
+1.
+
+\paragraph{Perceived Interaction Quality}
+
+The ratings of the perceived interaction quality was identical to study
+one.
+
+\paragraph{Outgroup Attitudes}
+
+As in Study 1, attitudes towards the Dutch majority outgroup were again
+measured using the feeling thermometer. All survey details are also
+available in Online Supplemental Materials A and B.
+
+\subsection{Results}
+
+\subsubsection{Contact Hypothesis}
+
+We tested the most general contact hypothesis in two steps. First, we
+assessed whether more intergroup interactions were related to to more
+positive outgroup attitudes. Second, we tested whether a potential
+positive effect on outgroup attitudes depended on the interaction
+quality (jointly with the number of interactions). We find a significant
+correlation with average outgroup attitudes for both the total number of
+outgroup interactions (\textit{r} = 0.22, \textit{p} = 0.019) and the
+number of measurement beeps with an interaction (\textit{r} = 0.28,
+\textit{p} = 0.003). This is to say that within our data, participants
+with more outgroup interactions did have significantly more positive
+outgroup attitudes. This is inconsistent with the results we found in
+the first study and might be due to the larger number of participants.
+
+However, we find no significant correlation between the participants'
+Average Interaction Quality and their Average Outgroup Attitudes
+(\textit{r} = 0.04, \textit{p} = 0.679). Thus, when considering the
+number of interactions and average interaction quality jointly in a
+linear regression, we find a main effect of intergroup contacts to
+predict outgroup attitudes (\textit{b} = 0.81, \textit{t}(109) = 3.29,
+\textit{p} = 0.001, \(\eta_p^2\) = 0.08). Given the missing aggregate
+relationship between average interaction quality and outgroup attitudes,
+we find no significant effect of average perceived contact quality. We
+also do not find that in this sample the impact of the number of
+interactions is moderated by the average contact quality. This is not
+entirely consistent with the first study, where average contact quality
+did have a meaningful effect on outgroup attitudes. This finding is not
+necessarily surprising given that the variables aggregate all within
+person variation and there were substantially more measurements where
+participants did not have an interaction (but reported their outgroup
+attitudes) than measurements that followed an outgroup contact.
+
+We additionally used a multilevel regression to check whether having an
+interaction with an outgroup member had a situational (i.e.,
+contemporaneous) effect within the participants. We find that having an
+outgroup interaction is indeed associated with significantly more
+positive outgroup attitudes within the participants (random slopes
+model; \textit{b} = 2.99, \textit{t}(4850) = 3.80, \textit{p}
+\textless{} .001, \textit{95\%CI}{[}1.45, 4.54{]}), even after
+controlling for having an interaction with a non-Dutch person (which did
+not relate to outgroup attitudes independently; For full results see
+Online Supplementary Materials B). Thus, in our second dataset we find
+mixed results, outgroup contacts show a positive effect on outgroup
+attitudes in the moment and on average between participants. However, we
+find that this effect does not depend on the average perceived
+interaction quality. This unexpected results, might be due to the
+aggregation process and the following analyses will focus in on the role
+of the perceived interaction quality during an outgroup interaction.
+
+\subsubsection{Core Need}
+
+We again sequentially tested whether the fulfillment of the core need
+during an interaction was (1) related to more positive outgroup
+attitudes, (2) higher perceived interaction quality, and (3) whether the
+variance explained by the core need is assumed by the perceived
+interaction quality if considered jointly. We find that in the
+multilevel models, the fulfillment of core situational needs during
+outgroup contacts was associated with more positive outgroup attitudes
+(random slopes model; \textit{b} = 0.13, \textit{t}(826) = 4.18,
+\textit{p} \textless{} .001, \textit{95\%CI}{[}0.07, 0.19{]}) and also
+predicted higher perceived interaction quality (random slopes model;
+\textit{b} = 0.40, \textit{t}(826) = 6.46, \textit{p} \textless{} .001,
+\textit{95\%CI}{[}0.28, 0.52{]}). Additionally, if we consider the
+influences of core need fulfillment and interaction quality on outgroup
+attitudes jointly, we find that virtually all variance is explained by
+perceived interaction quality (random slopes mode; \textit{b} = 0.17,
+\textit{t}(825) = 5.56, \textit{p} \textless{} .001,
+\textit{95\%CI}{[}0.11, 0.23{]}) and only little unique variance is
+still explained by core need fulfillment (\textit{b} = 0.03,
+\textit{t}(825) = 1.47, \textit{p} = 0.141, \textit{95\%CI}{[}-0.01,
+0.07{]}). These results are consistent with the results in study one and
+we thus find support for our hypotheses and can conclude that in this
+data set the fulfillment of core situational needs had a significant
+influence on outgroup attitudes and that this effect is likely explained
+by its effect through perceived interaction quality.
+
+\faQuestionCircle~Are we sure that we don't want some sort of
+bootstrapped indirect effect?
+
+\subsubsection{Robustness}
+
+We again checked for alternative models. First, when considering
+generalized situational core need fulfillment together with whether an
+intergroup contact took place, we find that there is only a minuscule
+main effect of core need fulfillment (random slopes model; \textit{b} =
+-0.03, \textit{t}(4849) = -1.34, \textit{p} = 0.181,
+\textit{95\%CI}{[}-0.08, 0.02{]}) but a stronger interaction effect of
+core need fulfillment and outgroup contact (\textit{b} = 0.06,
+\textit{t}(4849) = 3.03, \textit{p} = 0.002, \textit{95\%CI}{[}0.02,
+0.10{]}). Together with a significant main effect of having an outgroup
+contact (\textit{b} = 2.88, \textit{t}(4849) = 3.71, \textit{p}
+\textless{} .001, \textit{95\%CI}{[}1.36, 4.40{]}), this indicates that
+it is not key need fulfillment in general --- but key need fulfillment
+during an outgroup contact that predicts more positive outgroup
+attitudes. This finding is consistent with the results of the previous
+study, albeit with slightly weaker effect (likely because of the large
+number of measurements that did not include an outgroup interaction).
+
+In a final step we again checked whether during the interaction the core
+situational need remains a meaningful predictor even when taking other
+fundamental psychological needs into account. We find that the core need
+adds significantly above a model with only the self determination theory
+needs (random slopes models; \(\chi^2\)(6, \textit{N} = 108) = 22.90,
+\textit{p} \textless{} .001). We find that the core need explains the
+most variance in outgroup attitudes after an outgroup contact
+(\textit{b} = 0.08, \textit{t}(823) = 2.95, \textit{p} = 0.003,
+\textit{95\%CI}{[}0.03, 0.13{]}). When compared to the model with only
+the SDT needs, the core need fulfillment flexibly takes on some of the
+explained variance of all of the three fundamental needs. However,
+different from the first study, relatedness (\textit{b} = 0.07,
+\textit{t}(823) = 4.26, \textit{p} \textless{} .001,
+\textit{95\%CI}{[}0.04, 0.10{]}) and autonomy (\textit{b} = 0.02,
+\textit{t}(823) = 0.93, \textit{p} = 0.353, \textit{95\%CI}{[}-0.02,
+0.08{]}) also predicted positive outgroup attitudes in this larger
+sample. For full results see Online Supplementary Information B.
+
+\section{Study 3}
+
+The aim of this final study is to extend the previous studies by
+additionally testing Allport's conditions in an extensive longitudinal
+design and to compare the predictive powers of Allport's conditions and
+the core situational need fulfillment. We will, thus, again test the
+general contact hypothesis, the influence of core need fulfillment, and
+perceived interaction quality during intergroup contacts. However, we
+additionally have the opportunity to also assess the role of Allport's
+conditions in this and to compare the two approaches (Allport's
+conditions and core need fulfillment) directly.
+
+For this study we specifically recruited international medical students,
+because they represent a particular group of migrants who face
+structural requirements to integrate and interact with Dutch majority
+outgroup members on a daily basis. As part of their educational program,
+the migrants are required to take language courses and interact with
+patients as part of their medical internships and medical residency. The
+extensive longitudinal survey method again offers a large body of
+ecologically valid data on need satisfaction in real-life intergroup
+contact situations. Data were collected from November
+8\textsuperscript{th}, 2019 to January 10\textsuperscript{th}, 2020.
+
+The full surveys are available in our Online Supplementary Material A
+and the full data description is available in Online Supplementary
+Materials B. Correlations and descriptive statistics of the included
+variables are available in Tables \ref{tab:descrFullLong} and
+\ref{tab:descrOutLong}.
+
+\subsection{Methods}
+
+\subsubsection{Participants}
+
+After receiving ethical approval from the University of Groningen, we
+recruited 71 international medical students using a contacts within the
+University Medical Department and specifically targeted non-Dutch
+students, who had recently arrived in the Netherlands. Participants
+reported on their interactions for at least 30 days with two daily
+measures (capturing the morning and afternoon). With this design, we
+aimed at getting 50-60 measurements per participant (\textit{M} = 57.85,
+\textit{SD} = 20.68, \textit{total N} = 4107). As with the previous
+study this should offer sufficient power to model processes within
+participants and will lend stronger weight to between-participant
+results. Participants were compensated for their participation with
+partial course credits --- depending on their participation. The sample
+consisted of relatively young migrants, who were mostly from the global
+north (\(M_{age}\) = 22.68, \(SD_{age}\) = 3.10, 59 women). The sample
+fairly accurately describes the local population of international
+students.
+
+\subsubsection{Procedure}
+
+The study procedure mirrored the setup of studies one and two, in that
+it consisted of pre-, daily diary-, and post-measurement. The
+participants were invited for daily diary measurements twice a day (at
+12 pm and 7pm) for 30 days (\textit{median duration} = 4M 13S,
+\textit{MAD duration} = 2M 6S). General compliance was high (93.30\%
+filled daily diary surveys for 31 days or more NEED TO RE-CHECK THIS).
+The response rates were approximately equal during mornings (\textit{n}
+= 2092) and afternoons (\textit{n} = 2015). All key variables in for
+this study were part of the short daily diary surveys.
+
+\subsubsection{Materials}
+
+\paragraph{Intergroup Contact}
+
+The measurement of intergroup contacts was identical to study two. The
+participants recorded between 1--71 interactions with Dutch outgroup
+members (2.13--87.18\% of individual daily diary measurements; 41.44\%
+of all 4107 daily diary responses).
+
+\paragraph{Psychological Needs}
+
+The measurement of the core situational need and its fulfillment was
+identical to study two. Similarly, the measurement of the self
+determination needs was identical to studies one and two.
+
+\paragraph{Allport's Conditions}
+
+To measure how much each of the interactions fulfilled Allport's
+conditions of optimal contact we asked participants to rate how much the
+interaction had equal status
+(``\textit{The interaction with [name interaction partner] was on equal footing (same status)}''),
+a common goal
+(``\textit{[name interaction partner] shared your goal ([free-text entry interaction key need])}''),
+support of authorities
+(``\textit{The interaction with [name interaction partner] was voluntary}''),
+and intergroup cooperation
+(``\textit{The interaction with [name interaction partner] was cooperative}'').
+
+\paragraph{Perceived Interaction Quality}
+
+The ratings of the perceived interaction quality was identical to study
+one.
+
+\paragraph{Outgroup Attitudes}
+
+Attitudes towards the Dutch majority outgroup was again measured using
+the feeling thermometer, as in studies one and two. All survey details
+are also available in Online Supplemental Materials A and B.
+
+\subsection{Results}
+
+\subsubsection{Contact Hypothesis}
+
+We tested the most general contact hypothesis in two steps. First, we
+assessed whether more intergroup interactions were related to to more
+positive outgroup attitudes. Second, we tested whether a potential
+positive effect on outgroup attitudes depended on the interaction
+quality (jointly with the number of interactions). We find no
+significant correlation between intergroup contact and average outgroup
+attitudes --- for neither the total number of outgroup interactions
+(\textit{r} = 0.01, \textit{p} = 0.946) and the number of measurement
+beeps with an interaction (\textit{r} = 0.13, \textit{p} = 0.291). This
+is to say that within our data, participants with more outgroup
+interactions did not have significantly more positive or negative
+outgroup attitudes. This is again consistent with the results we found
+in the first study but inconsitent with the significant relationship we
+find in the second study.
+
+However, we do find a significant correlation between the participants'
+Average Interaction Quality and their Average Outgroup Attitudes
+(\textit{r} = 0.25, \textit{p} = 0.036). Thus, when considering the
+number of interactions and average interaction quality jointly in a
+linear regression, we only find a main effect of average perceived
+interaction quality on predict outgroup attitudes (\textit{b} = 0.36,
+\textit{t}(67) = 2.22, \textit{p} = 0.030, \(\eta_p^2\) = 0.07). Given
+the missing aggregate relationship between number of interactions and
+outgroup attitudes, we find no significant effect of interactions
+themselves nor do we find a significant interaction effect. This result
+mirrors that of study one but is inconsistent with the second study. But
+again this inconsistency is not necessarily surprising given that the
+variables aggregate all within person variation and there were
+substantially more measurements where participants did not have an
+interaction (but reported their outgroup attitudes) than measurements
+that followed an outgroup contact.
+
+We additionally used a multilevel regression to check whether having an
+interaction with an outgroup member had a situational (i.e.,
+contemporaneous) effect within the participants. We find that having an
+outgroup interaction is indeed associated with significantly more
+positive outgroup attitudes within the participants (random slopes
+model; \textit{b} = 5.63, \textit{t}(3834) = 6.61, \textit{p}
+\textless{} .001, \textit{95\%CI}{[}3.97, 7.29{]}), even after
+controlling for having an interaction with a non-Dutch (which did not
+relate to outgroup attitudes independently; For full results see Online
+Supplementary Materials B). Thus, in our third dataset we find some
+mixed results, outgroup contacts are not significantly related to
+outgroup attitudes on aggregate between participants and this effect is
+also not suppressed by a average interaction quality (i.e., no
+interaction effect). However, while the aggregate data is partly
+inconsistent with the first two studies, the within person contemoranous
+effect of intergroup contact is consistent across all three studies.
+
+\subsubsection{Allport's Conditions}
+
+We sequentially tested whether the fulfillment of Allport's Contact
+Conditions was (1) related to more positive outgroup attitudes, (2)
+higher perceived interaction quality, and (3) whether the variance
+explained by Allport's Conditions is assumed by the perceived
+interaction quality if considered jointly. We find that in the
+multilevel models, the fulfillment of Allport's Conditions during
+outgroup contacts was associated with more positive outgroup attitudes
+(random slopes model; \textit{b} = 0.22, \textit{t}(1601) = 5.86,
+\textit{p} \textless{} .001, \textit{95\%CI}{[}0.15, 0.29{]}) and also
+predicted higher perceived interaction quality (random slopes model;
+\textit{b} = 0.65, \textit{t}(1605) = 11.82, \textit{p} \textless{}
+.001, \textit{95\%CI}{[}0.54, 0.76{]}). Moreover, when we consider the
+influences of Allport's Conditions and interaction quality on outgroup
+attitudes jointly, we find that perceived interaction quality is a
+substantially stronger predictor (random slopes mode; \textit{b} = 0.17,
+\textit{t}(1600) = 6.25, \textit{p} \textless{} .001,
+\textit{95\%CI}{[}0.12, 0.23{]}) and the unique variance explained by
+Allport's Conditions was less than half of its original effect size
+(\textit{b} = 0.09, \textit{t}(1600) = 2.89, \textit{p} = 0.004,
+\textit{95\%CI}{[}0.03, 0.15{]}). These results indicate that in this
+dataset the the fulfillment of Allport's conditions had a significant
+influence on outgroup attitudes and this effect is likely in parts
+explained by its effect through perceived interaction quality.
+
+\faQuestionCircle~Are we sure that we don't want some sort of
+bootstrapped indirect effect?
+
+\subsubsection{Core Need}
+
+We again sequentially tested whether the fulfillment of the core need
+during an interaction was (1) related to more positive outgroup
+attitudes, (2) higher perceived interaction quality, and (3) whether the
+variance explained by the core need is assumed by the perceived
+interaction quality if considered jointly. We find that in the
+multilevel models, the fulfillment of core need fulfillment during
+outgroup contacts was associated with more positive outgroup attitudes
+(random slopes model; \textit{b} = 0.19, \textit{t}(1601) = 5.29,
+\textit{p} \textless{} .001, \textit{95\%CI}{[}0.12, 0.27{]}) and also
+predicted higher perceived interaction quality (random slopes model;
+\textit{b} = 0.43, \textit{t}(1605) = 8.35, \textit{p} \textless{} .001,
+\textit{95\%CI}{[}0.33, 0.54{]}). Additionally, once we consider the
+influences of core need fulfillment and interaction quality on outgroup
+attitudes jointly, we find that perceived interaction quality is a
+substantially stronger predictor (random slopes mode; \textit{b} = 0.17,
+\textit{t}(1600) = 6.86, \textit{p} \textless{} .001,
+\textit{95\%CI}{[}0.12, 0.22{]}) and the unique variance explained by
+core need fulfillment was roughly half of its original effect size
+(\textit{b} = 0.11, \textit{t}(1600) = 3.50, \textit{p} \textless{}
+.001, \textit{95\%CI}{[}0.05, 0.17{]}). These results indicate that in
+this dataset the the fulfillment of core situational needs had a
+significant influence on outgroup attitudes and this effect is likely in
+parts explained by its effect through perceived interaction quality.
+
+\faQuestionCircle~Are we sure that we don't want some sort of
+bootstrapped indirect effect?
+
+\subsubsection{Compare Fulfillment of Core Need and Allport's Conditions}
+
+To compare the models using either Allport's conditions or the core need
+fulfillment to predict outgroup attitudes, we first assess relative
+model performance indices (i.e., Akaike information criterion, and
+Bayesian information criterion), and then consider the two predictors in
+a joint model to see whether the two approaches predict the same
+variance in outgroup attitudes. When comparing the model selection
+indices we find that the fulfillment of the situation core need, indeed
+performs slightly better than the model using Allport's conditions
+(\(AIC_{CoreNeed}\) 12632.02 \textless{} 12651.59 \(AIC_{Allport}\), and
+\(BIC_{CoreNeed}\) 12664.55 \textless{} 12684.12 \(BIC_{Allport}\)).
+Additionally, when considering the predictors jointly, we find that both
+significantly predict outgroup attitudes with similar sized regression
+parameters (random slopes model; Allport's Conditions: \textit{b} =
+0.16, \textit{t}(1600) = 4.92, \textit{p} \textless{} .001,
+\textit{95\%CI}{[}0.09, 0.24{]}, Core Need: \textit{b} = 0.14,
+\textit{t}(1600) = 3.85, \textit{p} \textless{} .001,
+\textit{95\%CI}{[}0.08, 0.17{]}). This indicates that, although both
+Allport's conditions and the core need fulfillment seem to (in part)
+work through perceived interaction quality, they explain different
+aspects of the variance in outgroup attitudes and do not constitute one
+another.
+
+\subsubsection{Robustness}
+
+We again checked for alternative models to the core need fulfillment.
+First, when considering generalized situational core need fulfillment
+together with whether an intergroup contact took place, we find that
+there is no significant main effect of core need fulfillment (random
+slopes model; \textit{b} = 0.03, \textit{t}(3835) = 1.51, \textit{p} =
+0.131, \textit{95\%CI}{[}-0.01, 0.06{]}) but a stronger interaction
+effect of core need fulfillment and outgroup contact (\textit{b} = 0.17,
+\textit{t}(3835) = 7.32, \textit{p} \textless{} .001,
+\textit{95\%CI}{[}0.12, 0.21{]}). Together with a significant main
+effect of having an outgroup contact (\textit{b} = 5.41,
+\textit{t}(3835) = 6.36, \textit{p} \textless{} .001,
+\textit{95\%CI}{[}3.74, 7.08{]}), this indicates that it is not key need
+fulfillment in general --- but key need fulfillment during an outgroup
+contact that predicts more positive outgroup attitudes. This finding is
+consistent with the results of the previous studies.
+
+In a final step we again checked whether during the interaction the core
+situational need remains a meaningful predictor even when taking other
+fundamental psychological needs into account. We find that the core need
+adds significantly above a model with only the self determination theory
+needs (random slopes models; \(\chi^2\)(6, \textit{N} = 70) = 100.20,
+\textit{p} \textless{} .001). We find that the core need explains the
+most variance in outgroup attitudes after an outgroup contact
+(\textit{b} = 0.15, \textit{t}(1598) = 3.88, \textit{p} \textless{}
+.001, \textit{95\%CI}{[}0.07, 0.22{]}). When compared to the model with
+only the SDT needs, the core need fulfillment flexibly takes on some of
+the explained variance of all of the three fundamental needs. However,
+similar to the previous study, in this large sample relatedness
+(\textit{b} = 0.05, \textit{t}(1598) = 3.31, \textit{p} \textless{}
+.001, \textit{95\%CI}{[}0.02, 0.09{]}), competence (\textit{b} = 0.06,
+\textit{t}(1598) = 2.73, \textit{p} = 0.006, \textit{95\%CI}{[}0.02,
+0.10{]}) and autonomy (\textit{b} = 0.04, \textit{t}(1598) = 2.12,
+\textit{p} = 0.034, \textit{95\%CI}{[}-0.01, 0.08{]}) each also
+predicted positive outgroup attitudes independently. However, the
+regression coefficient is three times as large for the core need
+fulfillment (with all scaling being equal). For full results see Online
+Supplementary Information B.
+
+\input{Tables/descrFullLong}
+\input{Tables/descrOutLong}
+
+\input{Tables/mdlContactGeneralLong}
+
+\input{Tables/mdlTheorylong}
+
+\input{Tables/mdlRobustlong}
+
+
+\section{Discussion}
+% aims re-iterated
+In this paper we set out to (1) test the basic predictions of the intergroup contact hypothesis and Allport's optimal conditions in real-life extensive longitudinal data, (2) we proposed that the fulfillment situational psychological needs meaningfully predicts positive outgroup attitudes, and (3) that the fulfillment of psychological needs (and Allport's conditions) have their effect (partially) through perceived interaction quality. 
+
+% Contact hypothesis in ESM data [inconsistent in aggregate but consistent in ML analysis]
+When considering the results of the three studies jointly, we find mixed results for the basic intergroup contact hypothesis. The aggregated number of outgroup interactions across all measurements only had a significant effect on average outgroup attitudes in one of the three studies and in that study there was no significant effect of average interaction quality on outgroup attitudes (which was significant for the other two studies). This meant that only for our smallest study did we find the expected interaction between interaction frequency and interaction quality when looking at the aggregated data across all measurements. However, once we considered the effect of having an interaction with an outgroup member (vs. not having an outgroup interaction) within the participants, we find that intergroup contact is a strong predictor of outgroup attitudes across all three studies (even when taking other non-outgroup interactions into account). While this later results is in line with our expectations, the earlier aggregate findings are surprising because most past cross-sectional studies that have investigated the effect of interaction frequency have also considered an aggregate measurement (albeit not one from actual daily reports). Even though this inconsistency with past research might be a data artefact (e.g., because most people reported more substantially mode measurements during which they did not have an outgroup interaction), the absence of this aggregate effect could underline the fact that cross-sectional retrospective data might suffer from recall biases (e.g., where times with no outgroup interactions are undervalued by participants during the retrospective evaluations). In summary, we thus find that when we aggregate interaction frequencies and interaction quality from our intensive longitudinal data we find inconsistent results from the past literature but within participants intergroup contacts are significantly related with positive outgroup attitudes.
+
+% Allport's conditions in ESM data [consistent predictor and partially through quality]
+Using the data from our third study, we find that Allport's conditions are related to higher interaction quality perceptions and more positive outgroup attitudes. And when we consider interaction quality and Allport's conditions jointly, we find further evidence that part of the benefits of Allport's conditions are due to the case that such interactions are also perceived as more positive. We thus find first evidence that Allport's conditions of optimal contact are also relevant to the daily interactions recent migrants have in their interactions with majority group members. 
+
+% Need fulfillment in intergroup contact [consistent predictor, through quality, slightly better than Allport and SDT]
+Finally, when looking at the results for our main proposal regarding the importance of situational key needs, we find highly consistent positive results across all three studies. We find that in all three extensive longitudinal datasets, the fulfillment of core needs during intergroup contacts predicts higher interaction quality perceptions and more positive outgroup attitudes. We find that in all three studies the effect of core need fulfillment on outgroup attitudes is either fully or partially through its effect on quality perceptions, and we find that need fulfillment is an important predictor even when taking other fundamental psychological needs or Allport's conditions into account. In fact we find that our core situational needs measure predicted outgroup attitudes slightly better than Allport's conditions and consistently explained more variance in outgroup attitudes than any of the other psychological needs. In most cases the core need even took over the variances previously explained by the self-determination theory needs. We thus find strong evidence that within everyday life interactions of recent migrants with majority group members, the perception that one's interaction specific psychological needs are fulfilled offers a meaningful and flexible predictor of outgroup attitudes. As such the data offers a first test of the motivational basis of intergroup contact.
+
+\subsection{Limitations}
+to be discussed, potentially:
+\begin{enumerate}
+    \item migrants are not refugees (generalizability potentially even more relevant?)
+    \item minority perspective only
+    \item lagged effects left for future studies (potentially not relevant, time scale)
+    \item ESM: real-life data comes at the expense of having short/single item operationalizations
+\end{enumerate}
+
+\subsection{Implications}
+to be discussed, potentially:
+\begin{enumerate}
+    \item feasible to collect large amount of data on intergroup contact using ESM method (do we have a formR ref in there?; set up is feasible but not the easiest; maybe even advertise the reusability of the formR survey?)
+    \item role of motivation in intergroup contact promising (potential for interventions, e.g., most immediate to the data: settlement practices). 
+    \item potential to identify context specific needs
+\end{enumerate}
+
+\subsection{Conclusion paragraph (not a real heading)}
+to be written after co-author meeting.
+
+
+\printbibliography
+
+\appendix
+
+\section{Appendix A: Hypotheses}
+\label{app:AppendixHypotheses}
+
+\begin{hyp}[H\ref{hyp:contact}] \label{hyp:contact}
+Based on the most general understanding of the contact hypothesis, an increase in frequency and quality of contact should jointly account for changes in more favorable outgroup attitudes.
+\end{hyp}
+
+\begin{subhyp}[H\ref{hyp:contactFreq}] \label{hyp:contactFreq}
+\addtolength{\leftskip}{2.5em}
+Participants with more intergroup interactions should have a more favorable outgroup attitudes.
+\end{subhyp}
+
+\begin{subhyp}[H\ref{hyp:contactDummy}] \label{hyp:contactDummy}
+\addtolength{\leftskip}{2.5em}
+Outgroup attitudes should be more positive after an intergroup interaction compared to a non-outgroup interaction.
+\end{subhyp}
+
+\begin{subhyp}[H\ref{hyp:contactFreqQual}] \label{hyp:contactFreqQual}
+\addtolength{\leftskip}{2.5em}
+Participants with more intergroup interactions should have a more favorable outgroup attitudes depending on the average interaction quality.
+\end{subhyp}
+
+\begin{hyp}[H\ref{hyp:AllportsConditions}] \label{hyp:AllportsConditions}
+Based on Allport's optimal contact conditions, intergroup interactions with equal status, common goals, collaboration, and structural support should predict more favorable outgroup attitudes due to more positive interaction quality perceptions.
+\end{hyp}
+
+\setcounter{subhyp}{0}
+\begin{subhyp}[H\ref{hyp:AllportsPred}] \label{hyp:AllportsPred}
+\addtolength{\leftskip}{2.5em}
+Based on Allport's optimal contact conditions, outgroup attitudes should be more favorable after intergroup interactions with equal status, common goals, collaboration, and structural support.
+\end{subhyp}
+
+\begin{subhyp}[H\ref{hyp:AllportsQuality}] \label{hyp:AllportsQuality}
+\addtolength{\leftskip}{2.5em}
+Based on past research on the role of interaction quality, interaction quality should be more perceived as more favorable after intergroup interactions with equal status, common goals, collaboration, and structural support.
+\end{subhyp}
+
+\begin{subhyp}[H\ref{hyp:AllportsQualityMediation}] \label{hyp:AllportsQualityMediation}
+\addtolength{\leftskip}{2.5em}
+Based on past research on the role of interaction quality, the variance explained in outgroup attitudes by Allport's optimal contact should to a large extend be assumed by interaction quality.
+\end{subhyp}
+
+\begin{hyp}[H\ref{hyp:keyNeed}] \label{hyp:keyNeed}
+Based on our proposal, intergroup interactions with higher situational core need fulfillment should predict more favorable outgroup attitudes due to more positive interaction quality perceptions.
+\end{hyp}
+
+\setcounter{subhyp}{0}
+\begin{subhyp}[H\ref{hyp:keyNeedPred}] \label{hyp:keyNeedPred}
+\addtolength{\leftskip}{2.5em}
+Outgroup attitudes should be more favorable after intergroup interactions with high key need fulfillment.
+\end{subhyp}
+
+\begin{subhyp}[H\ref{hyp:keyNeedQual}] \label{hyp:keyNeedQual}
+\addtolength{\leftskip}{2.5em}
+Interaction Quality should be perceived as more positive after intergroup interactions with higher key need fulfillment.
+\end{subhyp}
+
+\begin{subhyp}[H\ref{hyp:keyNeedMediation}] \label{hyp:keyNeedMediation}
+\addtolength{\leftskip}{2.5em}
+The variance explained in outgroup attitudes by key need fulfillment should to a large extend be assumed by interaction quality.
+\end{subhyp}
+
+\begin{subhyp}[H\ref{hyp:keyNeedContactType}] \label{hyp:keyNeedContactType}
+\addtolength{\leftskip}{2.5em}
+The effect of key need fulfillment on outgroup attitudes should be specific to intergroup interactions and not be due to need fulfillment in general. Thus, the effect of key need fulfillment on outgroup attitudes should stronger for intergroup interact than for ingroup interactions. 
+\end{subhyp}
+
+\begin{subhyp}[H\ref{hyp:keyNeedSDT}] \label{hyp:keyNeedSDT}
+\addtolength{\leftskip}{2.5em}
+The effect of key need fulfillment on outgroup attitudes should be persist even when taking other fundamental psychological needs into account. Thus, the effect of key need fulfillment on outgroup attitudes should remain strong even after controlling for autonomy, competence, and relatedness fulfillment during the interaction (cf., self-determination theory). 
+\end{subhyp}
+
+\begin{hyp}[H\ref{hyp:comparison}] \label{hyp:comparison}
+Based on our proposal, intergroup interactions with higher situational core need fulfillment should predict outgroup attitudes at least as well as Allport's conditions.
+\end{hyp}
+
+\setcounter{subhyp}{0}
+\begin{subhyp}[H\ref{hyp:compModel}] \label{hyp:compModel}
+\addtolength{\leftskip}{2.5em}
+The need model (H\ref{hyp:keyNeedPred}) should predict more variance in outgroup attitudes than the model based on Allport's conditions (H\ref{hyp:AllportsPred}).
+\end{subhyp}
+
+\begin{subhyp}[H\ref{hyp:compTogether}] \label{hyp:compTogether}
+\addtolength{\leftskip}{2.5em}
+The  effect of key need fulfillment on outgroup attitudes should  persist even when taking other Allport's conditions into account. Thus, the effect of key need fulfillment on outgroup attitudes should remain strong even after controlling for equal status, common goals, collaboration, and structural support.  
+\end{subhyp}
+
+\end{document}
