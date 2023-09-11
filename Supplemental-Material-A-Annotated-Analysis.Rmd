@@ -2,12 +2,12 @@
 title: "Supplemental Information A: Full Annotated Analysis and Reproducible Code"
 subtitle: "Supplemental Material for 'Psychological Needs During Intergroup Contact: Three Experience Sampling Studies'"
 author:
-- ██████ ██████████^1^
-- ██████████ ████████^1^
-- █████ █████████^1^
-- █████ ██ █████^1^
-- ███ ███████^1^
-- ^1^██████████ ██ █████████, Department of Psychology
+- Jannis Kreienkamp^1^
+- Maximilian Agostini^1^
+- Laura F. Bringmann^1^
+- Peter de Jonge^1^
+- Kai Epstude^1^
+- ^1^University of Groningen, Department of Psychology
 - "Author Information:"
 - "Correspondence concerning this article should be addressed to ██████ ██████████, ██████████ ██ ██████████, █████████ ██ ██████████, █████ ██████████ ███, ████ ██ █████████ ████████████████. E-mail: █████████████████"
 - 'The main manuscript is available at <a href="https://www.doi.org/ToBePublished" target="_blank">doi.org/ToBePublished</a>'
