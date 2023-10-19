@@ -1,6 +1,7 @@
 # Need Fulfillment During Intergroup Contact: Three Experience Sampling Studies
 
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC_BY_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
+[![DOI](https://zenodo.org/badge/413074289.svg)](https://zenodo.org/doi/10.5281/zenodo.10021888)
 ![GitHub tag (with filter)](https://img.shields.io/github/v/tag/JannisCodes/intergroup-contact-needs?label=version)
 ![GitHub release (with filter)](https://img.shields.io/github/v/release/JannisCodes/intergroup-contact-needs)
 [![minimal R version](https://img.shields.io/badge/R%3E%3D-4.1.1-6666ff.svg)](https://cran.r-project.org/)
